@@ -16,6 +16,8 @@ export function buildCrashReasonLabel(input: CrashReasonLabelInput): string {
       ? "Hull collision: widen relay clearance"
       : input.contractId === "asteroid-sprint"
       ? "Hull collision: widen asteroid clearance"
+      : input.contractId === "return-leg"
+      ? "Hull collision: widen reverse arc"
       : "Hull collision: stay outside gravity wells";
   }
 

@@ -18,6 +18,12 @@ describe("crash reason labels", () => {
     );
   });
 
+  it("points return-leg hull collisions at the reverse approach arc", () => {
+    expect(buildCrashReasonLabel({ contractId: "return-leg", crashReason: "Hull Collision" })).toBe(
+      "Hull collision: widen reverse arc"
+    );
+  });
+
   it("points gravity route hull collisions at gravity wells", () => {
     expect(buildCrashReasonLabel({ contractId: "gravity-slingshot", crashReason: "Hull Collision" })).toBe(
       "Hull collision: stay outside gravity wells"
