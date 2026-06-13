@@ -250,7 +250,11 @@ export function App() {
     lastStyleAward: hud.lastStyleAward,
     lastMilestone: hud.lastMilestone,
     styleMultiplier: hud.styleMultiplier,
-    styleChainSecondsRemaining: hud.styleChainSecondsRemaining
+    styleChainSecondsRemaining: hud.styleChainSecondsRemaining,
+    quickPickupSecondsRemaining: hud.quickPickupSecondsRemaining,
+    cargoDamage: hud.cargoDamage,
+    hazardDangerLevel: hud.hazardDangerLevel,
+    gravitySlingReady: hud.gravitySlingReady
   });
   const styleChipStyle = { "--style-chain-progress": liveStyleReward?.chainProgress ?? 0 } as CSSProperties;
   const preflightMasteryTargets = buildPreflightMasteryTargets({ goldSeconds: hud.paceSecondsRemaining });

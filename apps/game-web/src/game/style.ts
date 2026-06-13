@@ -8,6 +8,10 @@ export type LiveStyleRewardInput = {
   lastMilestone?: string;
   styleMultiplier?: number;
   styleChainSecondsRemaining?: number;
+  quickPickupSecondsRemaining?: number;
+  cargoDamage?: number;
+  hazardDangerLevel?: "near" | "inside";
+  gravitySlingReady?: boolean;
 };
 
 export type LiveStyleReward = {
@@ -40,12 +44,13 @@ export function buildLiveStyleReward(input: LiveStyleRewardInput): LiveStyleRewa
   const urgent = chainActive && styleChainSecondsRemaining <= STYLE_CHAIN_URGENT_SECONDS && !fresh;
   const freshAward = fresh && input.lastStyleAward !== undefined && input.lastStyleAward > 0 ? Math.round(input.lastStyleAward) : undefined;
   const chainProgress = chainActive ? round(clamp(styleChainSecondsRemaining / STYLE_CHAIN_WINDOW_SECONDS, 0, 1), 2) : 0;
+  const urgentAction = urgent ? buildUrgentChainAction(input) : "Save chain";
   return {
     label: freshAward ? "Style hit" : fresh || chainActive ? "Style chain" : "Style bank",
     value: freshAward
       ? `+${freshAward} hit / +${roundedBonus} bank / x${(input.styleMultiplier ?? 1).toFixed(2)}`
       : urgent
-      ? `Save chain / x${(input.styleMultiplier ?? 1).toFixed(2)} / ${styleChainSecondsRemaining.toFixed(1)}s`
+      ? `${urgentAction} / x${(input.styleMultiplier ?? 1).toFixed(2)} / ${styleChainSecondsRemaining.toFixed(1)}s`
       : chainActive
       ? `+${roundedBonus} / x${(input.styleMultiplier ?? 1).toFixed(2)} / ${styleChainSecondsRemaining.toFixed(1)}s`
       : `+${roundedBonus}`,
@@ -53,6 +58,19 @@ export function buildLiveStyleReward(input: LiveStyleRewardInput): LiveStyleRewa
     tone: freshAward ? "fresh" : urgent ? "urgent" : chainActive || fresh ? "chain" : "bank",
     chainProgress
   };
+}
+
+function buildUrgentChainAction(input: LiveStyleRewardInput): string {
+  if (input.gravitySlingReady) {
+    return "Sling now";
+  }
+  if (input.hazardDangerLevel === "near" && (input.cargoDamage ?? 0) <= 0.02) {
+    return "Skim now";
+  }
+  if ((input.quickPickupSecondsRemaining ?? 0) > 0) {
+    return "Pickup now";
+  }
+  return "Save chain";
 }
 
 function clamp(value: number, min: number, max: number): number {

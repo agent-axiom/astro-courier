@@ -117,4 +117,58 @@ describe("live style reward HUD copy", () => {
       chainProgress: 0.2
     });
   });
+
+  it("points urgent chains at an immediate clean hazard skim", () => {
+    expect(
+      buildLiveStyleReward({
+        styleBonus: 440,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 0.8,
+        hazardDangerLevel: "near",
+        cargoDamage: 0
+      })
+    ).toEqual({
+      label: "Style chain",
+      value: "Skim now / x1.50 / 0.8s",
+      fresh: false,
+      tone: "urgent",
+      chainProgress: 0.2
+    });
+  });
+
+  it("points urgent chains at a ready gravity sling before a hazard skim", () => {
+    expect(
+      buildLiveStyleReward({
+        styleBonus: 440,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 0.8,
+        hazardDangerLevel: "near",
+        cargoDamage: 0,
+        gravitySlingReady: true
+      })
+    ).toEqual({
+      label: "Style chain",
+      value: "Sling now / x1.50 / 0.8s",
+      fresh: false,
+      tone: "urgent",
+      chainProgress: 0.2
+    });
+  });
+
+  it("points urgent chains at the remaining quick pickup window", () => {
+    expect(
+      buildLiveStyleReward({
+        styleBonus: 180,
+        styleMultiplier: 1.25,
+        styleChainSecondsRemaining: 0.7,
+        quickPickupSecondsRemaining: 4.2
+      })
+    ).toEqual({
+      label: "Style chain",
+      value: "Pickup now / x1.25 / 0.7s",
+      fresh: false,
+      tone: "urgent",
+      chainProgress: 0.18
+    });
+  });
 });
