@@ -97,7 +97,7 @@ import { createGameAudioController, type GameAudioController } from "./game/game
 import { createGameHapticsController, type GameHapticsController } from "./game/gameHaptics";
 import { buildAudioTogglePresentation } from "./game/audioControls";
 import { buildTouchFlightPadPresentation } from "./game/touchControls";
-import { buildScreenFeedback, type ScreenFeedback } from "./game/screenFeedback";
+import { buildMilestoneScreenFeedback, buildScreenFeedback, type ScreenFeedback } from "./game/screenFeedback";
 import { appendRunFeedUpdates, deriveRunFeedUpdates, type RunFeedEntry, type RunFeedSnapshot } from "./game/runFeed";
 
 type GameStore = {
@@ -380,6 +380,9 @@ export function App() {
   const fuelRatio = hud.maxFuel > 0 ? hud.fuel / hud.maxFuel : 0;
   const cargoIntegrity = Math.max(0, 1 - hud.cargoDamage);
   const runFinished = hud.status === "delivered" || hud.status === "crashed";
+  const milestoneScreenFeedback = buildMilestoneScreenFeedback(hud.lastMilestone);
+  const activeScreenFeedback =
+    screenFeedback ?? (!runFinished && milestoneScreenFeedback ? { key: -1, feedback: milestoneScreenFeedback } : undefined);
   const overlays = getOverlayVisibility({ status: hud.status, preflightOpen, resultDismissed });
   const touchFlightPad = buildTouchFlightPadPresentation({ status: hud.status, preflightOpen });
   const runIntensity = buildRunIntensity({
@@ -800,19 +803,19 @@ export function App() {
   return (
     <main className={`app-shell app-intensity-${runIntensity}`}>
       <div ref={canvasMountRef} className="game-canvas" aria-label="Astro Courier gameplay canvas" />
-      {screenFeedback ? (
+      {activeScreenFeedback ? (
         <div
-          key={screenFeedback.key}
-          className={`screen-feedback screen-feedback-${screenFeedback.feedback.tone} screen-feedback-${screenFeedback.feedback.intensity} ${
-            screenFeedback.feedback.accent ? `screen-feedback-accent-${screenFeedback.feedback.accent}` : ""
+          key={activeScreenFeedback.key}
+          className={`screen-feedback screen-feedback-${activeScreenFeedback.feedback.tone} screen-feedback-${activeScreenFeedback.feedback.intensity} ${
+            activeScreenFeedback.feedback.accent ? `screen-feedback-accent-${activeScreenFeedback.feedback.accent}` : ""
           }`}
-          style={{ "--screen-feedback-duration": `${screenFeedback.feedback.durationMs}ms` } as CSSProperties}
+          style={{ "--screen-feedback-duration": `${activeScreenFeedback.feedback.durationMs}ms` } as CSSProperties}
           aria-hidden="true"
         >
-          {screenFeedback.feedback.label ? (
+          {activeScreenFeedback.feedback.label ? (
             <div className="screen-feedback-callout">
-              <span>{screenFeedback.feedback.label}</span>
-              {screenFeedback.feedback.value ? <strong>{screenFeedback.feedback.value}</strong> : null}
+              <span>{activeScreenFeedback.feedback.label}</span>
+              {activeScreenFeedback.feedback.value ? <strong>{activeScreenFeedback.feedback.value}</strong> : null}
             </div>
           ) : null}
         </div>

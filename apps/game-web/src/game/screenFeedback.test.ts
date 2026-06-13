@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildScreenFeedback } from "./screenFeedback";
+import { buildMilestoneScreenFeedback, buildScreenFeedback } from "./screenFeedback";
 
 describe("screen feedback", () => {
   it("prioritizes crash feedback over lower-impact events", () => {
@@ -43,6 +43,8 @@ describe("screen feedback", () => {
 
   it("maps boost burns to light style feedback", () => {
     expect(buildScreenFeedback(["boost-burn"])).toEqual({
+      label: "Impulse burn",
+      value: "Vector kick",
       tone: "style",
       intensity: "light",
       durationMs: 300
@@ -120,10 +122,30 @@ describe("screen feedback", () => {
 
   it("maps launch bursts to medium style feedback", () => {
     expect(buildScreenFeedback(["launch-burst"])).toEqual({
+      label: "Launch burst",
+      value: "+120 style",
       tone: "style",
       intensity: "medium",
       durationMs: 420
     });
+  });
+
+  it("can fall back from visible boost and launch milestones when event timing is missed", () => {
+    expect(buildMilestoneScreenFeedback("Boost Burn")).toEqual({
+      label: "Impulse burn",
+      value: "Vector kick",
+      tone: "style",
+      intensity: "light",
+      durationMs: 300
+    });
+    expect(buildMilestoneScreenFeedback("Launch Burst")).toEqual({
+      label: "Launch burst",
+      value: "+120 style",
+      tone: "style",
+      intensity: "medium",
+      durationMs: 420
+    });
+    expect(buildMilestoneScreenFeedback("Pickup Required")).toBeUndefined();
   });
 
   it("maps personal-best leads to medium success feedback", () => {

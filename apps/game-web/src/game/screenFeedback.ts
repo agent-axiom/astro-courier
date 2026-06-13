@@ -9,6 +9,18 @@ export type ScreenFeedback = {
   durationMs: number;
 };
 
+export function buildMilestoneScreenFeedback(milestone: string | undefined): ScreenFeedback | undefined {
+  if (milestone === "Launch Burst") {
+    return buildScreenFeedback(["launch-burst"]);
+  }
+
+  if (milestone === "Boost Burn") {
+    return buildScreenFeedback(["boost-burn"]);
+  }
+
+  return undefined;
+}
+
 export function buildScreenFeedback(events: readonly GameAudioEvent[]): ScreenFeedback | undefined {
   if (events.includes("ship-crash")) {
     return { label: "Insurance event", value: "Recover line", tone: "danger", intensity: "heavy", durationMs: 520 };
@@ -59,10 +71,10 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[]): ScreenFe
     return { tone: "warning", intensity: "medium", durationMs: 400 };
   }
   if (events.includes("launch-burst")) {
-    return { tone: "style", intensity: "medium", durationMs: 420 };
+    return { label: "Launch burst", value: "+120 style", tone: "style", intensity: "medium", durationMs: 420 };
   }
   if (events.includes("boost-burn")) {
-    return { tone: "style", intensity: "light", durationMs: 300 };
+    return { label: "Impulse burn", value: "Vector kick", tone: "style", intensity: "light", durationMs: 300 };
   }
   if (events.includes("style-hit") || events.includes("assist-burn")) {
     return { tone: "style", intensity: "light", durationMs: 360 };
