@@ -268,6 +268,46 @@ describe("tactical cue", () => {
     });
   });
 
+  it("previews the multiplied last-drop payout during an active style chain", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        landingStatus: "ready",
+        cargoDamage: 0,
+        fuel: 4,
+        maxFuel: 100,
+        fuelUsed: 96,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 2.4
+      })
+    ).toEqual({
+      label: "Tactical cue",
+      value: "Last Drop / +255 / x1.50",
+      tone: "urgent"
+    });
+  });
+
+  it("adds fading chain timing to urgent last-drop docks", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        landingStatus: "ready",
+        cargoDamage: 0,
+        fuel: 4,
+        maxFuel: 100,
+        fuelUsed: 96,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 0.8
+      })
+    ).toEqual({
+      label: "Tactical cue",
+      value: "Last Drop / +255 / x1.50 / 0.8s",
+      tone: "urgent"
+    });
+  });
+
   it("keeps last-drop fuel as a survival cue until the dock is ready", () => {
     expect(
       buildTacticalCue({

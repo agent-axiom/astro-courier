@@ -217,7 +217,7 @@ export function buildTacticalCue(input: TacticalCueInput): TacticalCue | undefin
   if (isLastDropReady(input)) {
     return {
       label: "Tactical cue",
-      value: `Last Drop / +${LAST_DROP_STYLE_BONUS}`,
+      value: `Last Drop / ${formatLastDropPayout(input)}`,
       tone: "urgent"
     };
   }
@@ -386,6 +386,15 @@ function formatGravitySlingPayout(input: TacticalCueInput): string {
   const payout = Math.round((input.gravitySlingStyleBonus ?? 0) * multiplier);
   const multiplierSuffix = multiplier > 1 ? ` / x${multiplier.toFixed(2)}` : "";
   return `+${payout}${multiplierSuffix}`;
+}
+
+function formatLastDropPayout(input: TacticalCueInput): string {
+  const multiplier = styleMultiplier(input);
+  const payout = Math.round(LAST_DROP_STYLE_BONUS * multiplier);
+  const multiplierSuffix = multiplier > 1 ? ` / x${multiplier.toFixed(2)}` : "";
+  const chainSecondsRemaining = input.styleChainSecondsRemaining ?? 0;
+  const timingSuffix = multiplier > 1 && chainSecondsRemaining > 0 && chainSecondsRemaining <= 1 ? ` / ${formatSeconds(chainSecondsRemaining)}` : "";
+  return `+${payout}${multiplierSuffix}${timingSuffix}`;
 }
 
 function styleMultiplier(input: TacticalCueInput): number {
