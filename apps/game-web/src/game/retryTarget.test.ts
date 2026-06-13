@@ -20,6 +20,45 @@ describe("result retry target", () => {
     });
   });
 
+  it("turns hard landing failures into a concrete dock-speed target", () => {
+    expect(
+      buildRetryTarget({
+        status: "crashed",
+        crashReason: "Hard Landing",
+        targetAllowedSpeed: 38,
+        medal: "none",
+        elapsedSeconds: 14.2,
+        goldSeconds: 30,
+        score: 0,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Dock under 38.0",
+      tone: "danger"
+    });
+  });
+
+  it("turns hull collisions into a concrete gravity-well target", () => {
+    expect(
+      buildRetryTarget({
+        status: "crashed",
+        crashReason: "Hull Collision",
+        medal: "none",
+        elapsedSeconds: 14.2,
+        goldSeconds: 30,
+        score: 0,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Clear gravity well",
+      tone: "danger"
+    });
+  });
+
   it("turns a saved personal best score gap into a concrete score target", () => {
     expect(
       buildRetryTarget({

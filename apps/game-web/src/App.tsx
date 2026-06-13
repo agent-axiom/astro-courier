@@ -286,9 +286,11 @@ export function App() {
       : undefined;
   const retryTarget = buildRetryTarget({
     status: hud.status,
+    crashReason: hud.crashReason,
     medal: hud.medal,
     elapsedSeconds: hud.elapsedSeconds,
     goldSeconds: hud.paceSecondsRemaining,
+    targetAllowedSpeed: hud.targetAllowedSpeed,
     score: hud.score,
     isNewBest: newBest,
     bestRun
