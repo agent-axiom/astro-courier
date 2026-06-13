@@ -1,4 +1,4 @@
-import type { RunMedal } from "@astro-courier/shared";
+import type { RunMedal, RunStatus } from "@astro-courier/shared";
 
 export type BestRun = {
   score: number;
@@ -22,6 +22,18 @@ export type BestRunDelta = {
   label: "PB delta";
   value: string;
   tone: "success" | "chase";
+};
+
+export type LiveBestPaceInput = {
+  bestRun: BestRun | undefined;
+  elapsedSeconds: number;
+  status: RunStatus;
+};
+
+export type LiveBestPace = {
+  label: "PB pace";
+  value: string;
+  tone: "ahead" | "behind";
 };
 
 type BestRunStorage = Pick<Storage, "getItem" | "setItem">;
@@ -112,6 +124,27 @@ export function buildBestRunDelta(input: BestRunDeltaInput): BestRunDelta | unde
     label: "PB delta",
     value: `Need ${timeGap.toFixed(1)}s faster`,
     tone: "chase"
+  };
+}
+
+export function buildLiveBestPace(input: LiveBestPaceInput): LiveBestPace | undefined {
+  if (!input.bestRun || input.status === "delivered" || input.status === "crashed") {
+    return undefined;
+  }
+
+  const secondsDelta = input.bestRun.elapsedSeconds - input.elapsedSeconds;
+  if (secondsDelta >= 0) {
+    return {
+      label: "PB pace",
+      value: `${secondsDelta.toFixed(1)}s bank`,
+      tone: "ahead"
+    };
+  }
+
+  return {
+    label: "PB pace",
+    value: `${Math.abs(secondsDelta).toFixed(1)}s over`,
+    tone: "behind"
   };
 }
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildBestRunChase, buildBestRunDelta, getBestRun, recordBestRun } from "./bestRun";
+import { buildBestRunChase, buildBestRunDelta, buildLiveBestPace, getBestRun, recordBestRun } from "./bestRun";
 
 describe("personal best run storage", () => {
   it("stores a first delivered run as the personal best", () => {
@@ -117,6 +117,47 @@ describe("personal best result delta copy", () => {
       label: "PB delta",
       value: "Matched personal best",
       tone: "success"
+    });
+  });
+});
+
+describe("live personal best pace copy", () => {
+  it("stays hidden without a saved best or after the run has finished", () => {
+    expect(buildLiveBestPace({ bestRun: undefined, elapsedSeconds: 12, status: "flying" })).toBeUndefined();
+    expect(
+      buildLiveBestPace({
+        bestRun: { score: 3290, elapsedSeconds: 24.7, medal: "gold" },
+        elapsedSeconds: 12,
+        status: "delivered"
+      })
+    ).toBeUndefined();
+  });
+
+  it("shows time bank while the current run is ahead of the saved finish time", () => {
+    expect(
+      buildLiveBestPace({
+        bestRun: { score: 3290, elapsedSeconds: 24.7, medal: "gold" },
+        elapsedSeconds: 18.2,
+        status: "flying"
+      })
+    ).toEqual({
+      label: "PB pace",
+      value: "6.5s bank",
+      tone: "ahead"
+    });
+  });
+
+  it("shows overtime once the current run has passed the saved finish time", () => {
+    expect(
+      buildLiveBestPace({
+        bestRun: { score: 3290, elapsedSeconds: 24.7, medal: "gold" },
+        elapsedSeconds: 27.1,
+        status: "paused"
+      })
+    ).toEqual({
+      label: "PB pace",
+      value: "2.4s over",
+      tone: "behind"
     });
   });
 });

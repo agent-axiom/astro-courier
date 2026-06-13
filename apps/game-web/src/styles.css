@@ -240,6 +240,44 @@ button {
   color: #ffadc1;
 }
 
+.best-pace-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 34px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: 0.84rem;
+  font-weight: 850;
+}
+
+.best-pace-chip span,
+.best-pace-chip strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.best-pace-chip span {
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.best-pace-chip strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.best-pace-ahead {
+  background: rgba(142, 230, 184, 0.15);
+  color: #bff7d8;
+}
+
+.best-pace-behind {
+  background: rgba(255, 209, 102, 0.16);
+  color: #ffe19a;
+}
+
 .rush-chip {
   display: flex;
   align-items: center;

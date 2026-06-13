@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { create } from "zustand";
-import { buildBestRunChase, buildBestRunDelta, getBestRun, recordBestRun, type BestRun } from "./game/bestRun";
+import { buildBestRunChase, buildBestRunDelta, buildLiveBestPace, getBestRun, recordBestRun, type BestRun } from "./game/bestRun";
 import { GameShell, type HudState } from "./game/GameShell";
 import { formatBearingGuidance } from "./game/bearing";
 import { canUseImpulseControl } from "./game/hudControls";
@@ -173,6 +173,11 @@ export function App() {
     status: hud.status,
     targetDistance: hud.targetDistance,
     speed: hud.speed
+  });
+  const liveBestPace = buildLiveBestPace({
+    bestRun,
+    elapsedSeconds: hud.elapsedSeconds,
+    status: hud.status
   });
   const liveStyleReward = buildLiveStyleReward({
     styleBonus: hud.scoreBreakdown.styleBonus,
@@ -360,6 +365,12 @@ export function App() {
           <span>{paceLabel(hud.paceTier)}</span>
           <strong>{hud.paceTier === "overtime" ? "Expired" : `${hud.paceSecondsRemaining.toFixed(1)}s`}</strong>
         </div>
+        {liveBestPace ? (
+          <div className={`best-pace-chip best-pace-${liveBestPace.tone}`} aria-label={`${liveBestPace.label}: ${liveBestPace.value}`}>
+            <span>{liveBestPace.label}</span>
+            <strong>{liveBestPace.value}</strong>
+          </div>
+        ) : null}
         {pickupRushActive ? (
           <div className="rush-chip">
             <span>Pickup rush</span>
