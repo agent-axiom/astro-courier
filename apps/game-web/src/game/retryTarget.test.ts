@@ -468,6 +468,7 @@ describe("result retry action copy", () => {
   it("turns failed runs into a direct route retry", () => {
     expect(buildResultRetryAction({ label: "Retry target", value: "Complete delivery", tone: "danger" })).toEqual({
       label: "Retry Route",
+      tone: "danger",
       mode: "restart-run"
     });
   });
@@ -475,6 +476,7 @@ describe("result retry action copy", () => {
   it("turns personal best defense into a stronger call to action", () => {
     expect(buildResultRetryAction({ label: "Retry target", value: "Defend 3520 / 24.1s", tone: "success" })).toEqual({
       label: "Defend PB",
+      tone: "success",
       mode: "restart-run"
     });
   });
@@ -482,6 +484,7 @@ describe("result retry action copy", () => {
   it("turns personal best gaps into a chase call to action", () => {
     expect(buildResultRetryAction({ label: "Retry target", value: "Find +330 score", tone: "chase" })).toEqual({
       label: "Chase PB",
+      tone: "chase",
       mode: "restart-run"
     });
   });
@@ -489,6 +492,7 @@ describe("result retry action copy", () => {
   it("turns repeatable style targets into a repeat-line call to action", () => {
     expect(buildResultRetryAction({ label: "Retry target", value: "Repeat Chain Finish", tone: "opportunity" })).toEqual({
       label: "Repeat Line",
+      tone: "opportunity",
       mode: "restart-run"
     });
   });
@@ -496,6 +500,7 @@ describe("result retry action copy", () => {
   it("turns clean-cargo recovery into a specific clean-run call to action", () => {
     expect(buildResultRetryAction({ label: "Retry target", value: "Restore clean cargo", tone: "opportunity" })).toEqual({
       label: "Clean Run",
+      tone: "opportunity",
       mode: "restart-run"
     });
   });
@@ -503,14 +508,17 @@ describe("result retry action copy", () => {
   it("turns medal, express, and first-PB opportunities into specific calls to action", () => {
     expect(buildResultRetryAction({ label: "Retry target", value: "Gold under 24.0s", tone: "opportunity" })).toEqual({
       label: "Chase Gold",
+      tone: "opportunity",
       mode: "restart-run"
     });
     expect(buildResultRetryAction({ label: "Retry target", value: "Chase Express Finish", tone: "opportunity" })).toEqual({
       label: "Express Run",
+      tone: "opportunity",
       mode: "restart-run"
     });
     expect(buildResultRetryAction({ label: "Retry target", value: "Set first PB", tone: "opportunity" })).toEqual({
       label: "Set PB",
+      tone: "opportunity",
       mode: "restart-run"
     });
   });
@@ -518,10 +526,12 @@ describe("result retry action copy", () => {
   it("turns comet near-miss targets into a comet chase call to action", () => {
     expect(buildResultRetryAction({ label: "Retry target", value: "Bank 75% fuel for comet", tone: "opportunity" })).toEqual({
       label: "Chase Comet",
+      tone: "opportunity",
       mode: "restart-run"
     });
     expect(buildResultRetryAction({ label: "Retry target", value: "Perfect dock for comet", tone: "opportunity" })).toEqual({
       label: "Chase Comet",
+      tone: "opportunity",
       mode: "restart-run"
     });
   });
@@ -531,7 +541,7 @@ describe("result retry action briefing", () => {
   it("turns personal best defense into a high-confidence rematch hook", () => {
     expect(
       buildRetryActionBriefing(
-        { label: "Defend PB", mode: "restart-run" },
+        { label: "Defend PB", tone: "success", mode: "restart-run" },
         { label: "Retry target", value: "Defend 3520 / 24.1s", tone: "success" }
       )
     ).toEqual({
@@ -544,7 +554,7 @@ describe("result retry action briefing", () => {
   it("turns chase and repeat actions into focused rematch hooks", () => {
     expect(
       buildRetryActionBriefing(
-        { label: "Chase PB", mode: "restart-run" },
+        { label: "Chase PB", tone: "chase", mode: "restart-run" },
         { label: "Retry target", value: "Find +330 score", tone: "chase" }
       )
     ).toEqual({
@@ -554,7 +564,7 @@ describe("result retry action briefing", () => {
     });
     expect(
       buildRetryActionBriefing(
-        { label: "Repeat Line", mode: "restart-run" },
+        { label: "Repeat Line", tone: "opportunity", mode: "restart-run" },
         { label: "Retry target", value: "Repeat Chain Finish", tone: "opportunity" }
       )
     ).toEqual({
@@ -567,7 +577,7 @@ describe("result retry action briefing", () => {
   it("keeps failed retries focused on the repair target", () => {
     expect(
       buildRetryActionBriefing(
-        { label: "Retry Route", mode: "restart-run" },
+        { label: "Retry Route", tone: "danger", mode: "restart-run" },
         { label: "Retry target", value: "Clear asteroid field", tone: "danger" }
       )
     ).toEqual({
@@ -580,7 +590,7 @@ describe("result retry action briefing", () => {
   it("turns clean-cargo recovery targets into a no-scratch rematch hook", () => {
     expect(
       buildRetryActionBriefing(
-        { label: "Run Again", mode: "restart-run" },
+        { label: "Run Again", tone: "opportunity", mode: "restart-run" },
         { label: "Retry target", value: "Restore clean cargo", tone: "opportunity" }
       )
     ).toEqual({
@@ -593,7 +603,7 @@ describe("result retry action briefing", () => {
   it("turns medal, express, and first-PB actions into focused rematch hooks", () => {
     expect(
       buildRetryActionBriefing(
-        { label: "Chase Gold", mode: "restart-run" },
+        { label: "Chase Gold", tone: "opportunity", mode: "restart-run" },
         { label: "Retry target", value: "Gold under 24.0s", tone: "opportunity" }
       )
     ).toEqual({
@@ -603,7 +613,7 @@ describe("result retry action briefing", () => {
     });
     expect(
       buildRetryActionBriefing(
-        { label: "Express Run", mode: "restart-run" },
+        { label: "Express Run", tone: "opportunity", mode: "restart-run" },
         { label: "Retry target", value: "Chase Express Finish", tone: "opportunity" }
       )
     ).toEqual({
@@ -613,7 +623,7 @@ describe("result retry action briefing", () => {
     });
     expect(
       buildRetryActionBriefing(
-        { label: "Set PB", mode: "restart-run" },
+        { label: "Set PB", tone: "opportunity", mode: "restart-run" },
         { label: "Retry target", value: "Set first PB", tone: "opportunity" }
       )
     ).toEqual({
@@ -626,7 +636,7 @@ describe("result retry action briefing", () => {
   it("turns comet chase actions into elite rematch hooks", () => {
     expect(
       buildRetryActionBriefing(
-        { label: "Chase Comet", mode: "restart-run" },
+        { label: "Chase Comet", tone: "opportunity", mode: "restart-run" },
         { label: "Retry target", value: "Bank 75% fuel for comet", tone: "opportunity" }
       )
     ).toEqual({

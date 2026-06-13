@@ -1398,7 +1398,11 @@ export function App() {
             </div>
           ) : null}
           <div className="result-actions">
-            <button type="button" className="result-button" onClick={runResultRetryAction}>
+            <button
+              type="button"
+              className={`result-button result-button-retry result-button-retry-${resultRetryAction.tone}`}
+              onClick={runResultRetryAction}
+            >
               <RotateCcw size={18} />
               {resultRetryAction.label}
             </button>

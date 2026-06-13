@@ -37,6 +37,7 @@ export type ResultRetryAction = {
     | "Express Run"
     | "Set PB"
     | "Run Again";
+  tone: RetryTarget["tone"];
   mode: "restart-run";
 };
 
@@ -180,33 +181,33 @@ function buildRepeatableMilestoneTarget(lastMilestone?: string): RetryTarget | u
 
 export function buildResultRetryAction(target: RetryTarget): ResultRetryAction {
   if (target.tone === "danger") {
-    return { label: "Retry Route", mode: "restart-run" };
+    return { label: "Retry Route", tone: "danger", mode: "restart-run" };
   }
   if (target.tone === "success") {
-    return { label: "Defend PB", mode: "restart-run" };
+    return { label: "Defend PB", tone: "success", mode: "restart-run" };
   }
   if (target.tone === "chase") {
-    return { label: "Chase PB", mode: "restart-run" };
+    return { label: "Chase PB", tone: "chase", mode: "restart-run" };
   }
   if (target.value.startsWith("Repeat ")) {
-    return { label: "Repeat Line", mode: "restart-run" };
+    return { label: "Repeat Line", tone: "opportunity", mode: "restart-run" };
   }
   if (target.value === "Bank 75% fuel for comet" || target.value === "Perfect dock for comet") {
-    return { label: "Chase Comet", mode: "restart-run" };
+    return { label: "Chase Comet", tone: "opportunity", mode: "restart-run" };
   }
   if (target.value === "Restore clean cargo") {
-    return { label: "Clean Run", mode: "restart-run" };
+    return { label: "Clean Run", tone: "opportunity", mode: "restart-run" };
   }
   if (target.value.startsWith("Gold under ")) {
-    return { label: "Chase Gold", mode: "restart-run" };
+    return { label: "Chase Gold", tone: "opportunity", mode: "restart-run" };
   }
   if (target.value === "Chase Express Finish") {
-    return { label: "Express Run", mode: "restart-run" };
+    return { label: "Express Run", tone: "opportunity", mode: "restart-run" };
   }
   if (target.value === "Set first PB") {
-    return { label: "Set PB", mode: "restart-run" };
+    return { label: "Set PB", tone: "opportunity", mode: "restart-run" };
   }
-  return { label: "Run Again", mode: "restart-run" };
+  return { label: "Run Again", tone: target.tone, mode: "restart-run" };
 }
 
 export function buildRetryActionBriefing(action: ResultRetryAction, target: RetryTarget): RetryActionBriefing {
