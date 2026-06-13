@@ -47,7 +47,8 @@ export const cargoSchema = z.object({
 export const contractShipStartSchema = z.object({
   position: vec2Schema,
   velocity: vec2Schema,
-  rotation: z.number().finite()
+  rotation: z.number().finite(),
+  fuel: z.number().positive().optional()
 });
 
 export const contractSchema = z.object({

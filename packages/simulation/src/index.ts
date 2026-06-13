@@ -61,6 +61,7 @@ export type ContractContent = {
     position: [number, number];
     velocity: [number, number];
     rotation: number;
+    fuel?: number;
   };
   pickupId: string;
   destinationId: string;
@@ -260,6 +261,7 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
   const shipPosition = shipStart?.position ?? system.ship.startPosition;
   const shipVelocity = shipStart?.velocity ?? system.ship.startVelocity;
   const shipRotation = shipStart?.rotation ?? system.ship.rotation;
+  const shipFuel = shipStart?.fuel ?? system.ship.fuel;
   const hazardSeverityMultiplier = activeContract.hazardSeverityMultiplier ?? 1;
 
   return {
@@ -321,8 +323,8 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
       velocity: toVec2(shipVelocity),
       rotation: shipRotation,
       targetRotation: shipRotation,
-      fuel: system.ship.fuel,
-      maxFuel: system.ship.fuel,
+      fuel: shipFuel,
+      maxFuel: shipFuel,
       boostCooldownSeconds: 0,
       thrustPower: system.ship.thrustPower,
       rotationPower: system.ship.rotationPower,

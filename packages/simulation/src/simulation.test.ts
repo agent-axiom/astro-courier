@@ -109,6 +109,40 @@ describe("deterministic Astro Courier simulation", () => {
     expect(calculateHazardSkimStyleBonus(0.75)).toBe(230);
   });
 
+  it("applies contract-specific fuel starts for low-fuel challenge routes", () => {
+    const world = createWorldFromSystem(
+      {
+        ...starterSystem,
+        contracts: [
+          ...starterSystem.contracts,
+          {
+            id: "last-drop",
+            title: "Last Drop",
+            briefing: "Low fuel courier challenge.",
+            riskLabel: "Low Fuel",
+            rewardLabel: "Last Drop bonuses",
+            shipStart: {
+              position: [140, 12],
+              velocity: [4, 20],
+              rotation: Math.PI / 2,
+              fuel: 22
+            },
+            pickupId: "north-pad",
+            destinationId: "dock-a",
+            cargoId: "bottled-starlight",
+            medalTimes: { bronze: 72, silver: 44, gold: 27 }
+          }
+        ]
+      },
+      "seed",
+      { contractId: "last-drop" }
+    );
+
+    expect(world.ship.fuel).toBe(22);
+    expect(world.ship.maxFuel).toBe(22);
+    expect(snapshotWorld(world).ship.fuel).toBe(22);
+  });
+
   it("produces the same summary and checksum for the same seed and command frames", () => {
     const commands = createCommandBuffer([
       { tick: 0, command: { type: "THRUST", amount: 1 } },

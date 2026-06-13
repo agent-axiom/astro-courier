@@ -147,6 +147,27 @@
         "silver": 38,
         "gold": 22
       }
+    },
+    {
+      "id": "last-drop-run",
+      "title": "Last Drop Run",
+      "briefing": "Carry midnight medicine on a lean tank. Load cleanly, coast hard, and dock with just enough fuel to make the dispatcher smile.",
+      "riskLabel": "Low Fuel",
+      "rewardLabel": "Last Drop bonuses",
+      "shipStart": {
+        "position": [190, 18],
+        "velocity": [4, 22],
+        "rotation": 1.5707963267948966,
+        "fuel": 22
+      },
+      "pickupId": "north-pad",
+      "destinationId": "dock-a",
+      "cargoId": "midnight-medicine",
+      "medalTimes": {
+        "bronze": 72,
+        "silver": 44,
+        "gold": 27
+      }
     }
   ],
   "cargo": [
@@ -161,6 +182,12 @@
       "name": "Volatile Comet Ice",
       "kind": "unstable",
       "fragility": 1
+    },
+    {
+      "id": "midnight-medicine",
+      "name": "Midnight Medicine",
+      "kind": "time-sensitive",
+      "fragility": 0.9
     }
   ]
 }

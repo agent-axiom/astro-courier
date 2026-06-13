@@ -125,6 +125,7 @@ describe("contract rotation", () => {
     expect(buildContractPreflightKicker({ contractId: "chain-relay", goldSeconds: 22, hazardSeverityMultiplier: 1.3 })).toBe(
       "Chain Contract"
     );
+    expect(buildContractPreflightKicker({ contractId: "last-drop-run", goldSeconds: 27 })).toBe("Last Drop Contract");
   });
 
   it("calls out the gravity slingshot route plan before generic fragile handling", () => {
@@ -202,6 +203,21 @@ describe("contract rotation", () => {
       label: "Route plan",
       value: "Skim, chain, fast dock",
       tone: "danger"
+    });
+  });
+
+  it("calls out last drop routes before generic time-sensitive handling", () => {
+    expect(
+      buildContractRoutePlan({
+        contractId: "last-drop-run",
+        cargoKind: "time-sensitive",
+        cargoFragility: 0.9,
+        goldSeconds: 27
+      })
+    ).toEqual({
+      label: "Route plan",
+      value: "Preserve fuel, dock empty",
+      tone: "speed"
     });
   });
 

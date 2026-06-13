@@ -170,6 +170,10 @@ export function buildContractPreflightKicker(input: ContractPreflightKickerInput
     return "Chain Contract";
   }
 
+  if (input.contractId === "last-drop-run") {
+    return "Last Drop Contract";
+  }
+
   if ((input.hazardSeverityMultiplier ?? 1) >= 1.25) {
     return "Danger Contract";
   }
@@ -211,6 +215,14 @@ export function buildContractRoutePlan(input: ContractRoutePlanInput): ContractR
       label: "Route plan",
       value: "Skim, chain, fast dock",
       tone: "danger"
+    };
+  }
+
+  if (input.contractId === "last-drop-run") {
+    return {
+      label: "Route plan",
+      value: "Preserve fuel, dock empty",
+      tone: "speed"
     };
   }
 

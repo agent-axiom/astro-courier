@@ -201,6 +201,19 @@ describe("GameShell lifecycle", () => {
         cargoFragility: 1,
         hazardSeverityMultiplier: 1.3,
         medalTimes: { bronze: 64, silver: 38, gold: 22 }
+      },
+      {
+        id: "last-drop-run",
+        title: "Last Drop Run",
+        briefing: "Carry midnight medicine on a lean tank. Load cleanly, coast hard, and dock with just enough fuel to make the dispatcher smile.",
+        riskLabel: "Low Fuel",
+        rewardLabel: "Last Drop bonuses",
+        pickupLabel: "Luma North Pad",
+        destinationLabel: "Tea Station Dock A",
+        cargoName: "Midnight Medicine",
+        cargoKind: "time-sensitive",
+        cargoFragility: 0.9,
+        medalTimes: { bronze: 72, silver: 44, gold: 27 }
       }
     ]);
   });
