@@ -31,6 +31,10 @@ export function buildRadioMessage(hud: HudState): string {
     return `Asteroid field ahead. Skim wide${hud.hazardDistance === undefined ? "" : `, ${Math.round(hud.hazardDistance)}m out`}.`;
   }
 
+  if (hud.maxFuel > 0 && hud.fuel / hud.maxFuel <= 0.15) {
+    return "Fuel critical. Coast clean and save the last burn for docking.";
+  }
+
   if (hud.assistAvailable) {
     return "Assist burn available. Hold the line and let the legs do their job.";
   }

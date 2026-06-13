@@ -59,6 +59,10 @@ describe("radio feedback copy", () => {
     expect(buildRadioMessage({ ...baseHud, landingStatus: "ready", approachStreakSeconds: 1.4 })).toContain("steady");
   });
 
+  it("warns about critical fuel before generic objective guidance", () => {
+    expect(buildRadioMessage({ ...baseHud, fuel: 10, maxFuel: 100, landingStatus: "approach" })).toContain("Fuel critical");
+  });
+
   it("keeps preflight copy distinct from active pickup guidance", () => {
     expect(buildRadioMessage({ ...baseHud, status: "paused" })).toContain("Contract loaded");
   });
