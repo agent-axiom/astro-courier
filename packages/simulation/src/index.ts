@@ -230,6 +230,7 @@ export const DAMAGE_CONTROL_STYLE_BONUS = 140;
 export const LAST_DROP_STYLE_BONUS = 170;
 export const LAST_DROP_FUEL_RATIO = 0.05;
 export const STYLE_CHAIN_WINDOW_SECONDS = 4;
+export const CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS = 5.5;
 const STYLE_CHAIN_MULTIPLIER_STEP = 0.25;
 const STYLE_CHAIN_MAX_COUNT = 4;
 
@@ -628,9 +629,13 @@ function awardStyle(world: SimulationWorld, baseBonus: number, milestone: string
   const award = Math.round(baseBonus * styleMultiplierForChain(world));
   world.styleBonus += award;
   world.styleChainCount = Math.min(STYLE_CHAIN_MAX_COUNT, world.styleChainCount + 1);
-  world.styleChainSecondsRemaining = STYLE_CHAIN_WINDOW_SECONDS;
+  world.styleChainSecondsRemaining = styleChainWindowSeconds(world);
   world.lastMilestone = milestone;
   world.lastStyleAward = award;
+}
+
+function styleChainWindowSeconds(world: Pick<SimulationWorld, "contractId">): number {
+  return world.contractId === "chain-relay" ? CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS : STYLE_CHAIN_WINDOW_SECONDS;
 }
 
 function styleMultiplierForChain(world: Pick<SimulationWorld, "styleChainCount" | "styleChainSecondsRemaining">): number {

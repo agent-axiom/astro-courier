@@ -9,6 +9,7 @@ import {
   EXPRESS_FINISH_STYLE_BONUS,
   GRAVITY_SLING_STYLE_BONUS,
   CHAIN_FINISH_STYLE_BONUS,
+  CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS,
   DAMAGE_CONTROL_STYLE_BONUS,
   LAST_DROP_STYLE_BONUS,
   LANDING_ASSIST_FUEL_COST,
@@ -476,6 +477,41 @@ describe("deterministic Astro Courier simulation", () => {
       styleChainCount: 2,
       styleMultiplier: 1.5,
       styleChainSecondsRemaining: STYLE_CHAIN_WINDOW_SECONDS
+    });
+  });
+
+  it("extends style chain timing for chain relay contracts", () => {
+    const systemWithHazard: SystemContent = {
+      ...starterSystem,
+      hazards: [
+        {
+          id: "chain-relay-field",
+          type: "asteroid_field",
+          position: [180, -180],
+          radius: 40,
+          severity: 0.5
+        }
+      ],
+      contracts: [
+        ...starterSystem.contracts,
+        {
+          ...starterSystem.contracts[0]!,
+          id: "chain-relay",
+          title: "Chain Relay"
+        }
+      ]
+    };
+    const world = createWorldFromSystem(systemWithHazard, "chain-relay-window-seed", { contractId: "chain-relay" });
+    world.ship.position = { x: 233, y: -180 };
+    world.ship.velocity = { x: 0, y: 0 };
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.lastMilestone).toBe("Clean Hazard Skim");
+    expect(snapshotWorld(world)).toMatchObject({
+      styleChainCount: 1,
+      styleMultiplier: 1.25,
+      styleChainSecondsRemaining: CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS
     });
   });
 
