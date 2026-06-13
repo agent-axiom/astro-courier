@@ -360,6 +360,41 @@ describe("GameShell lifecycle", () => {
     expect(onHud.mock.calls.at(-1)?.[0].boostCooldownSeconds).toBeGreaterThan(0);
   });
 
+  it("keeps transient style awards visible with the milestone", async () => {
+    const { renderer, input } = createShellDoubles();
+    const onHud = vi.fn();
+    let frame: FrameRequestCallback = () => 0;
+    vi.stubGlobal(
+      "requestAnimationFrame",
+      vi.fn((callback: FrameRequestCallback) => {
+        frame = callback;
+        return 7;
+      })
+    );
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    vi.spyOn(performance, "now").mockReturnValue(1000);
+
+    const shell = new GameShell({
+      mount: {} as HTMLElement,
+      onHud,
+      renderer,
+      input
+    });
+
+    await shell.start();
+    const world = (shell as unknown as { world: SimulationWorld }).world;
+    world.ship.position = { x: 0, y: -74 };
+    world.ship.velocity = { x: 1, y: 3 };
+    world.ship.rotation = -Math.PI / 2;
+    world.ship.targetRotation = -Math.PI / 2;
+    (shell as unknown as { hudTimer: number }).hudTimer = 0.1;
+
+    frame(1017);
+
+    expect(onHud.mock.calls.at(-1)?.[0].lastMilestone).toBe("Quick Pickup");
+    expect(onHud.mock.calls.at(-1)?.[0].lastStyleAward).toBe(180);
+  });
+
   it("executes queued commands once on the next simulation frame", async () => {
     const { renderer, input } = createShellDoubles();
     const onHud = vi.fn();

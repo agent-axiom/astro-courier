@@ -535,9 +535,12 @@ describe("deterministic Astro Courier simulation", () => {
     const quickBreakdown = summarizeRun(quick).scoreBreakdown;
 
     expect(quick.lastMilestone).toBe("Quick Pickup");
+    expect(quick.lastStyleAward).toBe(QUICK_PICKUP_STYLE_BONUS);
+    expect(snapshotWorld(quick).lastStyleAward).toBe(QUICK_PICKUP_STYLE_BONUS);
     expect(quickBreakdown.styleBonus).toBe(180);
 
     stepWorld(quick, 1 / 60, []);
+    expect(quick.lastStyleAward).toBeUndefined();
     expect(summarizeRun(quick).scoreBreakdown.styleBonus).toBe(quickBreakdown.styleBonus);
 
     const late = createWorldFromSystem(starterSystem, "late-pickup-seed");

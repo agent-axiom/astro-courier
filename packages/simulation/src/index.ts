@@ -154,6 +154,7 @@ export type SimulationWorld = {
   objectivePhase: ObjectivePhase;
   cargoOnboard: boolean;
   lastMilestone?: string;
+  lastStyleAward?: number;
   approachStreakSeconds: number;
   bestApproachStreakSeconds: number;
   landingRating?: LandingRating;
@@ -310,6 +311,7 @@ export function stepWorld(world: SimulationWorld, fixedDt: number, commands: Pla
     return world;
   }
   world.lastMilestone = undefined;
+  world.lastStyleAward = undefined;
   tickBoostCooldown(world, fixedDt);
   tickStyleChain(world, fixedDt);
 
@@ -415,6 +417,7 @@ export function snapshotWorld(world: SimulationWorld): SimulationSnapshot {
     objectivePhase: world.objectivePhase,
     cargoOnboard: world.cargoOnboard,
     lastMilestone: world.lastMilestone,
+    lastStyleAward: world.lastStyleAward,
     approachStreakSeconds: round(world.approachStreakSeconds, 3),
     bestApproachStreakSeconds: round(world.bestApproachStreakSeconds, 3),
     styleChainCount: world.styleChainCount,
@@ -581,6 +584,7 @@ function awardStyle(world: SimulationWorld, baseBonus: number, milestone: string
   world.styleChainCount = Math.min(STYLE_CHAIN_MAX_COUNT, world.styleChainCount + 1);
   world.styleChainSecondsRemaining = STYLE_CHAIN_WINDOW_SECONDS;
   world.lastMilestone = milestone;
+  world.lastStyleAward = award;
 }
 
 function styleMultiplierForChain(world: Pick<SimulationWorld, "styleChainCount" | "styleChainSecondsRemaining">): number {

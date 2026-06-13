@@ -57,6 +57,7 @@ export type HudState = {
   landingStatus?: LandingGuidanceStatus;
   assistAvailable?: boolean;
   lastMilestone?: string;
+  lastStyleAward?: number;
   medal: RunMedal;
   grade: RunGrade;
   landingRating?: string;
@@ -115,6 +116,7 @@ export class GameShell {
   private hudTimer = 0;
   private paused = false;
   private retainedMilestone?: string;
+  private retainedStyleAward?: number;
   private retainedMilestoneTimer = 0;
   private latestTrajectoryRisk?: TrajectoryRiskForecast;
   private readonly queuedCommands: PlayerCommand[] = [];
@@ -149,6 +151,7 @@ export class GameShell {
     this.accumulator = 0;
     this.hudTimer = 0;
     this.retainedMilestone = undefined;
+    this.retainedStyleAward = undefined;
     this.retainedMilestoneTimer = 0;
     this.latestTrajectoryRisk = undefined;
     this.queuedCommands.length = 0;
@@ -170,6 +173,7 @@ export class GameShell {
     this.accumulator = 0;
     this.hudTimer = 0;
     this.retainedMilestone = undefined;
+    this.retainedStyleAward = undefined;
     this.retainedMilestoneTimer = 0;
     this.latestTrajectoryRisk = undefined;
     this.queuedCommands.length = 0;
@@ -216,6 +220,7 @@ export class GameShell {
         stepWorld(this.world, fixedDt, [...this.input.commands(this.world.ship.rotation), ...this.consumeQueuedCommands()]);
         if (this.world.lastMilestone) {
           this.retainedMilestone = this.world.lastMilestone;
+          this.retainedStyleAward = this.world.lastStyleAward;
           this.retainedMilestoneTimer = milestoneHoldSeconds;
           sawMilestone = true;
         }
@@ -231,6 +236,7 @@ export class GameShell {
         this.retainedMilestoneTimer = Math.max(0, this.retainedMilestoneTimer - rawDelta);
         if (this.retainedMilestoneTimer === 0) {
           this.retainedMilestone = undefined;
+          this.retainedStyleAward = undefined;
         }
       }
     }
@@ -308,6 +314,7 @@ export class GameShell {
       landingStatus: snapshot.objectiveTarget?.landingStatus,
       assistAvailable: snapshot.objectiveTarget?.assistAvailable,
       lastMilestone: this.world.lastMilestone ?? this.retainedMilestone,
+      lastStyleAward: this.world.lastStyleAward ?? this.retainedStyleAward,
       medal: result.medal,
       grade: result.grade,
       landingRating: result.landingRating,

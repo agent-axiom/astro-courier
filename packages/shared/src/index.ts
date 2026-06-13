@@ -75,6 +75,7 @@ export type SimulationSnapshot = {
   objectivePhase: ObjectivePhase;
   cargoOnboard: boolean;
   lastMilestone?: string;
+  lastStyleAward?: number;
   approachStreakSeconds: number;
   bestApproachStreakSeconds: number;
   styleChainCount: number;

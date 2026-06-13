@@ -83,6 +83,7 @@ const initialHud: HudState = {
   cargoOnboard: false,
   speed: 0,
   targetAllowedSpeed: 42,
+  lastStyleAward: undefined,
   medal: "none",
   grade: "F",
   scoreBreakdown: {
@@ -246,6 +247,7 @@ export function App() {
   });
   const liveStyleReward = buildLiveStyleReward({
     styleBonus: hud.scoreBreakdown.styleBonus,
+    lastStyleAward: hud.lastStyleAward,
     lastMilestone: hud.lastMilestone,
     styleMultiplier: hud.styleMultiplier,
     styleChainSecondsRemaining: hud.styleChainSecondsRemaining
@@ -433,6 +435,13 @@ export function App() {
           </button>
         </div>
       </header>
+
+      {liveStyleReward?.fresh && hud.lastStyleAward && !runFinished ? (
+        <div className="style-burst" aria-label={`Style hit: +${Math.round(hud.lastStyleAward)}`}>
+          <span>{hud.lastMilestone ?? "Style hit"}</span>
+          <strong>+{Math.round(hud.lastStyleAward)}</strong>
+        </div>
+      ) : null}
 
       <aside className="run-panel" aria-label="Delivery status">
         <div className="radio-message">{radioMessage}</div>

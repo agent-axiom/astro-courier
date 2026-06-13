@@ -15,19 +15,27 @@ describe("live style reward HUD copy", () => {
     });
   });
 
-  it("highlights a fresh style milestone as a short chain moment", () => {
-    expect(buildLiveStyleReward({ styleBonus: 320, lastMilestone: "Clean Hazard Skim", styleMultiplier: 1.25, styleChainSecondsRemaining: 3.8 })).toEqual({
-      label: "Style chain",
-      value: "+320 / x1.25 / 3.8s",
+  it("highlights a fresh style award separately from the banked chain total", () => {
+    expect(
+      buildLiveStyleReward({
+        styleBonus: 320,
+        lastStyleAward: 140,
+        lastMilestone: "Clean Hazard Skim",
+        styleMultiplier: 1.25,
+        styleChainSecondsRemaining: 3.8
+      })
+    ).toEqual({
+      label: "Style hit",
+      value: "+140 hit / +320 bank / x1.25",
       fresh: true,
       chainProgress: 0.95
     });
   });
 
   it("treats eco drift as a fresh style moment", () => {
-    expect(buildLiveStyleReward({ styleBonus: 340, lastMilestone: "Eco Drift", styleMultiplier: 1.5, styleChainSecondsRemaining: 4 })).toEqual({
-      label: "Style chain",
-      value: "+340 / x1.50 / 4.0s",
+    expect(buildLiveStyleReward({ styleBonus: 340, lastStyleAward: 160, lastMilestone: "Eco Drift", styleMultiplier: 1.5, styleChainSecondsRemaining: 4 })).toEqual({
+      label: "Style hit",
+      value: "+160 hit / +340 bank / x1.50",
       fresh: true,
       chainProgress: 1
     });
