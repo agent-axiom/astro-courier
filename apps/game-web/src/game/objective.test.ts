@@ -373,6 +373,23 @@ describe("tactical cue", () => {
     });
   });
 
+  it("points an urgent style chain at an armed launch burst", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        launchBurstSecondsRemaining: 2.4,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 0.8,
+        cargoDamage: 0
+      })
+    ).toEqual({
+      label: "Tactical cue",
+      value: "Boost now / +120 / 0.8s",
+      tone: "urgent"
+    });
+  });
+
   it("surfaces a ready gravity sling payout as an immediate opportunity", () => {
     expect(
       buildTacticalCue({

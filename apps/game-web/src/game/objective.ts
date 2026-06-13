@@ -388,6 +388,10 @@ function buildUrgentChainAction(input: TacticalCueInput): string {
     return `Soft dock / +${PERFECT_APPROACH_STYLE_BONUS}`;
   }
 
+  if ((input.launchBurstSecondsRemaining ?? 0) > 0) {
+    return `Boost now / +${LAUNCH_BURST_STYLE_BONUS}`;
+  }
+
   return "Save chain";
 }
 
