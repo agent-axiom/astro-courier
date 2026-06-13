@@ -159,6 +159,14 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
     });
   }
 
+  if (!freshFeedMilestone && !launchBurstArmed && hasStyleChainBeenSaved(previous, current)) {
+    updates.push({
+      label: "Chain saved",
+      value: `x${(current.styleMultiplier ?? 1).toFixed(2)} / ${formatSeconds(current.styleChainSecondsRemaining)}`,
+      tone: "style"
+    });
+  }
+
   if (hasStyleChainReachedCriticalWindow(previous, current)) {
     updates.push({
       label: "Chain fading",
@@ -348,6 +356,17 @@ function hasStyleChainBecomeLive(previous: RunFeedSnapshot, current: RunFeedSnap
   const previousChainActive = (previous.styleMultiplier ?? 1) > 1 && (previous.styleChainSecondsRemaining ?? 0) > 0;
   const currentChainActive = (current.styleMultiplier ?? 1) > 1 && (current.styleChainSecondsRemaining ?? 0) > 0;
   return !previousChainActive && currentChainActive;
+}
+
+function hasStyleChainBeenSaved(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
+  const previousChainActive = (previous.styleMultiplier ?? 1) > 1 && (previous.styleChainSecondsRemaining ?? 0) > 0;
+  const currentChainActive = (current.styleMultiplier ?? 1) > 1 && (current.styleChainSecondsRemaining ?? 0) > 0;
+  return (
+    previousChainActive &&
+    currentChainActive &&
+    (previous.styleChainSecondsRemaining ?? 0) <= criticalStyleChainSeconds &&
+    (current.styleChainSecondsRemaining ?? 0) > criticalStyleChainSeconds
+  );
 }
 
 function buildMedalDropUpdate(previous: ContractPaceTier | undefined, current: ContractPaceTier | undefined): RunFeedUpdate | undefined {

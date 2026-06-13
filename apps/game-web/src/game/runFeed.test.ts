@@ -222,6 +222,27 @@ describe("run action feed", () => {
     ).toEqual([]);
   });
 
+  it("announces when a critical style chain is saved back into a live window", () => {
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, styleMultiplier: 1.5, styleChainSecondsRemaining: 0.7 },
+        { ...baseSnapshot, styleMultiplier: 1.5, styleChainSecondsRemaining: 4.2 }
+      )
+    ).toEqual([
+      {
+        label: "Chain saved",
+        value: "x1.50 / 4.2s",
+        tone: "style"
+      }
+    ]);
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, styleMultiplier: 1.5, styleChainSecondsRemaining: 2.8 },
+        { ...baseSnapshot, styleMultiplier: 1.5, styleChainSecondsRemaining: 4.2 }
+      )
+    ).toEqual([]);
+  });
+
   it("announces when the live run loses the gold medal window", () => {
     expect(deriveRunFeedUpdates({ ...baseSnapshot, paceTier: "gold" }, { ...baseSnapshot, paceTier: "silver" })).toEqual([
       {
