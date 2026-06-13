@@ -52,6 +52,11 @@ export function buildRadioMessage(hud: HudState): string {
     return `Cargo integrity ${Math.round(Math.max(0, 1 - hud.cargoDamage) * 100)}%. Keep it out of hazards and dock clean.`;
   }
 
+  const urgentStyleChainMessage = buildUrgentStyleChainMessage(hud);
+  if (urgentStyleChainMessage) {
+    return urgentStyleChainMessage;
+  }
+
   if (hud.hazardDangerLevel === "near") {
     const needleThreadSetupSpeed = HAZARD_THREAD_SPEED_THRESHOLD * 0.65;
     if (
@@ -70,10 +75,6 @@ export function buildRadioMessage(hud: HudState): string {
 
   if (hud.trajectoryRiskLevel === "near") {
     return `Trajectory skims the hazard edge${formatTrajectoryEta(hud.trajectoryRiskSeconds)}. Hold it clean for style.`;
-  }
-
-  if (hud.styleMultiplier > 1 && hud.styleChainSecondsRemaining > 0 && hud.styleChainSecondsRemaining <= STYLE_CHAIN_URGENT_SECONDS) {
-    return "Style chain fading. Hit a skim or clean dock to save it.";
   }
 
   if (hud.gravitySlingDistance !== undefined) {
@@ -115,6 +116,33 @@ export function buildRadioMessage(hud: HudState): string {
   }
 
   return "Pickup beacon active. Bring the courier close and keep it tidy.";
+}
+
+function buildUrgentStyleChainMessage(hud: HudState): string | undefined {
+  if (!(hud.styleMultiplier > 1 && hud.styleChainSecondsRemaining > 0 && hud.styleChainSecondsRemaining <= STYLE_CHAIN_URGENT_SECONDS)) {
+    return undefined;
+  }
+
+  if (hud.gravitySlingReady) {
+    return "Style chain fading. Hold the sling arc now.";
+  }
+
+  if (hud.hazardDangerLevel === "near" && hud.cargoDamage <= 0.02) {
+    if (hud.speed >= HAZARD_THREAD_SPEED_THRESHOLD) {
+      return "Style chain fading. Thread the hazard gap now.";
+    }
+    return "Style chain fading. Skim the hazard edge now.";
+  }
+
+  if (hud.quickPickupSecondsRemaining > 0) {
+    return "Style chain fading. Take the pickup now.";
+  }
+
+  if (hud.landingStatus === "ready") {
+    return "Style chain fading. Set down softly now.";
+  }
+
+  return "Style chain fading. Hit a skim or clean dock to save it.";
 }
 
 function formatTrajectoryEta(seconds?: number): string {

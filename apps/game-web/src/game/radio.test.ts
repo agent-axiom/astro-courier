@@ -160,6 +160,50 @@ describe("radio feedback copy", () => {
     ).toContain("Style chain fading");
   });
 
+  it("points fading style chains at an immediate hazard skim before generic hazard copy", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        hazardDangerLevel: "near",
+        hazardDistance: 44,
+        cargoDamage: 0,
+        speed: 28,
+        styleChainCount: 2,
+        styleChainSecondsRemaining: 0.8,
+        styleMultiplier: 1.5
+      })
+    ).toContain("Skim the hazard edge now");
+  });
+
+  it("points fading style chains at a ready gravity sling before generic sling copy", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        gravitySlingDistance: 150,
+        gravitySlingReady: true,
+        gravitySlingSpeedThreshold: 54,
+        gravitySlingStyleBonus: 240,
+        styleChainCount: 2,
+        styleChainSecondsRemaining: 0.8,
+        styleMultiplier: 1.5
+      })
+    ).toContain("Hold the sling arc now");
+  });
+
+  it("points fading style chains at quick pickup while the pickup window is live", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        quickPickupSecondsRemaining: 4.2,
+        styleChainCount: 2,
+        styleChainSecondsRemaining: 0.8,
+        styleMultiplier: 1.5
+      })
+    ).toContain("Take the pickup now");
+  });
+
   it("coaches gravity sling setup before generic objective guidance", () => {
     expect(
       buildRadioMessage({
