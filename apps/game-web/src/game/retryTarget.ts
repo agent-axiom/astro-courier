@@ -34,6 +34,7 @@ export type ResultRetryAction = {
     | "Clean Run"
     | "Chase Gold"
     | "Chase Comet"
+    | "Chain Run"
     | "Express Run"
     | "Set PB"
     | "Run Again";
@@ -198,6 +199,9 @@ export function buildResultRetryAction(target: RetryTarget): ResultRetryAction {
   if (target.value === "Restore clean cargo") {
     return { label: "Clean Run", tone: "opportunity", mode: "restart-run" };
   }
+  if (target.value === "Carry Chain Finish") {
+    return { label: "Chain Run", tone: "opportunity", mode: "restart-run" };
+  }
   if (target.value.startsWith("Gold under ")) {
     return { label: "Chase Gold", tone: "opportunity", mode: "restart-run" };
   }
@@ -250,6 +254,13 @@ export function buildRetryActionBriefing(action: ResultRetryAction, target: Retr
     return {
       label: "Next run",
       value: "No-scratch rematch",
+      tone: "opportunity"
+    };
+  }
+  if (action.label === "Chain Run") {
+    return {
+      label: "Next run",
+      value: "Carry the chain home",
       tone: "opportunity"
     };
   }

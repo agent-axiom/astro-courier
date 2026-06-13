@@ -497,6 +497,14 @@ describe("result retry action copy", () => {
     });
   });
 
+  it("turns chain-finish setup targets into a chain-run call to action", () => {
+    expect(buildResultRetryAction({ label: "Retry target", value: "Carry Chain Finish", tone: "opportunity" })).toEqual({
+      label: "Chain Run",
+      tone: "opportunity",
+      mode: "restart-run"
+    });
+  });
+
   it("turns clean-cargo recovery into a specific clean-run call to action", () => {
     expect(buildResultRetryAction({ label: "Retry target", value: "Restore clean cargo", tone: "opportunity" })).toEqual({
       label: "Clean Run",
@@ -570,6 +578,16 @@ describe("result retry action briefing", () => {
     ).toEqual({
       label: "Next run",
       value: "Lock the style route",
+      tone: "opportunity"
+    });
+    expect(
+      buildRetryActionBriefing(
+        { label: "Chain Run", tone: "opportunity", mode: "restart-run" },
+        { label: "Retry target", value: "Carry Chain Finish", tone: "opportunity" }
+      )
+    ).toEqual({
+      label: "Next run",
+      value: "Carry the chain home",
       tone: "opportunity"
     });
   });
