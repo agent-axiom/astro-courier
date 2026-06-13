@@ -78,6 +78,10 @@ export function buildRadioMessage(hud: HudState): string {
     return urgentStyleChainMessage;
   }
 
+  if (isChainRelayCarryWindowOpen(hud)) {
+    return "Chain relay live. Carry the style chain into dock.";
+  }
+
   if (
     hud.objectivePhase === "delivery" &&
     hud.cargoOnboard &&
@@ -195,6 +199,16 @@ function buildUrgentStyleChainMessage(hud: HudState): string | undefined {
   }
 
   return "Style chain fading. Hit a skim or clean dock to save it.";
+}
+
+function isChainRelayCarryWindowOpen(hud: HudState): boolean {
+  return (
+    hud.contractId === "chain-relay" &&
+    hud.objectivePhase === "delivery" &&
+    hud.cargoOnboard &&
+    hud.styleMultiplier > 1 &&
+    hud.styleChainSecondsRemaining > STYLE_CHAIN_URGENT_SECONDS
+  );
 }
 
 function formatTrajectoryEta(seconds?: number): string {

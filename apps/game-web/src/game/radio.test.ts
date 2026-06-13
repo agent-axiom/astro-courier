@@ -280,6 +280,21 @@ describe("radio feedback copy", () => {
     ).toContain("Style chain fading");
   });
 
+  it("coaches chain relay deliveries to carry an active style chain into dock", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        contractId: "chain-relay",
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        paceSecondsRemaining: 9,
+        styleChainCount: 2,
+        styleChainSecondsRemaining: 2.4,
+        styleMultiplier: 1.5
+      })
+    ).toContain("Chain relay live");
+  });
+
   it("warns when the express finish window is about to close", () => {
     expect(
       buildRadioMessage({
