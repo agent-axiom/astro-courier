@@ -201,6 +201,13 @@ export function buildRetryActionBriefing(action: ResultRetryAction, target: Retr
       tone: "danger"
     };
   }
+  if (target.value === "Restore clean cargo") {
+    return {
+      label: "Next run",
+      value: "No-scratch rematch",
+      tone: "opportunity"
+    };
+  }
   return {
     label: "Next run",
     value: target.value,

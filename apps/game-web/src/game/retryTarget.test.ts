@@ -488,4 +488,17 @@ describe("result retry action briefing", () => {
       tone: "danger"
     });
   });
+
+  it("turns clean-cargo recovery targets into a no-scratch rematch hook", () => {
+    expect(
+      buildRetryActionBriefing(
+        { label: "Run Again", mode: "restart-run" },
+        { label: "Retry target", value: "Restore clean cargo", tone: "opportunity" }
+      )
+    ).toEqual({
+      label: "Next run",
+      value: "No-scratch rematch",
+      tone: "opportunity"
+    });
+  });
 });
