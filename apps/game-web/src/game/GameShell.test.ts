@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { GameShell } from "./GameShell";
 import type { AstroPixiRenderer } from "@astro-courier/renderer-pixi";
+import type { SimulationWorld } from "@astro-courier/simulation";
 import type { InputSource } from "./input";
 
 describe("GameShell lifecycle", () => {
@@ -218,6 +219,41 @@ describe("GameShell lifecycle", () => {
     });
     expect(onHud.mock.calls.at(-1)?.[0].speed).toBeCloseTo(63.15, 2);
     expect(onHud.mock.calls.at(-1)?.[0].targetDistance).toBeCloseTo(196.82, 2);
+  });
+
+  it("publishes predicted hazard trajectory risk before current proximity", async () => {
+    const { renderer, input } = createShellDoubles();
+    const onHud = vi.fn();
+    let frame: FrameRequestCallback = () => 0;
+    vi.stubGlobal(
+      "requestAnimationFrame",
+      vi.fn((callback: FrameRequestCallback) => {
+        frame = callback;
+        return 7;
+      })
+    );
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    vi.spyOn(performance, "now").mockReturnValue(1000);
+
+    const shell = new GameShell({
+      mount: {} as HTMLElement,
+      onHud,
+      renderer,
+      input
+    });
+
+    await shell.start();
+    const world = (shell as unknown as { world: SimulationWorld }).world;
+    world.ship.position = { x: 230, y: -230 };
+    world.ship.velocity = { x: 0, y: 58 };
+    world.ship.rotation = Math.PI / 2;
+    world.ship.targetRotation = Math.PI / 2;
+
+    frame(1167);
+
+    expect(onHud.mock.calls.at(-1)?.[0].hazardDangerLevel).toBeUndefined();
+    expect(onHud.mock.calls.at(-1)?.[0].trajectoryRiskLevel).toBe("inside");
+    expect(onHud.mock.calls.at(-1)?.[0].trajectoryRiskSeconds).toBeGreaterThan(0);
   });
 
   it("publishes contract-specific briefing copy for preflight selection", async () => {

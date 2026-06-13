@@ -26,6 +26,7 @@ import type {
 import { KeyboardInput, type InputSource } from "./input";
 import { calculateContractPace, type ContractPaceTier } from "./pace";
 import { normalizeAngle } from "./bearing";
+import { forecastTrajectoryHazardRisk, type TrajectoryRiskForecast, type TrajectoryRiskLevel } from "./trajectoryRisk";
 
 export type HudState = {
   status: RunStatus;
@@ -73,6 +74,8 @@ export type HudState = {
   hazardDangerLevel?: "near" | "inside";
   hazardDistance?: number;
   hazardSeverity?: number;
+  trajectoryRiskLevel?: TrajectoryRiskLevel;
+  trajectoryRiskSeconds?: number;
 };
 
 export type ContractOption = Pick<ContractContent, "id" | "title" | "briefing" | "riskLabel" | "rewardLabel" | "medalTimes"> & {
@@ -95,6 +98,9 @@ export type GameShellOptions = {
 const fixedDt = 1 / 60;
 const maxSubSteps = 5;
 const milestoneHoldSeconds = 1.2;
+const trajectoryPreviewSeconds = 3;
+const trajectorySampleEvery = 6;
+const trajectorySampleIntervalSeconds = fixedDt * trajectorySampleEvery;
 
 export class GameShell {
   private readonly mount: HTMLElement;
@@ -110,6 +116,7 @@ export class GameShell {
   private paused = false;
   private retainedMilestone?: string;
   private retainedMilestoneTimer = 0;
+  private latestTrajectoryRisk?: TrajectoryRiskForecast;
   private readonly queuedCommands: PlayerCommand[] = [];
   private selectedContractId?: string;
   private destroyed = false;
@@ -143,6 +150,7 @@ export class GameShell {
     this.hudTimer = 0;
     this.retainedMilestone = undefined;
     this.retainedMilestoneTimer = 0;
+    this.latestTrajectoryRisk = undefined;
     this.queuedCommands.length = 0;
     this.lastTime = performance.now();
     this.world = this.createFreshWorld();
@@ -163,6 +171,7 @@ export class GameShell {
     this.hudTimer = 0;
     this.retainedMilestone = undefined;
     this.retainedMilestoneTimer = 0;
+    this.latestTrajectoryRisk = undefined;
     this.queuedCommands.length = 0;
     this.lastTime = performance.now();
     this.world = this.createFreshWorld();
@@ -226,8 +235,18 @@ export class GameShell {
       }
     }
 
-    const trajectory = this.world.status === "flying" ? predictTrajectory(this.world, { seconds: 3, fixedDt, sampleEvery: 6 }) : [];
-    this.renderer.render(snapshotWorld(this.world), trajectory);
+    const trajectory =
+      this.world.status === "flying"
+        ? predictTrajectory(this.world, { seconds: trajectoryPreviewSeconds, fixedDt, sampleEvery: trajectorySampleEvery })
+        : [];
+    const snapshot = snapshotWorld(this.world);
+    this.latestTrajectoryRisk = forecastTrajectoryHazardRisk({
+      status: snapshot.status,
+      trajectory,
+      hazards: snapshot.hazards,
+      sampleIntervalSeconds: trajectorySampleIntervalSeconds
+    });
+    this.renderer.render(snapshot, trajectory);
 
     this.hudTimer += rawDelta;
     if (this.hudTimer >= 0.1 || this.world.status !== "flying") {
@@ -258,6 +277,7 @@ export class GameShell {
     const snapshot = snapshotWorld(this.world);
     const pace = calculateContractPace(result.elapsedSeconds, this.world.activeContract.medalTimes);
     const activeContract = this.contractOption(this.world.activeContract);
+    const trajectoryRisk = this.world.status === "flying" ? this.latestTrajectoryRisk : undefined;
     this.onHud({
       status: this.world.status,
       objectivePhase: this.world.objectivePhase,
@@ -304,7 +324,9 @@ export class GameShell {
       styleMultiplier: snapshot.styleMultiplier,
       hazardDangerLevel: snapshot.nearestHazard?.dangerLevel,
       hazardDistance: snapshot.nearestHazard?.distance,
-      hazardSeverity: snapshot.nearestHazard?.severity
+      hazardSeverity: snapshot.nearestHazard?.severity,
+      trajectoryRiskLevel: trajectoryRisk?.level,
+      trajectoryRiskSeconds: trajectoryRisk?.seconds
     });
   }
 

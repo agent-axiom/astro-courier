@@ -35,6 +35,34 @@ describe("hazard pressure readout", () => {
     });
   });
 
+  it("shows a predicted hazard intercept before current proximity", () => {
+    expect(
+      buildHazardPressureReadout({
+        trajectoryRiskLevel: "inside",
+        trajectoryRiskSeconds: 1.2,
+        cargoDamage: 0
+      })
+    ).toEqual({
+      label: "Risk pulse",
+      value: "Collision vector 1.2s",
+      tone: "danger"
+    });
+  });
+
+  it("turns a clean near-field forecast into a skim vector", () => {
+    expect(
+      buildHazardPressureReadout({
+        trajectoryRiskLevel: "near",
+        trajectoryRiskSeconds: 0.8,
+        cargoDamage: 0
+      })
+    ).toEqual({
+      label: "Risk pulse",
+      value: "Skim vector 0.8s",
+      tone: "opportunity"
+    });
+  });
+
   it("warns the player to keep damaged cargo wide near hazards", () => {
     expect(
       buildHazardPressureReadout({

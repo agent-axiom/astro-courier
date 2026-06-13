@@ -107,7 +107,9 @@ const initialHud: HudState = {
   styleMultiplier: 1,
   hazardDangerLevel: undefined,
   hazardDistance: undefined,
-  hazardSeverity: undefined
+  hazardSeverity: undefined,
+  trajectoryRiskLevel: undefined,
+  trajectoryRiskSeconds: undefined
 };
 
 const useGameStore = create<GameStore>((set) => ({
@@ -315,6 +317,8 @@ export function App() {
     hazardDangerLevel: hud.hazardDangerLevel,
     hazardDistance: hud.hazardDistance,
     hazardSeverity: hud.hazardSeverity,
+    trajectoryRiskLevel: hud.trajectoryRiskLevel,
+    trajectoryRiskSeconds: hud.trajectoryRiskSeconds,
     cargoDamage: hud.cargoDamage
   });
 

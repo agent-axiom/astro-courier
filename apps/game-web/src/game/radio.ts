@@ -46,6 +46,14 @@ export function buildRadioMessage(hud: HudState): string {
     return `Asteroid field ahead. Skim wide${hud.hazardDistance === undefined ? "" : `, ${Math.round(hud.hazardDistance)}m out`}.`;
   }
 
+  if (hud.trajectoryRiskLevel === "inside") {
+    return `Trajectory intersects hazard${formatTrajectoryEta(hud.trajectoryRiskSeconds)}. Brake or turn now.`;
+  }
+
+  if (hud.trajectoryRiskLevel === "near") {
+    return `Trajectory skims the hazard edge${formatTrajectoryEta(hud.trajectoryRiskSeconds)}. Hold it clean for style.`;
+  }
+
   if (hud.maxFuel > 0 && hud.fuel / hud.maxFuel <= 0.15) {
     return "Fuel critical. Coast clean and save the last burn for docking.";
   }
@@ -75,4 +83,8 @@ export function buildRadioMessage(hud: HudState): string {
   }
 
   return "Pickup beacon active. Bring the courier close and keep it tidy.";
+}
+
+function formatTrajectoryEta(seconds?: number): string {
+  return seconds === undefined ? " soon" : ` in ${seconds.toFixed(1)}s`;
 }

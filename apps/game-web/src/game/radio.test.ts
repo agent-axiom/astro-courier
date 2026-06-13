@@ -89,6 +89,12 @@ describe("radio feedback copy", () => {
     expect(buildRadioMessage({ ...baseHud, hazardDangerLevel: "near", hazardDistance: 44 })).toContain("Asteroid");
   });
 
+  it("warns about predicted hazard intercepts before generic objective guidance", () => {
+    expect(buildRadioMessage({ ...baseHud, trajectoryRiskLevel: "inside", trajectoryRiskSeconds: 1.2 })).toContain(
+      "Trajectory intersects hazard"
+    );
+  });
+
   it("warns about damaged cargo before generic hazard proximity", () => {
     expect(
       buildRadioMessage({
