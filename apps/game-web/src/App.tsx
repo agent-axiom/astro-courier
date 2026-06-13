@@ -43,7 +43,7 @@ import {
 } from "./game/contracts";
 import { buildRadioMessage } from "./game/radio";
 import { buildLiveStyleReward } from "./game/style";
-import { buildExpressFinishReadout, buildObjectiveDirective, buildObjectiveInterceptReadout } from "./game/objective";
+import { buildExpressFinishReadout, buildObjectiveDirective, buildObjectiveInterceptReadout, buildTacticalCue } from "./game/objective";
 import { buildPreflightBonusObjectives, buildPreflightMasteryTargets } from "./game/mastery";
 import { buildApproachRewardReadout, buildDockingSpeedReadout } from "./game/docking";
 import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./game/cargo";
@@ -256,6 +256,21 @@ export function App() {
     targetDistance: hud.targetDistance,
     speed: hud.speed,
     landingStatus: hud.landingStatus
+  });
+  const tacticalCue = buildTacticalCue({
+    status: hud.status,
+    objectivePhase: hud.objectivePhase,
+    hazardDangerLevel: hud.hazardDangerLevel,
+    trajectoryRiskLevel: hud.trajectoryRiskLevel,
+    trajectoryRiskSeconds: hud.trajectoryRiskSeconds,
+    landingStatus: hud.landingStatus,
+    paceTier: hud.paceTier,
+    paceSecondsRemaining: hud.paceSecondsRemaining,
+    cargoDamage: hud.cargoDamage,
+    quickPickupSecondsRemaining: hud.quickPickupSecondsRemaining,
+    quickPickupBonus: hud.quickPickupBonus,
+    styleMultiplier: hud.styleMultiplier,
+    styleChainSecondsRemaining: hud.styleChainSecondsRemaining
   });
   const liveBestPace = buildLiveBestPace({
     bestRun,
@@ -494,6 +509,13 @@ export function App() {
 
       <aside className="run-panel" aria-label="Delivery status">
         <div className="radio-message">{radioMessage}</div>
+        {tacticalCue ? (
+          <div className={`tactical-cue tactical-cue-${tacticalCue.tone}`} aria-label={`${tacticalCue.label}: ${tacticalCue.value}`}>
+            <Target size={16} />
+            <span>{tacticalCue.label}</span>
+            <strong>{tacticalCue.value}</strong>
+          </div>
+        ) : null}
         <div className="status-row">
           <span>Status</span>
           <strong>{statusLabel(hud.status)}</strong>

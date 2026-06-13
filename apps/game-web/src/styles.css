@@ -270,6 +270,53 @@ button {
   line-height: 1.35;
 }
 
+.tactical-cue {
+  display: grid;
+  grid-template-columns: 16px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  font-size: 0.84rem;
+  font-weight: 880;
+}
+
+.tactical-cue span,
+.tactical-cue strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.tactical-cue span {
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.tactical-cue strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.tactical-cue-danger {
+  border-color: rgba(255, 111, 145, 0.34);
+  background: rgba(255, 111, 145, 0.19);
+  color: #ffadc1;
+}
+
+.tactical-cue-urgent {
+  border-color: rgba(255, 209, 102, 0.34);
+  background: rgba(255, 209, 102, 0.19);
+  color: #ffe19a;
+}
+
+.tactical-cue-opportunity {
+  border-color: rgba(142, 230, 184, 0.34);
+  background: rgba(142, 230, 184, 0.17);
+  color: #bff7d8;
+}
+
 .status-row {
   display: flex;
   justify-content: space-between;

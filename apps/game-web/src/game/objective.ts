@@ -43,6 +43,28 @@ export type ExpressFinishReadout = {
   tone: "open" | "urgent";
 };
 
+export type TacticalCueInput = {
+  status: RunStatus;
+  objectivePhase: ObjectivePhase;
+  hazardDangerLevel?: "near" | "inside";
+  trajectoryRiskLevel?: "near" | "inside";
+  trajectoryRiskSeconds?: number;
+  landingStatus?: LandingGuidanceStatus;
+  paceTier?: ContractPaceTier;
+  paceSecondsRemaining?: number;
+  cargoDamage?: number;
+  quickPickupSecondsRemaining?: number;
+  quickPickupBonus?: number;
+  styleMultiplier?: number;
+  styleChainSecondsRemaining?: number;
+};
+
+export type TacticalCue = {
+  label: "Tactical cue";
+  value: string;
+  tone: "danger" | "urgent" | "opportunity";
+};
+
 export function buildObjectiveDirective(input: ObjectiveDirectiveInput): ObjectiveDirective {
   if (input.objectivePhase === "complete") {
     return {
@@ -143,4 +165,77 @@ export function buildObjectiveInterceptReadout(
     value: `ETA ${etaSeconds.toFixed(1)}s`,
     tone: etaSeconds <= 8 ? "fast" : etaSeconds <= 20 ? "steady" : "slow"
   };
+}
+
+export function buildTacticalCue(input: TacticalCueInput): TacticalCue | undefined {
+  if (input.status !== "flying") {
+    return undefined;
+  }
+
+  if (input.hazardDangerLevel === "inside") {
+    return {
+      label: "Tactical cue",
+      value: "Exit hazard field",
+      tone: "danger"
+    };
+  }
+
+  if (input.trajectoryRiskLevel === "inside") {
+    return {
+      label: "Tactical cue",
+      value: `Evade vector / ${formatSeconds(input.trajectoryRiskSeconds)}`,
+      tone: "danger"
+    };
+  }
+
+  if (input.landingStatus === "too-fast") {
+    return {
+      label: "Tactical cue",
+      value: "Brake before dock",
+      tone: "danger"
+    };
+  }
+
+  const chainSecondsRemaining = input.styleChainSecondsRemaining ?? 0;
+  const urgentStyleChain = (input.styleMultiplier ?? 1) > 1 && chainSecondsRemaining > 0 && chainSecondsRemaining <= 1;
+  if (urgentStyleChain) {
+    return {
+      label: "Tactical cue",
+      value: `Save chain / ${formatSeconds(input.styleChainSecondsRemaining)}`,
+      tone: "urgent"
+    };
+  }
+
+  if (isCleanGoldDelivery(input) && (input.paceSecondsRemaining ?? 0) <= 4) {
+    return {
+      label: "Tactical cue",
+      value: `Close express / +${EXPRESS_FINISH_STYLE_BONUS} / ${formatSeconds(input.paceSecondsRemaining)}`,
+      tone: "opportunity"
+    };
+  }
+
+  const quickPickupSecondsRemaining = input.quickPickupSecondsRemaining ?? 0;
+  const quickPickupBonus = input.quickPickupBonus ?? 0;
+  if (input.objectivePhase === "pickup" && quickPickupSecondsRemaining > 0 && quickPickupBonus > 0) {
+    return {
+      label: "Tactical cue",
+      value: `Rush pickup / +${Math.round(quickPickupBonus)} / ${formatSeconds(quickPickupSecondsRemaining)}`,
+      tone: "opportunity"
+    };
+  }
+
+  return undefined;
+}
+
+function isCleanGoldDelivery(input: TacticalCueInput): boolean {
+  return (
+    input.objectivePhase === "delivery" &&
+    input.paceTier === "gold" &&
+    (input.paceSecondsRemaining ?? 0) > 0 &&
+    (input.cargoDamage ?? 0) <= 0.02
+  );
+}
+
+function formatSeconds(seconds?: number): string {
+  return `${(seconds ?? 0).toFixed(1)}s`;
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildExpressFinishReadout, buildObjectiveDirective, buildObjectiveInterceptReadout } from "./objective";
+import { buildExpressFinishReadout, buildObjectiveDirective, buildObjectiveInterceptReadout, buildTacticalCue } from "./objective";
 
 describe("objective directive HUD copy", () => {
   it("points pickup phase at the pickup pad", () => {
@@ -175,6 +175,68 @@ describe("express finish readout", () => {
         paceTier: "gold",
         paceSecondsRemaining: 8.6,
         cargoDamage: 0.03
+      })
+    ).toBeUndefined();
+  });
+});
+
+describe("tactical cue", () => {
+  it("prioritizes an incoming collision vector over scoring windows", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        trajectoryRiskLevel: "inside",
+        trajectoryRiskSeconds: 1.2,
+        paceTier: "gold",
+        paceSecondsRemaining: 3.8,
+        cargoDamage: 0
+      })
+    ).toEqual({
+      label: "Tactical cue",
+      value: "Evade vector / 1.2s",
+      tone: "danger"
+    });
+  });
+
+  it("calls out the express finish when the clean gold window is closing", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        paceTier: "gold",
+        paceSecondsRemaining: 3.8,
+        cargoDamage: 0.01
+      })
+    ).toEqual({
+      label: "Tactical cue",
+      value: "Close express / +180 / 3.8s",
+      tone: "opportunity"
+    });
+  });
+
+  it("turns an active pickup rush into an immediate cue", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "pickup",
+        quickPickupSecondsRemaining: 7.2,
+        quickPickupBonus: 180
+      })
+    ).toEqual({
+      label: "Tactical cue",
+      value: "Rush pickup / +180 / 7.2s",
+      tone: "opportunity"
+    });
+  });
+
+  it("hides outside active flight", () => {
+    expect(
+      buildTacticalCue({
+        status: "paused",
+        objectivePhase: "pickup",
+        quickPickupSecondsRemaining: 7.2,
+        quickPickupBonus: 180
       })
     ).toBeUndefined();
   });
