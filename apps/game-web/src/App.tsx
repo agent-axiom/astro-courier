@@ -29,6 +29,7 @@ import { buildPreflightMasteryTargets } from "./game/mastery";
 import { buildDockingSpeedReadout } from "./game/docking";
 import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./game/cargo";
 import { buildResultStats } from "./game/resultStats";
+import { buildHazardPressureReadout } from "./game/hazard";
 
 type GameStore = {
   hud: HudState;
@@ -183,6 +184,11 @@ export function App() {
     cargoOnboard: hud.cargoOnboard,
     hazardDangerLevel: hud.hazardDangerLevel
   });
+  const hazardPressureReadout = buildHazardPressureReadout({
+    hazardDangerLevel: hud.hazardDangerLevel,
+    hazardDistance: hud.hazardDistance,
+    cargoDamage: hud.cargoDamage
+  });
 
   const launchContract = () => {
     setPreflightOpen(false);
@@ -329,10 +335,14 @@ export function App() {
             <strong>{liveStyleReward.value}</strong>
           </div>
         ) : null}
-        {hud.hazardDangerLevel ? (
-          <div className={`hazard-chip hazard-${hud.hazardDangerLevel}`}>
-            <span>{hud.hazardDangerLevel === "inside" ? "Hazard contact" : "Hazard near"}</span>
-            <strong>{hud.hazardDistance === undefined ? "" : `${Math.round(hud.hazardDistance)}m`}</strong>
+        {hazardPressureReadout ? (
+          <div
+            className={`risk-pulse-chip risk-pulse-${hazardPressureReadout.tone}`}
+            aria-label={`${hazardPressureReadout.label}: ${hazardPressureReadout.value}`}
+          >
+            <ShieldAlert size={16} />
+            <span>{hazardPressureReadout.label}</span>
+            <strong>{hazardPressureReadout.value}</strong>
           </div>
         ) : null}
         <div className={`cargo-risk-chip cargo-risk-${cargoRiskReadout.tone}`} aria-label={`${cargoRiskReadout.label}: ${cargoRiskReadout.value}`}>

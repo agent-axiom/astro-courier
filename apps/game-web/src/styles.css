@@ -359,11 +359,11 @@ button {
   color: rgba(255, 220, 229, 0.78);
 }
 
-.hazard-chip {
-  display: flex;
+.risk-pulse-chip {
+  display: grid;
+  grid-template-columns: 16px auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 8px;
   min-height: 36px;
   padding: 8px 10px;
   border-radius: 7px;
@@ -371,20 +371,33 @@ button {
   font-weight: 850;
 }
 
-.hazard-chip span {
+.risk-pulse-chip span,
+.risk-pulse-chip strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.risk-pulse-chip span {
   color: rgba(255, 255, 255, 0.76);
 }
 
-.hazard-chip strong {
+.risk-pulse-chip strong {
   color: #ffffff;
+  text-align: right;
 }
 
-.hazard-near {
+.risk-pulse-opportunity {
+  background: rgba(142, 230, 184, 0.15);
+  color: #bff7d8;
+}
+
+.risk-pulse-warning {
   background: rgba(255, 209, 102, 0.18);
   color: #ffe19a;
 }
 
-.hazard-inside {
+.risk-pulse-danger {
   background: rgba(255, 111, 145, 0.18);
   color: #ffadc1;
 }
