@@ -3,6 +3,9 @@ import type { PlayerCommand } from "@astro-courier/shared";
 const turnStep = 0.11;
 const pointerDeadZone = 10;
 const fullThrustDistance = 100;
+const gamepadStickDeadZone = 0.18;
+const gamepadBrakeButtonIndex = 6;
+const gamepadBoostButtonIndex = 0;
 
 export type ScreenPoint = {
   x: number;
@@ -13,6 +16,16 @@ export type PointerCommandInput = {
   active: boolean;
   center: ScreenPoint;
   pointer: ScreenPoint;
+};
+
+export type GamepadButtonSnapshot = {
+  pressed?: boolean;
+  value?: number;
+};
+
+export type GamepadCommandInput = {
+  axes: readonly number[];
+  buttons: readonly GamepadButtonSnapshot[];
 };
 
 export type InputSource = {
@@ -57,12 +70,32 @@ export function commandsFromKeyboardState(pressed: ReadonlySet<string>, currentR
   return commands;
 }
 
+export function commandsFromGamepadState(gamepad: GamepadCommandInput, _currentRotation: number): PlayerCommand[] {
+  const commands: PlayerCommand[] = [];
+  const stickX = gamepad.axes[0] ?? 0;
+  const stickY = gamepad.axes[1] ?? 0;
+  const stickDistance = Math.hypot(stickX, stickY);
+
+  if (stickDistance >= gamepadStickDeadZone) {
+    commands.push({ type: "AIM", angle: Math.atan2(stickY, stickX) });
+    commands.push({ type: "THRUST", amount: round(Math.min(1, stickDistance), 2) });
+  }
+
+  const brakeAmount = gamepadButtonValue(gamepad.buttons[gamepadBrakeButtonIndex]);
+  if (brakeAmount > 0) {
+    commands.push({ type: "BRAKE", amount: round(brakeAmount, 2) });
+  }
+
+  return commands;
+}
+
 export class KeyboardInput {
   private readonly target: Window;
   private readonly pressed = new Set<string>();
   private pointerTarget?: HTMLElement;
   private pointerActive = false;
   private boostQueued = false;
+  private gamepadBoostPressed = false;
   private pointer: ScreenPoint = { x: 0, y: 0 };
 
   constructor(target: Window) {
@@ -91,13 +124,21 @@ export class KeyboardInput {
     this.pressed.clear();
     this.pointerActive = false;
     this.boostQueued = false;
+    this.gamepadBoostPressed = false;
   }
 
   commands(currentRotation: number): PlayerCommand[] {
-    const commands = commandsFromKeyboardState(this.pressed, currentRotation);
+    const gamepad = this.activeGamepad();
+    const commands = [
+      ...commandsFromKeyboardState(this.pressed, currentRotation),
+      ...this.gamepadCommands(gamepad, currentRotation)
+    ];
     if (this.boostQueued) {
       commands.push({ type: "BOOST" });
       this.boostQueued = false;
+    }
+    if (this.takeGamepadBoost(gamepad)) {
+      commands.push({ type: "BOOST" });
     }
     return [...commands, ...this.pointerCommands()];
   }
@@ -124,6 +165,7 @@ export class KeyboardInput {
     this.pressed.clear();
     this.pointerActive = false;
     this.boostQueued = false;
+    this.gamepadBoostPressed = false;
   };
 
   private readonly handlePointerDown = (event: PointerEvent) => {
@@ -140,6 +182,21 @@ export class KeyboardInput {
   private readonly handlePointerUp = () => {
     this.pointerActive = false;
   };
+
+  private activeGamepad(): GamepadCommandInput | undefined {
+    return [...(this.target.navigator?.getGamepads?.() ?? [])].find(Boolean) ?? undefined;
+  }
+
+  private gamepadCommands(gamepad: GamepadCommandInput | undefined, currentRotation: number): PlayerCommand[] {
+    return gamepad ? commandsFromGamepadState(gamepad, currentRotation) : [];
+  }
+
+  private takeGamepadBoost(gamepad: GamepadCommandInput | undefined): boolean {
+    const boostPressed = gamepad ? gamepadButtonValue(gamepad.buttons[gamepadBoostButtonIndex]) > 0 : false;
+    const shouldQueue = boostPressed && !this.gamepadBoostPressed;
+    this.gamepadBoostPressed = boostPressed;
+    return shouldQueue;
+  }
 
   private pointerCommands(): PlayerCommand[] {
     if (!this.pointerTarget) {
@@ -177,6 +234,16 @@ function isGameKey(code: string): boolean {
 
 function isDown(pressed: ReadonlySet<string>, code: string): boolean {
   return pressed.has(code);
+}
+
+function gamepadButtonValue(button: GamepadButtonSnapshot | undefined): number {
+  if (!button) {
+    return 0;
+  }
+  if (button.value !== undefined) {
+    return Math.min(1, Math.max(0, button.value));
+  }
+  return button.pressed ? 1 : 0;
 }
 
 function round(value: number, digits: number): number {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { KeyboardInput, commandsFromKeyboardState, commandsFromPointer } from "./input";
+import { KeyboardInput, commandsFromGamepadState, commandsFromKeyboardState, commandsFromPointer } from "./input";
 
 describe("pointer input mapping", () => {
   it("maps an active pointer to aim and thrust commands", () => {
@@ -29,8 +29,7 @@ describe("pointer input mapping", () => {
     expect(
       commandsFromPointer({
         active: true,
-        center: { x: 200,
-          y: 200 },
+        center: { x: 200, y: 200 },
         pointer: { x: 230, y: 200 }
       })
     ).toEqual([
@@ -69,6 +68,52 @@ describe("keyboard input mapping", () => {
   });
 });
 
+describe("gamepad input mapping", () => {
+  it("maps the left stick to aim and proportional thrust", () => {
+    expect(
+      commandsFromGamepadState(
+        {
+          axes: [0, -0.5],
+          buttons: []
+        },
+        0
+      )
+    ).toEqual([
+      { type: "AIM", angle: -Math.PI / 2 },
+      { type: "THRUST", amount: 0.5 }
+    ]);
+  });
+
+  it("maps analog trigger pressure to brake strength", () => {
+    expect(
+      commandsFromGamepadState(
+        {
+          axes: [0, 0],
+          buttons: gamepadButtons({ 6: { pressed: true, value: 0.7 } })
+        },
+        Math.PI / 2
+      )
+    ).toEqual([{ type: "BRAKE", amount: 0.7 }]);
+  });
+
+  it("queues gamepad boost once per face-button press", () => {
+    const target = new FakeGamepadTarget();
+    const input = new KeyboardInput(target as unknown as Window);
+    input.attach();
+
+    target.setGamepads([{ axes: [0, 0], buttons: [{ pressed: true, value: 1 }] }]);
+
+    expect(input.commands(0)).toEqual([{ type: "BOOST" }]);
+    expect(input.commands(0)).toEqual([]);
+
+    target.setGamepads([{ axes: [0, 0], buttons: [{ pressed: false, value: 0 }] }]);
+    expect(input.commands(0)).toEqual([]);
+
+    target.setGamepads([{ axes: [0, 0], buttons: [{ pressed: true, value: 1 }] }]);
+    expect(input.commands(0)).toEqual([{ type: "BOOST" }]);
+  });
+});
+
 type KeyboardListener = (event: { code: string; preventDefault: () => void }) => void;
 
 class FakeKeyboardTarget {
@@ -88,5 +133,26 @@ class FakeKeyboardTarget {
     for (const listener of this.listeners.get(type) ?? []) {
       listener({ code, preventDefault: () => undefined });
     }
+  }
+}
+
+function gamepadButtons(
+  entries: Record<number, { pressed: boolean; value: number }>
+): Array<{ pressed: boolean; value: number }> {
+  const highestIndex = Math.max(...Object.keys(entries).map(Number));
+  return Array.from({ length: highestIndex + 1 }, (_, index) => {
+    return entries[index] ?? { pressed: false, value: 0 };
+  });
+}
+
+class FakeGamepadTarget extends FakeKeyboardTarget {
+  readonly navigator = {
+    getGamepads: () => this.gamepads
+  };
+
+  private gamepads: Array<{ axes: number[]; buttons: Array<{ pressed: boolean; value: number }> } | null> = [];
+
+  setGamepads(gamepads: Array<{ axes: number[]; buttons: Array<{ pressed: boolean; value: number }> } | null>): void {
+    this.gamepads = gamepads;
   }
 }
