@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildResultHighlight, buildResultStats } from "./resultStats";
+import { buildReplayReceipt, buildResultHighlight, buildResultStats } from "./resultStats";
 
 const baseBreakdown = {
   base: 1000,
@@ -72,5 +72,14 @@ describe("result stat formatting", () => {
 
   it("stays hidden when a run has no earned bonus source", () => {
     expect(buildResultHighlight(baseBreakdown)).toBeUndefined();
+  });
+
+  it("formats replay fingerprints for the result overlay", () => {
+    expect(buildReplayReceipt("rc-a1b2c3d4e5f6")).toEqual({
+      label: "Replay ID",
+      value: "RC-A1B2C3D4E5F6",
+      tone: "verified"
+    });
+    expect(buildReplayReceipt()).toBeUndefined();
   });
 });

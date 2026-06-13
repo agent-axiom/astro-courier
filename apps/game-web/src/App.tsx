@@ -52,7 +52,7 @@ import { buildExpressFinishReadout, buildObjectiveDirective, buildObjectiveInter
 import { buildPreflightBonusObjectives, buildPreflightMasteryTargets } from "./game/mastery";
 import { buildApproachRewardReadout, buildDockingSpeedReadout } from "./game/docking";
 import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./game/cargo";
-import { buildResultHighlight, buildResultStats } from "./game/resultStats";
+import { buildReplayReceipt, buildResultHighlight, buildResultStats } from "./game/resultStats";
 import { buildHazardPressureReadout } from "./game/hazard";
 import { buildResultBoardAction, buildResultBoardPrompt, buildResultCoach } from "./game/resultCoach";
 import { getOverlayVisibility } from "./game/overlays";
@@ -119,7 +119,9 @@ const initialHud: HudState = {
   hazardDistance: undefined,
   hazardSeverity: undefined,
   trajectoryRiskLevel: undefined,
-  trajectoryRiskSeconds: undefined
+  trajectoryRiskSeconds: undefined,
+  replayFrameCount: 0,
+  replayChecksum: undefined
 };
 
 const useGameStore = create<GameStore>((set) => ({
@@ -325,6 +327,7 @@ export function App() {
   const cargoManifest = buildCargoManifest({ cargoName: hud.cargoName, cargoOnboard: hud.cargoOnboard });
   const resultStats = buildResultStats({ score: hud.score, elapsedSeconds: hud.elapsedSeconds, cargoIntegrity });
   const resultHighlight = buildResultHighlight(hud.scoreBreakdown, hud.lastMilestone);
+  const replayReceipt = buildReplayReceipt(hud.replayChecksum);
   const bestRunChase = buildBestRunChase(bestRun);
   const routeBoardProgress = buildRouteBoardProgress(hud.contractOptions, bestRunsByContract);
   const routeBoardTarget = buildRouteBoardTarget(hud.contractOptions, bestRunsByContract);
@@ -928,6 +931,13 @@ export function App() {
               </div>
             ))}
           </div>
+          {replayReceipt ? (
+            <div className={`replay-receipt replay-receipt-${replayReceipt.tone}`} aria-label={`${replayReceipt.label}: ${replayReceipt.value}`}>
+              <Satellite size={18} />
+              <span>{replayReceipt.label}</span>
+              <strong>{replayReceipt.value}</strong>
+            </div>
+          ) : null}
           {resultHighlight ? (
             <div
               className={`result-highlight result-highlight-${resultHighlight.tone}`}

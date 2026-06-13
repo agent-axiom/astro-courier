@@ -15,11 +15,14 @@ import {
 } from "@astro-courier/simulation";
 import type {
   CrashReason,
+  InputFrame,
   LandingGuidanceStatus,
   ObjectivePhase,
   PlayerCommand,
+  ReplayEnvelope,
   RunGrade,
   RunMedal,
+  RunResultSummary,
   RunStatus,
   ScoreBreakdown
 } from "@astro-courier/shared";
@@ -83,6 +86,8 @@ export type HudState = {
   gravitySlingReady?: boolean;
   gravitySlingSpeedThreshold?: number;
   gravitySlingStyleBonus?: number;
+  replayFrameCount: number;
+  replayChecksum?: string;
 };
 
 export type ContractOption = Pick<ContractContent, "id" | "title" | "briefing" | "riskLabel" | "rewardLabel" | "medalTimes"> & {
@@ -108,6 +113,8 @@ const milestoneHoldSeconds = 1.2;
 const trajectoryPreviewSeconds = 3;
 const trajectorySampleEvery = 6;
 const trajectorySampleIntervalSeconds = fixedDt * trajectorySampleEvery;
+const gameVersion = "0.1.0";
+const localReplaySeed = "local-starter-seed";
 
 export class GameShell {
   private readonly mount: HTMLElement;
@@ -126,6 +133,7 @@ export class GameShell {
   private retainedMilestoneTimer = 0;
   private latestTrajectoryRisk?: TrajectoryRiskForecast;
   private readonly queuedCommands: PlayerCommand[] = [];
+  private readonly inputFrames: InputFrame[] = [];
   private selectedContractId?: string;
   private destroyed = false;
 
@@ -161,6 +169,7 @@ export class GameShell {
     this.retainedMilestoneTimer = 0;
     this.latestTrajectoryRisk = undefined;
     this.queuedCommands.length = 0;
+    this.inputFrames.length = 0;
     this.lastTime = performance.now();
     this.world = this.createFreshWorld();
     this.publishHud();
@@ -183,6 +192,7 @@ export class GameShell {
     this.retainedMilestoneTimer = 0;
     this.latestTrajectoryRisk = undefined;
     this.queuedCommands.length = 0;
+    this.inputFrames.length = 0;
     this.lastTime = performance.now();
     this.world = this.createFreshWorld();
     this.publishHud();
@@ -223,7 +233,9 @@ export class GameShell {
       let sawMilestone = false;
 
       while (this.accumulator >= fixedDt && subSteps < maxSubSteps) {
-        stepWorld(this.world, fixedDt, [...this.input.commands(this.world.ship.rotation), ...this.consumeQueuedCommands()]);
+        const commands = [...this.input.commands(this.world.ship.rotation), ...this.consumeQueuedCommands()];
+        this.recordReplayCommands(commands);
+        stepWorld(this.world, fixedDt, commands);
         if (this.world.lastMilestone) {
           this.retainedMilestone = this.world.lastMilestone;
           this.retainedStyleAward = this.world.lastStyleAward;
@@ -276,8 +288,17 @@ export class GameShell {
     return this.queuedCommands.splice(0);
   }
 
+  private recordReplayCommands(commands: PlayerCommand[]): void {
+    for (const command of commands) {
+      this.inputFrames.push({
+        tick: this.world.tick,
+        command
+      });
+    }
+  }
+
   private createFreshWorld(): SimulationWorld {
-    const world = createWorldFromSystem(this.system, "local-starter-seed", { contractId: this.selectedContractId });
+    const world = createWorldFromSystem(this.system, localReplaySeed, { contractId: this.selectedContractId });
     if (this.paused) {
       world.status = "paused";
     }
@@ -290,6 +311,8 @@ export class GameShell {
     const pace = calculateContractPace(result.elapsedSeconds, this.world.activeContract.medalTimes);
     const activeContract = this.contractOption(this.world.activeContract);
     const trajectoryRisk = this.world.status === "flying" ? this.latestTrajectoryRisk : undefined;
+    const replayChecksum =
+      this.world.status === "delivered" || this.world.status === "crashed" ? replayFingerprint(this.createReplayEnvelope(result)) : undefined;
     this.onHud({
       status: this.world.status,
       objectivePhase: this.world.objectivePhase,
@@ -345,8 +368,29 @@ export class GameShell {
       gravitySlingSpeedThreshold: snapshot.gravitySlingOpportunity?.speedThreshold,
       gravitySlingStyleBonus: snapshot.gravitySlingOpportunity?.styleBonus,
       trajectoryRiskLevel: trajectoryRisk?.level,
-      trajectoryRiskSeconds: trajectoryRisk?.seconds
+      trajectoryRiskSeconds: trajectoryRisk?.seconds,
+      replayFrameCount: this.inputFrames.length,
+      replayChecksum
     });
+  }
+
+  private createReplayEnvelope(result: RunResultSummary): ReplayEnvelope {
+    return {
+      gameVersion,
+      contentVersion: this.world.contentVersion,
+      systemId: this.world.systemId,
+      contractId: this.world.contractId,
+      rngSeed: localReplaySeed,
+      shipConfig: {
+        hull: "starter",
+        upgrades: []
+      },
+      inputFrames: this.inputFrames.map((frame) => ({
+        tick: frame.tick,
+        command: { ...frame.command }
+      })),
+      result
+    };
   }
 
   private contractOptions(): ContractOption[] {
@@ -405,4 +449,37 @@ function titleFromId(id: string): string {
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+function replayFingerprint(replay: ReplayEnvelope): string {
+  return `rc-${fnv1a64(canonicalJson(replay)).slice(0, 12)}`;
+}
+
+function canonicalJson(value: unknown): string {
+  return JSON.stringify(canonicalize(value));
+}
+
+function canonicalize(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((entry) => canonicalize(entry));
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value)
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([key, entry]) => [key, canonicalize(entry)])
+    );
+  }
+
+  return value;
+}
+
+function fnv1a64(value: string): string {
+  let hash = 0xcbf29ce484222325n;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= BigInt(value.charCodeAt(index));
+    hash = BigInt.asUintN(64, hash * 0x100000001b3n);
+  }
+  return hash.toString(16).padStart(16, "0");
 }

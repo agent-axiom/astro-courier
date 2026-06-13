@@ -1927,6 +1927,41 @@ button {
   color: #ffadc1;
 }
 
+.replay-receipt {
+  display: grid;
+  grid-template-columns: 18px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid rgba(124, 225, 255, 0.26);
+  border-radius: 7px;
+  background: rgba(124, 225, 255, 0.08);
+  color: #c6f6ff;
+  font-size: 0.76rem;
+  font-weight: 850;
+  text-align: left;
+}
+
+.replay-receipt span,
+.replay-receipt strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.replay-receipt span {
+  color: rgba(198, 246, 255, 0.72);
+  text-transform: uppercase;
+}
+
+.replay-receipt strong {
+  color: #ffffff;
+  font-size: 0.74rem;
+  text-align: right;
+}
+
 .result-highlight {
   display: grid;
   grid-template-columns: 18px auto 1fr;

@@ -66,7 +66,8 @@ const baseHud: HudState = {
   styleMultiplier: 1,
   launchBurstSecondsRemaining: 0,
   hazardDangerLevel: undefined,
-  hazardDistance: undefined
+  hazardDistance: undefined,
+  replayFrameCount: 0
 };
 
 describe("radio feedback copy", () => {

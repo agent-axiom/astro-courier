@@ -17,6 +17,12 @@ export type ResultHighlight = {
   tone: "pace" | "efficiency" | "cargo" | "precision" | "style" | "danger";
 };
 
+export type ReplayReceipt = {
+  label: "Replay ID";
+  value: string;
+  tone: "verified";
+};
+
 const styleMilestones = new Set([
   "Clean Hazard Skim",
   "Needle Thread",
@@ -60,5 +66,17 @@ export function buildResultHighlight(breakdown: ScoreBreakdown, lastMilestone?: 
     label: "Run highlight",
     value: `${highlightLabel} +${Math.round(winner.value)}`,
     tone: winner.tone
+  };
+}
+
+export function buildReplayReceipt(replayChecksum?: string): ReplayReceipt | undefined {
+  if (!replayChecksum) {
+    return undefined;
+  }
+
+  return {
+    label: "Replay ID",
+    value: replayChecksum.replace(/^rc-/, "RC-").toUpperCase(),
+    tone: "verified"
   };
 }

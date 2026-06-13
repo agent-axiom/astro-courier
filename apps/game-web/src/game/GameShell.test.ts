@@ -473,6 +473,71 @@ describe("GameShell lifecycle", () => {
     expect(onHud.mock.calls.at(-2)?.[0].fuelUsed).toBeGreaterThan(0);
     expect(fuelAfterNextFrame).toBe(fuelAfterBoost);
   });
+
+  it("publishes the live replay command count during flight", async () => {
+    let commandCalls = 0;
+    const { renderer, input } = createShellDoubles({
+      commands: () => {
+        commandCalls += 1;
+        return commandCalls === 1 ? [{ type: "THRUST", amount: 1 }] : [];
+      }
+    });
+    const onHud = vi.fn();
+    let frame: FrameRequestCallback = () => 0;
+    vi.stubGlobal(
+      "requestAnimationFrame",
+      vi.fn((callback: FrameRequestCallback) => {
+        frame = callback;
+        return 7;
+      })
+    );
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    vi.spyOn(performance, "now").mockReturnValue(1000);
+
+    const shell = new GameShell({
+      mount: {} as HTMLElement,
+      onHud,
+      renderer,
+      input
+    });
+
+    await shell.start();
+    frame(1167);
+
+    expect(onHud.mock.calls.at(-1)?.[0].replayFrameCount).toBe(1);
+  });
+
+  it("publishes a deterministic replay fingerprint for terminal runs", async () => {
+    const { renderer, input } = createShellDoubles();
+    const onHud = vi.fn();
+    let frame: FrameRequestCallback = () => 0;
+    vi.stubGlobal(
+      "requestAnimationFrame",
+      vi.fn((callback: FrameRequestCallback) => {
+        frame = callback;
+        return 7;
+      })
+    );
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    vi.spyOn(performance, "now").mockReturnValue(1000);
+
+    const shell = new GameShell({
+      mount: {} as HTMLElement,
+      onHud,
+      renderer,
+      input
+    });
+
+    await shell.start();
+    shell.queueCommand({ type: "BOOST" });
+    frame(1167);
+    const world = (shell as unknown as { world: SimulationWorld }).world;
+    world.status = "delivered";
+    world.objectivePhase = "complete";
+    (shell as unknown as { publishHud: () => void }).publishHud();
+
+    expect(onHud.mock.calls.at(-1)?.[0].replayChecksum).toMatch(/^rc-[a-f0-9]{12}$/);
+  });
 });
 
 function createShellDoubles(options?: { mount?: AstroPixiRenderer["mount"]; commands?: InputSource["commands"] }) {
