@@ -9,6 +9,7 @@ import {
   buildDailyDispatchAction,
   buildDailyDispatchReset,
   buildDailyDispatchStatus,
+  buildRoutePressureBriefing,
   getNextContractId
 } from "./contracts";
 
@@ -275,6 +276,48 @@ describe("contract rotation", () => {
       label: "Route plan",
       value: "Minimal burns, fast dock",
       tone: "speed"
+    });
+  });
+
+  it("summarizes high-pressure danger pay contracts for preflight", () => {
+    expect(
+      buildRoutePressureBriefing({
+        contractId: "asteroid-sprint",
+        cargoKind: "volatile",
+        cargoFragility: 1,
+        hazardSeverityMultiplier: 1.45,
+        goldSeconds: 24
+      })
+    ).toEqual({
+      label: "Route pressure",
+      value: "High risk / high payout",
+      tone: "hot"
+    });
+  });
+
+  it("summarizes fuel-tempo and fragile-care contracts for preflight", () => {
+    expect(
+      buildRoutePressureBriefing({
+        contractId: "last-drop-run",
+        cargoKind: "time-sensitive",
+        cargoFragility: 0.9,
+        goldSeconds: 27
+      })
+    ).toEqual({
+      label: "Route pressure",
+      value: "Fuel squeeze / late reward",
+      tone: "tempo"
+    });
+    expect(
+      buildRoutePressureBriefing({
+        cargoKind: "fragile",
+        cargoFragility: 0.8,
+        goldSeconds: 35
+      })
+    ).toEqual({
+      label: "Route pressure",
+      value: "Clean handling / soft dock",
+      tone: "care"
     });
   });
 

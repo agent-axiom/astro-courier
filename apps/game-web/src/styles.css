@@ -1383,6 +1383,59 @@ button {
   color: #bff7d8;
 }
 
+.route-pressure-briefing {
+  display: grid;
+  grid-template-columns: 18px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 9px 10px;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.route-pressure-briefing span,
+.route-pressure-briefing strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.route-pressure-briefing span {
+  color: rgba(255, 255, 255, 0.72);
+  text-transform: uppercase;
+}
+
+.route-pressure-briefing strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.route-pressure-hot {
+  border: 1px solid rgba(255, 111, 145, 0.18);
+  background: rgba(255, 111, 145, 0.16);
+  color: #ffadc1;
+}
+
+.route-pressure-tempo {
+  border: 1px solid rgba(124, 225, 255, 0.18);
+  background: rgba(124, 225, 255, 0.15);
+  color: #c6f6ff;
+}
+
+.route-pressure-care {
+  border: 1px solid rgba(255, 209, 102, 0.18);
+  background: rgba(255, 209, 102, 0.15);
+  color: #ffe19a;
+}
+
+.route-pressure-steady {
+  border: 1px solid rgba(142, 230, 184, 0.16);
+  background: rgba(142, 230, 184, 0.13);
+  color: #bff7d8;
+}
+
 .contract-modifiers {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

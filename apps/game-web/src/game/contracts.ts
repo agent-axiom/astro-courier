@@ -64,6 +64,12 @@ export type ContractRoutePlan = {
   tone: "danger" | "careful" | "speed" | "balanced";
 };
 
+export type RoutePressureBriefing = {
+  label: "Route pressure";
+  value: string;
+  tone: "hot" | "tempo" | "care" | "steady";
+};
+
 export type ContractModifierTone = "cargo" | "danger" | "fuel" | "precision" | "speed" | "style";
 
 export type ContractModifier = {
@@ -298,6 +304,39 @@ export function buildContractRoutePlan(input: ContractRoutePlanInput): ContractR
     label: "Route plan",
     value: "Clean line, spare fuel",
     tone: "balanced"
+  };
+}
+
+export function buildRoutePressureBriefing(input: ContractRoutePlanInput): RoutePressureBriefing {
+  const hazardLoad = input.hazardSeverityMultiplier ?? 1;
+  if (input.contractId === "asteroid-sprint" || input.contractId === "chain-relay" || (hazardLoad >= 1.25 && input.goldSeconds <= 25)) {
+    return {
+      label: "Route pressure",
+      value: "High risk / high payout",
+      tone: "hot"
+    };
+  }
+
+  if (input.contractId === "last-drop-run" || input.cargoKind === "time-sensitive") {
+    return {
+      label: "Route pressure",
+      value: "Fuel squeeze / late reward",
+      tone: "tempo"
+    };
+  }
+
+  if (input.cargoKind === "fragile" || input.cargoFragility < 0.9) {
+    return {
+      label: "Route pressure",
+      value: "Clean handling / soft dock",
+      tone: "care"
+    };
+  }
+
+  return {
+    label: "Route pressure",
+    value: "Balanced courier line",
+    tone: "steady"
   };
 }
 

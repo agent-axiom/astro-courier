@@ -49,7 +49,8 @@ import {
   buildDailyDispatch,
   buildDailyDispatchAction,
   buildDailyDispatchReset,
-  buildDailyDispatchStatus
+  buildDailyDispatchStatus,
+  buildRoutePressureBriefing
 } from "./game/contracts";
 import { buildRadioMessage } from "./game/radio";
 import { buildLiveStyleReward, buildStyleTargetCue } from "./game/style";
@@ -543,6 +544,13 @@ export function App() {
     hazardSeverityMultiplier: hud.hazardSeverityMultiplier,
     goldSeconds: hud.paceSecondsRemaining
   });
+  const routePressure = buildRoutePressureBriefing({
+    contractId: hud.contractId,
+    cargoKind: hud.cargoKind,
+    cargoFragility: hud.cargoFragility,
+    hazardSeverityMultiplier: hud.hazardSeverityMultiplier,
+    goldSeconds: hud.paceSecondsRemaining
+  });
   const contractModifiers = buildContractModifiers({
     contractId: hud.contractId,
     cargoKind: hud.cargoKind,
@@ -946,6 +954,22 @@ export function App() {
             <Route size={18} />
             <span>{routePlan.label}</span>
             <strong>{routePlan.value}</strong>
+          </div>
+          <div
+            className={`route-pressure-briefing route-pressure-${routePressure.tone}`}
+            aria-label={`${routePressure.label}: ${routePressure.value}`}
+          >
+            {routePressure.tone === "hot" ? (
+              <ShieldAlert size={18} />
+            ) : routePressure.tone === "tempo" ? (
+              <Gauge size={18} />
+            ) : routePressure.tone === "care" ? (
+              <PackageCheck size={18} />
+            ) : (
+              <Route size={18} />
+            )}
+            <span>{routePressure.label}</span>
+            <strong>{routePressure.value}</strong>
           </div>
           <div className="contract-modifiers" aria-label="Contract modifiers">
             {contractModifiers.map((modifier) => (
