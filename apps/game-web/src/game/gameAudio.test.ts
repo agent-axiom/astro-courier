@@ -120,6 +120,17 @@ describe("game audio controller", () => {
     expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.1, 3);
   });
 
+  it("plays a compact confirmation tone when cargo is loaded", () => {
+    const context = new FakeAudioContext();
+    const controller = createGameAudioController({ createContext: () => context });
+
+    controller.play(["cargo-loaded"]);
+
+    expect(context.oscillators).toHaveLength(1);
+    expect(context.oscillators[0]?.frequencyValue).toBe(660);
+    expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.08, 3);
+  });
+
   it("does not create an audio context for empty event batches", () => {
     const createContext = vi.fn(() => new FakeAudioContext());
     const controller = createGameAudioController({ createContext });

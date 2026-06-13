@@ -7,6 +7,7 @@ export type GameAudioEvent =
   | "ship-crash"
   | "style-hit"
   | "launch-burst"
+  | "cargo-loaded"
   | "pb-pressure"
   | "pb-lead"
   | "ghost-pressure"
@@ -80,6 +81,10 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
     } else if (styleMilestones.has(current.lastMilestone)) {
       events.push("style-hit");
     }
+  }
+
+  if (previous?.objectivePhase === "pickup" && current.objectivePhase === "delivery") {
+    events.push("cargo-loaded");
   }
 
   if (!isFuelCritical(previous) && isFuelCritical(current)) {

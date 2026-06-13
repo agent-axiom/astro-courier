@@ -32,6 +32,9 @@ export function hapticPatternForEvents(events: readonly GameAudioEvent[]): Hapti
   if (events.includes("cargo-damage")) {
     return [16, 24];
   }
+  if (events.includes("cargo-loaded")) {
+    return [10, 12];
+  }
   if (events.includes("pb-lead")) {
     return [16, 20, 16];
   }

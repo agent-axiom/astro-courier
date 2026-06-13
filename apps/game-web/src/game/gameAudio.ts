@@ -47,6 +47,7 @@ const eventTones: Record<GameAudioEvent, { frequency: number; duration: number; 
   "ship-crash": { frequency: 120, duration: 0.24, gain: 0.06 },
   "style-hit": { frequency: 720, duration: 0.08, gain: 0.045 },
   "launch-burst": { frequency: 820, duration: 0.12, gain: 0.05 },
+  "cargo-loaded": { frequency: 660, duration: 0.08, gain: 0.042 },
   "pb-pressure": { frequency: 760, duration: 0.1, gain: 0.045 },
   "pb-lead": { frequency: 960, duration: 0.12, gain: 0.05 },
   "ghost-pressure": { frequency: 880, duration: 0.1, gain: 0.045 },

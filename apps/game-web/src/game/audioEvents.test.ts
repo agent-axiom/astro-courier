@@ -31,6 +31,21 @@ describe("HUD audio events", () => {
     expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, lastMilestone: "Cargo Loaded" })).toEqual([]);
   });
 
+  it("emits a pickup confirmation event when cargo becomes the delivery objective", () => {
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, objectivePhase: "pickup" },
+        { ...baseSnapshot, objectivePhase: "delivery" }
+      )
+    ).toEqual(["cargo-loaded"]);
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, objectivePhase: "delivery" },
+        { ...baseSnapshot, objectivePhase: "delivery" }
+      )
+    ).toEqual([]);
+  });
+
   it("warns when fuel crosses into the critical band", () => {
     expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, fuel: 14 })).toEqual(["fuel-critical"]);
     expect(deriveHudAudioEvents({ ...baseSnapshot, fuel: 14 }, { ...baseSnapshot, fuel: 13 })).toEqual([]);
