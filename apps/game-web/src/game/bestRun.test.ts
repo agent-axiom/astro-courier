@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildBestRunChase,
   buildBestRunDelta,
+  buildContractMasteryBadge,
   buildContractBestRunLabel,
   buildLiveBestPace,
   buildRouteBoardProgress,
@@ -68,6 +69,28 @@ describe("contract option personal best copy", () => {
 
   it("formats saved contract personal bests compactly", () => {
     expect(buildContractBestRunLabel({ score: 3290, elapsedSeconds: 24.667, medal: "gold" })).toBe("PB 3290 / 24.7s");
+  });
+});
+
+describe("contract option mastery badge copy", () => {
+  it("marks unplayed contracts as open route slots", () => {
+    expect(buildContractMasteryBadge(undefined)).toEqual({ label: "Mastery", value: "Open", tone: "open" });
+  });
+
+  it("marks non-comet clears as cleared routes", () => {
+    expect(buildContractMasteryBadge({ score: 2400, elapsedSeconds: 31.4, medal: "gold" })).toEqual({
+      label: "Mastery",
+      value: "Cleared",
+      tone: "cleared"
+    });
+  });
+
+  it("marks comet clears as mastered routes", () => {
+    expect(buildContractMasteryBadge({ score: 3600, elapsedSeconds: 19.8, medal: "comet" })).toEqual({
+      label: "Mastery",
+      value: "Comet",
+      tone: "comet"
+    });
   });
 });
 

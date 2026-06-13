@@ -12,6 +12,12 @@ export type BestRunChase = {
   tone: "empty" | "target";
 };
 
+export type ContractMasteryBadge = {
+  label: "Mastery";
+  value: "Open" | "Cleared" | "Comet";
+  tone: "open" | "cleared" | "comet";
+};
+
 export type BestRunDeltaInput = {
   bestRun: BestRun | undefined;
   run: BestRun;
@@ -105,6 +111,18 @@ export function buildContractBestRunLabel(bestRun: BestRun | undefined): string 
   }
 
   return `PB ${bestRun.score} / ${bestRun.elapsedSeconds.toFixed(1)}s`;
+}
+
+export function buildContractMasteryBadge(bestRun: BestRun | undefined): ContractMasteryBadge {
+  if (!bestRun) {
+    return { label: "Mastery", value: "Open", tone: "open" };
+  }
+
+  if (bestRun.medal === "comet") {
+    return { label: "Mastery", value: "Comet", tone: "comet" };
+  }
+
+  return { label: "Mastery", value: "Cleared", tone: "cleared" };
 }
 
 export function buildRouteBoardProgress(

@@ -22,6 +22,7 @@ import { create } from "zustand";
 import {
   buildBestRunChase,
   buildBestRunDelta,
+  buildContractMasteryBadge,
   buildContractBestRunLabel,
   buildLiveBestPace,
   buildRouteBoardProgress,
@@ -589,6 +590,8 @@ export function App() {
           {hud.contractOptions.length > 1 ? (
             <div className="contract-selector" aria-label="Contract selection">
               {hud.contractOptions.map((contract) => {
+                const contractBestRun = bestRunsByContract[contract.id];
+                const contractMasteryBadge = buildContractMasteryBadge(contractBestRun);
                 const contractCargoRisk = buildCargoRiskReadout({
                   cargoKind: contract.cargoKind,
                   cargoFragility: contract.cargoFragility,
@@ -618,7 +621,10 @@ export function App() {
                     <div className="contract-option-traits">
                       <em>{contract.riskLabel}</em>
                       <em>{contract.rewardLabel}</em>
-                      <em className="contract-option-best">{buildContractBestRunLabel(bestRunsByContract[contract.id])}</em>
+                      <em className={`contract-option-mastery contract-option-mastery-${contractMasteryBadge.tone}`}>
+                        {contractMasteryBadge.value}
+                      </em>
+                      <em className="contract-option-best">{buildContractBestRunLabel(contractBestRun)}</em>
                       <em className={`contract-option-cargo contract-option-cargo-${contractCargoRisk.tone}`}>
                         {buildContractCargoTrait(contract)}
                       </em>

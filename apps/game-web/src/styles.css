@@ -1131,6 +1131,25 @@ button {
   color: #bff7d8;
 }
 
+.contract-option-mastery {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.contract-option-mastery-open {
+  background: rgba(160, 196, 255, 0.1);
+  color: #d8e6ff;
+}
+
+.contract-option-mastery-cleared {
+  background: rgba(142, 230, 184, 0.13);
+  color: #bff7d8;
+}
+
+.contract-option-mastery-comet {
+  background: rgba(255, 209, 102, 0.18);
+  color: #ffe19a;
+}
+
 .contract-option-cargo {
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
