@@ -3,6 +3,7 @@ import type { RunStatus } from "@astro-courier/shared";
 export type OverlayVisibilityInput = {
   status: RunStatus;
   preflightOpen: boolean;
+  resultDismissed?: boolean;
 };
 
 export type OverlayVisibility = {
@@ -15,6 +16,6 @@ export function getOverlayVisibility(input: OverlayVisibilityInput): OverlayVisi
 
   return {
     preflight: input.preflightOpen,
-    result: runFinished && !input.preflightOpen
+    result: runFinished && !input.preflightOpen && !input.resultDismissed
   };
 }

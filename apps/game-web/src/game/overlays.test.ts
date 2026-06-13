@@ -16,6 +16,13 @@ describe("overlay visibility", () => {
     });
   });
 
+  it("hides the result overlay immediately once retry dismisses the old result", () => {
+    expect(getOverlayVisibility({ status: "crashed", preflightOpen: false, resultDismissed: true })).toEqual({
+      preflight: false,
+      result: false
+    });
+  });
+
   it("keeps ordinary flight clear of blocking overlays", () => {
     expect(getOverlayVisibility({ status: "flying", preflightOpen: false })).toEqual({
       preflight: false,

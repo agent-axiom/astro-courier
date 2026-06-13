@@ -170,6 +170,7 @@ export function App() {
   const [audioMuted, setAudioMuted] = useState(false);
   const [screenFeedback, setScreenFeedback] = useState<ActiveScreenFeedback | undefined>(undefined);
   const [runFeed, setRunFeed] = useState<RunFeedEntry[]>([]);
+  const [resultDismissed, setResultDismissed] = useState(false);
   const [bestRun, setBestRun] = useState<BestRun | undefined>(() => {
     const storage = getBestRunStorage();
     return storage ? getBestRun(storage, initialHud.contractId) : undefined;
@@ -228,6 +229,12 @@ export function App() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (hud.status === "flying" || hud.status === "paused") {
+      setResultDismissed(false);
+    }
+  }, [hud.status]);
 
   useEffect(() => {
     const storage = getBestRunStorage();
@@ -350,7 +357,7 @@ export function App() {
   const fuelRatio = hud.maxFuel > 0 ? hud.fuel / hud.maxFuel : 0;
   const cargoIntegrity = Math.max(0, 1 - hud.cargoDamage);
   const runFinished = hud.status === "delivered" || hud.status === "crashed";
-  const overlays = getOverlayVisibility({ status: hud.status, preflightOpen });
+  const overlays = getOverlayVisibility({ status: hud.status, preflightOpen, resultDismissed });
   const touchFlightPad = buildTouchFlightPadPresentation({ status: hud.status, preflightOpen });
   const runIntensity = buildRunIntensity({
     status: hud.status,
@@ -639,6 +646,7 @@ export function App() {
   const restartActiveRun = () => {
     audioRef.current?.unlock();
     resetRunUiState();
+    setResultDismissed(true);
     setPreflightOpen(false);
     setPaused(false);
     shellRef.current?.restart(false);
