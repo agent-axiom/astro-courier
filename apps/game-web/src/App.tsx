@@ -21,6 +21,7 @@ import { formatBearingGuidance } from "./game/bearing";
 import { canUseImpulseControl } from "./game/hudControls";
 import { getNextContractId } from "./game/contracts";
 import { buildRadioMessage } from "./game/radio";
+import { buildLiveStyleReward } from "./game/style";
 
 type GameStore = {
   hud: HudState;
@@ -151,6 +152,10 @@ export function App() {
   const canBrake = canUseImpulseControl({ action: "brake", fuel: hud.fuel, paused, preflightOpen, status: hud.status });
   const nextContractId = getNextContractId(hud.contractOptions, hud.contractId);
   const canAdvanceContract = hud.status === "delivered" && nextContractId !== hud.contractId;
+  const liveStyleReward = buildLiveStyleReward({
+    styleBonus: hud.scoreBreakdown.styleBonus,
+    lastMilestone: hud.lastMilestone
+  });
 
   const launchContract = () => {
     setPreflightOpen(false);
@@ -283,6 +288,12 @@ export function App() {
             <strong>
               +{hud.quickPickupBonus} / {hud.quickPickupSecondsRemaining.toFixed(1)}s
             </strong>
+          </div>
+        ) : null}
+        {liveStyleReward ? (
+          <div className={`style-chip ${liveStyleReward.fresh ? "style-chip-hot" : ""}`} aria-label={liveStyleReward.label}>
+            <span>{liveStyleReward.label}</span>
+            <strong>{liveStyleReward.value}</strong>
           </div>
         ) : null}
         {hud.hazardDangerLevel ? (
