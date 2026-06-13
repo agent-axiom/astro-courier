@@ -319,6 +319,7 @@ export function App() {
     hazardDangerLevel: hud.hazardDangerLevel,
     hazardDistance: hud.hazardDistance,
     hazardSeverity: hud.hazardSeverity,
+    styleMultiplier: hud.styleMultiplier,
     trajectoryRiskLevel: hud.trajectoryRiskLevel,
     trajectoryRiskSeconds: hud.trajectoryRiskSeconds,
     cargoDamage: hud.cargoDamage

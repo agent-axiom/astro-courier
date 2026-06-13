@@ -35,6 +35,22 @@ describe("hazard pressure readout", () => {
     });
   });
 
+  it("previews the multiplied skim payout during an active style chain", () => {
+    expect(
+      buildHazardPressureReadout({
+        hazardDangerLevel: "near",
+        hazardDistance: 44,
+        hazardSeverity: 0.75,
+        styleMultiplier: 1.5,
+        cargoDamage: 0.01
+      })
+    ).toEqual({
+      label: "Risk pulse",
+      value: "Skim +345 / x1.50 / 44m",
+      tone: "opportunity"
+    });
+  });
+
   it("shows a predicted hazard intercept before current proximity", () => {
     expect(
       buildHazardPressureReadout({
