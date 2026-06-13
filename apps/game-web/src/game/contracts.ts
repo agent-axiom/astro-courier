@@ -143,7 +143,7 @@ export function buildDailyDispatchStatus(
   if (!bestRun || bestRun.medal === "none") {
     return {
       label: "Daily status",
-      value: "Open today",
+      value: "First daily clear",
       tone: "open"
     };
   }
@@ -153,6 +153,14 @@ export function buildDailyDispatchStatus(
       label: "Daily status",
       value: "Comet held",
       tone: "comet"
+    };
+  }
+
+  if (bestRun.medal === "bronze" || bestRun.medal === "silver") {
+    return {
+      label: "Daily status",
+      value: "Push daily gold",
+      tone: "chase"
     };
   }
 
