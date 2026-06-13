@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   boostBurstVisual,
+  boostSparkVisual,
   cameraFocus,
   cargoAuraVisual,
   ghostTrailSegmentVisual,
@@ -726,5 +727,40 @@ describe("boost burst visual", () => {
     expect(express?.radius).toBeGreaterThan(perfect?.radius ?? 0);
     expect(noBrake?.alpha).toBeGreaterThanOrEqual(eco?.alpha ?? 0);
     expect(damageControl?.alpha).toBeGreaterThanOrEqual(eco?.alpha ?? 0);
+  });
+});
+
+describe("boost spark visual", () => {
+  it("stays hidden outside active boost and launch milestones", () => {
+    expect(boostSparkVisual({ status: "paused", lastMilestone: "Boost Burn", tick: 12 })).toBeUndefined();
+    expect(boostSparkVisual({ status: "flying", lastMilestone: "Cargo Loaded", tick: 12 })).toBeUndefined();
+    expect(boostSparkVisual({ status: "flying", tick: 12 })).toBeUndefined();
+  });
+
+  it("renders boost burns as a short cyan afterburner fan", () => {
+    const visual = boostSparkVisual({ status: "flying", lastMilestone: "Boost Burn", tick: 4 });
+
+    expect(visual).toMatchObject({
+      color: 0x7ce1ff,
+      tone: "boost",
+      sparks: 3
+    });
+    expect(visual?.length).toBeGreaterThan(24);
+    expect(visual?.spread).toBeGreaterThan(0);
+    expect(visual?.alpha).toBeGreaterThan(0.25);
+  });
+
+  it("renders launch bursts as a hotter wider fan than ordinary boost burns", () => {
+    const boost = boostSparkVisual({ status: "flying", lastMilestone: "Boost Burn", tick: 4 });
+    const launch = boostSparkVisual({ status: "flying", lastMilestone: "Launch Burst", tick: 4 });
+
+    expect(launch).toMatchObject({
+      color: 0xffd166,
+      tone: "launch",
+      sparks: 5
+    });
+    expect(launch?.length).toBeGreaterThan(boost?.length ?? 0);
+    expect(launch?.spread).toBeGreaterThan(boost?.spread ?? 0);
+    expect(launch?.alpha).toBeGreaterThan(boost?.alpha ?? 0);
   });
 });

@@ -583,6 +583,22 @@ export type BoostBurstVisual = {
   width: number;
 };
 
+export type BoostSparkVisualInput = {
+  status: SimulationSnapshot["status"];
+  lastMilestone?: string;
+  tick: number;
+};
+
+export type BoostSparkVisual = {
+  color: number;
+  tone: "boost" | "launch";
+  sparks: number;
+  length: number;
+  spread: number;
+  alpha: number;
+  width: number;
+};
+
 export function shipTrailVisual(input: ShipTrailVisualInput): ShipTrailVisual | undefined {
   if (input.status !== "flying" || input.speed <= 8) {
     return undefined;
@@ -677,6 +693,39 @@ export function boostBurstVisual(input: BoostBurstVisualInput): BoostBurstVisual
     radius: round(22 + pulse * 22, 2),
     alpha: round(0.16 + (1 - pulse) * 0.32, 2),
     width: round(2 + pulse * 2.8, 2)
+  };
+}
+
+export function boostSparkVisual(input: BoostSparkVisualInput): BoostSparkVisual | undefined {
+  if (input.status !== "flying") {
+    return undefined;
+  }
+
+  const pulse = (Math.sin(input.tick * 0.42) + 1) / 2;
+  if (input.lastMilestone === "Launch Burst") {
+    return {
+      color: 0xffd166,
+      tone: "launch",
+      sparks: 5,
+      length: round(36 + pulse * 24, 2),
+      spread: round(0.55 + pulse * 0.24, 2),
+      alpha: round(0.42 + (1 - pulse) * 0.28, 2),
+      width: round(2.4 + pulse * 1.2, 2)
+    };
+  }
+
+  if (input.lastMilestone !== "Boost Burn") {
+    return undefined;
+  }
+
+  return {
+    color: 0x7ce1ff,
+    tone: "boost",
+    sparks: 3,
+    length: round(28 + pulse * 18, 2),
+    spread: round(0.34 + pulse * 0.18, 2),
+    alpha: round(0.3 + (1 - pulse) * 0.22, 2),
+    width: round(1.8 + pulse * 0.9, 2)
   };
 }
 
@@ -1217,6 +1266,7 @@ class PixiRenderer implements AstroPixiRenderer {
       styleChainSecondsRemaining: snapshot.styleChainSecondsRemaining
     });
     const boostBurst = boostBurstVisual({ status: snapshot.status, lastMilestone: snapshot.lastMilestone, tick: snapshot.tick });
+    const boostSpark = boostSparkVisual({ status: snapshot.status, lastMilestone: snapshot.lastMilestone, tick: snapshot.tick });
     const cargoAura = cargoAuraVisual({
       status: snapshot.status,
       cargoOnboard: snapshot.cargoOnboard,
@@ -1282,6 +1332,32 @@ class PixiRenderer implements AstroPixiRenderer {
         width: velocityVector.width,
         alpha: velocityVector.alpha
       });
+    }
+
+    if (boostSpark) {
+      const rear = {
+        x: center.x - Math.cos(angle) * 13,
+        y: center.y - Math.sin(angle) * 13
+      };
+      const sparkCenter = (boostSpark.sparks - 1) / 2;
+      for (let index = 0; index < boostSpark.sparks; index += 1) {
+        const sparkOffset = index - sparkCenter;
+        const sparkAngle = angle + Math.PI + sparkOffset * boostSpark.spread;
+        const lengthScale = 1 - Math.abs(sparkOffset) * 0.12;
+        const start = {
+          x: rear.x + Math.cos(angle + Math.PI / 2) * sparkOffset * 3,
+          y: rear.y + Math.sin(angle + Math.PI / 2) * sparkOffset * 3
+        };
+        const end = {
+          x: start.x + Math.cos(sparkAngle) * boostSpark.length * lengthScale,
+          y: start.y + Math.sin(sparkAngle) * boostSpark.length * lengthScale
+        };
+        this.ship.moveTo(start.x, start.y).lineTo(end.x, end.y).stroke({
+          color: boostSpark.color,
+          width: boostSpark.width,
+          alpha: boostSpark.alpha * lengthScale
+        });
+      }
     }
 
     this.ship.moveTo(nose.x, nose.y).lineTo(left.x, left.y).lineTo(right.x, right.y).closePath().fill(0xfff7d6);
