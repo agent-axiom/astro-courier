@@ -14,6 +14,7 @@ export type GameAudioEvent =
   | "ghost-pass"
   | "comet-armed"
   | "chain-critical"
+  | "chain-save"
   | "medal-drop"
   | "assist-burn"
   | "boost-burn"
@@ -115,6 +116,10 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
     events.push("chain-critical");
   }
 
+  if (hasStyleChainBeenSaved(previous, current)) {
+    events.push("chain-save");
+  }
+
   if (previous?.hazardDangerLevel !== "inside" && current.hazardDangerLevel === "inside") {
     events.push("hazard-contact");
   }
@@ -185,6 +190,17 @@ function hasStyleChainReachedCriticalWindow(previous: HudAudioSnapshot | undefin
   return (
     (previous.styleChainSecondsRemaining ?? 0) > criticalStyleChainSeconds &&
     (current.styleChainSecondsRemaining ?? 0) <= criticalStyleChainSeconds
+  );
+}
+
+function hasStyleChainBeenSaved(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {
+  const previousChainActive = (previous?.styleMultiplier ?? 1) > 1 && (previous?.styleChainSecondsRemaining ?? 0) > 0;
+  const currentChainActive = (current.styleMultiplier ?? 1) > 1 && (current.styleChainSecondsRemaining ?? 0) > 0;
+  return (
+    previousChainActive &&
+    currentChainActive &&
+    (previous?.styleChainSecondsRemaining ?? 0) <= criticalStyleChainSeconds &&
+    (current.styleChainSecondsRemaining ?? 0) > criticalStyleChainSeconds
   );
 }
 

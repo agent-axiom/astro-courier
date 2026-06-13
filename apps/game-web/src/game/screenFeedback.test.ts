@@ -99,6 +99,16 @@ describe("screen feedback", () => {
     });
   });
 
+  it("maps saved style chains to a visible combo restore pulse", () => {
+    expect(buildScreenFeedback(["chain-save"])).toEqual({
+      label: "Chain saved",
+      value: "Combo restored",
+      tone: "style",
+      intensity: "medium",
+      durationMs: 440
+    });
+  });
+
   it("maps medal window drops to medium warning feedback", () => {
     expect(buildScreenFeedback(["medal-drop"])).toEqual({
       tone: "warning",

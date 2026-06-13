@@ -187,4 +187,19 @@ describe("HUD audio events", () => {
       )
     ).toEqual([]);
   });
+
+  it("signals when a critical style chain is saved back into a live window", () => {
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, styleMultiplier: 1.35, styleChainSecondsRemaining: 0.85 },
+        { ...baseSnapshot, styleMultiplier: 1.35, styleChainSecondsRemaining: 4.6 }
+      )
+    ).toEqual(["chain-save"]);
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, styleMultiplier: 1.35, styleChainSecondsRemaining: 2.4 },
+        { ...baseSnapshot, styleMultiplier: 1.35, styleChainSecondsRemaining: 4.6 }
+      )
+    ).toEqual([]);
+  });
 });

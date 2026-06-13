@@ -53,6 +53,9 @@ export function hapticPatternForEvents(events: readonly GameAudioEvent[]): Hapti
   if (events.includes("chain-critical")) {
     return [10, 18, 10];
   }
+  if (events.includes("chain-save")) {
+    return [12, 14, 12];
+  }
   if (events.includes("launch-burst")) {
     return [18, 18];
   }

@@ -98,6 +98,17 @@ describe("game audio controller", () => {
     expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.09, 3);
   });
 
+  it("plays a bright restore tone when a style chain is saved", () => {
+    const context = new FakeAudioContext();
+    const controller = createGameAudioController({ createContext: () => context });
+
+    controller.play(["chain-save"]);
+
+    expect(context.oscillators).toHaveLength(1);
+    expect(context.oscillators[0]?.frequencyValue).toBe(900);
+    expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.11, 3);
+  });
+
   it("plays a pace warning tone when a medal window drops", () => {
     const context = new FakeAudioContext();
     const controller = createGameAudioController({ createContext: () => context });
