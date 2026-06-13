@@ -77,6 +77,14 @@ export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
     }
   }
 
+  if (input.lastMilestone === "Last Drop") {
+    return {
+      label: "Retry target",
+      value: "Repeat Last Drop",
+      tone: "opportunity"
+    };
+  }
+
   if (input.medal !== "gold" && input.medal !== "comet") {
     return {
       label: "Retry target",

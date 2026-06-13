@@ -151,6 +151,25 @@ describe("result retry target", () => {
     });
   });
 
+  it("turns last-drop finishes into a repeatable clutch target", () => {
+    expect(
+      buildRetryTarget({
+        status: "delivered",
+        medal: "silver",
+        lastMilestone: "Last Drop",
+        elapsedSeconds: 34.6,
+        goldSeconds: 30,
+        score: 2260,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Repeat Last Drop",
+      tone: "opportunity"
+    });
+  });
+
   it("nudges gold clears without express finish toward the express target", () => {
     expect(
       buildRetryTarget({
