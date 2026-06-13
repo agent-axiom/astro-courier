@@ -288,6 +288,21 @@ describe("live personal best pace copy", () => {
     });
   });
 
+  it("prioritizes a live score lead over the saved finish time", () => {
+    expect(
+      buildLiveBestPace({
+        bestRun: { score: 3290, elapsedSeconds: 24.7, medal: "gold" },
+        score: 3440,
+        elapsedSeconds: 18.2,
+        status: "flying"
+      })
+    ).toEqual({
+      label: "PB chase",
+      value: "+150 score lead",
+      tone: "ahead"
+    });
+  });
+
   it("shows overtime once the current run has passed the saved finish time", () => {
     expect(
       buildLiveBestPace({

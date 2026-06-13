@@ -32,12 +32,13 @@ export type BestRunDelta = {
 
 export type LiveBestPaceInput = {
   bestRun: BestRun | undefined;
+  score?: number;
   elapsedSeconds: number;
   status: RunStatus;
 };
 
 export type LiveBestPace = {
-  label: "PB pace";
+  label: "PB pace" | "PB chase";
   value: string;
   tone: "ahead" | "behind";
 };
@@ -243,6 +244,15 @@ export function buildBestRunDelta(input: BestRunDeltaInput): BestRunDelta | unde
 export function buildLiveBestPace(input: LiveBestPaceInput): LiveBestPace | undefined {
   if (!input.bestRun || input.status === "delivered" || input.status === "crashed") {
     return undefined;
+  }
+
+  const scoreDelta = (input.score ?? 0) - input.bestRun.score;
+  if (scoreDelta > 0) {
+    return {
+      label: "PB chase",
+      value: `+${Math.round(scoreDelta)} score lead`,
+      tone: "ahead"
+    };
   }
 
   const secondsDelta = input.bestRun.elapsedSeconds - input.elapsedSeconds;

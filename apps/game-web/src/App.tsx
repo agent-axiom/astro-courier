@@ -245,6 +245,7 @@ export function App() {
   });
   const liveBestPace = buildLiveBestPace({
     bestRun,
+    score: hud.score,
     elapsedSeconds: hud.elapsedSeconds,
     status: hud.status
   });
