@@ -69,7 +69,7 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
   } satisfies PreflightBonusObjective;
   const cometFinish = {
     label: "Comet finish",
-    value: `+${COMET_FINISH_STYLE_BONUS} / perfect comet`
+    value: `+${COMET_FINISH_STYLE_BONUS} / 75% fuel + perfect dock`
   } satisfies PreflightBonusObjective;
   const launchBurst = {
     label: "Launch burst",
