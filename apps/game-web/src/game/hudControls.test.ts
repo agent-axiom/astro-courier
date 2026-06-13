@@ -7,6 +7,7 @@ describe("HUD impulse controls", () => {
       [{ action: "boost", fuel: 100, paused: false, preflightOpen: false, status: "flying" }, true],
       [{ action: "brake", fuel: 1, paused: false, preflightOpen: false, status: "flying" }, true],
       [{ action: "boost", fuel: 2, paused: false, preflightOpen: false, status: "flying" }, false],
+      [{ action: "boost", fuel: 100, boostCooldownSeconds: 0.4, paused: false, preflightOpen: false, status: "flying" }, false],
       [{ action: "brake", fuel: 0, paused: false, preflightOpen: false, status: "flying" }, false],
       [{ action: "brake", fuel: 100, paused: true, preflightOpen: false, status: "paused" }, false],
       [{ action: "brake", fuel: 100, paused: false, preflightOpen: true, status: "flying" }, false],

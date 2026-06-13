@@ -137,6 +137,7 @@ export type ShipState = {
   targetRotation: number;
   fuel: number;
   maxFuel: number;
+  boostCooldownSeconds: number;
   thrustPower: number;
   rotationPower: number;
   cargoDamage: number;
@@ -197,6 +198,7 @@ const GRAVITY_SCALE = 70;
 const GRAVITY_SOFTENING = 16;
 const FUEL_BURN_PER_SECOND = 8;
 const BRAKE_BURN_PER_SECOND = 3;
+export const BOOST_COOLDOWN_SECONDS = 1.15;
 const HAZARD_SKIM_OUTER_RADIUS = 1.35;
 export const HAZARD_SKIM_BASE_BONUS = 140;
 export const HAZARD_SKIM_SEVERITY_BONUS = 120;
@@ -287,6 +289,7 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
       targetRotation: shipRotation,
       fuel: system.ship.fuel,
       maxFuel: system.ship.fuel,
+      boostCooldownSeconds: 0,
       thrustPower: system.ship.thrustPower,
       rotationPower: system.ship.rotationPower,
       cargoDamage: 0
@@ -299,6 +302,7 @@ export function stepWorld(world: SimulationWorld, fixedDt: number, commands: Pla
     return world;
   }
   world.lastMilestone = undefined;
+  tickBoostCooldown(world, fixedDt);
 
   let thrust = 0;
   let brake = 0;
@@ -310,10 +314,11 @@ export function stepWorld(world: SimulationWorld, fixedDt: number, commands: Pla
       thrust = Math.max(thrust, clamp(command.amount, 0, 1));
     } else if (command.type === "BRAKE") {
       brake = Math.max(brake, clamp(command.amount, 0, 1));
-    } else if (command.type === "BOOST" && world.ship.fuel > 2) {
+    } else if (command.type === "BOOST" && world.ship.fuel > 2 && world.ship.boostCooldownSeconds <= 0) {
       thrust = Math.max(thrust, 1);
       world.ship.fuel -= 2;
       world.fuelUsed += 2;
+      world.ship.boostCooldownSeconds = BOOST_COOLDOWN_SECONDS;
       world.lastMilestone = "Boost Burn";
     } else if (command.type === "PAUSE") {
       world.status = "paused";
@@ -412,6 +417,7 @@ export function snapshotWorld(world: SimulationWorld): SimulationSnapshot {
       rotation: world.ship.rotation,
       fuel: world.ship.fuel,
       maxFuel: world.ship.maxFuel,
+      boostCooldownSeconds: round(world.ship.boostCooldownSeconds, 3),
       cargoDamage: world.ship.cargoDamage
     },
     gravitySources: world.gravitySources.map((source) => ({
@@ -533,6 +539,15 @@ function applyGravity(world: SimulationWorld, fixedDt: number): void {
       (source.gravityMass / (distance * distance + source.radius * source.radius + GRAVITY_SOFTENING)) * GRAVITY_SCALE;
     world.ship.velocity = add(world.ship.velocity, scale(direction, strength * fixedDt));
   }
+}
+
+function tickBoostCooldown(world: SimulationWorld, fixedDt: number): void {
+  if (world.ship.boostCooldownSeconds <= 0) {
+    world.ship.boostCooldownSeconds = 0;
+    return;
+  }
+
+  world.ship.boostCooldownSeconds = round(Math.max(0, world.ship.boostCooldownSeconds - fixedDt), 6);
 }
 
 function applyThrust(world: SimulationWorld, fixedDt: number, amount: number): void {

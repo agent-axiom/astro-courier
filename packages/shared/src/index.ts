@@ -98,6 +98,7 @@ export type SimulationSnapshot = {
     rotation: number;
     fuel: number;
     maxFuel: number;
+    boostCooldownSeconds: number;
     cargoDamage: number;
   };
   gravitySources: Array<{

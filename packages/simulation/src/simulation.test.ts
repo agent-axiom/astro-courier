@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createCommandBuffer, checksumReplay } from "@astro-courier/engine";
 import {
   calculateHazardSkimStyleBonus,
+  BOOST_COOLDOWN_SECONDS,
   ECO_DRIFT_FUEL_USED_LIMIT,
   ECO_DRIFT_STYLE_BONUS,
   QUICK_PICKUP_STYLE_BONUS,
@@ -152,6 +153,31 @@ describe("deterministic Astro Courier simulation", () => {
     expect(world.objectivePhase).toBe("pickup");
     expect(world.cargoOnboard).toBe(false);
     expect(world.lastMilestone).toBe("Pickup Required");
+  });
+
+  it("gates boost burns behind a short cooldown", () => {
+    const world = createWorldFromSystem(starterSystem, "boost-seed");
+
+    stepWorld(world, 1 / 60, [{ type: "BOOST" }]);
+    const fuelAfterFirstBoost = world.ship.fuel;
+
+    expect(world.lastMilestone).toBe("Boost Burn");
+    expect(world.ship.boostCooldownSeconds).toBeCloseTo(BOOST_COOLDOWN_SECONDS, 3);
+    expect(snapshotWorld(world).ship.boostCooldownSeconds).toBeCloseTo(BOOST_COOLDOWN_SECONDS, 3);
+
+    stepWorld(world, 1 / 60, [{ type: "BOOST" }]);
+
+    expect(world.lastMilestone).toBeUndefined();
+    expect(world.ship.fuel).toBe(fuelAfterFirstBoost);
+
+    for (let tick = 0; tick < Math.ceil(BOOST_COOLDOWN_SECONDS / (1 / 60)); tick += 1) {
+      stepWorld(world, 1 / 60, []);
+    }
+
+    expect(world.ship.boostCooldownSeconds).toBe(0);
+    stepWorld(world, 1 / 60, [{ type: "BOOST" }]);
+    expect(world.lastMilestone).toBe("Boost Burn");
+    expect(world.ship.fuel).toBeLessThan(fuelAfterFirstBoost);
   });
 
   it("can start worlds and replays from a selected contract", () => {

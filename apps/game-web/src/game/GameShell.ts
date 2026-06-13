@@ -46,6 +46,7 @@ export type HudState = {
   score: number;
   fuel: number;
   maxFuel: number;
+  boostCooldownSeconds: number;
   cargoDamage: number;
   cargoOnboard: boolean;
   speed: number;
@@ -273,6 +274,7 @@ export class GameShell {
       score: result.score,
       fuel: this.world.ship.fuel,
       maxFuel: this.world.ship.maxFuel,
+      boostCooldownSeconds: snapshot.ship.boostCooldownSeconds,
       cargoDamage: result.cargoDamage,
       cargoOnboard: this.world.cargoOnboard,
       speed: Math.hypot(this.world.ship.velocity.x, this.world.ship.velocity.y),

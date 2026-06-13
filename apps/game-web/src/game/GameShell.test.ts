@@ -321,6 +321,7 @@ describe("GameShell lifecycle", () => {
     frame(1167);
 
     expect(onHud.mock.calls.at(-1)?.[0].lastMilestone).toBe("Boost Burn");
+    expect(onHud.mock.calls.at(-1)?.[0].boostCooldownSeconds).toBeGreaterThan(0);
   });
 
   it("executes queued commands once on the next simulation frame", async () => {

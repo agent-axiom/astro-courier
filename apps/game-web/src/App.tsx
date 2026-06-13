@@ -78,6 +78,7 @@ const initialHud: HudState = {
   score: 0,
   fuel: 100,
   maxFuel: 100,
+  boostCooldownSeconds: 0,
   cargoDamage: 0,
   cargoOnboard: false,
   speed: 0,
@@ -207,8 +208,16 @@ export function App() {
   const dockingSpeedReadout = buildDockingSpeedReadout({ speed: hud.speed, allowedSpeed: hud.targetAllowedSpeed });
   const approachRewardReadout = buildApproachRewardReadout({ approachStreakSeconds: hud.approachStreakSeconds });
   const primaryActionLabel = preflightOpen ? "Launch" : paused ? "Resume" : "Pause";
-  const canBoost = canUseImpulseControl({ action: "boost", fuel: hud.fuel, paused, preflightOpen, status: hud.status });
+  const canBoost = canUseImpulseControl({
+    action: "boost",
+    fuel: hud.fuel,
+    boostCooldownSeconds: hud.boostCooldownSeconds,
+    paused,
+    preflightOpen,
+    status: hud.status
+  });
   const canBrake = canUseImpulseControl({ action: "brake", fuel: hud.fuel, paused, preflightOpen, status: hud.status });
+  const boostActionLabel = hud.boostCooldownSeconds > 0 ? `Boost ${hud.boostCooldownSeconds.toFixed(1)}s` : "Boost";
   const objectiveDirective = buildObjectiveDirective(hud);
   const objectiveInterceptReadout = buildObjectiveInterceptReadout({
     status: hud.status,
@@ -363,8 +372,8 @@ export function App() {
           <button
             type="button"
             className="icon-button"
-            aria-label="Boost"
-            title="Boost"
+            aria-label={boostActionLabel}
+            title={boostActionLabel}
             disabled={!canBoost}
             onClick={() => {
               shellRef.current?.queueCommand({ type: "BOOST" });
