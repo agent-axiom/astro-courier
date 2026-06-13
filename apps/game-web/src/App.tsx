@@ -254,7 +254,11 @@ export function App() {
   });
   const styleChipStyle = { "--style-chain-progress": liveStyleReward?.chainProgress ?? 0 } as CSSProperties;
   const preflightMasteryTargets = buildPreflightMasteryTargets({ goldSeconds: hud.paceSecondsRemaining });
-  const preflightBonusObjectives = buildPreflightBonusObjectives({ quickPickupBonus: hud.quickPickupBonus });
+  const preflightBonusObjectives = buildPreflightBonusObjectives({
+    contractId: hud.contractId,
+    quickPickupBonus: hud.quickPickupBonus,
+    hazardSeverityMultiplier: hud.hazardSeverityMultiplier
+  });
   const cargoManifest = buildCargoManifest({ cargoName: hud.cargoName, cargoOnboard: hud.cargoOnboard });
   const resultStats = buildResultStats({ score: hud.score, elapsedSeconds: hud.elapsedSeconds, cargoIntegrity });
   const resultHighlight = buildResultHighlight(hud.scoreBreakdown);
@@ -657,8 +661,10 @@ export function App() {
               <span key={objective.label}>
                 {objective.label === "Rush pickup" ? (
                   <TimerReset size={17} />
-                ) : objective.label === "Clean skim" ? (
+                ) : objective.label === "Clean skim" || objective.label === "Needle thread" || objective.label === "Danger pay" ? (
                   <ShieldAlert size={17} />
+                ) : objective.label === "Chain finish" ? (
+                  <Star size={17} />
                 ) : (
                   <Flag size={17} />
                 )}

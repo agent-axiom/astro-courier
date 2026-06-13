@@ -25,4 +25,32 @@ describe("preflight bonus objectives", () => {
       { label: "Perfect dock", value: "+220" }
     ]);
   });
+
+  it("surfaces needle threading and danger pay for high-hazard contracts", () => {
+    expect(
+      buildPreflightBonusObjectives({
+        contractId: "asteroid-sprint",
+        quickPickupBonus: 180,
+        hazardSeverityMultiplier: 1.45
+      })
+    ).toEqual([
+      { label: "Rush pickup", value: "+180" },
+      { label: "Needle thread", value: "42+ speed" },
+      { label: "Danger pay", value: "+180" }
+    ]);
+  });
+
+  it("surfaces chain finish as the gravity route bonus target", () => {
+    expect(
+      buildPreflightBonusObjectives({
+        contractId: "gravity-slingshot",
+        quickPickupBonus: 180,
+        hazardSeverityMultiplier: 1.2
+      })
+    ).toEqual([
+      { label: "Rush pickup", value: "+180" },
+      { label: "Chain finish", value: "hold combo" },
+      { label: "Perfect dock", value: "+220" }
+    ]);
+  });
 });
