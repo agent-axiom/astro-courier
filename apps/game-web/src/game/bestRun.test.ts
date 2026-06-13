@@ -5,6 +5,7 @@ import {
   buildContractMasteryBadge,
   buildContractBestRunLabel,
   buildLiveBestPace,
+  buildRouteBoardRecommendationBadge,
   buildRouteBoardProgress,
   buildRouteBoardSelectionAction,
   buildRouteBoardTarget,
@@ -202,6 +203,34 @@ describe("route board target selection action", () => {
 
   it("stays passive after the full route board is mastered", () => {
     expect(buildRouteBoardSelectionAction({ label: "Board status", value: "Board mastered", tone: "complete" }, "gravity-slingshot")).toBeUndefined();
+  });
+});
+
+describe("route board recommendation badge", () => {
+  it("labels clear targets as clear badges", () => {
+    expect(
+      buildRouteBoardRecommendationBadge({
+        label: "Next clear",
+        value: "Clear Return Leg",
+        tone: "clear",
+        contractId: "return-leg"
+      })
+    ).toBe("Clear");
+  });
+
+  it("labels comet targets as comet badges", () => {
+    expect(
+      buildRouteBoardRecommendationBadge({
+        label: "Comet chase",
+        value: "Comet Asteroid Sprint",
+        tone: "comet",
+        contractId: "asteroid-sprint"
+      })
+    ).toBe("Comet");
+  });
+
+  it("stays hidden once the route board is complete", () => {
+    expect(buildRouteBoardRecommendationBadge({ label: "Board status", value: "Board mastered", tone: "complete" })).toBeUndefined();
   });
 });
 

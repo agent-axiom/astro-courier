@@ -69,6 +69,8 @@ export type RouteBoardSelectionAction = {
   contractId: string;
 };
 
+export type RouteBoardRecommendationBadge = "Clear" | "Comet";
+
 type BestRunStorage = Pick<Storage, "getItem" | "setItem">;
 
 export function getBestRun(storage: BestRunStorage, contractKey: string): BestRun | undefined {
@@ -203,6 +205,16 @@ export function buildRouteBoardSelectionAction(
   }
 
   return { label: "Select target", contractId: routeBoardTarget.contractId };
+}
+
+export function buildRouteBoardRecommendationBadge(routeBoardTarget: RouteBoardTarget): RouteBoardRecommendationBadge | undefined {
+  if (routeBoardTarget.tone === "clear") {
+    return "Clear";
+  }
+  if (routeBoardTarget.tone === "comet") {
+    return "Comet";
+  }
+  return undefined;
 }
 
 export function buildBestRunDelta(input: BestRunDeltaInput): BestRunDelta | undefined {

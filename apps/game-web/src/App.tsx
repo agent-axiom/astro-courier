@@ -25,6 +25,7 @@ import {
   buildContractMasteryBadge,
   buildContractBestRunLabel,
   buildLiveBestPace,
+  buildRouteBoardRecommendationBadge,
   buildRouteBoardProgress,
   buildRouteBoardSelectionAction,
   buildRouteBoardTarget,
@@ -779,6 +780,7 @@ export function App() {
                 const contractDangerPayTrait = buildContractDangerPayTrait({
                   hazardSeverityMultiplier: contract.hazardSeverityMultiplier
                 });
+                const contractRecommendationBadge = contractRecommended ? buildRouteBoardRecommendationBadge(routeBoardTarget) : undefined;
                 return (
                   <button
                     key={contract.id}
@@ -801,7 +803,9 @@ export function App() {
                       <em className={`contract-option-mastery contract-option-mastery-${contractMasteryBadge.tone}`}>
                         {contractMasteryBadge.value}
                       </em>
-                      {contractRecommended ? <em className={`contract-option-next contract-option-next-${routeBoardTarget.tone}`}>Next</em> : null}
+                      {contractRecommendationBadge ? (
+                        <em className={`contract-option-next contract-option-next-${routeBoardTarget.tone}`}>{contractRecommendationBadge}</em>
+                      ) : null}
                       <em className="contract-option-best">{buildContractBestRunLabel(contractBestRun)}</em>
                       <em className={`contract-option-cargo contract-option-cargo-${contractCargoRisk.tone}`}>
                         {buildContractCargoTrait(contract)}
