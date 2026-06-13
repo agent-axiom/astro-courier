@@ -1,4 +1,10 @@
-import { HAZARD_THREAD_SPEED_THRESHOLD, PERFECT_APPROACH_STREAK_SECONDS, PERFECT_APPROACH_STYLE_BONUS } from "@astro-courier/simulation";
+import {
+  HAZARD_THREAD_SPEED_THRESHOLD,
+  LAST_DROP_FUEL_RATIO,
+  LAST_DROP_STYLE_BONUS,
+  PERFECT_APPROACH_STREAK_SECONDS,
+  PERFECT_APPROACH_STYLE_BONUS
+} from "@astro-courier/simulation";
 import type { HudState } from "./GameShell";
 import { COMET_RESERVE_MIN_RATIO, COMET_RESERVE_WARNING_RATIO } from "./comet";
 import { STYLE_CHAIN_URGENT_SECONDS } from "./style";
@@ -116,6 +122,10 @@ export function buildRadioMessage(hud: HudState): string {
     return `Gravity pocket live. Build ${hud.gravitySlingSpeedThreshold ?? 54}+ speed for a sling bonus.`;
   }
 
+  if (isLastDropWindowOpen(hud)) {
+    return `Last drop window. Dock clean for +${LAST_DROP_STYLE_BONUS} style.`;
+  }
+
   if (hud.maxFuel > 0 && hud.fuel / hud.maxFuel <= 0.15) {
     return "Fuel critical. Coast clean and save the last burn for docking.";
   }
@@ -189,4 +199,15 @@ function buildUrgentStyleChainMessage(hud: HudState): string | undefined {
 
 function formatTrajectoryEta(seconds?: number): string {
   return seconds === undefined ? " soon" : ` in ${seconds.toFixed(1)}s`;
+}
+
+function isLastDropWindowOpen(hud: HudState): boolean {
+  return (
+    hud.objectivePhase === "delivery" &&
+    hud.cargoOnboard &&
+    hud.landingStatus === "ready" &&
+    hud.cargoDamage <= 0.02 &&
+    hud.maxFuel > 0 &&
+    hud.fuel / hud.maxFuel <= LAST_DROP_FUEL_RATIO
+  );
 }

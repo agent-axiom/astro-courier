@@ -208,6 +208,34 @@ describe("radio feedback copy", () => {
     expect(buildRadioMessage({ ...baseHud, fuel: 10, maxFuel: 100, landingStatus: "approach" })).toContain("Fuel critical");
   });
 
+  it("surfaces a ready last-drop dock before generic critical fuel", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        landingStatus: "ready",
+        fuel: 4,
+        maxFuel: 100,
+        cargoDamage: 0
+      })
+    ).toContain("Last drop window");
+  });
+
+  it("keeps low last-drop fuel as a warning until the dock is ready", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        landingStatus: "misaligned",
+        fuel: 4,
+        maxFuel: 100,
+        cargoDamage: 0
+      })
+    ).toContain("Fuel critical");
+  });
+
   it("warns about tight comet reserve before generic delivery guidance", () => {
     expect(
       buildRadioMessage({
