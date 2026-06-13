@@ -33,6 +33,48 @@ describe("result coach", () => {
     });
   });
 
+  it("calls out hard landing near-misses at the delivery pad", () => {
+    expect(
+      buildResultCoach({
+        status: "crashed",
+        objectivePhase: "delivery",
+        targetDistance: 42,
+        crashReason: "Hard Landing",
+        medal: "none",
+        grade: "F",
+        cargoDamage: 1,
+        fuel: 40,
+        maxFuel: 100,
+        scoreBreakdown: baseBreakdown
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Near miss: feather final brake",
+      tone: "danger"
+    });
+  });
+
+  it("does not treat pickup crashes as delivery near-misses", () => {
+    expect(
+      buildResultCoach({
+        status: "crashed",
+        objectivePhase: "pickup",
+        targetDistance: 42,
+        crashReason: "Hard Landing",
+        medal: "none",
+        grade: "F",
+        cargoDamage: 1,
+        fuel: 40,
+        maxFuel: 100,
+        scoreBreakdown: baseBreakdown
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Brake earlier before pad contact",
+      tone: "danger"
+    });
+  });
+
   it("coaches gravity route hull collisions toward the sling ring", () => {
     expect(
       buildResultCoach({

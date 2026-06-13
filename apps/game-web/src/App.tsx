@@ -325,6 +325,7 @@ export function App() {
   });
   const resultCoach = buildResultCoach({
     status: hud.status,
+    objectivePhase: hud.objectivePhase,
     contractId: hud.contractId,
     lastMilestone: hud.lastMilestone,
     crashReason: hud.crashReason,
@@ -333,6 +334,7 @@ export function App() {
     cargoDamage: hud.cargoDamage,
     fuel: hud.fuel,
     maxFuel: hud.maxFuel,
+    targetDistance: hud.targetDistance,
     scoreBreakdown: hud.scoreBreakdown
   });
   const resultBoardPrompt =

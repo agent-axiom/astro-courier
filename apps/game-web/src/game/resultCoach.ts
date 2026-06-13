@@ -1,7 +1,8 @@
-import type { CrashReason, RunGrade, RunMedal, RunStatus, ScoreBreakdown } from "@astro-courier/shared";
+import type { CrashReason, ObjectivePhase, RunGrade, RunMedal, RunStatus, ScoreBreakdown } from "@astro-courier/shared";
 
 export type ResultCoachInput = {
   status: RunStatus;
+  objectivePhase?: ObjectivePhase;
   contractId?: string;
   lastMilestone?: string;
   crashReason?: CrashReason;
@@ -10,6 +11,7 @@ export type ResultCoachInput = {
   cargoDamage: number;
   fuel: number;
   maxFuel: number;
+  targetDistance?: number;
   scoreBreakdown: ScoreBreakdown;
 };
 
@@ -53,6 +55,14 @@ export type ResultBoardAction = {
 export function buildResultCoach(input: ResultCoachInput): ResultCoach {
   if (input.status === "crashed") {
     const gravityHullCollision = input.contractId === "gravity-slingshot" && input.crashReason === "Hull Collision";
+    if (isDeliveryNearMiss(input)) {
+      return {
+        label: "Next run",
+        value: "Near miss: feather final brake",
+        tone: "danger"
+      };
+    }
+
     return {
       label: "Next run",
       value:
@@ -150,6 +160,10 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
     value: "Tighten landing angle",
     tone: "opportunity"
   };
+}
+
+function isDeliveryNearMiss(input: ResultCoachInput): boolean {
+  return input.objectivePhase === "delivery" && input.targetDistance !== undefined && input.targetDistance <= 60;
 }
 
 export function buildResultBoardPrompt(input: ResultBoardPromptInput): ResultBoardPrompt {
