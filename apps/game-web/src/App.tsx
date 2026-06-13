@@ -28,6 +28,7 @@ import { buildObjectiveDirective } from "./game/objective";
 import { buildPreflightMasteryTargets } from "./game/mastery";
 import { buildDockingSpeedReadout } from "./game/docking";
 import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./game/cargo";
+import { buildResultStats } from "./game/resultStats";
 
 type GameStore = {
   hud: HudState;
@@ -169,6 +170,7 @@ export function App() {
   });
   const preflightMasteryTargets = buildPreflightMasteryTargets({ goldSeconds: hud.paceSecondsRemaining });
   const cargoManifest = buildCargoManifest({ cargoName: hud.cargoName, cargoOnboard: hud.cargoOnboard });
+  const resultStats = buildResultStats({ score: hud.score, elapsedSeconds: hud.elapsedSeconds, cargoIntegrity });
   const cargoRiskReadout = buildCargoRiskReadout({
     cargoKind: hud.cargoKind,
     cargoFragility: hud.cargoFragility,
@@ -472,9 +474,12 @@ export function App() {
             </div>
           ) : null}
           <div className="result-stats">
-            <span>{hud.score}</span>
-            <span>{hud.elapsedSeconds.toFixed(1)}s</span>
-            <span>{Math.round(cargoIntegrity * 100)}%</span>
+            {resultStats.map((stat) => (
+              <span key={stat.label}>
+                <small>{stat.label}</small>
+                <strong>{stat.value}</strong>
+              </span>
+            ))}
           </div>
           <div className="score-breakdown" aria-label="Score breakdown">
             {scoreBreakdownRows(hud).map((row) => (
