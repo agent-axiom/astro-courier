@@ -624,6 +624,7 @@ describe("deterministic Astro Courier simulation", () => {
       cargoBonus: 500,
       landingBonus: 300,
       styleBonus: 180,
+      dangerBonus: 0,
       incidentPenalty: 0,
       total: result.score
     });
@@ -635,7 +636,46 @@ describe("deterministic Astro Courier simulation", () => {
           result.scoreBreakdown.fuelBonus +
           result.scoreBreakdown.cargoBonus +
           result.scoreBreakdown.landingBonus +
-          result.scoreBreakdown.styleBonus -
+          result.scoreBreakdown.styleBonus +
+          result.scoreBreakdown.dangerBonus -
+          result.scoreBreakdown.incidentPenalty
+      )
+    ).toBe(result.score);
+  });
+
+  it("awards danger pay for delivered contracts with elevated hazard load", () => {
+    const systemWithDangerPay: SystemContent = {
+      ...starterSystem,
+      contracts: [
+        {
+          ...starterSystem.contracts[0],
+          hazardSeverityMultiplier: 1.5
+        }
+      ]
+    };
+    const world = createWorldFromSystem(systemWithDangerPay, "danger-pay-seed");
+    world.ship.position = { x: 0, y: -74 };
+    world.ship.velocity = { x: 1, y: 3 };
+    world.ship.rotation = -Math.PI / 2;
+    stepWorld(world, 1 / 60, []);
+    world.ship.position = { x: 260, y: -80 };
+    world.ship.velocity = { x: 4, y: 1 };
+    world.ship.rotation = 0;
+    stepWorld(world, 1 / 60, []);
+
+    const result = summarizeRun(world);
+
+    expect(result.status).toBe("delivered");
+    expect(result.scoreBreakdown.dangerBonus).toBe(200);
+    expect(
+      Math.round(
+        result.scoreBreakdown.base +
+          result.scoreBreakdown.paceBonus +
+          result.scoreBreakdown.fuelBonus +
+          result.scoreBreakdown.cargoBonus +
+          result.scoreBreakdown.landingBonus +
+          result.scoreBreakdown.styleBonus +
+          result.scoreBreakdown.dangerBonus -
           result.scoreBreakdown.incidentPenalty
       )
     ).toBe(result.score);

@@ -48,6 +48,7 @@ describe("engine replay utilities", () => {
           cargoBonus: 0,
           landingBonus: 120,
           styleBonus: 0,
+          dangerBonus: 0,
           incidentPenalty: 0,
           total: 1400
         }

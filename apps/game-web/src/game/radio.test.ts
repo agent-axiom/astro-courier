@@ -46,6 +46,7 @@ const baseHud: HudState = {
     cargoBonus: 0,
     landingBonus: 0,
     styleBonus: 0,
+    dangerBonus: 0,
     incidentPenalty: 0,
     total: 0
   },

@@ -37,6 +37,7 @@ export type ScoreBreakdown = {
   cargoBonus: number;
   landingBonus: number;
   styleBonus: number;
+  dangerBonus: number;
   incidentPenalty: number;
   total: number;
 };

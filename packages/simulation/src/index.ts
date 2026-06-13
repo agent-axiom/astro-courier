@@ -717,6 +717,7 @@ function buildScoreBreakdown(world: SimulationWorld): ScoreBreakdown {
       cargoBonus: 0,
       landingBonus: 0,
       styleBonus,
+      dangerBonus: 0,
       incidentPenalty,
       total
     };
@@ -728,8 +729,12 @@ function buildScoreBreakdown(world: SimulationWorld): ScoreBreakdown {
   const cargoBonus = round((1 - world.ship.cargoDamage) * 500, 3);
   const landingBonus = world.landingRating === "Perfect Landing" ? 300 : 120;
   const styleBonus = world.styleBonus;
+  const dangerBonus = dangerPayBonus(world);
   const incidentPenalty = 0;
-  const total = Math.max(0, Math.round(base + paceBonus + fuelBonus + cargoBonus + landingBonus + styleBonus - incidentPenalty));
+  const total = Math.max(
+    0,
+    Math.round(base + paceBonus + fuelBonus + cargoBonus + landingBonus + styleBonus + dangerBonus - incidentPenalty)
+  );
 
   return {
     base,
@@ -738,6 +743,7 @@ function buildScoreBreakdown(world: SimulationWorld): ScoreBreakdown {
     cargoBonus,
     landingBonus,
     styleBonus,
+    dangerBonus,
     incidentPenalty,
     total
   };
@@ -751,9 +757,15 @@ function createEmptyScoreBreakdown(): ScoreBreakdown {
     cargoBonus: 0,
     landingBonus: 0,
     styleBonus: 0,
+    dangerBonus: 0,
     incidentPenalty: 0,
     total: 0
   };
+}
+
+function dangerPayBonus(world: SimulationWorld): number {
+  const multiplier = world.activeContract.hazardSeverityMultiplier ?? 1;
+  return round(Math.max(0, multiplier - 1) * 400, 3);
 }
 
 function medalFor(world: SimulationWorld): RunMedal {
