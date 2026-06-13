@@ -1573,6 +1573,7 @@ function toRunFeedSnapshot(hud: HudState, bestRun: BestRun | undefined): RunFeed
     trajectoryRiskLevel: hud.trajectoryRiskLevel,
     trajectoryRiskSeconds: hud.trajectoryRiskSeconds,
     launchBurstSecondsRemaining: hud.launchBurstSecondsRemaining,
+    manualBrakeUsed: hud.manualBrakeUsed,
     landingStatus: hud.landingStatus,
     perfectDockReady: hud.perfectDockReady,
     approachStreakSeconds: hud.approachStreakSeconds,

@@ -22,6 +22,7 @@ export type RunFeedSnapshot = {
   trajectoryRiskLevel?: "near" | "inside";
   trajectoryRiskSeconds?: number;
   launchBurstSecondsRemaining?: number;
+  manualBrakeUsed?: boolean;
   landingStatus?: LandingGuidanceStatus;
   perfectDockReady?: boolean;
   approachStreakSeconds?: number;
@@ -116,6 +117,14 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
     updates.push({
       label: "Cargo exposed",
       value: "Protect the load",
+      tone: "warning"
+    });
+  }
+
+  if (hasSpentNoBrakeFinesse(previous, current)) {
+    updates.push({
+      label: "Finesse spent",
+      value: "Manual brake used",
       tone: "warning"
     });
   }
@@ -269,6 +278,15 @@ function isFuelCritical(snapshot: RunFeedSnapshot): boolean {
 
 function hasCargoDamageCrossedCleanLimit(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
   return (previous.cargoDamage ?? 0) <= cleanCargoDamageLimit && (current.cargoDamage ?? 0) > cleanCargoDamageLimit;
+}
+
+function hasSpentNoBrakeFinesse(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
+  return (
+    current.objectivePhase === "delivery" &&
+    (current.cargoDamage ?? 0) <= cleanCargoDamageLimit &&
+    previous.manualBrakeUsed === false &&
+    current.manualBrakeUsed === true
+  );
 }
 
 function formatSeconds(seconds: number | undefined): string {

@@ -367,6 +367,32 @@ describe("run action feed", () => {
     ).toEqual([]);
   });
 
+  it("announces when the player spends the no-brake finesse line", () => {
+    const cleanDeliverySnapshot = {
+      ...baseSnapshot,
+      objectivePhase: "delivery" as const,
+      cargoDamage: 0
+    };
+    expect(
+      deriveRunFeedUpdates(
+        { ...cleanDeliverySnapshot, manualBrakeUsed: false },
+        { ...cleanDeliverySnapshot, manualBrakeUsed: true }
+      )
+    ).toEqual([
+      {
+        label: "Finesse spent",
+        value: "Manual brake used",
+        tone: "warning"
+      }
+    ]);
+    expect(
+      deriveRunFeedUpdates(
+        { ...cleanDeliverySnapshot, manualBrakeUsed: true },
+        { ...cleanDeliverySnapshot, manualBrakeUsed: true }
+      )
+    ).toEqual([]);
+  });
+
   it("warns when clean cargo first takes damage", () => {
     expect(deriveRunFeedUpdates({ ...baseSnapshot, cargoDamage: 0.01 }, { ...baseSnapshot, cargoDamage: 0.05 })).toEqual([
       {
