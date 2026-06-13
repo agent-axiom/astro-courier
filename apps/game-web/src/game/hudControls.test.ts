@@ -92,7 +92,7 @@ describe("brake control presentation", () => {
       tone: "disabled"
     });
     expect(buildBrakeControlPresentation({ canBrake: true, manualBrakeUsed: false, objectivePhase: "delivery", cargoDamage: 0.01 })).toEqual({
-      label: "Hold brake for No Brake +150",
+      label: "No Brake +150 armed",
       badge: "+150",
       tone: "finesse"
     });

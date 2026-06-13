@@ -115,7 +115,7 @@ export function buildBrakeControlPresentation(input: BrakeControlPresentationInp
     input.objectivePhase === "delivery" && !input.manualBrakeUsed && (input.cargoDamage ?? 0) <= 0.02;
   if (noBrakeFinesseLive) {
     return {
-      label: `Hold brake for No Brake +${NO_BRAKE_STYLE_BONUS}`,
+      label: `No Brake +${NO_BRAKE_STYLE_BONUS} armed`,
       badge: `+${NO_BRAKE_STYLE_BONUS}`,
       tone: "finesse"
     };
