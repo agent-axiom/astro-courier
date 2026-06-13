@@ -4,6 +4,7 @@ import {
   createWorldFromSystem,
   createWorldReplay,
   predictTrajectory,
+  snapshotWorld,
   stepWorld,
   summarizeRun,
   type SystemContent
@@ -169,6 +170,49 @@ describe("deterministic Astro Courier simulation", () => {
     expect(soft.landingRating).toBe("Perfect Landing");
     expect(harsh.status).toBe("crashed");
     expect(harsh.landingRating).toBe("Insurance Event");
+  });
+
+  it("reports objective telemetry for pickup and delivery guidance", () => {
+    const world = createWorldFromSystem(starterSystem, "guide-seed");
+    let snapshot = snapshotWorld(world);
+
+    expect(snapshot.objectiveTarget).toMatchObject({
+      id: "north-pad",
+      role: "pickup",
+      landingStatus: "approach",
+      allowedApproachSpeed: 42
+    });
+    expect(snapshot.objectiveTarget?.distance).toBeCloseTo(140.96, 1);
+
+    world.ship.position = { x: 0, y: -74 };
+    world.ship.velocity = { x: 1, y: 3 };
+    world.ship.rotation = -Math.PI / 2;
+    stepWorld(world, 1 / 60, []);
+    snapshot = snapshotWorld(world);
+
+    expect(snapshot.objectivePhase).toBe("delivery");
+    expect(snapshot.objectiveTarget).toMatchObject({
+      id: "dock-a",
+      role: "destination",
+      landingStatus: "approach",
+      allowedApproachSpeed: 38
+    });
+  });
+
+  it("classifies landing guidance as too-fast, misaligned, or ready", () => {
+    const world = createWorldFromSystem(starterSystem, "guide-seed");
+    world.ship.position = { x: 0, y: -74 };
+    world.ship.rotation = -Math.PI / 2;
+
+    world.ship.velocity = { x: 60, y: 0 };
+    expect(snapshotWorld(world).objectiveTarget?.landingStatus).toBe("too-fast");
+
+    world.ship.velocity = { x: 2, y: 1 };
+    world.ship.rotation = Math.PI;
+    expect(snapshotWorld(world).objectiveTarget?.landingStatus).toBe("misaligned");
+
+    world.ship.rotation = -Math.PI / 2;
+    expect(snapshotWorld(world).objectiveTarget?.landingStatus).toBe("ready");
   });
 
   it("predicts a finite trajectory without mutating the live world", () => {

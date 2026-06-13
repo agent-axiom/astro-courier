@@ -186,6 +186,34 @@ button {
   text-align: center;
 }
 
+.guidance-chip {
+  min-height: 34px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-weight: 850;
+  text-align: center;
+}
+
+.guidance-approach {
+  background: rgba(160, 196, 255, 0.12);
+  color: #d8e6ff;
+}
+
+.guidance-too-fast {
+  background: rgba(255, 111, 145, 0.16);
+  color: #ffadc1;
+}
+
+.guidance-misaligned {
+  background: rgba(255, 209, 102, 0.16);
+  color: #ffe19a;
+}
+
+.guidance-ready {
+  background: rgba(142, 230, 184, 0.18);
+  color: #bff7d8;
+}
+
 .milestone {
   min-height: 32px;
   padding: 8px 10px;

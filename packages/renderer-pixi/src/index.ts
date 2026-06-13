@@ -1,4 +1,4 @@
-import type { SimulationSnapshot, Vec2 } from "@astro-courier/shared";
+import type { LandingGuidanceStatus, SimulationSnapshot, Vec2 } from "@astro-courier/shared";
 import { Application, Container, Graphics } from "pixi.js";
 
 export type AstroPixiRenderer = {
@@ -25,6 +25,7 @@ class PixiRenderer implements AstroPixiRenderer {
   private readonly background = new Graphics();
   private readonly gravity = new Graphics();
   private readonly trajectory = new Graphics();
+  private readonly guidance = new Graphics();
   private readonly world = new Graphics();
   private readonly hazards = new Graphics();
   private readonly ship = new Graphics();
@@ -55,6 +56,7 @@ class PixiRenderer implements AstroPixiRenderer {
       this.background,
       this.gravity,
       this.trajectory,
+      this.guidance,
       this.world,
       this.hazards,
       this.ship,
@@ -78,6 +80,7 @@ class PixiRenderer implements AstroPixiRenderer {
     this.drawBackground(viewport, snapshot.tick);
     this.drawGravity(snapshot, project);
     this.drawTrajectory(trajectory, project, snapshot.status);
+    this.drawGuidance(snapshot, project, viewport);
     this.drawWorld(snapshot, project);
     this.drawHazards(snapshot, project);
     this.drawShip(snapshot, project);
@@ -123,6 +126,49 @@ class PixiRenderer implements AstroPixiRenderer {
       const alpha = 0.18 + (index / Math.max(1, trajectory.length - 1)) * 0.48;
       this.trajectory.circle(point.x, point.y, 2.4).fill({ color: 0xf8e59a, alpha });
     }
+  }
+
+  private drawGuidance(
+    snapshot: SimulationSnapshot,
+    project: (point: Vec2) => Vec2,
+    viewport: { width: number; height: number }
+  ): void {
+    this.guidance.clear();
+    const target = snapshot.objectiveTarget;
+    if (!target || snapshot.status !== "flying") return;
+
+    const ship = project(snapshot.ship.position);
+    const targetPoint = project(target.position);
+    const color = guidanceColor(target.landingStatus);
+    const targetOnScreen =
+      targetPoint.x >= 0 && targetPoint.x <= viewport.width && targetPoint.y >= 0 && targetPoint.y <= viewport.height;
+
+    this.guidance.moveTo(ship.x, ship.y).lineTo(targetPoint.x, targetPoint.y).stroke({ color, width: 2, alpha: 0.22 });
+
+    if (targetOnScreen) {
+      this.guidance.circle(targetPoint.x, targetPoint.y, 34).stroke({ color, width: 2, alpha: 0.65 });
+      this.guidance.circle(targetPoint.x, targetPoint.y, 5).fill({ color, alpha: 0.9 });
+      return;
+    }
+
+    const clamped = clampToViewport(targetPoint, viewport, 28);
+    const angle = Math.atan2(targetPoint.y - ship.y, targetPoint.x - ship.x);
+    const nose = {
+      x: clamped.x + Math.cos(angle) * 14,
+      y: clamped.y + Math.sin(angle) * 14
+    };
+    const left = {
+      x: clamped.x + Math.cos(angle + 2.5) * 10,
+      y: clamped.y + Math.sin(angle + 2.5) * 10
+    };
+    const right = {
+      x: clamped.x + Math.cos(angle - 2.5) * 10,
+      y: clamped.y + Math.sin(angle - 2.5) * 10
+    };
+    this.guidance.moveTo(nose.x, nose.y).lineTo(left.x, left.y).lineTo(right.x, right.y).closePath().fill({
+      color,
+      alpha: 0.88
+    });
   }
 
   private drawWorld(snapshot: SimulationSnapshot, project: (point: Vec2) => Vec2): void {
@@ -235,4 +281,18 @@ function createStars(count: number): Star[] {
 
 function positiveModulo(value: number, modulus: number): number {
   return ((value % modulus) + modulus) % modulus;
+}
+
+function guidanceColor(status: LandingGuidanceStatus): number {
+  if (status === "ready") return 0x8ee6b8;
+  if (status === "too-fast") return 0xff6f91;
+  if (status === "misaligned") return 0xffd166;
+  return 0xa0c4ff;
+}
+
+function clampToViewport(point: Vec2, viewport: { width: number; height: number }, inset: number): Vec2 {
+  return {
+    x: Math.min(viewport.width - inset, Math.max(inset, point.x)),
+    y: Math.min(viewport.height - inset, Math.max(inset, point.y))
+  };
 }

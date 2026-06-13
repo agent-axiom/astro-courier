@@ -9,7 +9,7 @@ import {
   summarizeRun,
   type SimulationWorld
 } from "@astro-courier/simulation";
-import type { ObjectivePhase, PlayerCommand, RunStatus } from "@astro-courier/shared";
+import type { LandingGuidanceStatus, ObjectivePhase, PlayerCommand, RunStatus } from "@astro-courier/shared";
 import { KeyboardInput, type InputSource } from "./input";
 
 export type HudState = {
@@ -23,6 +23,8 @@ export type HudState = {
   cargoDamage: number;
   cargoOnboard: boolean;
   speed: number;
+  targetDistance?: number;
+  landingStatus?: LandingGuidanceStatus;
   lastMilestone?: string;
   landingRating?: string;
 };
@@ -137,6 +139,7 @@ export class GameShell {
 
   private publishHud(): void {
     const result = summarizeRun(this.world);
+    const snapshot = snapshotWorld(this.world);
     this.onHud({
       status: this.world.status,
       objectivePhase: this.world.objectivePhase,
@@ -148,6 +151,8 @@ export class GameShell {
       cargoDamage: result.cargoDamage,
       cargoOnboard: this.world.cargoOnboard,
       speed: Math.hypot(this.world.ship.velocity.x, this.world.ship.velocity.y),
+      targetDistance: snapshot.objectiveTarget?.distance,
+      landingStatus: snapshot.objectiveTarget?.landingStatus,
       lastMilestone: this.world.lastMilestone,
       landingRating: result.landingRating
     });

@@ -116,6 +116,11 @@ export function App() {
           <strong>{objectiveLabel(hud)}</strong>
         </div>
         <div className="status-row">
+          <span>Target</span>
+          <strong>{hud.targetDistance === undefined ? "-" : `${Math.round(hud.targetDistance)}m`}</strong>
+        </div>
+        {hud.landingStatus ? <div className={`guidance-chip guidance-${hud.landingStatus}`}>{guidanceLabel(hud.landingStatus)}</div> : null}
+        <div className="status-row">
           <span>Time</span>
           <strong>{hud.elapsedSeconds.toFixed(1)}s</strong>
         </div>
@@ -182,4 +187,11 @@ function objectiveLabel(hud: HudState): string {
   if (hud.objectivePhase === "complete") return "Complete";
   if (hud.objectivePhase === "delivery") return "Deliver";
   return hud.lastMilestone === "Pickup Required" ? "Pickup first" : "Pickup";
+}
+
+function guidanceLabel(status: NonNullable<HudState["landingStatus"]>): string {
+  if (status === "ready") return "Ready to dock";
+  if (status === "too-fast") return "Slow down";
+  if (status === "misaligned") return "Align ship";
+  return "Approach target";
 }

@@ -18,6 +18,7 @@ export type InputFrame = {
 
 export type RunStatus = "flying" | "delivered" | "crashed" | "paused";
 export type ObjectivePhase = "pickup" | "delivery" | "complete";
+export type LandingGuidanceStatus = "approach" | "too-fast" | "misaligned" | "ready";
 
 export type LandingRating =
   | "Perfect Landing"
@@ -57,6 +58,18 @@ export type SimulationSnapshot = {
   lastMilestone?: string;
   elapsedSeconds: number;
   score: number;
+  objectiveTarget?: {
+    id: string;
+    role: "pickup" | "destination" | "neutral";
+    position: Vec2;
+    distance: number;
+    bearing: number;
+    speed: number;
+    allowedApproachSpeed: number;
+    angleError: number;
+    requiredAngleTolerance: number;
+    landingStatus: LandingGuidanceStatus;
+  };
   ship: {
     position: Vec2;
     velocity: Vec2;

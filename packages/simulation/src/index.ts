@@ -1,6 +1,7 @@
 import type {
   InputFrame,
   LandingRating,
+  LandingGuidanceStatus,
   ObjectivePhase,
   PlayerCommand,
   ReplayEnvelope,
@@ -303,11 +304,11 @@ export function createWorldReplay(input: WorldReplayInput): WorldReplayOutput {
 
 export function summarizeRun(world: SimulationWorld): RunResultSummary {
   return {
-      status: world.status,
+    status: world.status,
     elapsedSeconds: round(world.elapsedSeconds, 3),
-      score: world.score,
-      cargoDamage: round(world.ship.cargoDamage, 3),
-      fuelUsed: round(world.fuelUsed, 3),
+    score: world.score,
+    cargoDamage: round(world.ship.cargoDamage, 3),
+    fuelUsed: round(world.fuelUsed, 3),
     landingRating: world.landingRating
   };
 }
@@ -337,6 +338,7 @@ export function snapshotWorld(world: SimulationWorld): SimulationSnapshot {
     lastMilestone: world.lastMilestone,
     elapsedSeconds: world.elapsedSeconds,
     score: world.score,
+    objectiveTarget: getObjectiveTarget(world),
     ship: {
       position: { ...world.ship.position },
       velocity: { ...world.ship.velocity },
@@ -369,6 +371,49 @@ export function snapshotWorld(world: SimulationWorld): SimulationSnapshot {
       severity: hazard.severity
     }))
   };
+}
+
+function getObjectiveTarget(world: SimulationWorld): SimulationSnapshot["objectiveTarget"] {
+  const pad = world.landingPads.find((candidate) => candidate.active);
+  if (!pad) {
+    return undefined;
+  }
+
+  const offset = subtract(pad.position, world.ship.position);
+  const distance = magnitude(offset);
+  const speed = magnitude(world.ship.velocity);
+  const angleError = Math.abs(shortestAngleDelta(world.ship.rotation, pad.normalAngle));
+
+  return {
+    id: pad.id,
+    role: pad.role,
+    position: { ...pad.position },
+    distance: round(distance, 3),
+    bearing: normalizeAngle(Math.atan2(offset.y, offset.x)),
+    speed: round(speed, 3),
+    allowedApproachSpeed: pad.allowedApproachSpeed,
+    angleError: round(angleError, 3),
+    requiredAngleTolerance: pad.requiredAngleTolerance,
+    landingStatus: classifyLandingGuidance(distance, speed, angleError, pad)
+  };
+}
+
+function classifyLandingGuidance(
+  distance: number,
+  speed: number,
+  angleError: number,
+  pad: LandingPadState
+): LandingGuidanceStatus {
+  if (distance > pad.radius * 1.35) {
+    return "approach";
+  }
+  if (speed > pad.allowedApproachSpeed) {
+    return "too-fast";
+  }
+  if (angleError > pad.requiredAngleTolerance) {
+    return "misaligned";
+  }
+  return "ready";
 }
 
 function applyGravity(world: SimulationWorld, fixedDt: number): void {
