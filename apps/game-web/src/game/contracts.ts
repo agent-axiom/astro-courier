@@ -26,6 +26,8 @@ export type DailyDispatchAction = {
 
 export type DailyDispatchBestRun = {
   medal: "none" | "bronze" | "silver" | "gold" | "comet";
+  score?: number;
+  elapsedSeconds?: number;
 };
 
 export type DailyDispatchStatus = {
@@ -156,6 +158,15 @@ export function buildDailyDispatchStatus(
     };
   }
 
+  const dailyBest = formatDailyBestRun(bestRun);
+  if (dailyBest) {
+    return {
+      label: "Daily status",
+      value: dailyBest,
+      tone: bestRun.medal === "comet" ? "comet" : "chase"
+    };
+  }
+
   if (bestRun.medal === "comet") {
     return {
       label: "Daily status",
@@ -177,6 +188,21 @@ export function buildDailyDispatchStatus(
     value: "Chase daily comet",
     tone: "chase"
   };
+}
+
+function formatDailyBestRun(bestRun: DailyDispatchBestRun): string | undefined {
+  if (bestRun.score === undefined || bestRun.elapsedSeconds === undefined) {
+    return undefined;
+  }
+
+  const result = `${Math.round(bestRun.score)} / ${bestRun.elapsedSeconds.toFixed(1)}s`;
+  if (bestRun.medal === "comet") {
+    return `Comet PB ${result}`;
+  }
+  if (bestRun.medal === "gold") {
+    return `Gold PB ${result}`;
+  }
+  return `PB ${result}`;
 }
 
 export function buildDailyDispatchReset(dispatch: DailyDispatch | undefined, now: Date): DailyDispatchReset | undefined {

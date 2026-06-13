@@ -137,6 +137,32 @@ describe("contract rotation", () => {
     expect(buildDailyDispatchStatus(undefined, { medal: "gold" })).toBeUndefined();
   });
 
+  it("surfaces saved daily personal-best metrics when the route has a result", () => {
+    const dispatch = {
+      label: "Daily dispatch" as const,
+      value: "Asteroid Sprint",
+      contractId: "asteroid-sprint",
+      seed: "daily-2026-06-13-asteroid-sprint",
+      tone: "daily" as const
+    };
+
+    expect(buildDailyDispatchStatus(dispatch, { medal: "silver", score: 1780, elapsedSeconds: 34.6 })).toEqual({
+      label: "Daily status",
+      value: "PB 1780 / 34.6s",
+      tone: "chase"
+    });
+    expect(buildDailyDispatchStatus(dispatch, { medal: "gold", score: 2960, elapsedSeconds: 25.8 })).toEqual({
+      label: "Daily status",
+      value: "Gold PB 2960 / 25.8s",
+      tone: "chase"
+    });
+    expect(buildDailyDispatchStatus(dispatch, { medal: "comet", score: 3260, elapsedSeconds: 27.4 })).toEqual({
+      label: "Daily status",
+      value: "Comet PB 3260 / 27.4s",
+      tone: "comet"
+    });
+  });
+
   it("summarizes the remaining time before the daily dispatch rotates", () => {
     const dispatch = {
       label: "Daily dispatch" as const,
