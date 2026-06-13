@@ -8,6 +8,7 @@ import {
   landingPadVisual,
   objectiveBeaconPulse,
   objectiveGuidanceVisual,
+  screenShakeOffset,
   shipTrailVisual,
   trajectoryHazardDanger,
   trajectoryGravitySlingSignal,
@@ -59,6 +60,39 @@ describe("camera focus", () => {
 
     expect(far.x).toBeGreaterThan(close.x);
     expect(close.x).toBeGreaterThan(10);
+  });
+});
+
+describe("screen shake offset", () => {
+  it("stays still outside active flight", () => {
+    expect(screenShakeOffset({ status: "paused", tick: 12 })).toEqual({ x: 0, y: 0 });
+  });
+
+  it("adds bounded impact motion for boost burns", () => {
+    const shake = screenShakeOffset({ status: "flying", tick: 12, lastMilestone: "Boost Burn" });
+
+    expect(Math.hypot(shake.x, shake.y)).toBeGreaterThan(0);
+    expect(Math.abs(shake.x)).toBeLessThanOrEqual(4);
+    expect(Math.abs(shake.y)).toBeLessThanOrEqual(4);
+  });
+
+  it("makes inside hazard contact stronger than boost impact", () => {
+    const boost = screenShakeOffset({ status: "flying", tick: 12, lastMilestone: "Boost Burn" });
+    const hazard = screenShakeOffset({
+      status: "flying",
+      tick: 12,
+      nearestHazard: {
+        id: "training-asteroids",
+        type: "asteroid_field",
+        position: { x: 0, y: 0 },
+        distance: 24,
+        radius: 70,
+        severity: 0.8,
+        dangerLevel: "inside"
+      }
+    });
+
+    expect(Math.hypot(hazard.x, hazard.y)).toBeGreaterThan(Math.hypot(boost.x, boost.y));
   });
 });
 

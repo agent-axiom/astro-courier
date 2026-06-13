@@ -39,6 +39,40 @@ export function cameraFocus(input: CameraFocusInput): Vec2 {
   };
 }
 
+export type ScreenShakeInput = Pick<SimulationSnapshot, "status" | "tick" | "lastMilestone" | "nearestHazard">;
+
+export function screenShakeOffset(input: ScreenShakeInput): Vec2 {
+  if (input.status !== "flying") {
+    return { x: 0, y: 0 };
+  }
+
+  const hazardMagnitude =
+    input.nearestHazard?.dangerLevel === "inside"
+      ? clamp(4 + input.nearestHazard.severity * 7, 4, 10)
+      : 0;
+  const milestoneMagnitude = screenShakeMilestoneMagnitude(input.lastMilestone);
+  const magnitude = Math.max(hazardMagnitude, milestoneMagnitude);
+  if (magnitude <= 0) {
+    return { x: 0, y: 0 };
+  }
+
+  const phase = input.tick * 1.731;
+  return {
+    x: round(Math.sin(phase) * magnitude, 2),
+    y: round(Math.cos(phase * 1.37) * magnitude * 0.7, 2)
+  };
+}
+
+function screenShakeMilestoneMagnitude(milestone?: string): number {
+  if (milestone === "Boost Burn") {
+    return 4;
+  }
+  if (milestone === "Assist Burn") {
+    return 3;
+  }
+  return styleShockwaveSpec(milestone) ? 2.5 : 0;
+}
+
 export function objectiveBeaconPulse(tick: number): { radius: number; alpha: number } {
   const wave = (Math.sin(tick * 0.12) + 1) / 2;
   return {
@@ -524,9 +558,10 @@ class PixiRenderer implements AstroPixiRenderer {
       height: this.app.renderer.height
     };
     const camera = cameraFocus(snapshot);
+    const shake = screenShakeOffset(snapshot);
     const project = (point: Vec2): Vec2 => ({
-      x: point.x - camera.x + viewport.width / 2,
-      y: point.y - camera.y + viewport.height / 2
+      x: point.x - camera.x + viewport.width / 2 + shake.x,
+      y: point.y - camera.y + viewport.height / 2 + shake.y
     });
 
     this.drawBackground(viewport, snapshot.tick);
