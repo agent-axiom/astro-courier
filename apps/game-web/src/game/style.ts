@@ -30,7 +30,8 @@ const styleMilestones = new Set([
   "Launch Burst",
   "Perfect Approach",
   "Eco Drift",
-  "Chain Finish"
+  "Chain Finish",
+  "Express Finish"
 ]);
 
 export function buildLiveStyleReward(input: LiveStyleRewardInput): LiveStyleReward | undefined {

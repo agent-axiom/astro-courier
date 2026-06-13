@@ -116,6 +116,24 @@ describe("live style reward HUD copy", () => {
     });
   });
 
+  it("treats express finish as a fresh style moment", () => {
+    expect(
+      buildLiveStyleReward({
+        styleBonus: 405,
+        lastStyleAward: 225,
+        lastMilestone: "Express Finish",
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 4
+      })
+    ).toEqual({
+      label: "Style hit",
+      value: "+225 hit / +405 bank / x1.50",
+      fresh: true,
+      tone: "fresh",
+      chainProgress: 1
+    });
+  });
+
   it("shows an active chain even between fresh milestones", () => {
     expect(buildLiveStyleReward({ styleBonus: 180, styleMultiplier: 1.25, styleChainSecondsRemaining: 2.4 })).toEqual({
       label: "Style chain",

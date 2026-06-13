@@ -588,6 +588,31 @@ describe("deterministic Astro Courier simulation", () => {
     expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(320 + Math.round(CHAIN_FINISH_STYLE_BONUS * 1.5));
   });
 
+  it("awards express finish style for clean deliveries inside the gold window", () => {
+    const world = createWorldFromSystem(starterSystem, "express-finish-seed");
+    world.cargoOnboard = true;
+    world.objectivePhase = "delivery";
+    world.elapsedSeconds = starterSystem.contracts[0]!.medalTimes.gold - 0.5;
+    world.styleBonus = QUICK_PICKUP_STYLE_BONUS;
+    world.styleChainCount = 1;
+    world.styleChainSecondsRemaining = 2.4;
+    world.fuelUsed = ECO_DRIFT_FUEL_USED_LIMIT + 4;
+    world.bestApproachStreakSeconds = 0;
+    for (const pad of world.landingPads) {
+      pad.active = pad.role === "destination";
+    }
+    world.ship.position = { x: 260, y: -80 };
+    world.ship.velocity = { x: 8, y: 1 };
+    world.ship.rotation = 0;
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("delivered");
+    expect(world.lastMilestone).toBe("Express Finish");
+    expect(world.lastStyleAward).toBe(225);
+    expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(QUICK_PICKUP_STYLE_BONUS + 225);
+  });
+
   it("scales hazard contact damage by active cargo fragility", () => {
     const systemWithCargoRisk: SystemContent = {
       ...starterSystem,

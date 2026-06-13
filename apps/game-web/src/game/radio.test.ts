@@ -145,6 +145,10 @@ describe("radio feedback copy", () => {
     );
   });
 
+  it("celebrates express finishes before generic medal copy", () => {
+    expect(buildRadioMessage({ ...baseHud, status: "delivered", medal: "gold", lastMilestone: "Express Finish" })).toContain("Express finish");
+  });
+
   it("praises a held stable approach before generic landing guidance", () => {
     expect(buildRadioMessage({ ...baseHud, landingStatus: "ready", approachStreakSeconds: 1.4 })).toContain("Perfect setup");
     expect(buildRadioMessage({ ...baseHud, landingStatus: "ready", approachStreakSeconds: 1.4 })).toContain("+220");
