@@ -55,6 +55,7 @@ export type TrajectoryPointVisualInput = {
   status: SimulationSnapshot["status"];
   index: number;
   total: number;
+  danger?: TrajectoryHazardDanger;
 };
 
 export type TrajectoryPointVisual = {
@@ -63,6 +64,8 @@ export type TrajectoryPointVisual = {
   alpha: number;
 };
 
+export type TrajectoryHazardDanger = "near" | "inside";
+
 export function trajectoryPointVisual(input: TrajectoryPointVisualInput): TrajectoryPointVisual | undefined {
   if (input.status !== "flying" || input.total <= 0) {
     return undefined;
@@ -70,11 +73,38 @@ export function trajectoryPointVisual(input: TrajectoryPointVisualInput): Trajec
 
   const progress = clamp(input.index / Math.max(1, input.total - 1), 0, 1);
   const isEndpoint = input.index >= input.total - 1;
+  if (input.danger) {
+    return {
+      color: input.danger === "inside" ? 0xff4d6d : 0xffd166,
+      radius: input.danger === "inside" ? 5 : 4.1,
+      alpha: input.danger === "inside" ? 0.88 : 0.72
+    };
+  }
+
   return {
     color: isEndpoint ? 0x7ce1ff : 0xf8e59a,
     radius: round(isEndpoint ? 4.2 : 2.2 + progress * 0.8, 2),
     alpha: round(isEndpoint ? 0.78 : 0.18 + progress * 0.42, 2)
   };
+}
+
+export function trajectoryHazardDanger(
+  point: Vec2,
+  hazards: SimulationSnapshot["hazards"]
+): TrajectoryHazardDanger | undefined {
+  let nearestDanger: TrajectoryHazardDanger | undefined;
+
+  for (const hazard of hazards) {
+    const distance = Math.hypot(point.x - hazard.position.x, point.y - hazard.position.y);
+    if (distance <= hazard.radius) {
+      return "inside";
+    }
+    if (distance <= hazard.radius * 1.6) {
+      nearestDanger = "near";
+    }
+  }
+
+  return nearestDanger;
 }
 
 type LandingPadVisualInput = Pick<SimulationSnapshot["landingPads"][number], "role" | "active" | "destination">;
@@ -286,7 +316,7 @@ class PixiRenderer implements AstroPixiRenderer {
 
     this.drawBackground(viewport, snapshot.tick);
     this.drawGravity(snapshot, project);
-    this.drawTrajectory(trajectory, project, snapshot.status);
+    this.drawTrajectory(trajectory, project, snapshot);
     this.drawGuidance(snapshot, project, viewport);
     this.drawWorld(snapshot, project);
     this.drawHazards(snapshot, project);
@@ -327,13 +357,19 @@ class PixiRenderer implements AstroPixiRenderer {
   private drawTrajectory(
     trajectory: Vec2[],
     project: (point: Vec2) => Vec2,
-    status: SimulationSnapshot["status"]
+    snapshot: SimulationSnapshot
   ): void {
     this.trajectory.clear();
 
     for (let index = 0; index < trajectory.length; index += 1) {
-      const point = project(trajectory[index]);
-      const visual = trajectoryPointVisual({ status, index, total: trajectory.length });
+      const worldPoint = trajectory[index];
+      const point = project(worldPoint);
+      const visual = trajectoryPointVisual({
+        status: snapshot.status,
+        index,
+        total: trajectory.length,
+        danger: trajectoryHazardDanger(worldPoint, snapshot.hazards)
+      });
       if (!visual) continue;
 
       this.trajectory.circle(point.x, point.y, visual.radius).fill({ color: visual.color, alpha: visual.alpha });

@@ -7,6 +7,7 @@ import {
   objectiveBeaconPulse,
   objectiveGuidanceVisual,
   shipTrailVisual,
+  trajectoryHazardDanger,
   trajectoryPointVisual
 } from "./index";
 
@@ -54,6 +55,35 @@ describe("trajectory point visual", () => {
     expect(last).toMatchObject({ color: 0x7ce1ff });
     expect(last?.radius).toBeGreaterThan(first?.radius ?? 0);
     expect(last?.alpha).toBeGreaterThan(first?.alpha ?? 0);
+  });
+
+  it("escalates forecast dots that pass through hazard pressure", () => {
+    const safe = trajectoryPointVisual({ status: "flying", index: 3, total: 8 });
+    const near = trajectoryPointVisual({ status: "flying", index: 3, total: 8, danger: "near" });
+    const inside = trajectoryPointVisual({ status: "flying", index: 3, total: 8, danger: "inside" });
+
+    expect(near).toMatchObject({ color: 0xffd166 });
+    expect(inside).toMatchObject({ color: 0xff4d6d });
+    expect(near?.radius).toBeGreaterThan(safe?.radius ?? 0);
+    expect(inside?.alpha).toBeGreaterThan(near?.alpha ?? 0);
+  });
+});
+
+describe("trajectory hazard danger", () => {
+  it("classifies forecast points against hazard radius and warning skirt", () => {
+    const hazards = [
+      {
+        id: "training-asteroids",
+        type: "asteroid_field",
+        position: { x: 10, y: 0 },
+        radius: 20,
+        severity: 0.5
+      }
+    ];
+
+    expect(trajectoryHazardDanger({ x: 12, y: 0 }, hazards)).toBe("inside");
+    expect(trajectoryHazardDanger({ x: 40, y: 0 }, hazards)).toBe("near");
+    expect(trajectoryHazardDanger({ x: 80, y: 0 }, hazards)).toBeUndefined();
   });
 });
 
