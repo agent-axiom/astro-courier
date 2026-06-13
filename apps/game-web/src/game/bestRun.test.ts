@@ -380,6 +380,22 @@ describe("live personal best pace copy", () => {
     });
   });
 
+  it("turns a live score lead into a clutch defend cue near the dock", () => {
+    expect(
+      buildLiveBestPace({
+        bestRun: { score: 3290, elapsedSeconds: 24.7, medal: "gold" },
+        score: 3440,
+        elapsedSeconds: 22.4,
+        targetDistance: 120,
+        status: "flying"
+      })
+    ).toEqual({
+      label: "PB clutch",
+      value: "Defend +150 into dock",
+      tone: "clutch"
+    });
+  });
+
   it("shows overtime once the current run has passed the saved finish time", () => {
     expect(
       buildLiveBestPace({

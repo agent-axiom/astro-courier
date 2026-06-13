@@ -35,13 +35,14 @@ export type LiveBestPaceInput = {
   bestRun: BestRun | undefined;
   score?: number;
   elapsedSeconds: number;
+  targetDistance?: number;
   status: RunStatus;
 };
 
 export type LiveBestPace = {
-  label: "PB pace" | "PB chase";
+  label: "PB pace" | "PB chase" | "PB clutch";
   value: string;
-  tone: "ahead" | "behind";
+  tone: "ahead" | "behind" | "clutch";
 };
 
 export type RouteBoardContract = {
@@ -268,6 +269,13 @@ export function buildLiveBestPace(input: LiveBestPaceInput): LiveBestPace | unde
 
   const scoreDelta = (input.score ?? 0) - input.bestRun.score;
   if (scoreDelta > 0) {
+    if ((input.targetDistance ?? Number.POSITIVE_INFINITY) <= 150) {
+      return {
+        label: "PB clutch",
+        value: `Defend +${Math.round(scoreDelta)} into dock`,
+        tone: "clutch"
+      };
+    }
     return {
       label: "PB chase",
       value: `+${Math.round(scoreDelta)} score lead`,

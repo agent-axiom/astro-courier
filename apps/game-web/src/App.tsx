@@ -414,6 +414,7 @@ export function App() {
     bestRun,
     score: hud.score,
     elapsedSeconds: hud.elapsedSeconds,
+    targetDistance: hud.targetDistance,
     status: hud.status
   });
   const replayCaptureReadout = buildReplayCaptureReadout({
