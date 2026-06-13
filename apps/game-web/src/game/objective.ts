@@ -10,6 +10,8 @@ import type { LandingGuidanceStatus, ObjectivePhase, RunStatus } from "@astro-co
 import { COMET_RESERVE_MIN_RATIO, COMET_RESERVE_WARNING_RATIO } from "./comet";
 import type { ContractPaceTier } from "./pace";
 
+const FUEL_CRITICAL_RATIO = 0.15;
+
 export type ObjectiveDirectiveInput = {
   objectivePhase: ObjectivePhase;
   pickupLabel: string;
@@ -210,6 +212,14 @@ export function buildTacticalCue(input: TacticalCueInput): TacticalCue | undefin
     };
   }
 
+  if (isFuelCritical(input)) {
+    return {
+      label: "Tactical cue",
+      value: "Fuel critical / coast",
+      tone: "urgent"
+    };
+  }
+
   const chainSecondsRemaining = input.styleChainSecondsRemaining ?? 0;
   const urgentStyleChain = (input.styleMultiplier ?? 1) > 1 && chainSecondsRemaining > 0 && chainSecondsRemaining <= 1;
   if (urgentStyleChain) {
@@ -331,6 +341,10 @@ function isTightCometReserve(input: TacticalCueInput): boolean {
 
 function fuelReserve(input: TacticalCueInput): number {
   return input.maxFuel !== undefined && input.maxFuel > 0 && input.fuel !== undefined ? input.fuel / input.maxFuel : 0;
+}
+
+function isFuelCritical(input: TacticalCueInput): boolean {
+  return input.maxFuel !== undefined && input.maxFuel > 0 && input.fuel !== undefined && input.fuel / input.maxFuel <= FUEL_CRITICAL_RATIO;
 }
 
 function buildUrgentChainAction(input: TacticalCueInput): string {

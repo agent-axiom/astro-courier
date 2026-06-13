@@ -199,6 +199,22 @@ describe("tactical cue", () => {
     });
   });
 
+  it("prioritizes an active hazard over critical fuel", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        hazardDangerLevel: "inside",
+        fuel: 10,
+        maxFuel: 100
+      })
+    ).toEqual({
+      label: "Tactical cue",
+      value: "Exit hazard field",
+      tone: "danger"
+    });
+  });
+
   it("calls out the express finish when the clean gold window is closing", () => {
     expect(
       buildTacticalCue({
@@ -213,6 +229,36 @@ describe("tactical cue", () => {
       value: "Close express / +180 / 3.8s",
       tone: "opportunity"
     });
+  });
+
+  it("warns about critical fuel before scoring opportunities", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        paceTier: "silver",
+        paceSecondsRemaining: 9.5,
+        cargoDamage: 0,
+        fuel: 10,
+        maxFuel: 100,
+        fuelUsed: 8
+      })
+    ).toEqual({
+      label: "Tactical cue",
+      value: "Fuel critical / coast",
+      tone: "urgent"
+    });
+  });
+
+  it("does not warn about fuel after the reserve leaves the critical band", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        fuel: 16,
+        maxFuel: 100
+      })
+    ).toBeUndefined();
   });
 
   it("points an urgent style chain at a ready gravity sling", () => {
