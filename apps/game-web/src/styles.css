@@ -1753,9 +1753,9 @@ button {
   color: #d8e6ff;
 }
 
-.daily-dispatch-cleared {
-  background: rgba(142, 230, 184, 0.13);
-  color: #bff7d8;
+.daily-dispatch-chase {
+  background: rgba(255, 209, 102, 0.13);
+  color: #ffe19a;
 }
 
 .daily-dispatch-comet {

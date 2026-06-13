@@ -31,7 +31,7 @@ export type DailyDispatchBestRun = {
 export type DailyDispatchStatus = {
   label: "Daily status";
   value: string;
-  tone: "open" | "cleared" | "comet";
+  tone: "open" | "chase" | "comet";
 };
 
 export type DailyDispatchReset = {
@@ -158,8 +158,8 @@ export function buildDailyDispatchStatus(
 
   return {
     label: "Daily status",
-    value: `Cleared ${capitalize(bestRun.medal)}`,
-    tone: "cleared"
+    value: "Chase daily comet",
+    tone: "chase"
   };
 }
 
@@ -175,10 +175,6 @@ export function buildDailyDispatchReset(dispatch: DailyDispatch | undefined, now
     value: `${formatResetTime(millisecondsRemaining)} left`,
     tone: millisecondsRemaining <= 60 * 60 * 1000 ? "urgent" : "steady"
   };
-}
-
-function capitalize(value: string): string {
-  return `${value.slice(0, 1).toUpperCase()}${value.slice(1)}`;
 }
 
 function formatResetTime(millisecondsRemaining: number): string {

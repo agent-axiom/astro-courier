@@ -93,10 +93,15 @@ describe("contract rotation", () => {
       value: "Open today",
       tone: "open"
     });
+    expect(buildDailyDispatchStatus(dispatch, { medal: "silver" })).toEqual({
+      label: "Daily status",
+      value: "Chase daily comet",
+      tone: "chase"
+    });
     expect(buildDailyDispatchStatus(dispatch, { medal: "gold" })).toEqual({
       label: "Daily status",
-      value: "Cleared Gold",
-      tone: "cleared"
+      value: "Chase daily comet",
+      tone: "chase"
     });
     expect(buildDailyDispatchStatus(dispatch, { medal: "comet" })).toEqual({
       label: "Daily status",
