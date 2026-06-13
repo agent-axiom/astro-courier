@@ -126,7 +126,7 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
           ? "Catch one gravity sling"
           : input.contractId === "asteroid-sprint"
           ? "Thread one asteroid gap"
-          : input.contractId === "return-leg"
+          : input.contractId === "return-leg" || input.contractId === "chain-relay"
           ? "Carry a chain into dock"
           : "Add a skim or quick pickup",
       tone: "opportunity"

@@ -208,6 +208,25 @@ describe("result coach", () => {
     });
   });
 
+  it("nudges chain relay clears without style toward carrying a chain home", () => {
+    expect(
+      buildResultCoach({
+        status: "delivered",
+        contractId: "chain-relay",
+        medal: "gold",
+        grade: "A",
+        cargoDamage: 0,
+        fuel: 48,
+        maxFuel: 100,
+        scoreBreakdown: baseBreakdown
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Carry a chain into dock",
+      tone: "opportunity"
+    });
+  });
+
   it("celebrates comet-grade runs with a mastery target", () => {
     expect(
       buildResultCoach({
