@@ -12,6 +12,7 @@ export type RunFeedSnapshot = {
   lastStyleAward?: number;
   score?: number;
   bestRunScore?: number;
+  bestRunHasGhostTrail?: boolean;
   paceTier?: ContractPaceTier;
   fuel: number;
   maxFuel: number;
@@ -135,17 +136,19 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
   }
 
   if (hasCrossedBestRunScore(previous, current)) {
+    const scoreLead = Math.round((current.score ?? 0) - (current.bestRunScore ?? 0));
     updates.push({
-      label: "PB lead",
-      value: `+${Math.round((current.score ?? 0) - (current.bestRunScore ?? 0))} score`,
+      label: current.bestRunHasGhostTrail ? "Ghost pass" : "PB lead",
+      value: current.bestRunHasGhostTrail ? `+${scoreLead} over ghost` : `+${scoreLead} score`,
       tone: "success"
     });
   }
 
   if (hasEnteredBestRunPressure(previous, current)) {
+    const scoreGap = Math.round((current.bestRunScore ?? 0) - (current.score ?? 0));
     updates.push({
-      label: "PB pressure",
-      value: `${Math.round((current.bestRunScore ?? 0) - (current.score ?? 0))} score back`,
+      label: current.bestRunHasGhostTrail ? "Ghost pressure" : "PB pressure",
+      value: current.bestRunHasGhostTrail ? `${scoreGap} behind ghost` : `${scoreGap} score back`,
       tone: "style"
     });
   }

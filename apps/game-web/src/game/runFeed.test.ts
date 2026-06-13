@@ -212,6 +212,21 @@ describe("run action feed", () => {
     ).toEqual([]);
   });
 
+  it("announces ghost overtakes when a saved replay trail is loaded", () => {
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, score: 3280, bestRunScore: 3290, bestRunHasGhostTrail: true },
+        { ...baseSnapshot, score: 3440, bestRunScore: 3290, bestRunHasGhostTrail: true }
+      )
+    ).toEqual([
+      {
+        label: "Ghost pass",
+        value: "+150 over ghost",
+        tone: "success"
+      }
+    ]);
+  });
+
   it("announces when the live run enters personal-best chase range", () => {
     expect(
       deriveRunFeedUpdates(
@@ -231,6 +246,21 @@ describe("run action feed", () => {
         { ...baseSnapshot, score: 3180, bestRunScore: 3290 }
       )
     ).toEqual([]);
+  });
+
+  it("announces ghost pressure when a saved replay trail is loaded", () => {
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, score: 2980, bestRunScore: 3290, bestRunHasGhostTrail: true },
+        { ...baseSnapshot, score: 3105, bestRunScore: 3290, bestRunHasGhostTrail: true }
+      )
+    ).toEqual([
+      {
+        label: "Ghost pressure",
+        value: "185 behind ghost",
+        tone: "style"
+      }
+    ]);
   });
 
   it("announces when the final comet dock becomes armed", () => {

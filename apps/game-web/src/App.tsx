@@ -1447,6 +1447,7 @@ function toRunFeedSnapshot(hud: HudState, bestRun: BestRun | undefined): RunFeed
     lastStyleAward: hud.lastStyleAward,
     score: hud.score,
     bestRunScore: bestRun?.score,
+    bestRunHasGhostTrail: (bestRun?.ghostTrail?.length ?? 0) >= 2,
     paceTier: hud.paceTier,
     fuel: hud.fuel,
     maxFuel: hud.maxFuel,
