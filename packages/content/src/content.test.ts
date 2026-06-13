@@ -22,7 +22,7 @@ describe("content schemas", () => {
     expect(parsed.contracts.find((contract) => contract.id === "gravity-slingshot")).toMatchObject({
       title: "Gravity Slingshot",
       riskLabel: "Gravity Entry",
-      rewardLabel: "Comet reserve challenge",
+      rewardLabel: "Gravity sling bonuses",
       cargoId: "bottled-starlight",
       hazardSeverityMultiplier: 1.2,
       shipStart: {

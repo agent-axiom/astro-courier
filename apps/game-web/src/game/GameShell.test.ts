@@ -178,7 +178,7 @@ describe("GameShell lifecycle", () => {
         title: "Gravity Slingshot",
         briefing: "Enter above Luma with lateral speed, catch the north pad, then ride the gravity arc out to Tea Station.",
         riskLabel: "Gravity Entry",
-        rewardLabel: "Comet reserve challenge",
+        rewardLabel: "Gravity sling bonuses",
         pickupLabel: "Luma North Pad",
         destinationLabel: "Tea Station Dock A",
         cargoName: "Bottled Starlight",
@@ -213,7 +213,7 @@ describe("GameShell lifecycle", () => {
       contractId: "gravity-slingshot",
       contractTitle: "Gravity Slingshot",
       contractRiskLabel: "Gravity Entry",
-      contractRewardLabel: "Comet reserve challenge",
+      contractRewardLabel: "Gravity sling bonuses",
       paceSecondsRemaining: 26,
       hazardSeverityMultiplier: 1.2
     });
