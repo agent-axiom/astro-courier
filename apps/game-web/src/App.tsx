@@ -474,6 +474,7 @@ export function App() {
     objectivePhase: hud.objectivePhase,
     cargoOnboard: hud.cargoOnboard,
     targetDistance: hud.targetDistance,
+    speed: hud.speed,
     landingStatus: hud.landingStatus,
     trajectoryRiskLevel: hud.trajectoryRiskLevel,
     trajectoryRiskSeconds: hud.trajectoryRiskSeconds,

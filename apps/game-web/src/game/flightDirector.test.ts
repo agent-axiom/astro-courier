@@ -76,6 +76,47 @@ describe("flight director", () => {
     });
   });
 
+  it("turns a clean near trajectory vector into a style opportunity", () => {
+    expect(
+      buildFlightDirector({
+        status: "flying",
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        trajectoryRiskLevel: "near",
+        trajectoryRiskSeconds: 0.8,
+        speed: 46,
+        cargoDamage: 0,
+        targetDistance: 220
+      })
+    ).toEqual({
+      label: "Flight director",
+      action: "Thread vector",
+      detail: "Edge in 0.8s",
+      tone: "opportunity",
+      progress: 0.73
+    });
+  });
+
+  it("treats near trajectory vectors as a recovery command for damaged cargo", () => {
+    expect(
+      buildFlightDirector({
+        status: "flying",
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        trajectoryRiskLevel: "near",
+        trajectoryRiskSeconds: 2.1,
+        cargoDamage: 0.18,
+        targetDistance: 180
+      })
+    ).toEqual({
+      label: "Flight director",
+      action: "Clear vector",
+      detail: "Cargo exposed / 2.1s",
+      tone: "urgent",
+      progress: 0.3
+    });
+  });
+
   it("keeps ordinary flight focused on the active objective", () => {
     expect(
       buildFlightDirector({

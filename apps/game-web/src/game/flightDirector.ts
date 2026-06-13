@@ -1,3 +1,4 @@
+import { HAZARD_THREAD_SPEED_THRESHOLD } from "@astro-courier/simulation";
 import type { LandingGuidanceStatus, ObjectivePhase, RunStatus } from "@astro-courier/shared";
 
 export type FlightDirectorInput = {
@@ -5,6 +6,7 @@ export type FlightDirectorInput = {
   objectivePhase: ObjectivePhase;
   cargoOnboard: boolean;
   targetDistance?: number;
+  speed?: number;
   landingStatus?: LandingGuidanceStatus;
   trajectoryRiskLevel?: "near" | "inside";
   trajectoryRiskSeconds?: number;
@@ -51,6 +53,20 @@ export function buildFlightDirector(input: FlightDirectorInput): FlightDirector 
 
   if (input.landingStatus === "too-fast") {
     return director("Brake hard", "Dock speed high", "danger", 1);
+  }
+
+  if (input.trajectoryRiskLevel === "near") {
+    const seconds = input.trajectoryRiskSeconds ?? 0;
+    if ((input.cargoDamage ?? 0) > 0.02) {
+      return director("Clear vector", `Cargo exposed / ${formatSeconds(seconds)}`, "urgent", countdownProgress(seconds, TRAJECTORY_WARNING_SECONDS));
+    }
+
+    return director(
+      (input.speed ?? 0) >= HAZARD_THREAD_SPEED_THRESHOLD ? "Thread vector" : "Skim vector",
+      `Edge in ${formatSeconds(seconds)}`,
+      "opportunity",
+      countdownProgress(seconds, TRAJECTORY_WARNING_SECONDS)
+    );
   }
 
   const chainSeconds = input.styleChainSecondsRemaining ?? 0;
