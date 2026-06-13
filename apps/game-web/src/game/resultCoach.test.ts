@@ -69,6 +69,25 @@ describe("result coach", () => {
     });
   });
 
+  it("nudges gravity route clears without style toward gravity slings", () => {
+    expect(
+      buildResultCoach({
+        status: "delivered",
+        contractId: "gravity-slingshot",
+        medal: "gold",
+        grade: "A",
+        cargoDamage: 0,
+        fuel: 48,
+        maxFuel: 100,
+        scoreBreakdown: baseBreakdown
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Catch one gravity sling",
+      tone: "opportunity"
+    });
+  });
+
   it("celebrates comet-grade runs with a mastery target", () => {
     expect(
       buildResultCoach({

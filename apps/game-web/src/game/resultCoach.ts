@@ -2,6 +2,7 @@ import type { CrashReason, RunGrade, RunMedal, RunStatus, ScoreBreakdown } from 
 
 export type ResultCoachInput = {
   status: RunStatus;
+  contractId?: string;
   crashReason?: CrashReason;
   medal: RunMedal;
   grade: RunGrade;
@@ -78,7 +79,7 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
   if (input.scoreBreakdown.styleBonus <= 0) {
     return {
       label: "Next run",
-      value: "Add a skim or quick pickup",
+      value: input.contractId === "gravity-slingshot" ? "Catch one gravity sling" : "Add a skim or quick pickup",
       tone: "opportunity"
     };
   }
