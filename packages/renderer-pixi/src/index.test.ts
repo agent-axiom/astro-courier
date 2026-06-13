@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hazardVignetteEffect, landingPadVisual, objectiveBeaconPulse } from "./index";
+import { hazardFieldVisual, hazardVignetteEffect, landingPadVisual, objectiveBeaconPulse } from "./index";
 
 describe("objective beacon pulse", () => {
   it("returns bounded radius and alpha values across the pulse cycle", () => {
@@ -78,5 +78,16 @@ describe("hazard vignette effect", () => {
     expect(near).toMatchObject({ color: 0xffd166, width: 6 });
     expect(inside).toMatchObject({ color: 0xff4d6d, width: 10 });
     expect(inside?.alpha).toBeGreaterThan(near?.alpha ?? 0);
+  });
+});
+
+describe("hazard field visual", () => {
+  it("draws high severity fields with denser and stronger hazard marks", () => {
+    const low = hazardFieldVisual({ severity: 0.2 });
+    const high = hazardFieldVisual({ severity: 0.8 });
+
+    expect(high.fillAlpha).toBeGreaterThan(low.fillAlpha);
+    expect(high.strokeWidth).toBeGreaterThan(low.strokeWidth);
+    expect(high.rockCount).toBeGreaterThan(low.rockCount);
   });
 });

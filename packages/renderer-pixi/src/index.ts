@@ -96,6 +96,24 @@ export function hazardVignetteEffect(snapshot: HazardVignetteInput): HazardVigne
   };
 }
 
+type HazardFieldVisualInput = Pick<SimulationSnapshot["hazards"][number], "severity">;
+
+export type HazardFieldVisual = {
+  fillAlpha: number;
+  strokeAlpha: number;
+  strokeWidth: number;
+  rockCount: number;
+};
+
+export function hazardFieldVisual(hazard: HazardFieldVisualInput): HazardFieldVisual {
+  return {
+    fillAlpha: round(clamp(0.08 + hazard.severity * 0.14, 0.08, 0.24), 2),
+    strokeAlpha: round(clamp(0.34 + hazard.severity * 0.28, 0.34, 0.62), 2),
+    strokeWidth: round(1 + hazard.severity * 1.4, 2),
+    rockCount: Math.round(7 + hazard.severity * 7)
+  };
+}
+
 class PixiRenderer implements AstroPixiRenderer {
   private app?: Application;
   private mountElement?: HTMLElement;
@@ -299,10 +317,15 @@ class PixiRenderer implements AstroPixiRenderer {
     this.hazards.clear();
     for (const hazard of snapshot.hazards) {
       const center = project(hazard.position);
-      this.hazards.circle(center.x, center.y, hazard.radius).fill({ color: 0xff5c7a, alpha: 0.08 + hazard.severity * 0.12 });
-      this.hazards.circle(center.x, center.y, hazard.radius).stroke({ color: 0xff7a90, width: 1, alpha: 0.4 });
-      for (let index = 0; index < 8; index += 1) {
-        const angle = (index / 8) * Math.PI * 2;
+      const visual = hazardFieldVisual(hazard);
+      this.hazards.circle(center.x, center.y, hazard.radius).fill({ color: 0xff5c7a, alpha: visual.fillAlpha });
+      this.hazards.circle(center.x, center.y, hazard.radius).stroke({
+        color: 0xff7a90,
+        width: visual.strokeWidth,
+        alpha: visual.strokeAlpha
+      });
+      for (let index = 0; index < visual.rockCount; index += 1) {
+        const angle = (index / visual.rockCount) * Math.PI * 2;
         const rock = {
           x: center.x + Math.cos(angle) * hazard.radius * 0.62,
           y: center.y + Math.sin(angle) * hazard.radius * 0.36
