@@ -26,7 +26,7 @@ import { buildContractDangerPayTrait, buildContractHazardTrait, buildContractRou
 import { buildRadioMessage } from "./game/radio";
 import { buildLiveStyleReward } from "./game/style";
 import { buildObjectiveDirective, buildObjectiveInterceptReadout } from "./game/objective";
-import { buildPreflightMasteryTargets } from "./game/mastery";
+import { buildPreflightBonusObjectives, buildPreflightMasteryTargets } from "./game/mastery";
 import { buildApproachRewardReadout, buildDockingSpeedReadout } from "./game/docking";
 import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./game/cargo";
 import { buildResultStats } from "./game/resultStats";
@@ -188,6 +188,7 @@ export function App() {
     lastMilestone: hud.lastMilestone
   });
   const preflightMasteryTargets = buildPreflightMasteryTargets({ goldSeconds: hud.paceSecondsRemaining });
+  const preflightBonusObjectives = buildPreflightBonusObjectives({ quickPickupBonus: hud.quickPickupBonus });
   const cargoManifest = buildCargoManifest({ cargoName: hud.cargoName, cargoOnboard: hud.cargoOnboard });
   const resultStats = buildResultStats({ score: hud.score, elapsedSeconds: hud.elapsedSeconds, cargoIntegrity });
   const bestRunChase = buildBestRunChase(bestRun);
@@ -490,6 +491,21 @@ export function App() {
               </strong>
             </div>
           ) : null}
+          <div className="bonus-objectives" aria-label="Bonus objectives">
+            {preflightBonusObjectives.map((objective) => (
+              <span key={objective.label}>
+                {objective.label === "Rush pickup" ? (
+                  <TimerReset size={17} />
+                ) : objective.label === "Clean skim" ? (
+                  <ShieldAlert size={17} />
+                ) : (
+                  <Flag size={17} />
+                )}
+                <small>{objective.label}</small>
+                <strong>{objective.value}</strong>
+              </span>
+            ))}
+          </div>
           {hud.contractOptions.length > 1 ? (
             <div className="contract-selector" aria-label="Contract selection">
               {hud.contractOptions.map((contract) => {

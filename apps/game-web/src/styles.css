@@ -608,6 +608,7 @@ button {
   left: 50%;
   display: grid;
   width: min(390px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
   gap: 13px;
   padding: 20px;
   border: 1px solid rgba(160, 196, 255, 0.28);
@@ -617,6 +618,9 @@ button {
   transform: translate(-50%, -50%);
   backdrop-filter: blur(18px);
   box-shadow: 0 0 54px rgba(124, 225, 255, 0.12);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
 }
 
 .preflight-kicker {
@@ -922,6 +926,46 @@ button {
 .rush-briefing strong {
   color: #ffffff;
   text-align: right;
+}
+
+.bonus-objectives {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.bonus-objectives span {
+  display: grid;
+  grid-template-columns: 17px 1fr;
+  min-width: 0;
+  min-height: 48px;
+  gap: 3px 7px;
+  align-content: center;
+  padding: 8px 10px;
+  border-radius: 7px;
+  background: rgba(142, 230, 184, 0.12);
+  color: #bff7d8;
+}
+
+.bonus-objectives small,
+.bonus-objectives strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.12;
+}
+
+.bonus-objectives small {
+  color: rgba(234, 255, 243, 0.76);
+  font-size: 0.66rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.bonus-objectives strong {
+  grid-column: 2;
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 900;
 }
 
 .contract-selector {
@@ -1464,8 +1508,9 @@ button {
   }
 
   .preflight-overlay {
-    top: 40%;
+    top: 50%;
     width: calc(100vw - 20px);
+    max-height: calc(100vh - 20px);
     padding: 16px;
   }
 
@@ -1480,6 +1525,10 @@ button {
   .rush-briefing strong {
     grid-column: 1 / -1;
     text-align: left;
+  }
+
+  .bonus-objectives {
+    grid-template-columns: 1fr;
   }
 
   .preflight-stats span {

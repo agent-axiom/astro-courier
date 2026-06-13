@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildPreflightMasteryTargets } from "./mastery";
+import { buildPreflightBonusObjectives, buildPreflightMasteryTargets } from "./mastery";
 
 describe("preflight mastery targets", () => {
   it("summarizes gold time and comet mastery conditions", () => {
@@ -14,5 +14,15 @@ describe("preflight mastery targets", () => {
       label: "Gold",
       value: "25s"
     });
+  });
+});
+
+describe("preflight bonus objectives", () => {
+  it("summarizes active style objectives before launch", () => {
+    expect(buildPreflightBonusObjectives({ quickPickupBonus: 180 })).toEqual([
+      { label: "Rush pickup", value: "+180" },
+      { label: "Clean skim", value: "from +140" },
+      { label: "Perfect dock", value: "+220" }
+    ]);
   });
 });
