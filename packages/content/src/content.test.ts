@@ -12,7 +12,8 @@ describe("content schemas", () => {
       "first-light-delivery",
       "return-leg",
       "asteroid-sprint",
-      "gravity-slingshot"
+      "gravity-slingshot",
+      "chain-relay"
     ]);
     expect(parsed.contracts.find((contract) => contract.id === "asteroid-sprint")?.briefing ?? "").toContain("asteroid");
     expect(parsed.contracts.find((contract) => contract.id === "asteroid-sprint")?.riskLabel).toBe("Asteroid Field");
@@ -31,6 +32,14 @@ describe("content schemas", () => {
         rotation: 0.2
       },
       medalTimes: { bronze: 76, silver: 44, gold: 26 }
+    });
+    expect(parsed.contracts.find((contract) => contract.id === "chain-relay")).toMatchObject({
+      title: "Chain Relay",
+      riskLabel: "Chain Timer",
+      rewardLabel: "Chain finish bonuses",
+      cargoId: "volatile-comet-ice",
+      hazardSeverityMultiplier: 1.3,
+      medalTimes: { bronze: 64, silver: 38, gold: 22 }
     });
     expect(parsed.cargo.find((cargo) => cargo.id === "volatile-comet-ice")).toMatchObject({
       name: "Volatile Comet Ice",

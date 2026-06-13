@@ -187,6 +187,20 @@ describe("GameShell lifecycle", () => {
         cargoFragility: 0.8,
         hazardSeverityMultiplier: 1.2,
         medalTimes: { bronze: 76, silver: 44, gold: 26 }
+      },
+      {
+        id: "chain-relay",
+        title: "Chain Relay",
+        briefing: "Launch fast, skim the asteroid field, and carry the style chain all the way into Tea Station.",
+        riskLabel: "Chain Timer",
+        rewardLabel: "Chain finish bonuses",
+        pickupLabel: "Luma North Pad",
+        destinationLabel: "Tea Station Dock A",
+        cargoName: "Volatile Comet Ice",
+        cargoKind: "unstable",
+        cargoFragility: 1,
+        hazardSeverityMultiplier: 1.3,
+        medalTimes: { bronze: 64, silver: 38, gold: 22 }
       }
     ]);
   });
