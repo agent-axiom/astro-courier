@@ -67,6 +67,11 @@ export type ResultBoardAction = {
   tone: "retry" | "clear" | "comet" | "complete";
 };
 
+const cleanCargoDamageLimit = 0.02;
+const cometReserveMinRatio = 0.75;
+const cometReserveNearMissRatio = 0.6;
+const perfectLandingBonus = 300;
+
 export function buildResultCoach(input: ResultCoachInput): ResultCoach {
   if (input.status === "crashed") {
     const gravityHullCollision = input.contractId === "gravity-slingshot" && input.crashReason === "Hull Collision";
@@ -168,6 +173,11 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
     };
   }
 
+  const cometNearMissCoach = buildCometNearMissCoach(input, fuelRatio);
+  if (cometNearMissCoach) {
+    return cometNearMissCoach;
+  }
+
   if (input.medal === "comet" || input.grade === "S") {
     return {
       label: "Next run",
@@ -217,6 +227,35 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
 
 function isDeliveryNearMiss(input: ResultCoachInput): boolean {
   return input.objectivePhase === "delivery" && input.targetDistance !== undefined && input.targetDistance <= 60;
+}
+
+function buildCometNearMissCoach(input: ResultCoachInput, fuelRatio: number): ResultCoach | undefined {
+  if (
+    input.status !== "delivered" ||
+    input.medal !== "gold" ||
+    input.lastMilestone !== "Express Finish" ||
+    input.cargoDamage > cleanCargoDamageLimit
+  ) {
+    return undefined;
+  }
+
+  if (fuelRatio >= cometReserveNearMissRatio && fuelRatio < cometReserveMinRatio) {
+    return {
+      label: "Next run",
+      value: "Bank 75% fuel for comet",
+      tone: "opportunity"
+    };
+  }
+
+  if (fuelRatio >= cometReserveMinRatio && input.scoreBreakdown.landingBonus < perfectLandingBonus) {
+    return {
+      label: "Next run",
+      value: "Perfect dock for comet",
+      tone: "opportunity"
+    };
+  }
+
+  return undefined;
 }
 
 export function buildResultBoardPrompt(input: ResultBoardPromptInput): ResultBoardPrompt {

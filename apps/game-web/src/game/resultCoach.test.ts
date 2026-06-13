@@ -323,6 +323,44 @@ describe("result coach", () => {
     });
   });
 
+  it("coaches gold comet near-misses toward the missing reserve", () => {
+    expect(
+      buildResultCoach({
+        status: "delivered",
+        lastMilestone: "Express Finish",
+        medal: "gold",
+        grade: "A",
+        cargoDamage: 0,
+        fuel: 72,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 180, landingBonus: 300 }
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Bank 75% fuel for comet",
+      tone: "opportunity"
+    });
+  });
+
+  it("coaches gold comet near-misses toward the missing perfect dock", () => {
+    expect(
+      buildResultCoach({
+        status: "delivered",
+        lastMilestone: "Express Finish",
+        medal: "gold",
+        grade: "A",
+        cargoDamage: 0,
+        fuel: 82,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 180, landingBonus: 120 }
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Perfect dock for comet",
+      tone: "opportunity"
+    });
+  });
+
   it("coaches perfect approach runs toward repeating the soft dock", () => {
     expect(
       buildResultCoach({
