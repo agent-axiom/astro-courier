@@ -718,7 +718,14 @@ export function App() {
           className={`screen-feedback screen-feedback-${screenFeedback.feedback.tone} screen-feedback-${screenFeedback.feedback.intensity}`}
           style={{ "--screen-feedback-duration": `${screenFeedback.feedback.durationMs}ms` } as CSSProperties}
           aria-hidden="true"
-        />
+        >
+          {screenFeedback.feedback.label ? (
+            <div className="screen-feedback-callout">
+              <span>{screenFeedback.feedback.label}</span>
+              {screenFeedback.feedback.value ? <strong>{screenFeedback.feedback.value}</strong> : null}
+            </div>
+          ) : null}
+        </div>
       ) : null}
       {touchFlightPad.visible ? (
         <div className={`touch-flight-pad touch-flight-pad-${touchFlightPad.tone}`} aria-hidden="true">

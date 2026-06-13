@@ -119,6 +119,44 @@ button {
   animation-name: screen-feedback-heavy;
 }
 
+.screen-feedback-callout {
+  position: absolute;
+  top: 118px;
+  left: 50%;
+  display: grid;
+  gap: 3px;
+  min-width: min(280px, calc(100vw - 48px));
+  padding: 10px 14px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: rgba(8, 13, 28, 0.76);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.28);
+  text-align: center;
+  animation: screen-feedback-callout var(--screen-feedback-duration, 420ms) cubic-bezier(0.18, 0.82, 0.22, 1) both;
+  backdrop-filter: blur(14px);
+}
+
+.screen-feedback-callout span,
+.screen-feedback-callout strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.05;
+}
+
+.screen-feedback-callout span {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.74rem;
+  font-weight: 880;
+  text-transform: uppercase;
+}
+
+.screen-feedback-callout strong {
+  color: #ffffff;
+  font-size: 1.06rem;
+  font-weight: 920;
+}
+
 @keyframes screen-feedback-light {
   0% {
     opacity: 0;
@@ -177,6 +215,28 @@ button {
   }
 }
 
+@keyframes screen-feedback-callout {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 10px) scale(0.96);
+  }
+
+  18% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+
+  70% {
+    opacity: 1;
+    transform: translate(-50%, -4px) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -12px) scale(0.98);
+  }
+}
+
 .touch-flight-pad {
   position: absolute;
   right: max(18px, env(safe-area-inset-right));
@@ -232,6 +292,12 @@ button {
 @media (prefers-reduced-motion: reduce) {
   .screen-feedback {
     animation-name: screen-feedback-light;
+  }
+
+  .screen-feedback-callout {
+    animation: none;
+    opacity: 1;
+    transform: translateX(-50%);
   }
 
   .daily-reset-urgent {

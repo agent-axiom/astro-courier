@@ -1,6 +1,8 @@
 import type { GameAudioEvent } from "./audioEvents";
 
 export type ScreenFeedback = {
+  label?: string;
+  value?: string;
   tone: "style" | "success" | "warning" | "danger";
   intensity: "light" | "medium" | "heavy";
   durationMs: number;
@@ -8,19 +10,19 @@ export type ScreenFeedback = {
 
 export function buildScreenFeedback(events: readonly GameAudioEvent[]): ScreenFeedback | undefined {
   if (events.includes("ship-crash")) {
-    return { tone: "danger", intensity: "heavy", durationMs: 520 };
+    return { label: "Insurance event", value: "Recover line", tone: "danger", intensity: "heavy", durationMs: 520 };
   }
   if (events.includes("delivery-complete")) {
     return { tone: "success", intensity: "heavy", durationMs: 620 };
   }
   if (events.includes("cargo-loaded")) {
-    return { tone: "success", intensity: "medium", durationMs: 360 };
+    return { label: "Cargo secured", value: "Outbound line", tone: "success", intensity: "medium", durationMs: 360 };
   }
   if (events.includes("ghost-pass")) {
     return { tone: "success", intensity: "heavy", durationMs: 520 };
   }
   if (events.includes("pb-lead")) {
-    return { tone: "success", intensity: "medium", durationMs: 420 };
+    return { label: "PB lead", value: "Hold pace", tone: "success", intensity: "medium", durationMs: 420 };
   }
   if (events.includes("ghost-pressure")) {
     return { tone: "style", intensity: "medium", durationMs: 420 };

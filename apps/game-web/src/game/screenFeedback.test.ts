@@ -4,6 +4,8 @@ import { buildScreenFeedback } from "./screenFeedback";
 describe("screen feedback", () => {
   it("prioritizes crash feedback over lower-impact events", () => {
     expect(buildScreenFeedback(["style-hit", "ship-crash"])).toEqual({
+      label: "Insurance event",
+      value: "Recover line",
       tone: "danger",
       intensity: "heavy",
       durationMs: 520
@@ -17,6 +19,8 @@ describe("screen feedback", () => {
       durationMs: 620
     });
     expect(buildScreenFeedback(["cargo-loaded"])).toEqual({
+      label: "Cargo secured",
+      value: "Outbound line",
       tone: "success",
       intensity: "medium",
       durationMs: 360
@@ -109,6 +113,8 @@ describe("screen feedback", () => {
 
   it("maps personal-best leads to medium success feedback", () => {
     expect(buildScreenFeedback(["pb-lead"])).toEqual({
+      label: "PB lead",
+      value: "Hold pace",
       tone: "success",
       intensity: "medium",
       durationMs: 420
@@ -127,6 +133,8 @@ describe("screen feedback", () => {
       durationMs: 360
     });
     expect(buildScreenFeedback(["pb-pressure", "pb-lead"])).toEqual({
+      label: "PB lead",
+      value: "Hold pace",
       tone: "success",
       intensity: "medium",
       durationMs: 420
