@@ -43,7 +43,8 @@ import {
   buildContractPreflightKicker,
   buildContractRoutePlan,
   buildDailyDispatch,
-  buildDailyDispatchAction
+  buildDailyDispatchAction,
+  buildDailyDispatchStatus
 } from "./game/contracts";
 import { buildRadioMessage } from "./game/radio";
 import { buildLiveStyleReward } from "./game/style";
@@ -330,6 +331,10 @@ export function App() {
   const routeTargetSelectionAction = buildRouteBoardSelectionAction(routeBoardTarget, hud.contractId);
   const dailyDispatch = buildDailyDispatch({ contracts: hud.contractOptions, now: new Date() });
   const dailyDispatchAction = buildDailyDispatchAction(dailyDispatch, hud.contractId);
+  const dailyDispatchStatus = buildDailyDispatchStatus(
+    dailyDispatch,
+    dailyDispatch ? bestRunsByContract[dailyDispatch.contractId] : undefined
+  );
   const bestRunDelta = buildBestRunDelta({
     bestRun,
     run: { score: hud.score, elapsedSeconds: hud.elapsedSeconds, medal: hud.medal },
@@ -720,21 +725,24 @@ export function App() {
             dailyDispatchAction ? (
               <button
                 type="button"
-                className="daily-dispatch-briefing daily-dispatch-action"
+                className={`daily-dispatch-briefing daily-dispatch-${dailyDispatchStatus?.tone ?? "open"} daily-dispatch-action`}
                 aria-label={`${dailyDispatch.label}: ${dailyDispatch.value}. ${dailyDispatchAction.label}`}
                 onClick={selectDailyDispatch}
               >
                 <CalendarDays size={18} />
                 <span>{dailyDispatch.label}</span>
                 <strong>{dailyDispatch.value}</strong>
-                <small>{dailyDispatch.seed}</small>
+                <small>{dailyDispatchStatus ? `${dailyDispatchStatus.value} / ${dailyDispatch.seed}` : dailyDispatch.seed}</small>
               </button>
             ) : (
-              <div className="daily-dispatch-briefing" aria-label={`${dailyDispatch.label}: ${dailyDispatch.value}`}>
+              <div
+                className={`daily-dispatch-briefing daily-dispatch-${dailyDispatchStatus?.tone ?? "open"}`}
+                aria-label={`${dailyDispatch.label}: ${dailyDispatch.value}`}
+              >
                 <CalendarDays size={18} />
                 <span>{dailyDispatch.label}</span>
                 <strong>{dailyDispatch.value}</strong>
-                <small>{dailyDispatch.seed}</small>
+                <small>{dailyDispatchStatus ? `${dailyDispatchStatus.value} / ${dailyDispatch.seed}` : dailyDispatch.seed}</small>
               </div>
             )
           ) : null}

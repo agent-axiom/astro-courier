@@ -6,6 +6,7 @@ import {
   buildContractRoutePlan,
   buildDailyDispatch,
   buildDailyDispatchAction,
+  buildDailyDispatchStatus,
   getNextContractId
 } from "./contracts";
 
@@ -66,6 +67,38 @@ describe("contract rotation", () => {
     });
     expect(buildDailyDispatchAction(dispatch, "asteroid-sprint")).toBeUndefined();
     expect(buildDailyDispatchAction(undefined, "asteroid-sprint")).toBeUndefined();
+  });
+
+  it("summarizes daily dispatch clear status from the saved route best", () => {
+    const dispatch = {
+      label: "Daily dispatch" as const,
+      value: "Asteroid Sprint",
+      contractId: "asteroid-sprint",
+      seed: "daily-2026-06-13-asteroid-sprint",
+      tone: "daily" as const
+    };
+
+    expect(buildDailyDispatchStatus(dispatch, undefined)).toEqual({
+      label: "Daily status",
+      value: "Open today",
+      tone: "open"
+    });
+    expect(buildDailyDispatchStatus(dispatch, { medal: "none" })).toEqual({
+      label: "Daily status",
+      value: "Open today",
+      tone: "open"
+    });
+    expect(buildDailyDispatchStatus(dispatch, { medal: "gold" })).toEqual({
+      label: "Daily status",
+      value: "Cleared Gold",
+      tone: "cleared"
+    });
+    expect(buildDailyDispatchStatus(dispatch, { medal: "comet" })).toEqual({
+      label: "Daily status",
+      value: "Comet held",
+      tone: "comet"
+    });
+    expect(buildDailyDispatchStatus(undefined, { medal: "gold" })).toBeUndefined();
   });
 
   it("formats elevated contract hazard load for briefing cards", () => {

@@ -24,6 +24,16 @@ export type DailyDispatchAction = {
   contractId: string;
 };
 
+export type DailyDispatchBestRun = {
+  medal: "none" | "bronze" | "silver" | "gold" | "comet";
+};
+
+export type DailyDispatchStatus = {
+  label: "Daily status";
+  value: string;
+  tone: "open" | "cleared" | "comet";
+};
+
 export type ContractHazardTraitInput = {
   hazardSeverityMultiplier?: number;
 };
@@ -88,6 +98,41 @@ export function buildDailyDispatchAction(dispatch: DailyDispatch | undefined, cu
     label: "Open daily",
     contractId: dispatch.contractId
   };
+}
+
+export function buildDailyDispatchStatus(
+  dispatch: DailyDispatch | undefined,
+  bestRun: DailyDispatchBestRun | undefined
+): DailyDispatchStatus | undefined {
+  if (!dispatch) {
+    return undefined;
+  }
+
+  if (!bestRun || bestRun.medal === "none") {
+    return {
+      label: "Daily status",
+      value: "Open today",
+      tone: "open"
+    };
+  }
+
+  if (bestRun.medal === "comet") {
+    return {
+      label: "Daily status",
+      value: "Comet held",
+      tone: "comet"
+    };
+  }
+
+  return {
+    label: "Daily status",
+    value: `Cleared ${capitalize(bestRun.medal)}`,
+    tone: "cleared"
+  };
+}
+
+function capitalize(value: string): string {
+  return `${value.slice(0, 1).toUpperCase()}${value.slice(1)}`;
 }
 
 export function buildContractHazardTrait(input: ContractHazardTraitInput): string | undefined {
