@@ -65,6 +65,37 @@ export function landingPadVisual(pad: LandingPadVisualInput): LandingPadVisual {
   };
 }
 
+type HazardVignetteInput = Pick<SimulationSnapshot, "nearestHazard" | "status">;
+
+export type HazardVignetteEffect = {
+  color: number;
+  width: number;
+  alpha: number;
+};
+
+export function hazardVignetteEffect(snapshot: HazardVignetteInput): HazardVignetteEffect | undefined {
+  const hazard = snapshot.nearestHazard;
+  if (snapshot.status !== "flying" || !hazard) {
+    return undefined;
+  }
+
+  if (hazard.dangerLevel === "inside") {
+    return {
+      color: 0xff4d6d,
+      width: 10,
+      alpha: round(clamp(0.24 + hazard.severity * 0.22, 0.22, 0.5), 2)
+    };
+  }
+
+  const distancePastEdge = Math.max(0, hazard.distance - hazard.radius);
+  const pressure = 1 - clamp(distancePastEdge / Math.max(1, hazard.radius), 0, 1);
+  return {
+    color: 0xffd166,
+    width: 6,
+    alpha: round(clamp(0.08 + pressure * 0.16 + hazard.severity * 0.06, 0.08, 0.32), 2)
+  };
+}
+
 class PixiRenderer implements AstroPixiRenderer {
   private app?: Application;
   private mountElement?: HTMLElement;
@@ -325,6 +356,15 @@ class PixiRenderer implements AstroPixiRenderer {
         alpha: 0.18 + (0.25 - fuelRatio) * 0.7
       });
     }
+
+    const hazardEffect = hazardVignetteEffect(snapshot);
+    if (hazardEffect) {
+      this.screenFx.rect(0, 0, viewport.width, viewport.height).stroke({
+        color: hazardEffect.color,
+        width: hazardEffect.width,
+        alpha: hazardEffect.alpha
+      });
+    }
   }
 }
 
@@ -360,6 +400,10 @@ function clampToViewport(point: Vec2, viewport: { width: number; height: number 
     x: Math.min(viewport.width - inset, Math.max(inset, point.x)),
     y: Math.min(viewport.height - inset, Math.max(inset, point.y))
   };
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
 }
 
 function round(value: number, digits: number): number {

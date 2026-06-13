@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { landingPadVisual, objectiveBeaconPulse } from "./index";
+import { hazardVignetteEffect, landingPadVisual, objectiveBeaconPulse } from "./index";
 
 describe("objective beacon pulse", () => {
   it("returns bounded radius and alpha values across the pulse cycle", () => {
@@ -27,5 +27,56 @@ describe("landing pad visual state", () => {
     expect(destination.strokeWidth).toBeGreaterThan(neutral.strokeWidth);
     expect(destination.alpha).toBeGreaterThan(neutral.alpha);
     expect(neutral.haloAlpha).toBe(0);
+  });
+});
+
+describe("hazard vignette effect", () => {
+  it("stays hidden outside flight or without a nearby hazard", () => {
+    expect(hazardVignetteEffect({ status: "flying", nearestHazard: undefined })).toBeUndefined();
+    expect(
+      hazardVignetteEffect({
+        status: "paused",
+        nearestHazard: {
+          id: "training-asteroids",
+          type: "asteroid_field",
+          position: { x: 0, y: 0 },
+          distance: 80,
+          radius: 70,
+          severity: 0.2,
+          dangerLevel: "near"
+        }
+      })
+    ).toBeUndefined();
+  });
+
+  it("intensifies from a near hazard warning to an inside hazard warning", () => {
+    const near = hazardVignetteEffect({
+      status: "flying",
+      nearestHazard: {
+        id: "training-asteroids",
+        type: "asteroid_field",
+        position: { x: 0, y: 0 },
+        distance: 118,
+        radius: 70,
+        severity: 0.2,
+        dangerLevel: "near"
+      }
+    });
+    const inside = hazardVignetteEffect({
+      status: "flying",
+      nearestHazard: {
+        id: "training-asteroids",
+        type: "asteroid_field",
+        position: { x: 0, y: 0 },
+        distance: 36,
+        radius: 70,
+        severity: 0.2,
+        dangerLevel: "inside"
+      }
+    });
+
+    expect(near).toMatchObject({ color: 0xffd166, width: 6 });
+    expect(inside).toMatchObject({ color: 0xff4d6d, width: 10 });
+    expect(inside?.alpha).toBeGreaterThan(near?.alpha ?? 0);
   });
 });
