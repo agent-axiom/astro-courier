@@ -7,7 +7,8 @@ export type GameAudioEvent =
   | "assist-burn"
   | "boost-burn"
   | "fuel-critical"
-  | "hazard-contact";
+  | "hazard-contact"
+  | "trajectory-warning";
 
 export type HudAudioSnapshot = {
   status: RunStatus;
@@ -15,6 +16,7 @@ export type HudAudioSnapshot = {
   fuel: number;
   maxFuel: number;
   hazardDangerLevel?: "near" | "inside";
+  trajectoryRiskLevel?: "near" | "inside";
 };
 
 const criticalFuelRatio = 0.15;
@@ -59,6 +61,10 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
 
   if (previous?.hazardDangerLevel !== "inside" && current.hazardDangerLevel === "inside") {
     events.push("hazard-contact");
+  }
+
+  if (previous?.trajectoryRiskLevel !== current.trajectoryRiskLevel && current.trajectoryRiskLevel === "inside") {
+    events.push("trajectory-warning");
   }
 
   return events;

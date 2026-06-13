@@ -49,7 +49,8 @@ const eventTones: Record<GameAudioEvent, { frequency: number; duration: number; 
   "assist-burn": { frequency: 420, duration: 0.1, gain: 0.04 },
   "boost-burn": { frequency: 560, duration: 0.07, gain: 0.045 },
   "fuel-critical": { frequency: 220, duration: 0.14, gain: 0.05 },
-  "hazard-contact": { frequency: 160, duration: 0.14, gain: 0.055 }
+  "hazard-contact": { frequency: 160, duration: 0.14, gain: 0.055 },
+  "trajectory-warning": { frequency: 300, duration: 0.11, gain: 0.045 }
 };
 
 export function createGameAudioController(options: GameAudioControllerOptions = {}): GameAudioController {

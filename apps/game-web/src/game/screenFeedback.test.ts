@@ -44,6 +44,14 @@ describe("screen feedback", () => {
     });
   });
 
+  it("maps trajectory warnings to medium warning feedback", () => {
+    expect(buildScreenFeedback(["trajectory-warning"])).toEqual({
+      tone: "warning",
+      intensity: "medium",
+      durationMs: 380
+    });
+  });
+
   it("stays hidden when no gameplay event needs screen feedback", () => {
     expect(buildScreenFeedback([])).toBeUndefined();
   });

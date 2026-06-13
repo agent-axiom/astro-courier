@@ -9,6 +9,8 @@ export type RunFeedSnapshot = {
   fuel: number;
   maxFuel: number;
   hazardDangerLevel?: "near" | "inside";
+  trajectoryRiskLevel?: "near" | "inside";
+  trajectoryRiskSeconds?: number;
 };
 
 export type RunFeedUpdate = {
@@ -90,6 +92,20 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
     });
   }
 
+  if (previous.trajectoryRiskLevel !== current.trajectoryRiskLevel && current.trajectoryRiskLevel === "inside") {
+    updates.push({
+      label: "Collision forecast",
+      value: `Evade in ${formatSeconds(current.trajectoryRiskSeconds)}`,
+      tone: "danger"
+    });
+  } else if (previous.trajectoryRiskLevel !== current.trajectoryRiskLevel && current.trajectoryRiskLevel === "near") {
+    updates.push({
+      label: "Hazard vector",
+      value: `Thread in ${formatSeconds(current.trajectoryRiskSeconds)}`,
+      tone: "warning"
+    });
+  }
+
   return updates;
 }
 
@@ -126,4 +142,8 @@ function formatMilestoneValue(styleAward: number | undefined): string {
 
 function isFuelCritical(snapshot: RunFeedSnapshot): boolean {
   return snapshot.maxFuel > 0 && snapshot.fuel / snapshot.maxFuel <= criticalFuelRatio;
+}
+
+function formatSeconds(seconds: number | undefined): string {
+  return `${(seconds ?? 0).toFixed(1)}s`;
 }

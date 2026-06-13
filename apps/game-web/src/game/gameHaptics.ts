@@ -23,6 +23,9 @@ export function hapticPatternForEvents(events: readonly GameAudioEvent[]): Hapti
   if (events.includes("fuel-critical")) {
     return [24, 30, 24];
   }
+  if (events.includes("trajectory-warning")) {
+    return [18, 24, 18];
+  }
   if (events.includes("style-hit") || events.includes("assist-burn")) {
     return [14];
   }

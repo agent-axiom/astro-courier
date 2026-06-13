@@ -21,6 +21,17 @@ describe("game audio controller", () => {
     expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.08, 3);
   });
 
+  it("plays a distinct warning tone for projected trajectory danger", () => {
+    const context = new FakeAudioContext();
+    const controller = createGameAudioController({ createContext: () => context });
+
+    controller.play(["trajectory-warning"]);
+
+    expect(context.oscillators).toHaveLength(1);
+    expect(context.oscillators[0]?.frequencyValue).toBe(300);
+    expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.11, 3);
+  });
+
   it("does not create an audio context for empty event batches", () => {
     const createContext = vi.fn(() => new FakeAudioContext());
     const controller = createGameAudioController({ createContext });

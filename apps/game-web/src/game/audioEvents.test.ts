@@ -6,7 +6,8 @@ const baseSnapshot: HudAudioSnapshot = {
   lastMilestone: undefined,
   fuel: 100,
   maxFuel: 100,
-  hazardDangerLevel: undefined
+  hazardDangerLevel: undefined,
+  trajectoryRiskLevel: undefined
 };
 
 describe("HUD audio events", () => {
@@ -35,5 +36,18 @@ describe("HUD audio events", () => {
   it("warns when the ship enters a hazard", () => {
     expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, hazardDangerLevel: "inside" })).toEqual(["hazard-contact"]);
     expect(deriveHudAudioEvents({ ...baseSnapshot, hazardDangerLevel: "inside" }, { ...baseSnapshot, hazardDangerLevel: "inside" })).toEqual([]);
+  });
+
+  it("warns once when the predicted trajectory turns dangerous", () => {
+    expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, trajectoryRiskLevel: "inside" })).toEqual(["trajectory-warning"]);
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, trajectoryRiskLevel: "inside" },
+        { ...baseSnapshot, trajectoryRiskLevel: "inside" }
+      )
+    ).toEqual([]);
+    expect(
+      deriveHudAudioEvents({ ...baseSnapshot, trajectoryRiskLevel: "near" }, { ...baseSnapshot, trajectoryRiskLevel: "inside" })
+    ).toEqual(["trajectory-warning"]);
   });
 });

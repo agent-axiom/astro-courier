@@ -266,7 +266,7 @@ export function App() {
         screenFeedbackTimerRef.current = undefined;
       }, feedback.durationMs);
     }
-  }, [hud.fuel, hud.hazardDangerLevel, hud.lastMilestone, hud.maxFuel, hud.status]);
+  }, [hud.fuel, hud.hazardDangerLevel, hud.lastMilestone, hud.maxFuel, hud.status, hud.trajectoryRiskLevel]);
 
   useEffect(() => {
     const currentSnapshot = toRunFeedSnapshot(hud);
@@ -281,7 +281,16 @@ export function App() {
       nextRunFeedIdRef.current = result.nextId;
       return result.entries;
     });
-  }, [hud.fuel, hud.hazardDangerLevel, hud.lastMilestone, hud.lastStyleAward, hud.maxFuel, hud.status]);
+  }, [
+    hud.fuel,
+    hud.hazardDangerLevel,
+    hud.lastMilestone,
+    hud.lastStyleAward,
+    hud.maxFuel,
+    hud.status,
+    hud.trajectoryRiskLevel,
+    hud.trajectoryRiskSeconds
+  ]);
 
   useEffect(() => {
     if (hud.status !== "delivered") {
@@ -1196,7 +1205,8 @@ function toHudAudioSnapshot(hud: HudState): HudAudioSnapshot {
     lastMilestone: hud.lastMilestone,
     fuel: hud.fuel,
     maxFuel: hud.maxFuel,
-    hazardDangerLevel: hud.hazardDangerLevel
+    hazardDangerLevel: hud.hazardDangerLevel,
+    trajectoryRiskLevel: hud.trajectoryRiskLevel
   };
 }
 
@@ -1207,7 +1217,9 @@ function toRunFeedSnapshot(hud: HudState): RunFeedSnapshot {
     lastStyleAward: hud.lastStyleAward,
     fuel: hud.fuel,
     maxFuel: hud.maxFuel,
-    hazardDangerLevel: hud.hazardDangerLevel
+    hazardDangerLevel: hud.hazardDangerLevel,
+    trajectoryRiskLevel: hud.trajectoryRiskLevel,
+    trajectoryRiskSeconds: hud.trajectoryRiskSeconds
   };
 }
 

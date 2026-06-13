@@ -7,7 +7,9 @@ const baseSnapshot: RunFeedSnapshot = {
   lastStyleAward: undefined,
   fuel: 100,
   maxFuel: 100,
-  hazardDangerLevel: undefined
+  hazardDangerLevel: undefined,
+  trajectoryRiskLevel: undefined,
+  trajectoryRiskSeconds: undefined
 };
 
 describe("run action feed", () => {
@@ -52,6 +54,29 @@ describe("run action feed", () => {
         label: "Insurance event",
         value: "Review approach",
         tone: "danger"
+      }
+    ]);
+  });
+
+  it("warns when the projected trajectory enters hazard space", () => {
+    expect(deriveRunFeedUpdates(baseSnapshot, { ...baseSnapshot, trajectoryRiskLevel: "inside", trajectoryRiskSeconds: 1.8 })).toEqual([
+      {
+        label: "Collision forecast",
+        value: "Evade in 1.8s",
+        tone: "danger"
+      }
+    ]);
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, trajectoryRiskLevel: "inside", trajectoryRiskSeconds: 1.8 },
+        { ...baseSnapshot, trajectoryRiskLevel: "inside", trajectoryRiskSeconds: 1.2 }
+      )
+    ).toEqual([]);
+    expect(deriveRunFeedUpdates(baseSnapshot, { ...baseSnapshot, trajectoryRiskLevel: "near", trajectoryRiskSeconds: 2.4 })).toEqual([
+      {
+        label: "Hazard vector",
+        value: "Thread in 2.4s",
+        tone: "warning"
       }
     ]);
   });
