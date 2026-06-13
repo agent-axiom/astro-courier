@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   boostBurstVisual,
+  cameraFocus,
   gravitySlingCueVisual,
   hazardFieldVisual,
   hazardVignetteEffect,
@@ -13,6 +14,53 @@ import {
   trajectoryPointVisual,
   velocityVectorVisual
 } from "./index";
+
+describe("camera focus", () => {
+  it("stays centered on the ship outside active flight", () => {
+    expect(
+      cameraFocus({
+        status: "paused",
+        ship: { position: { x: 10, y: 20 }, velocity: { x: 40, y: 0 } }
+      })
+    ).toEqual({ x: 10, y: 20 });
+  });
+
+  it("leads the camera into a fast flight vector", () => {
+    expect(
+      cameraFocus({
+        status: "flying",
+        ship: { position: { x: 10, y: 20 }, velocity: { x: 40, y: 0 } }
+      })
+    ).toEqual({ x: 56, y: 20 });
+  });
+
+  it("damps camera lead during close docking precision", () => {
+    const far = cameraFocus({
+      status: "flying",
+      ship: { position: { x: 10, y: 20 }, velocity: { x: 60, y: 0 } }
+    });
+    const close = cameraFocus({
+      status: "flying",
+      ship: { position: { x: 10, y: 20 }, velocity: { x: 60, y: 0 } },
+      objectiveTarget: {
+        id: "dock-a",
+        role: "destination",
+        position: { x: 0, y: 0 },
+        distance: 48,
+        bearing: 0,
+        speed: 60,
+        allowedApproachSpeed: 42,
+        angleError: 0,
+        requiredAngleTolerance: 0.3,
+        assistAvailable: false,
+        landingStatus: "ready"
+      }
+    });
+
+    expect(far.x).toBeGreaterThan(close.x);
+    expect(close.x).toBeGreaterThan(10);
+  });
+});
 
 describe("objective beacon pulse", () => {
   it("returns bounded radius and alpha values across the pulse cycle", () => {

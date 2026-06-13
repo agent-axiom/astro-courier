@@ -18,6 +18,27 @@ export function createAstroPixiRenderer(): AstroPixiRenderer {
   return new PixiRenderer();
 }
 
+export type CameraFocusInput = Pick<SimulationSnapshot, "status" | "objectiveTarget"> & {
+  ship: Pick<SimulationSnapshot["ship"], "position" | "velocity">;
+};
+
+export function cameraFocus(input: CameraFocusInput): Vec2 {
+  const speed = Math.hypot(input.ship.velocity.x, input.ship.velocity.y);
+  if (input.status !== "flying" || speed < 4) {
+    return input.ship.position;
+  }
+
+  const dockingDamping =
+    input.objectiveTarget && input.objectiveTarget.distance <= 120
+      ? clamp(input.objectiveTarget.distance / 120, 0.25, 1)
+      : 1;
+  const lead = Math.min(72, speed * 1.15) * dockingDamping;
+  return {
+    x: round(input.ship.position.x + (input.ship.velocity.x / speed) * lead, 2),
+    y: round(input.ship.position.y + (input.ship.velocity.y / speed) * lead, 2)
+  };
+}
+
 export function objectiveBeaconPulse(tick: number): { radius: number; alpha: number } {
   const wave = (Math.sin(tick * 0.12) + 1) / 2;
   return {
@@ -502,7 +523,7 @@ class PixiRenderer implements AstroPixiRenderer {
       width: this.app.renderer.width,
       height: this.app.renderer.height
     };
-    const camera = snapshot.ship.position;
+    const camera = cameraFocus(snapshot);
     const project = (point: Vec2): Vec2 => ({
       x: point.x - camera.x + viewport.width / 2,
       y: point.y - camera.y + viewport.height / 2
