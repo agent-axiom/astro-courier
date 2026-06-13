@@ -16,6 +16,11 @@ describe("screen feedback", () => {
       intensity: "heavy",
       durationMs: 620
     });
+    expect(buildScreenFeedback(["cargo-loaded"])).toEqual({
+      tone: "success",
+      intensity: "medium",
+      durationMs: 360
+    });
     expect(buildScreenFeedback(["style-hit"])).toEqual({
       tone: "style",
       intensity: "light",

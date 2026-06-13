@@ -13,6 +13,9 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[]): ScreenFe
   if (events.includes("delivery-complete")) {
     return { tone: "success", intensity: "heavy", durationMs: 620 };
   }
+  if (events.includes("cargo-loaded")) {
+    return { tone: "success", intensity: "medium", durationMs: 360 };
+  }
   if (events.includes("ghost-pass")) {
     return { tone: "success", intensity: "heavy", durationMs: 520 };
   }
