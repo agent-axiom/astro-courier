@@ -15,7 +15,9 @@ const baseHud: HudState = {
   speed: 0,
   medal: "none",
   landingStatus: "approach",
-  targetDistance: 220
+  targetDistance: 220,
+  paceTier: "gold",
+  paceSecondsRemaining: 35
 };
 
 describe("radio feedback copy", () => {

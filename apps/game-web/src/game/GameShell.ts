@@ -11,6 +11,7 @@ import {
 } from "@astro-courier/simulation";
 import type { LandingGuidanceStatus, ObjectivePhase, PlayerCommand, RunMedal, RunStatus } from "@astro-courier/shared";
 import { KeyboardInput, type InputSource } from "./input";
+import { calculateContractPace, type ContractPaceTier } from "./pace";
 
 export type HudState = {
   status: RunStatus;
@@ -29,6 +30,8 @@ export type HudState = {
   lastMilestone?: string;
   medal: RunMedal;
   landingRating?: string;
+  paceTier: ContractPaceTier;
+  paceSecondsRemaining: number;
 };
 
 export type GameShellOptions = {
@@ -148,6 +151,7 @@ export class GameShell {
   private publishHud(): void {
     const result = summarizeRun(this.world);
     const snapshot = snapshotWorld(this.world);
+    const pace = calculateContractPace(result.elapsedSeconds, this.world.activeContract.medalTimes);
     this.onHud({
       status: this.world.status,
       objectivePhase: this.world.objectivePhase,
@@ -164,7 +168,9 @@ export class GameShell {
       assistAvailable: snapshot.objectiveTarget?.assistAvailable,
       lastMilestone: this.world.lastMilestone,
       medal: result.medal,
-      landingRating: result.landingRating
+      landingRating: result.landingRating,
+      paceTier: pace.tier,
+      paceSecondsRemaining: pace.secondsRemaining
     });
   }
 }

@@ -20,7 +20,9 @@ const initialHud: HudState = {
   cargoDamage: 0,
   cargoOnboard: false,
   speed: 0,
-  medal: "none"
+  medal: "none",
+  paceTier: "gold",
+  paceSecondsRemaining: 35
 };
 
 const useGameStore = create<GameStore>((set) => ({
@@ -140,6 +142,10 @@ export function App() {
           <span>Target</span>
           <strong>{targetDistanceLabel}</strong>
         </div>
+        <div className={`pace-chip pace-${hud.paceTier}`}>
+          <span>{paceLabel(hud.paceTier)}</span>
+          <strong>{hud.paceTier === "overtime" ? "Expired" : `${hud.paceSecondsRemaining.toFixed(1)}s`}</strong>
+        </div>
         {hud.landingStatus ? (
           <div className={`guidance-chip guidance-${hud.assistAvailable ? "assist" : hud.landingStatus}`}>
             {guidanceLabel(hud.landingStatus, Boolean(hud.assistAvailable))}
@@ -168,8 +174,8 @@ export function App() {
               Pickup
             </span>
             <span>
-              <Gauge size={18} />
-              {targetDistanceLabel}
+              <Trophy size={18} />
+              Gold {hud.paceSecondsRemaining.toFixed(0)}s
             </span>
             <span>
               <Zap size={18} />
@@ -252,4 +258,11 @@ function medalLabel(medal: HudState["medal"]): string {
   if (medal === "silver") return "Silver Medal";
   if (medal === "bronze") return "Bronze Medal";
   return "No Medal";
+}
+
+function paceLabel(tier: HudState["paceTier"]): string {
+  if (tier === "gold") return "Gold pace";
+  if (tier === "silver") return "Silver pace";
+  if (tier === "bronze") return "Bronze pace";
+  return "Overtime";
 }

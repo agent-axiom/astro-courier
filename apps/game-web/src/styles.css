@@ -186,6 +186,46 @@ button {
   font-weight: 700;
 }
 
+.pace-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 36px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: 0.84rem;
+  font-weight: 850;
+}
+
+.pace-chip span {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.pace-chip strong {
+  color: #ffffff;
+}
+
+.pace-gold {
+  background: rgba(255, 209, 102, 0.17);
+  color: #ffe19a;
+}
+
+.pace-silver {
+  background: rgba(216, 230, 255, 0.15);
+  color: #e8f0ff;
+}
+
+.pace-bronze {
+  background: rgba(213, 143, 94, 0.2);
+  color: #ffd5b5;
+}
+
+.pace-overtime {
+  background: rgba(255, 111, 145, 0.16);
+  color: #ffadc1;
+}
+
 .landing-rating {
   min-height: 36px;
   padding: 9px 10px;
@@ -478,7 +518,7 @@ button {
   }
 
   .preflight-overlay {
-    top: 54%;
+    top: 43%;
     width: calc(100vw - 20px);
     padding: 16px;
   }
