@@ -1,0 +1,85 @@
+{
+  "id": "starter-route",
+  "name": "Luma Local Route",
+  "difficulty": 1,
+  "background": "soft-blue-nebula",
+  "musicIntensity": "stealth",
+  "ship": {
+    "startPosition": [180, 20],
+    "startVelocity": [0, 18],
+    "rotation": 1.5707963267948966,
+    "fuel": 100,
+    "thrustPower": 58,
+    "rotationPower": 3.5
+  },
+  "planets": [
+    {
+      "id": "luma",
+      "name": "Luma",
+      "position": [0, 0],
+      "radius": 72,
+      "gravityMass": 1500,
+      "influenceRadius": 380,
+      "visualTheme": "blue_garden",
+      "landingPads": [
+        {
+          "id": "north-pad",
+          "position": [0, -84],
+          "normalAngle": -1.5707963267948966,
+          "radius": 20,
+          "allowedApproachSpeed": 42,
+          "requiredAngleTolerance": 0.75
+        }
+      ]
+    }
+  ],
+  "stations": [
+    {
+      "id": "tea-station",
+      "name": "Tea Station",
+      "position": [420, -140],
+      "landingPads": [
+        {
+          "id": "dock-a",
+          "position": [420, -140],
+          "normalAngle": 0,
+          "radius": 26,
+          "allowedApproachSpeed": 36,
+          "requiredAngleTolerance": 0.85
+        }
+      ]
+    }
+  ],
+  "hazards": [
+    {
+      "id": "training-asteroids",
+      "type": "asteroid_field",
+      "position": [230, -80],
+      "radius": 70,
+      "severity": 0.2
+    }
+  ],
+  "contracts": [
+    {
+      "id": "first-light-delivery",
+      "title": "First Light Delivery",
+      "pickupId": "north-pad",
+      "destinationId": "dock-a",
+      "cargoId": "bottled-starlight",
+      "medalTimes": {
+        "bronze": 90,
+        "silver": 55,
+        "gold": 35
+      }
+    }
+  ],
+  "cargo": [
+    {
+      "id": "bottled-starlight",
+      "name": "Bottled Starlight",
+      "kind": "fragile",
+      "fragility": 0.8
+    }
+  ]
+}
+

@@ -1,0 +1,542 @@
+import type {
+  InputFrame,
+  LandingRating,
+  PlayerCommand,
+  ReplayEnvelope,
+  RunResultSummary,
+  RunStatus,
+  SimulationSnapshot,
+  Vec2
+} from "@astro-courier/shared";
+import type { CommandBuffer } from "@astro-courier/engine";
+
+export type LandingPadContent = {
+  id: string;
+  position: [number, number];
+  normalAngle: number;
+  radius: number;
+  allowedApproachSpeed: number;
+  requiredAngleTolerance: number;
+};
+
+export type PlanetContent = {
+  id: string;
+  name: string;
+  position: [number, number];
+  radius: number;
+  gravityMass: number;
+  influenceRadius: number;
+  visualTheme: string;
+  landingPads: LandingPadContent[];
+};
+
+export type StationContent = {
+  id: string;
+  name: string;
+  position: [number, number];
+  landingPads: LandingPadContent[];
+};
+
+export type HazardContent = {
+  id: string;
+  type: string;
+  position: [number, number];
+  radius: number;
+  severity: number;
+};
+
+export type ContractContent = {
+  id: string;
+  title: string;
+  pickupId: string;
+  destinationId: string;
+  cargoId: string;
+  medalTimes: {
+    bronze: number;
+    silver: number;
+    gold: number;
+  };
+};
+
+export type CargoContent = {
+  id: string;
+  name: string;
+  kind: string;
+  fragility: number;
+};
+
+export type SystemContent = {
+  id: string;
+  name: string;
+  difficulty: number;
+  background: string;
+  musicIntensity: "stealth" | "alarm" | "lockdown";
+  ship: {
+    startPosition: [number, number];
+    startVelocity: [number, number];
+    rotation: number;
+    fuel: number;
+    thrustPower: number;
+    rotationPower: number;
+  };
+  planets: PlanetContent[];
+  stations: StationContent[];
+  hazards: HazardContent[];
+  contracts: ContractContent[];
+  cargo: CargoContent[];
+};
+
+export type GravitySourceState = {
+  id: string;
+  name: string;
+  position: Vec2;
+  radius: number;
+  gravityMass: number;
+  influenceRadius: number;
+};
+
+export type LandingPadState = {
+  id: string;
+  position: Vec2;
+  normalAngle: number;
+  radius: number;
+  allowedApproachSpeed: number;
+  requiredAngleTolerance: number;
+  destination: boolean;
+};
+
+export type HazardState = {
+  id: string;
+  type: string;
+  position: Vec2;
+  radius: number;
+  severity: number;
+};
+
+export type ShipState = {
+  position: Vec2;
+  velocity: Vec2;
+  rotation: number;
+  targetRotation: number;
+  fuel: number;
+  maxFuel: number;
+  thrustPower: number;
+  rotationPower: number;
+  cargoDamage: number;
+};
+
+export type SimulationWorld = {
+  systemId: string;
+  contractId: string;
+  contentVersion: string;
+  seed: string;
+  tick: number;
+  elapsedSeconds: number;
+  status: RunStatus;
+  landingRating?: LandingRating;
+  score: number;
+  fuelUsed: number;
+  activeContract: ContractContent;
+  gravitySources: GravitySourceState[];
+  landingPads: LandingPadState[];
+  hazards: HazardState[];
+  ship: ShipState;
+};
+
+export type TrajectoryOptions = {
+  seconds: number;
+  fixedDt: number;
+  sampleEvery: number;
+};
+
+export type WorldReplayInput = {
+  system: SystemContent;
+  seed: string;
+  commandBuffer: CommandBuffer;
+  ticks: number;
+};
+
+export type WorldReplayOutput = {
+  world: SimulationWorld;
+  replay: ReplayEnvelope;
+};
+
+const GRAVITY_SCALE = 70;
+const GRAVITY_SOFTENING = 16;
+const FUEL_BURN_PER_SECOND = 8;
+const BRAKE_BURN_PER_SECOND = 3;
+
+export function createWorldFromSystem(system: SystemContent, seed: string): SimulationWorld {
+  const activeContract = system.contracts[0];
+  if (!activeContract) {
+    throw new Error(`System "${system.id}" does not define a contract`);
+  }
+
+  return {
+    systemId: system.id,
+    contractId: activeContract.id,
+    contentVersion: `${system.id}@1`,
+    seed,
+    tick: 0,
+    elapsedSeconds: 0,
+    status: "flying",
+    score: 0,
+    fuelUsed: 0,
+    activeContract,
+    gravitySources: system.planets.map((planet) => ({
+      id: planet.id,
+      name: planet.name,
+      position: toVec2(planet.position),
+      radius: planet.radius,
+      gravityMass: planet.gravityMass,
+      influenceRadius: planet.influenceRadius
+    })),
+    landingPads: [
+      ...system.planets.flatMap((planet) => planet.landingPads),
+      ...system.stations.flatMap((station) => station.landingPads)
+    ].map((pad) => ({
+      id: pad.id,
+      position: toVec2(pad.position),
+      normalAngle: pad.normalAngle,
+      radius: pad.radius,
+      allowedApproachSpeed: pad.allowedApproachSpeed,
+      requiredAngleTolerance: pad.requiredAngleTolerance,
+      destination: pad.id === activeContract.destinationId
+    })),
+    hazards: system.hazards.map((hazard) => ({
+      id: hazard.id,
+      type: hazard.type,
+      position: toVec2(hazard.position),
+      radius: hazard.radius,
+      severity: hazard.severity
+    })),
+    ship: {
+      position: toVec2(system.ship.startPosition),
+      velocity: toVec2(system.ship.startVelocity),
+      rotation: system.ship.rotation,
+      targetRotation: system.ship.rotation,
+      fuel: system.ship.fuel,
+      maxFuel: system.ship.fuel,
+      thrustPower: system.ship.thrustPower,
+      rotationPower: system.ship.rotationPower,
+      cargoDamage: 0
+    }
+  };
+}
+
+export function stepWorld(world: SimulationWorld, fixedDt: number, commands: PlayerCommand[]): SimulationWorld {
+  if (world.status !== "flying") {
+    return world;
+  }
+
+  let thrust = 0;
+  let brake = 0;
+
+  for (const command of commands) {
+    if (command.type === "AIM") {
+      world.ship.targetRotation = normalizeAngle(command.angle);
+    } else if (command.type === "THRUST") {
+      thrust = Math.max(thrust, clamp(command.amount, 0, 1));
+    } else if (command.type === "BRAKE") {
+      brake = Math.max(brake, clamp(command.amount, 0, 1));
+    } else if (command.type === "BOOST" && world.ship.fuel > 2) {
+      thrust = Math.max(thrust, 1);
+      world.ship.fuel -= 2;
+      world.fuelUsed += 2;
+    } else if (command.type === "PAUSE") {
+      world.status = "paused";
+      return world;
+    }
+  }
+
+  rotateTowardTarget(world.ship, fixedDt);
+  applyGravity(world, fixedDt);
+  applyThrust(world, fixedDt, thrust);
+  applyBrake(world, fixedDt, brake);
+  integrate(world, fixedDt);
+  updateHazards(world, fixedDt);
+  resolveLandingOrCrash(world);
+  updateScore(world);
+
+  world.tick += 1;
+  world.elapsedSeconds = round(world.elapsedSeconds + fixedDt, 6);
+
+  return world;
+}
+
+export function createWorldReplay(input: WorldReplayInput): WorldReplayOutput {
+  const world = createWorldFromSystem(input.system, input.seed);
+
+  for (let tick = 0; tick < input.ticks && world.status === "flying"; tick += 1) {
+    stepWorld(world, 1 / 60, input.commandBuffer.commandsForTick(tick));
+  }
+
+  return {
+    world,
+    replay: {
+      gameVersion: "0.1.0",
+      contentVersion: world.contentVersion,
+      systemId: world.systemId,
+      contractId: world.contractId,
+      rngSeed: input.seed,
+      shipConfig: {
+        hull: "starter",
+        upgrades: []
+      },
+      inputFrames: input.commandBuffer.frames(),
+      result: summarizeRun(world)
+    }
+  };
+}
+
+export function summarizeRun(world: SimulationWorld): RunResultSummary {
+  return {
+    status: world.status,
+    elapsedSeconds: round(world.elapsedSeconds, 3),
+    score: world.score,
+    cargoDamage: round(world.ship.cargoDamage, 3),
+    fuelUsed: round(world.fuelUsed, 3),
+    landingRating: world.landingRating
+  };
+}
+
+export function predictTrajectory(world: SimulationWorld, options: TrajectoryOptions): Vec2[] {
+  const preview = cloneWorld(world);
+  const totalTicks = Math.max(0, Math.floor(options.seconds / options.fixedDt));
+  const sampleEvery = Math.max(1, options.sampleEvery);
+  const points: Vec2[] = [];
+
+  for (let tick = 0; tick < totalTicks; tick += 1) {
+    stepWorld(preview, options.fixedDt, []);
+    if (tick % sampleEvery === 0) {
+      points.push({ ...preview.ship.position });
+    }
+  }
+
+  return points;
+}
+
+export function snapshotWorld(world: SimulationWorld): SimulationSnapshot {
+  return {
+    tick: world.tick,
+    status: world.status,
+    elapsedSeconds: world.elapsedSeconds,
+    score: world.score,
+    ship: {
+      position: { ...world.ship.position },
+      velocity: { ...world.ship.velocity },
+      rotation: world.ship.rotation,
+      fuel: world.ship.fuel,
+      maxFuel: world.ship.maxFuel,
+      cargoDamage: world.ship.cargoDamage
+    },
+    gravitySources: world.gravitySources.map((source) => ({
+      id: source.id,
+      name: source.name,
+      position: { ...source.position },
+      radius: source.radius,
+      influenceRadius: source.influenceRadius
+    })),
+    landingPads: world.landingPads.map((pad) => ({
+      id: pad.id,
+      position: { ...pad.position },
+      normalAngle: pad.normalAngle,
+      radius: pad.radius,
+      destination: pad.destination
+    })),
+    hazards: world.hazards.map((hazard) => ({
+      id: hazard.id,
+      type: hazard.type,
+      position: { ...hazard.position },
+      radius: hazard.radius,
+      severity: hazard.severity
+    }))
+  };
+}
+
+function applyGravity(world: SimulationWorld, fixedDt: number): void {
+  for (const source of world.gravitySources) {
+    const offset = subtract(source.position, world.ship.position);
+    const distance = magnitude(offset);
+    if (distance <= 0 || distance > source.influenceRadius) {
+      continue;
+    }
+
+    const direction = scale(offset, 1 / distance);
+    const strength =
+      (source.gravityMass / (distance * distance + source.radius * source.radius + GRAVITY_SOFTENING)) * GRAVITY_SCALE;
+    world.ship.velocity = add(world.ship.velocity, scale(direction, strength * fixedDt));
+  }
+}
+
+function applyThrust(world: SimulationWorld, fixedDt: number, amount: number): void {
+  if (amount <= 0 || world.ship.fuel <= 0) {
+    return;
+  }
+
+  const spend = Math.min(world.ship.fuel, amount * FUEL_BURN_PER_SECOND * fixedDt);
+  const effectiveAmount = spend / (FUEL_BURN_PER_SECOND * fixedDt);
+  const thrustVector = {
+    x: Math.cos(world.ship.rotation) * world.ship.thrustPower * effectiveAmount * fixedDt,
+    y: Math.sin(world.ship.rotation) * world.ship.thrustPower * effectiveAmount * fixedDt
+  };
+
+  world.ship.velocity = add(world.ship.velocity, thrustVector);
+  world.ship.fuel = round(world.ship.fuel - spend, 6);
+  world.fuelUsed = round(world.fuelUsed + spend, 6);
+}
+
+function applyBrake(world: SimulationWorld, fixedDt: number, amount: number): void {
+  if (amount <= 0 || world.ship.fuel <= 0) {
+    return;
+  }
+
+  const spend = Math.min(world.ship.fuel, amount * BRAKE_BURN_PER_SECOND * fixedDt);
+  const damping = Math.max(0, 1 - amount * fixedDt * 1.8);
+
+  world.ship.velocity = scale(world.ship.velocity, damping);
+  world.ship.fuel = round(world.ship.fuel - spend, 6);
+  world.fuelUsed = round(world.fuelUsed + spend, 6);
+}
+
+function integrate(world: SimulationWorld, fixedDt: number): void {
+  world.ship.position = add(world.ship.position, scale(world.ship.velocity, fixedDt));
+}
+
+function updateHazards(world: SimulationWorld, fixedDt: number): void {
+  for (const hazard of world.hazards) {
+    const distance = distanceBetween(world.ship.position, hazard.position);
+    if (distance <= hazard.radius) {
+      world.ship.cargoDamage = clamp(world.ship.cargoDamage + hazard.severity * fixedDt * 0.08, 0, 1);
+    }
+  }
+}
+
+function resolveLandingOrCrash(world: SimulationWorld): void {
+  const touchedPad = world.landingPads.find((pad) => distanceBetween(world.ship.position, pad.position) <= pad.radius);
+  if (touchedPad) {
+    const speed = magnitude(world.ship.velocity);
+    const angleDiff = Math.abs(shortestAngleDelta(world.ship.rotation, touchedPad.normalAngle));
+    const isSoftEnough = speed <= touchedPad.allowedApproachSpeed;
+    const isAligned = angleDiff <= touchedPad.requiredAngleTolerance;
+
+    if (touchedPad.destination && isSoftEnough && isAligned) {
+      world.status = "delivered";
+      world.landingRating = rateLanding(speed, angleDiff, touchedPad, world.ship.cargoDamage);
+      return;
+    }
+
+    world.status = "crashed";
+    world.landingRating = "Insurance Event";
+    world.ship.cargoDamage = 1;
+    return;
+  }
+
+  const hitGravitySource = world.gravitySources.find((source) => distanceBetween(world.ship.position, source.position) <= source.radius);
+  if (hitGravitySource) {
+    world.status = "crashed";
+    world.landingRating = "Insurance Event";
+    world.ship.cargoDamage = 1;
+  }
+}
+
+function updateScore(world: SimulationWorld): void {
+  if (world.status !== "delivered") {
+    world.score = Math.max(0, Math.round(100 + world.tick * 0.05 - world.ship.cargoDamage * 100));
+    return;
+  }
+
+  const timeBonus = Math.max(0, 700 - world.elapsedSeconds * 8);
+  const fuelBonus = world.ship.fuel * 5;
+  const cargoBonus = (1 - world.ship.cargoDamage) * 500;
+  const landingBonus = world.landingRating === "Perfect Landing" ? 300 : 120;
+  world.score = Math.max(0, Math.round(1000 + timeBonus + fuelBonus + cargoBonus + landingBonus));
+}
+
+function rateLanding(
+  speed: number,
+  angleDiff: number,
+  pad: LandingPadState,
+  cargoDamage: number
+): LandingRating {
+  if (speed <= pad.allowedApproachSpeed * 0.45 && angleDiff <= pad.requiredAngleTolerance * 0.5 && cargoDamage <= 0.02) {
+    return "Perfect Landing";
+  }
+
+  if (speed <= pad.allowedApproachSpeed * 0.7 && cargoDamage <= 0.08) {
+    return "Soft Landing";
+  }
+
+  if (cargoDamage <= 0.35) {
+    return "Spicy Landing";
+  }
+
+  return "Cargo Survived Somehow";
+}
+
+function rotateTowardTarget(ship: ShipState, fixedDt: number): void {
+  const delta = shortestAngleDelta(ship.rotation, ship.targetRotation);
+  const maxTurn = ship.rotationPower * fixedDt;
+  ship.rotation = normalizeAngle(ship.rotation + clamp(delta, -maxTurn, maxTurn));
+}
+
+function cloneWorld(world: SimulationWorld): SimulationWorld {
+  return JSON.parse(JSON.stringify(world)) as SimulationWorld;
+}
+
+function toVec2(tuple: [number, number]): Vec2 {
+  return {
+    x: tuple[0],
+    y: tuple[1]
+  };
+}
+
+function add(left: Vec2, right: Vec2): Vec2 {
+  return {
+    x: left.x + right.x,
+    y: left.y + right.y
+  };
+}
+
+function subtract(left: Vec2, right: Vec2): Vec2 {
+  return {
+    x: left.x - right.x,
+    y: left.y - right.y
+  };
+}
+
+function scale(value: Vec2, amount: number): Vec2 {
+  return {
+    x: value.x * amount,
+    y: value.y * amount
+  };
+}
+
+function magnitude(value: Vec2): number {
+  return Math.hypot(value.x, value.y);
+}
+
+function distanceBetween(left: Vec2, right: Vec2): number {
+  return magnitude(subtract(left, right));
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+function normalizeAngle(angle: number): number {
+  let next = angle;
+  while (next <= -Math.PI) next += Math.PI * 2;
+  while (next > Math.PI) next -= Math.PI * 2;
+  return next;
+}
+
+function shortestAngleDelta(from: number, to: number): number {
+  return normalizeAngle(to - from);
+}
+
+function round(value: number, digits: number): number {
+  const scaleFactor = 10 ** digits;
+  return Math.round(value * scaleFactor) / scaleFactor;
+}
+
