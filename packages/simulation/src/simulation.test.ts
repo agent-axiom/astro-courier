@@ -5,6 +5,7 @@ import {
   BOOST_COOLDOWN_SECONDS,
   ECO_DRIFT_FUEL_USED_LIMIT,
   ECO_DRIFT_STYLE_BONUS,
+  CHAIN_FINISH_STYLE_BONUS,
   LANDING_ASSIST_FUEL_COST,
   QUICK_PICKUP_STYLE_BONUS,
   STYLE_CHAIN_WINDOW_SECONDS,
@@ -443,6 +444,30 @@ describe("deterministic Astro Courier simulation", () => {
 
     expect(world.lastMilestone).toBe("Eco Drift");
     expect(result.scoreBreakdown.styleBonus).toBe(QUICK_PICKUP_STYLE_BONUS + Math.round(ECO_DRIFT_STYLE_BONUS * 1.25));
+  });
+
+  it("awards a chain finish when a clean delivery preserves an active style chain", () => {
+    const world = createWorldFromSystem(starterSystem, "chain-finish-seed");
+    world.cargoOnboard = true;
+    world.objectivePhase = "delivery";
+    world.styleBonus = 320;
+    world.styleChainCount = 2;
+    world.styleChainSecondsRemaining = 2.4;
+    world.fuelUsed = ECO_DRIFT_FUEL_USED_LIMIT + 4;
+    world.bestApproachStreakSeconds = 0;
+    for (const pad of world.landingPads) {
+      pad.active = pad.role === "destination";
+    }
+    world.ship.position = { x: 260, y: -80 };
+    world.ship.velocity = { x: 8, y: 1 };
+    world.ship.rotation = 0;
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("delivered");
+    expect(world.lastMilestone).toBe("Chain Finish");
+    expect(world.lastStyleAward).toBe(Math.round(CHAIN_FINISH_STYLE_BONUS * 1.5));
+    expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(320 + Math.round(CHAIN_FINISH_STYLE_BONUS * 1.5));
   });
 
   it("scales hazard contact damage by active cargo fragility", () => {

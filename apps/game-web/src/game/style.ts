@@ -15,7 +15,7 @@ export type LiveStyleReward = {
   chainProgress: number;
 };
 
-const styleMilestones = new Set(["Clean Hazard Skim", "Quick Pickup", "Perfect Approach", "Eco Drift"]);
+const styleMilestones = new Set(["Clean Hazard Skim", "Quick Pickup", "Perfect Approach", "Eco Drift", "Chain Finish"]);
 
 export function buildLiveStyleReward(input: LiveStyleRewardInput): LiveStyleReward | undefined {
   const roundedBonus = Math.round(input.styleBonus);

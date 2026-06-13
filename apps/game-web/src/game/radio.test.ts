@@ -135,6 +135,7 @@ describe("radio feedback copy", () => {
       "Perfect approach"
     );
     expect(buildRadioMessage({ ...baseHud, status: "delivered", medal: "gold", lastMilestone: "Eco Drift" })).toContain("Eco drift");
+    expect(buildRadioMessage({ ...baseHud, status: "delivered", medal: "gold", lastMilestone: "Chain Finish" })).toContain("Chain finish");
     expect(buildRadioMessage({ ...baseHud, status: "delivered", medal: "comet" })).toContain("Comet");
     expect(buildRadioMessage({ ...baseHud, status: "crashed", landingRating: "Insurance Event" })).toContain("Insurance");
     expect(buildRadioMessage({ ...baseHud, status: "crashed", crashReason: "Hard Landing" })).toContain("Bleed speed");

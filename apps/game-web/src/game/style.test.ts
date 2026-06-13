@@ -41,6 +41,23 @@ describe("live style reward HUD copy", () => {
     });
   });
 
+  it("treats chain finish as a fresh style moment", () => {
+    expect(
+      buildLiveStyleReward({
+        styleBonus: 710,
+        lastStyleAward: 390,
+        lastMilestone: "Chain Finish",
+        styleMultiplier: 1.75,
+        styleChainSecondsRemaining: 4
+      })
+    ).toEqual({
+      label: "Style hit",
+      value: "+390 hit / +710 bank / x1.75",
+      fresh: true,
+      chainProgress: 1
+    });
+  });
+
   it("shows an active chain even between fresh milestones", () => {
     expect(buildLiveStyleReward({ styleBonus: 180, styleMultiplier: 1.25, styleChainSecondsRemaining: 2.4 })).toEqual({
       label: "Style chain",
