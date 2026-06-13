@@ -69,7 +69,13 @@ import {
 import { buildPreflightBonusObjectives, buildPreflightMasteryTargets } from "./game/mastery";
 import { buildApproachRewardReadout, buildDockingSpeedReadout } from "./game/docking";
 import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./game/cargo";
-import { buildReplayReceipt, buildResultHighlight, buildResultOutcomePresentation, buildResultStats } from "./game/resultStats";
+import {
+  buildReplayReceipt,
+  buildResultHighlight,
+  buildResultOutcomePresentation,
+  buildResultStats,
+  buildRunIdentityReceipt
+} from "./game/resultStats";
 import { buildHazardPressureReadout } from "./game/hazard";
 import {
   buildResultActionsLayout,
@@ -533,6 +539,21 @@ export function App() {
     hud.status === "delivered" || hud.status === "crashed" ? buildResultOutcomePresentation(hud.status) : undefined;
   const crashDebrief = hud.status === "crashed" ? buildCrashDebrief(hud) : undefined;
   const resultHighlight = buildResultHighlight(hud.scoreBreakdown, hud.lastMilestone);
+  const runIdentityReceipt =
+    hud.status === "delivered" || hud.status === "crashed"
+      ? buildRunIdentityReceipt({
+          status: hud.status,
+          contractId: hud.contractId,
+          lastMilestone: hud.lastMilestone,
+          crashReason: hud.crashReason,
+          medal: hud.medal,
+          grade: hud.grade,
+          cargoDamage: hud.cargoDamage,
+          fuel: hud.fuel,
+          maxFuel: hud.maxFuel,
+          scoreBreakdown: hud.scoreBreakdown
+        })
+      : undefined;
   const replayReceipt = buildReplayReceipt(hud.replayChecksum);
   const bestRunChase = buildBestRunChase(bestRun);
   const routeBoardProgress = buildRouteBoardProgress(hud.contractOptions, bestRunsByContract);
@@ -1395,6 +1416,16 @@ export function App() {
               <Satellite size={18} />
               <span>{replayReceipt.label}</span>
               <strong>{replayReceipt.value}</strong>
+            </div>
+          ) : null}
+          {runIdentityReceipt ? (
+            <div
+              className={`run-identity-receipt run-identity-${runIdentityReceipt.tone}`}
+              aria-label={`${runIdentityReceipt.label}: ${runIdentityReceipt.value}`}
+            >
+              <Activity size={18} />
+              <span>{runIdentityReceipt.label}</span>
+              <strong>{runIdentityReceipt.value}</strong>
             </div>
           ) : null}
           {resultHighlight ? (

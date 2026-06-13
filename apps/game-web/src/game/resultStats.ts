@@ -1,4 +1,4 @@
-import type { RunStatus, ScoreBreakdown } from "@astro-courier/shared";
+import type { CrashReason, RunGrade, RunMedal, RunStatus, ScoreBreakdown } from "@astro-courier/shared";
 
 export type ResultStatsInput = {
   score: number;
@@ -26,6 +26,25 @@ export type ReplayReceipt = {
 export type ResultOutcomePresentation = {
   icon: "alert" | "trophy";
   tone: "danger" | "success";
+};
+
+export type RunIdentityReceiptInput = {
+  status: Extract<RunStatus, "crashed" | "delivered">;
+  contractId?: string;
+  lastMilestone?: string;
+  crashReason?: CrashReason;
+  medal: RunMedal;
+  grade: RunGrade;
+  cargoDamage: number;
+  fuel: number;
+  maxFuel: number;
+  scoreBreakdown: ScoreBreakdown;
+};
+
+export type RunIdentityReceipt = {
+  label: "Run identity";
+  value: string;
+  tone: "clean" | "clutch" | "danger" | "elite" | "failure" | "style";
 };
 
 const styleMilestones = new Set([
@@ -87,6 +106,65 @@ export function buildResultHighlight(breakdown: ScoreBreakdown, lastMilestone?: 
     label: "Run highlight",
     value: `${highlightLabel} +${Math.round(winner.value)}`,
     tone: winner.tone
+  };
+}
+
+export function buildRunIdentityReceipt(input: RunIdentityReceiptInput): RunIdentityReceipt {
+  if (input.status === "crashed") {
+    return {
+      label: "Run identity",
+      value: input.crashReason === "Hull Collision" ? "Route failed / hull contact" : "Route failed / final approach",
+      tone: "failure"
+    };
+  }
+
+  if (input.medal === "comet" || input.grade === "S") {
+    return {
+      label: "Run identity",
+      value: "Elite courier line",
+      tone: "elite"
+    };
+  }
+
+  if (input.lastMilestone === "Last Drop") {
+    return {
+      label: "Run identity",
+      value: "Fuel clutch finish",
+      tone: "clutch"
+    };
+  }
+
+  if (
+    input.lastMilestone === "Chain Finish" ||
+    (input.contractId === "chain-relay" && input.scoreBreakdown.styleBonus > 0)
+  ) {
+    return {
+      label: "Run identity",
+      value: "Style chain route",
+      tone: "style"
+    };
+  }
+
+  if (input.scoreBreakdown.dangerBonus > input.scoreBreakdown.styleBonus && input.scoreBreakdown.dangerBonus >= 300) {
+    return {
+      label: "Run identity",
+      value: "Danger pay route",
+      tone: "danger"
+    };
+  }
+
+  if (input.cargoDamage <= 0.02) {
+    return {
+      label: "Run identity",
+      value: "Clean cargo clear",
+      tone: "clean"
+    };
+  }
+
+  return {
+    label: "Run identity",
+    value: "Delivery banked",
+    tone: "clean"
   };
 }
 

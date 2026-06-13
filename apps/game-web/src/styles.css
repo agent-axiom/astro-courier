@@ -2856,6 +2856,74 @@ button {
   text-align: right;
 }
 
+.run-identity-receipt {
+  display: grid;
+  grid-template-columns: 18px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 40px;
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 850;
+  text-align: left;
+}
+
+.run-identity-receipt span,
+.run-identity-receipt strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.run-identity-receipt span {
+  color: rgba(255, 255, 255, 0.74);
+  text-transform: uppercase;
+}
+
+.run-identity-receipt strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.run-identity-clean {
+  border-color: rgba(142, 230, 184, 0.24);
+  background: rgba(142, 230, 184, 0.13);
+  color: #bff7d8;
+}
+
+.run-identity-clutch {
+  border-color: rgba(255, 209, 102, 0.3);
+  background: rgba(255, 209, 102, 0.16);
+  color: #ffe19a;
+}
+
+.run-identity-danger {
+  border-color: rgba(255, 111, 145, 0.28);
+  background: rgba(255, 111, 145, 0.15);
+  color: #ffadc1;
+}
+
+.run-identity-elite {
+  border-color: rgba(255, 209, 102, 0.34);
+  background: linear-gradient(90deg, rgba(255, 209, 102, 0.18), rgba(142, 230, 184, 0.15));
+  color: #fff1c7;
+}
+
+.run-identity-failure {
+  border-color: rgba(255, 111, 145, 0.34);
+  background: rgba(255, 111, 145, 0.18);
+  color: #ffadc1;
+}
+
+.run-identity-style {
+  border-color: rgba(255, 209, 102, 0.28);
+  background: rgba(255, 209, 102, 0.15);
+  color: #ffe19a;
+}
+
 .result-highlight {
   display: grid;
   grid-template-columns: 18px auto 1fr;

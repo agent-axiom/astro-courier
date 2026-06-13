@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { buildReplayReceipt, buildResultHighlight, buildResultOutcomePresentation, buildResultStats } from "./resultStats";
+import {
+  buildReplayReceipt,
+  buildResultHighlight,
+  buildResultOutcomePresentation,
+  buildResultStats,
+  buildRunIdentityReceipt
+} from "./resultStats";
 
 const baseBreakdown = {
   base: 1000,
@@ -97,5 +103,57 @@ describe("result stat formatting", () => {
       tone: "verified"
     });
     expect(buildReplayReceipt()).toBeUndefined();
+  });
+
+  it("summarizes the run identity for modern result scanning", () => {
+    expect(
+      buildRunIdentityReceipt({
+        status: "delivered",
+        medal: "comet",
+        grade: "S",
+        cargoDamage: 0,
+        fuel: 82,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 320, landingBonus: 300 }
+      })
+    ).toEqual({
+      label: "Run identity",
+      value: "Elite courier line",
+      tone: "elite"
+    });
+
+    expect(
+      buildRunIdentityReceipt({
+        status: "delivered",
+        lastMilestone: "Last Drop",
+        medal: "silver",
+        grade: "B",
+        cargoDamage: 0,
+        fuel: 4,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 170 }
+      })
+    ).toEqual({
+      label: "Run identity",
+      value: "Fuel clutch finish",
+      tone: "clutch"
+    });
+
+    expect(
+      buildRunIdentityReceipt({
+        status: "crashed",
+        crashReason: "Hull Collision",
+        medal: "none",
+        grade: "F",
+        cargoDamage: 1,
+        fuel: 40,
+        maxFuel: 100,
+        scoreBreakdown: baseBreakdown
+      })
+    ).toEqual({
+      label: "Run identity",
+      value: "Route failed / hull contact",
+      tone: "failure"
+    });
   });
 });
