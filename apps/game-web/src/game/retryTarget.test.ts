@@ -267,6 +267,25 @@ describe("result retry target", () => {
     });
   });
 
+  it("turns launch bursts into a repeatable burst-chain target", () => {
+    expect(
+      buildRetryTarget({
+        status: "delivered",
+        medal: "gold",
+        lastMilestone: "Launch Burst",
+        elapsedSeconds: 28.4,
+        goldSeconds: 30,
+        score: 2760,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Repeat Launch Burst",
+      tone: "opportunity"
+    });
+  });
+
   it("turns no-brake finesse finishes into a repeatable finesse target", () => {
     expect(
       buildRetryTarget({
