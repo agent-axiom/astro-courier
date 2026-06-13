@@ -20,6 +20,21 @@ describe("hazard pressure readout", () => {
     });
   });
 
+  it("shows the potential style payout when hazard severity is known", () => {
+    expect(
+      buildHazardPressureReadout({
+        hazardDangerLevel: "near",
+        hazardDistance: 44,
+        hazardSeverity: 0.75,
+        cargoDamage: 0.01
+      })
+    ).toEqual({
+      label: "Risk pulse",
+      value: "Skim +230 / 44m",
+      tone: "opportunity"
+    });
+  });
+
   it("warns the player to keep damaged cargo wide near hazards", () => {
     expect(
       buildHazardPressureReadout({

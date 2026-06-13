@@ -81,7 +81,8 @@ const initialHud: HudState = {
   approachStreakSeconds: 0,
   bestApproachStreakSeconds: 0,
   hazardDangerLevel: undefined,
-  hazardDistance: undefined
+  hazardDistance: undefined,
+  hazardSeverity: undefined
 };
 
 const useGameStore = create<GameStore>((set) => ({
@@ -221,6 +222,7 @@ export function App() {
   const hazardPressureReadout = buildHazardPressureReadout({
     hazardDangerLevel: hud.hazardDangerLevel,
     hazardDistance: hud.hazardDistance,
+    hazardSeverity: hud.hazardSeverity,
     cargoDamage: hud.cargoDamage
   });
 

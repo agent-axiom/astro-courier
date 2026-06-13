@@ -68,6 +68,7 @@ export type HudState = {
   bestApproachStreakSeconds: number;
   hazardDangerLevel?: "near" | "inside";
   hazardDistance?: number;
+  hazardSeverity?: number;
 };
 
 export type ContractOption = Pick<ContractContent, "id" | "title" | "briefing" | "riskLabel" | "rewardLabel" | "medalTimes"> & {
@@ -294,7 +295,8 @@ export class GameShell {
       approachStreakSeconds: snapshot.approachStreakSeconds,
       bestApproachStreakSeconds: snapshot.bestApproachStreakSeconds,
       hazardDangerLevel: snapshot.nearestHazard?.dangerLevel,
-      hazardDistance: snapshot.nearestHazard?.distance
+      hazardDistance: snapshot.nearestHazard?.distance,
+      hazardSeverity: snapshot.nearestHazard?.severity
     });
   }
 

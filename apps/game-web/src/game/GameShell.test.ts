@@ -65,6 +65,7 @@ describe("GameShell lifecycle", () => {
     expect(onHud.mock.calls[0]?.[0].targetAllowedSpeed).toBe(42);
     expect(onHud.mock.calls[0]?.[0].quickPickupSecondsRemaining).toBe(12);
     expect(onHud.mock.calls[0]?.[0].quickPickupBonus).toBe(180);
+    expect(onHud.mock.calls[0]?.[0].hazardSeverity).toBe(0.2);
     expect(input.commands).not.toHaveBeenCalled();
     expect(renderer.render).toHaveBeenCalled();
   });

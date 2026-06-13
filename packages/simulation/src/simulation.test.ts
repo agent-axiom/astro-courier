@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createCommandBuffer, checksumReplay } from "@astro-courier/engine";
 import {
+  calculateHazardSkimStyleBonus,
   ECO_DRIFT_FUEL_USED_LIMIT,
   ECO_DRIFT_STYLE_BONUS,
   QUICK_PICKUP_STYLE_BONUS,
@@ -94,6 +95,10 @@ const starterSystem: SystemContent = {
 };
 
 describe("deterministic Astro Courier simulation", () => {
+  it("calculates hazard skim style payout from hazard severity", () => {
+    expect(calculateHazardSkimStyleBonus(0.75)).toBe(230);
+  });
+
   it("produces the same summary and checksum for the same seed and command frames", () => {
     const commands = createCommandBuffer([
       { tick: 0, command: { type: "THRUST", amount: 1 } },

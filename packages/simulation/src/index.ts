@@ -198,14 +198,18 @@ const GRAVITY_SOFTENING = 16;
 const FUEL_BURN_PER_SECOND = 8;
 const BRAKE_BURN_PER_SECOND = 3;
 const HAZARD_SKIM_OUTER_RADIUS = 1.35;
-const HAZARD_SKIM_BASE_BONUS = 140;
-const HAZARD_SKIM_SEVERITY_BONUS = 120;
+export const HAZARD_SKIM_BASE_BONUS = 140;
+export const HAZARD_SKIM_SEVERITY_BONUS = 120;
 export const QUICK_PICKUP_WINDOW_SECONDS = 12;
 export const QUICK_PICKUP_STYLE_BONUS = 180;
 export const PERFECT_APPROACH_STREAK_SECONDS = 1;
 export const PERFECT_APPROACH_STYLE_BONUS = 220;
 export const ECO_DRIFT_FUEL_USED_LIMIT = 12;
 export const ECO_DRIFT_STYLE_BONUS = 160;
+
+export function calculateHazardSkimStyleBonus(severity: number): number {
+  return Math.round(HAZARD_SKIM_BASE_BONUS + clamp(severity, 0, 1) * HAZARD_SKIM_SEVERITY_BONUS);
+}
 
 export function createWorldFromSystem(system: SystemContent, seed: string, options: WorldCreationOptions = {}): SimulationWorld {
   const activeContract = options.contractId
@@ -577,7 +581,7 @@ function updateHazards(world: SimulationWorld, fixedDt: number): void {
     const cleanSkim = distance <= hazard.radius * HAZARD_SKIM_OUTER_RADIUS && world.ship.cargoDamage <= 0.02;
     if (cleanSkim && !world.skimmedHazardIds.includes(hazard.id)) {
       world.skimmedHazardIds.push(hazard.id);
-      world.styleBonus += Math.round(HAZARD_SKIM_BASE_BONUS + hazard.severity * HAZARD_SKIM_SEVERITY_BONUS);
+      world.styleBonus += calculateHazardSkimStyleBonus(hazard.severity);
       world.lastMilestone = "Clean Hazard Skim";
     }
   }

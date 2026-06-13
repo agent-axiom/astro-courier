@@ -1,6 +1,9 @@
+import { calculateHazardSkimStyleBonus } from "@astro-courier/simulation";
+
 export type HazardPressureInput = {
   hazardDangerLevel?: "near" | "inside";
   hazardDistance?: number;
+  hazardSeverity?: number;
   cargoDamage?: number;
 };
 
@@ -25,6 +28,16 @@ export function buildHazardPressureReadout(input: HazardPressureInput): HazardPr
   }
 
   const cargoDamage = input.cargoDamage ?? 0;
+  if (cargoDamage <= 0.02 && input.hazardSeverity !== undefined) {
+    const payout = calculateHazardSkimStyleBonus(input.hazardSeverity);
+    const distanceSuffix = input.hazardDistance === undefined ? "" : ` / ${Math.round(input.hazardDistance)}m`;
+    return {
+      label: "Risk pulse",
+      value: `Skim +${payout}${distanceSuffix}`,
+      tone: "opportunity"
+    };
+  }
+
   return {
     label: "Risk pulse",
     value: cargoDamage <= 0.02 ? `Skim window${distance}` : `Keep wide${distance}`,
