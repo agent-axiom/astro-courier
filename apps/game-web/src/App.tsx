@@ -67,10 +67,16 @@ import { deriveHudAudioEvents, type HudAudioSnapshot } from "./game/audioEvents"
 import { createGameAudioController, type GameAudioController } from "./game/gameAudio";
 import { buildAudioTogglePresentation } from "./game/audioControls";
 import { buildTouchFlightPadPresentation } from "./game/touchControls";
+import { buildScreenFeedback, type ScreenFeedback } from "./game/screenFeedback";
 
 type GameStore = {
   hud: HudState;
   setHud: (hud: HudState) => void;
+};
+
+type ActiveScreenFeedback = {
+  key: number;
+  feedback: ScreenFeedback;
 };
 
 const initialHud: HudState = {
@@ -142,11 +148,13 @@ export function App() {
   const recordedRunRef = useRef<string | null>(null);
   const audioRef = useRef<GameAudioController | null>(null);
   const previousAudioSnapshotRef = useRef<HudAudioSnapshot | undefined>(undefined);
+  const screenFeedbackTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const hud = useGameStore((state) => state.hud);
   const setHud = useGameStore((state) => state.setHud);
   const [paused, setPaused] = useState(true);
   const [preflightOpen, setPreflightOpen] = useState(true);
   const [audioMuted, setAudioMuted] = useState(false);
+  const [screenFeedback, setScreenFeedback] = useState<ActiveScreenFeedback | undefined>(undefined);
   const [bestRun, setBestRun] = useState<BestRun | undefined>(() => {
     const storage = getBestRunStorage();
     return storage ? getBestRun(storage, initialHud.contractId) : undefined;
@@ -186,6 +194,14 @@ export function App() {
   }, [audioMuted]);
 
   useEffect(() => {
+    return () => {
+      if (screenFeedbackTimerRef.current) {
+        clearTimeout(screenFeedbackTimerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     const storage = getBestRunStorage();
     setBestRun(storage ? getBestRun(storage, hud.contractId) : undefined);
     setNewBest(false);
@@ -211,6 +227,20 @@ export function App() {
     const events = deriveHudAudioEvents(previousAudioSnapshotRef.current, currentSnapshot);
     previousAudioSnapshotRef.current = currentSnapshot;
     audioRef.current?.play(events);
+    const feedback = buildScreenFeedback(events);
+    if (feedback) {
+      if (screenFeedbackTimerRef.current) {
+        clearTimeout(screenFeedbackTimerRef.current);
+      }
+      setScreenFeedback((current) => ({
+        key: (current?.key ?? 0) + 1,
+        feedback
+      }));
+      screenFeedbackTimerRef.current = setTimeout(() => {
+        setScreenFeedback(undefined);
+        screenFeedbackTimerRef.current = undefined;
+      }, feedback.durationMs);
+    }
   }, [hud.fuel, hud.hazardDangerLevel, hud.lastMilestone, hud.maxFuel, hud.status]);
 
   useEffect(() => {
@@ -510,6 +540,14 @@ export function App() {
   return (
     <main className={`app-shell app-intensity-${runIntensity}`}>
       <div ref={canvasMountRef} className="game-canvas" aria-label="Astro Courier gameplay canvas" />
+      {screenFeedback ? (
+        <div
+          key={screenFeedback.key}
+          className={`screen-feedback screen-feedback-${screenFeedback.feedback.tone} screen-feedback-${screenFeedback.feedback.intensity}`}
+          style={{ "--screen-feedback-duration": `${screenFeedback.feedback.durationMs}ms` } as CSSProperties}
+          aria-hidden="true"
+        />
+      ) : null}
       {touchFlightPad.visible ? (
         <div className={`touch-flight-pad touch-flight-pad-${touchFlightPad.tone}`} aria-hidden="true">
           <span className="touch-flight-pad-ring" />

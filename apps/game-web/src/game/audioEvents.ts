@@ -1,6 +1,13 @@
 import type { RunStatus } from "@astro-courier/shared";
 
-export type GameAudioEvent = "delivery-complete" | "ship-crash" | "style-hit" | "assist-burn" | "fuel-critical" | "hazard-contact";
+export type GameAudioEvent =
+  | "delivery-complete"
+  | "ship-crash"
+  | "style-hit"
+  | "assist-burn"
+  | "boost-burn"
+  | "fuel-critical"
+  | "hazard-contact";
 
 export type HudAudioSnapshot = {
   status: RunStatus;
@@ -39,6 +46,8 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
   if (current.lastMilestone && previous?.lastMilestone !== current.lastMilestone) {
     if (current.lastMilestone === "Assist Burn") {
       events.push("assist-burn");
+    } else if (current.lastMilestone === "Boost Burn") {
+      events.push("boost-burn");
     } else if (styleMilestones.has(current.lastMilestone)) {
       events.push("style-hit");
     }

@@ -47,6 +47,7 @@ const eventTones: Record<GameAudioEvent, { frequency: number; duration: number; 
   "ship-crash": { frequency: 120, duration: 0.24, gain: 0.06 },
   "style-hit": { frequency: 720, duration: 0.08, gain: 0.045 },
   "assist-burn": { frequency: 420, duration: 0.1, gain: 0.04 },
+  "boost-burn": { frequency: 560, duration: 0.07, gain: 0.045 },
   "fuel-critical": { frequency: 220, duration: 0.14, gain: 0.05 },
   "hazard-contact": { frequency: 160, duration: 0.14, gain: 0.055 }
 };
