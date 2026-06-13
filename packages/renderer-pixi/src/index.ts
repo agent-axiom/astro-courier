@@ -336,6 +336,18 @@ export type ShipTrailVisual = {
   alpha: number;
 };
 
+export type CargoAuraVisualInput = Pick<SimulationSnapshot, "status" | "cargoOnboard"> & {
+  cargoDamage: number;
+};
+
+export type CargoAuraVisual = {
+  color: number;
+  tone: "secure" | "strained" | "critical";
+  radius: number;
+  alpha: number;
+  width: number;
+};
+
 export type VelocityVectorVisualInput = {
   status: SimulationSnapshot["status"];
   velocity: Vec2;
@@ -382,6 +394,24 @@ export function shipTrailVisual(input: ShipTrailVisualInput): ShipTrailVisual | 
     length: round(18 + pressure * trailBoost, 2),
     radius: round(4 + pressure * 8, 2),
     alpha: round(clamp(0.34 + pressure * alphaBoost, 0.34, alphaMax), 2)
+  };
+}
+
+export function cargoAuraVisual(input: CargoAuraVisualInput): CargoAuraVisual | undefined {
+  if (input.status !== "flying" || !input.cargoOnboard) {
+    return undefined;
+  }
+
+  const damage = clamp(input.cargoDamage, 0, 1);
+  const pressure = clamp(damage / 0.5, 0, 1);
+  const tone: CargoAuraVisual["tone"] = damage >= 0.3 ? "critical" : damage > 0.02 ? "strained" : "secure";
+
+  return {
+    color: tone === "critical" ? 0xff4d6d : tone === "strained" ? 0xffd166 : 0x8ee6b8,
+    tone,
+    radius: round(25 + pressure * 10, 2),
+    alpha: round(0.22 + pressure * 0.22, 2),
+    width: round(1.6 + pressure * 1.6, 2)
   };
 }
 
@@ -859,6 +889,11 @@ class PixiRenderer implements AstroPixiRenderer {
       styleChainSecondsRemaining: snapshot.styleChainSecondsRemaining
     });
     const boostBurst = boostBurstVisual({ status: snapshot.status, lastMilestone: snapshot.lastMilestone, tick: snapshot.tick });
+    const cargoAura = cargoAuraVisual({
+      status: snapshot.status,
+      cargoOnboard: snapshot.cargoOnboard,
+      cargoDamage: snapshot.ship.cargoDamage
+    });
     const velocityVector = velocityVectorVisual({
       status: snapshot.status,
       velocity: snapshot.ship.velocity,
@@ -875,6 +910,19 @@ class PixiRenderer implements AstroPixiRenderer {
         color: 0xffffff,
         width: 1,
         alpha: boostBurst.alpha * 0.42
+      });
+    }
+
+    if (cargoAura) {
+      this.ship.circle(center.x, center.y, cargoAura.radius + 6).stroke({
+        color: cargoAura.color,
+        width: 1,
+        alpha: cargoAura.alpha * 0.34
+      });
+      this.ship.circle(center.x, center.y, cargoAura.radius).stroke({
+        color: cargoAura.color,
+        width: cargoAura.width,
+        alpha: cargoAura.alpha
       });
     }
 

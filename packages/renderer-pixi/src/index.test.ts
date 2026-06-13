@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   boostBurstVisual,
   cameraFocus,
+  cargoAuraVisual,
   gravitySlingCueVisual,
   hazardFieldVisual,
   hazardVignetteEffect,
@@ -406,6 +407,35 @@ describe("ship trail visual", () => {
       color: 0xff4d6d,
       tone: "warning"
     });
+  });
+});
+
+describe("cargo aura visual", () => {
+  it("stays hidden without onboard cargo or outside active flight", () => {
+    expect(cargoAuraVisual({ status: "flying", cargoOnboard: false, cargoDamage: 0 })).toBeUndefined();
+    expect(cargoAuraVisual({ status: "paused", cargoOnboard: true, cargoDamage: 0 })).toBeUndefined();
+  });
+
+  it("shows a clean cargo integrity aura", () => {
+    expect(cargoAuraVisual({ status: "flying", cargoOnboard: true, cargoDamage: 0 })).toMatchObject({
+      color: 0x8ee6b8,
+      tone: "secure",
+      radius: 25,
+      alpha: 0.22,
+      width: 1.6
+    });
+  });
+
+  it("escalates the aura as cargo damage rises", () => {
+    const secure = cargoAuraVisual({ status: "flying", cargoOnboard: true, cargoDamage: 0 });
+    const strained = cargoAuraVisual({ status: "flying", cargoOnboard: true, cargoDamage: 0.18 });
+    const critical = cargoAuraVisual({ status: "flying", cargoOnboard: true, cargoDamage: 0.42 });
+
+    expect(strained).toMatchObject({ color: 0xffd166, tone: "strained" });
+    expect(critical).toMatchObject({ color: 0xff4d6d, tone: "critical" });
+    expect(strained?.alpha).toBeGreaterThan(secure?.alpha ?? 0);
+    expect(critical?.radius).toBeGreaterThan(strained?.radius ?? 0);
+    expect(critical?.width).toBeGreaterThan(strained?.width ?? 0);
   });
 });
 
