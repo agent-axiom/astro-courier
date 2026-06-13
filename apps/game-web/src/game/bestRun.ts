@@ -77,7 +77,7 @@ export type RouteBoardSelectionAction = {
   contractId: string;
 };
 
-export type RouteBoardRecommendationBadge = "Clear" | "Comet" | "Relay";
+export type RouteBoardRecommendationBadge = "Next" | "Comet" | "Relay";
 
 type BestRunStorage = Pick<Storage, "getItem" | "setItem">;
 
@@ -256,7 +256,7 @@ export function buildRouteBoardRecommendationBadge(routeBoardTarget: RouteBoardT
     if (routeBoardTarget.contractId === "chain-relay") {
       return "Relay";
     }
-    return "Clear";
+    return "Next";
   }
   if (routeBoardTarget.tone === "comet") {
     return "Comet";

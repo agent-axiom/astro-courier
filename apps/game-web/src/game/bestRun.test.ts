@@ -283,7 +283,7 @@ describe("route board target selection action", () => {
 });
 
 describe("route board recommendation badge", () => {
-  it("labels clear targets as clear badges", () => {
+  it("labels clear targets as the next recommended route", () => {
     expect(
       buildRouteBoardRecommendationBadge({
         label: "Next clear",
@@ -291,7 +291,7 @@ describe("route board recommendation badge", () => {
         tone: "clear",
         contractId: "return-leg"
       })
-    ).toBe("Clear");
+    ).toBe("Next");
   });
 
   it("labels chain relay clear targets as relay badges", () => {
