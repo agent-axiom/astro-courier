@@ -7,6 +7,7 @@ import {
   gravitySlingCueVisual,
   hazardFieldVisual,
   hazardVignetteEffect,
+  landingCorridorVisual,
   landingPadVisual,
   objectiveBeaconPulse,
   objectiveGuidanceVisual,
@@ -255,6 +256,73 @@ describe("landing pad visual state", () => {
     expect(destination.strokeWidth).toBeGreaterThan(neutral.strokeWidth);
     expect(destination.alpha).toBeGreaterThan(neutral.alpha);
     expect(neutral.haloAlpha).toBe(0);
+  });
+});
+
+describe("landing corridor visual", () => {
+  it("stays hidden for inactive pads or terminal run screens", () => {
+    expect(
+      landingCorridorVisual({
+        status: "flying",
+        active: false,
+        distance: 80,
+        landingStatus: "approach",
+        assistAvailable: false
+      })
+    ).toBeUndefined();
+    expect(
+      landingCorridorVisual({
+        status: "delivered",
+        active: true,
+        distance: 20,
+        landingStatus: "ready",
+        assistAvailable: true
+      })
+    ).toBeUndefined();
+  });
+
+  it("uses status color and grows clearer near the docking pad", () => {
+    const far = landingCorridorVisual({
+      status: "flying",
+      active: true,
+      distance: 220,
+      landingStatus: "approach",
+      assistAvailable: false
+    });
+    const ready = landingCorridorVisual({
+      status: "flying",
+      active: true,
+      distance: 26,
+      landingStatus: "ready",
+      assistAvailable: true
+    });
+
+    expect(far).toMatchObject({ color: 0xa0c4ff, tone: "approach" });
+    expect(ready).toMatchObject({ color: 0x7ce1ff, tone: "assist" });
+    expect(ready?.alpha).toBeGreaterThan(far?.alpha ?? 0);
+    expect(ready?.width).toBeGreaterThan(far?.width ?? 0);
+    expect(ready?.length).toBeGreaterThan(far?.length ?? 0);
+  });
+
+  it("marks unsafe docking statuses with warning colors", () => {
+    expect(
+      landingCorridorVisual({
+        status: "flying",
+        active: true,
+        distance: 32,
+        landingStatus: "too-fast",
+        assistAvailable: false
+      })
+    ).toMatchObject({ color: 0xff6f91, tone: "too-fast" });
+    expect(
+      landingCorridorVisual({
+        status: "flying",
+        active: true,
+        distance: 32,
+        landingStatus: "misaligned",
+        assistAvailable: false
+      })
+    ).toMatchObject({ color: 0xffd166, tone: "misaligned" });
   });
 });
 

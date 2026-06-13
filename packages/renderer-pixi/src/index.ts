@@ -227,6 +227,22 @@ export type LandingPadVisual = {
   beaconAlpha: number;
 };
 
+export type LandingCorridorVisualInput = {
+  status: SimulationSnapshot["status"];
+  active: boolean;
+  distance: number;
+  landingStatus: LandingGuidanceStatus;
+  assistAvailable: boolean;
+};
+
+export type LandingCorridorVisual = {
+  color: number;
+  tone: "approach" | "ready" | "assist" | "too-fast" | "misaligned";
+  length: number;
+  alpha: number;
+  width: number;
+};
+
 export function landingPadVisual(pad: LandingPadVisualInput): LandingPadVisual {
   const color = pad.role === "destination" ? 0xffd166 : pad.role === "pickup" ? 0x8ee6b8 : 0xa0c4ff;
   if (pad.active) {
@@ -253,6 +269,38 @@ export function landingPadVisual(pad: LandingPadVisualInput): LandingPadVisual {
     alpha: 0.38,
     haloAlpha: 0,
     beaconAlpha: 0
+  };
+}
+
+export function landingCorridorVisual(input: LandingCorridorVisualInput): LandingCorridorVisual | undefined {
+  if (!input.active || (input.status !== "flying" && input.status !== "paused")) {
+    return undefined;
+  }
+
+  const proximity = 1 - clamp((input.distance - 24) / 220, 0, 1);
+  const tone: LandingCorridorVisual["tone"] = input.assistAvailable
+    ? "assist"
+    : input.landingStatus === "ready"
+      ? "ready"
+      : input.landingStatus;
+  const color =
+    tone === "assist"
+      ? 0x7ce1ff
+      : tone === "ready"
+        ? 0x8ee6b8
+        : tone === "too-fast"
+          ? 0xff6f91
+          : tone === "misaligned"
+            ? 0xffd166
+            : 0xa0c4ff;
+  const precisionBoost = tone === "ready" || tone === "assist" ? 1 : 0;
+
+  return {
+    color,
+    tone,
+    length: round(34 + proximity * 32 + precisionBoost * 8, 2),
+    alpha: round(clamp(0.2 + proximity * 0.34 + precisionBoost * 0.12, 0.2, 0.72), 2),
+    width: round(1.2 + proximity * 1.1 + precisionBoost * 0.6, 2)
   };
 }
 
@@ -854,6 +902,7 @@ class PixiRenderer implements AstroPixiRenderer {
 
   private drawWorld(snapshot: SimulationSnapshot, project: (point: Vec2) => Vec2): void {
     this.world.clear();
+    const objectiveTarget = snapshot.objectiveTarget;
 
     for (const source of snapshot.gravitySources) {
       const center = project(source.position);
@@ -868,6 +917,51 @@ class PixiRenderer implements AstroPixiRenderer {
     for (const pad of snapshot.landingPads) {
       const center = project(pad.position);
       const visual = landingPadVisual(pad);
+      const corridor =
+        objectiveTarget?.id === pad.id
+          ? landingCorridorVisual({
+              status: snapshot.status,
+              active: pad.active,
+              distance: objectiveTarget.distance,
+              landingStatus: objectiveTarget.landingStatus,
+              assistAvailable: objectiveTarget.assistAvailable
+            })
+          : undefined;
+      const corridorTarget = objectiveTarget?.id === pad.id ? objectiveTarget : undefined;
+      if (corridor && corridorTarget) {
+        const corridorInner = pad.radius + 8;
+        const corridorOuter = pad.radius + corridor.length;
+        const leftAngle = pad.normalAngle + corridorTarget.requiredAngleTolerance;
+        const rightAngle = pad.normalAngle - corridorTarget.requiredAngleTolerance;
+        const centerStart = {
+          x: center.x + Math.cos(pad.normalAngle) * corridorInner,
+          y: center.y + Math.sin(pad.normalAngle) * corridorInner
+        };
+        const centerEnd = {
+          x: center.x + Math.cos(pad.normalAngle) * corridorOuter,
+          y: center.y + Math.sin(pad.normalAngle) * corridorOuter
+        };
+        this.world.moveTo(centerStart.x, centerStart.y).lineTo(centerEnd.x, centerEnd.y).stroke({
+          color: corridor.color,
+          width: Math.max(1, corridor.width - 0.4),
+          alpha: corridor.alpha * 0.46
+        });
+        for (const angle of [leftAngle, rightAngle]) {
+          const start = {
+            x: center.x + Math.cos(angle) * corridorInner,
+            y: center.y + Math.sin(angle) * corridorInner
+          };
+          const end = {
+            x: center.x + Math.cos(angle) * corridorOuter,
+            y: center.y + Math.sin(angle) * corridorOuter
+          };
+          this.world.moveTo(start.x, start.y).lineTo(end.x, end.y).stroke({
+            color: corridor.color,
+            width: corridor.width,
+            alpha: corridor.alpha
+          });
+        }
+      }
       if (visual.haloAlpha > 0) {
         this.world.circle(center.x, center.y, pad.radius + 12).fill({ color: visual.color, alpha: visual.haloAlpha * 0.58 });
         this.world.circle(center.x, center.y, pad.radius + 16).stroke({
