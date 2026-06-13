@@ -132,6 +132,19 @@ export type GhostTrailPointVisual = {
   alpha: number;
 };
 
+export type GhostTrailSegmentVisualInput = {
+  status: SimulationSnapshot["status"];
+  index: number;
+  total: number;
+  tick: number;
+};
+
+export type GhostTrailSegmentVisual = {
+  color: number;
+  width: number;
+  alpha: number;
+};
+
 export type TrajectoryHazardDanger = "near" | "inside";
 export type TrajectoryGravitySlingSignal = "setup" | "ready";
 
@@ -190,6 +203,21 @@ export function ghostTrailPointVisual(input: GhostTrailPointVisualInput): GhostT
     color: isEndpoint ? 0xf8e59a : 0x8ee6b8,
     radius: round(isEndpoint ? 3.8 : 2.4 + progress * 0.5, 2),
     alpha: round(isEndpoint ? 0.72 : 0.24 + progress * 0.28, 2)
+  };
+}
+
+export function ghostTrailSegmentVisual(input: GhostTrailSegmentVisualInput): GhostTrailSegmentVisual | undefined {
+  if ((input.status !== "flying" && input.status !== "paused") || input.total < 2) {
+    return undefined;
+  }
+
+  const progress = clamp(input.index / Math.max(1, input.total - 1), 0, 1);
+  const pulse = input.status === "flying" ? (Math.sin(input.tick * 0.12 + input.index * 0.9) + 1) / 2 : 0;
+  const activeBoost = input.status === "flying" ? 1 : 0;
+  return {
+    color: progress >= 0.92 ? 0xf8e59a : 0x8ee6b8,
+    width: round(1.3 + activeBoost * (0.45 + progress * 0.3), 2),
+    alpha: round(0.16 + progress * 0.18 + activeBoost * 0.12 + pulse * 0.08, 2)
   };
 }
 
@@ -865,12 +893,11 @@ class PixiRenderer implements AstroPixiRenderer {
 
       const point = project(ghostTrail[index]);
       if (index > 0) {
+        const segment = ghostTrailSegmentVisual({ status: snapshot.status, index, total: ghostTrail.length, tick: snapshot.tick });
         const previous = project(ghostTrail[index - 1]);
-        this.ghost.moveTo(previous.x, previous.y).lineTo(point.x, point.y).stroke({
-          color: visual.color,
-          width: 1.4,
-          alpha: visual.alpha * 0.32
-        });
+        if (segment) {
+          this.ghost.moveTo(previous.x, previous.y).lineTo(point.x, point.y).stroke(segment);
+        }
       }
       this.ghost.circle(point.x, point.y, visual.radius).fill({ color: visual.color, alpha: visual.alpha });
     }

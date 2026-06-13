@@ -3,6 +3,7 @@ import {
   boostBurstVisual,
   cameraFocus,
   cargoAuraVisual,
+  ghostTrailSegmentVisual,
   ghostTrailPointVisual,
   gravitySlingCueVisual,
   hazardFieldVisual,
@@ -296,6 +297,26 @@ describe("ghost trail point visual", () => {
     expect(last).toMatchObject({ color: 0xf8e59a });
     expect(last?.radius).toBeGreaterThan(first?.radius ?? 0);
     expect(last?.alpha).toBeGreaterThan(first?.alpha ?? 0);
+  });
+});
+
+describe("ghost trail segment visual", () => {
+  it("stays hidden without enough samples or after terminal results own the screen", () => {
+    expect(ghostTrailSegmentVisual({ status: "flying", index: 0, total: 1, tick: 12 })).toBeUndefined();
+    expect(ghostTrailSegmentVisual({ status: "delivered", index: 1, total: 5, tick: 12 })).toBeUndefined();
+    expect(ghostTrailSegmentVisual({ status: "crashed", index: 1, total: 5, tick: 12 })).toBeUndefined();
+  });
+
+  it("renders active ghost segments brighter than preflight route ghosts", () => {
+    const preflight = ghostTrailSegmentVisual({ status: "paused", index: 1, total: 5, tick: 12 });
+    const active = ghostTrailSegmentVisual({ status: "flying", index: 1, total: 5, tick: 12 });
+    const late = ghostTrailSegmentVisual({ status: "flying", index: 4, total: 5, tick: 12 });
+
+    expect(preflight).toMatchObject({ color: 0x8ee6b8, width: 1.3 });
+    expect(active).toMatchObject({ color: 0x8ee6b8 });
+    expect(active?.width).toBeGreaterThan(preflight?.width ?? 0);
+    expect(active?.alpha).toBeGreaterThan(preflight?.alpha ?? 0);
+    expect(late?.alpha).toBeGreaterThan(active?.alpha ?? 0);
   });
 });
 
