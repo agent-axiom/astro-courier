@@ -434,6 +434,7 @@ export function App() {
     lastMilestone: hud.lastMilestone,
     styleMultiplier: hud.styleMultiplier,
     styleChainSecondsRemaining: hud.styleChainSecondsRemaining,
+    launchBurstSecondsRemaining: hud.launchBurstSecondsRemaining,
     quickPickupSecondsRemaining: hud.quickPickupSecondsRemaining,
     cargoDamage: hud.cargoDamage,
     hazardDangerLevel: hud.hazardDangerLevel,

@@ -15,6 +15,7 @@ export type LiveStyleRewardInput = {
   lastMilestone?: string;
   styleMultiplier?: number;
   styleChainSecondsRemaining?: number;
+  launchBurstSecondsRemaining?: number;
   quickPickupSecondsRemaining?: number;
   cargoDamage?: number;
   hazardDangerLevel?: "near" | "inside";
@@ -155,6 +156,9 @@ function buildUrgentChainAction(input: LiveStyleRewardInput): string {
   }
   if (input.hazardDangerLevel === "near" && (input.cargoDamage ?? 0) <= 0.02) {
     return "Skim now";
+  }
+  if ((input.launchBurstSecondsRemaining ?? 0) > 0) {
+    return "Boost now";
   }
   if ((input.quickPickupSecondsRemaining ?? 0) > 0) {
     return "Pickup now";

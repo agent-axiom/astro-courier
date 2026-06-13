@@ -295,6 +295,23 @@ describe("live style reward HUD copy", () => {
       chainProgress: 0.18
     });
   });
+
+  it("points urgent chains at an armed launch burst before generic save copy", () => {
+    expect(
+      buildLiveStyleReward({
+        styleBonus: 330,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 0.8,
+        launchBurstSecondsRemaining: 2.4
+      })
+    ).toEqual({
+      label: "Style chain",
+      value: "Boost now / x1.50 / 0.8s",
+      fresh: false,
+      tone: "urgent",
+      chainProgress: 0.2
+    });
+  });
 });
 
 describe("style target cue", () => {
