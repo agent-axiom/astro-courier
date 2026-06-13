@@ -180,6 +180,23 @@ describe("live style reward HUD copy", () => {
     });
   });
 
+  it("uses the longer chain relay timing for style chain progress", () => {
+    expect(
+      buildLiveStyleReward({
+        contractId: "chain-relay",
+        styleBonus: 180,
+        styleMultiplier: 1.25,
+        styleChainSecondsRemaining: 2.75
+      })
+    ).toEqual({
+      label: "Style chain",
+      value: "+180 / x1.25 / 2.8s",
+      fresh: false,
+      tone: "chain",
+      chainProgress: 0.5
+    });
+  });
+
   it("warns when an active style chain is about to expire", () => {
     expect(buildLiveStyleReward({ styleBonus: 440, styleMultiplier: 1.5, styleChainSecondsRemaining: 0.8 })).toEqual({
       label: "Style chain",
@@ -203,7 +220,7 @@ describe("live style reward HUD copy", () => {
       value: "Dock chain / x1.50 / 0.8s",
       fresh: false,
       tone: "urgent",
-      chainProgress: 0.2
+      chainProgress: 0.15
     });
   });
 

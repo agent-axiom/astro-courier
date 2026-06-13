@@ -1,4 +1,4 @@
-import { STYLE_CHAIN_WINDOW_SECONDS } from "@astro-courier/simulation";
+import { CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS, STYLE_CHAIN_WINDOW_SECONDS } from "@astro-courier/simulation";
 
 export const STYLE_CHAIN_URGENT_SECONDS = 1;
 
@@ -48,7 +48,7 @@ export function buildLiveStyleReward(input: LiveStyleRewardInput): LiveStyleRewa
   const chainActive = (input.styleMultiplier ?? 1) > 1 && styleChainSecondsRemaining > 0;
   const urgent = chainActive && styleChainSecondsRemaining <= STYLE_CHAIN_URGENT_SECONDS && !fresh;
   const freshAward = fresh && input.lastStyleAward !== undefined && input.lastStyleAward > 0 ? Math.round(input.lastStyleAward) : undefined;
-  const chainProgress = chainActive ? round(clamp(styleChainSecondsRemaining / STYLE_CHAIN_WINDOW_SECONDS, 0, 1), 2) : 0;
+  const chainProgress = chainActive ? round(clamp(styleChainSecondsRemaining / styleChainWindowSeconds(input), 0, 1), 2) : 0;
   const urgentAction = urgent ? buildUrgentChainAction(input) : "Save chain";
   return {
     label: freshAward ? "Style hit" : fresh || chainActive ? "Style chain" : "Style bank",
@@ -79,6 +79,10 @@ function buildUrgentChainAction(input: LiveStyleRewardInput): string {
     return "Dock chain";
   }
   return "Save chain";
+}
+
+function styleChainWindowSeconds(input: LiveStyleRewardInput): number {
+  return input.contractId === "chain-relay" ? CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS : STYLE_CHAIN_WINDOW_SECONDS;
 }
 
 function clamp(value: number, min: number, max: number): number {
