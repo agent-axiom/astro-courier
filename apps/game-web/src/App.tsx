@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { create } from "zustand";
-import { getBestRun, recordBestRun, type BestRun } from "./game/bestRun";
+import { buildBestRunChase, getBestRun, recordBestRun, type BestRun } from "./game/bestRun";
 import { GameShell, type HudState } from "./game/GameShell";
 import { formatBearingGuidance } from "./game/bearing";
 import { canUseImpulseControl } from "./game/hudControls";
@@ -181,6 +181,7 @@ export function App() {
   const preflightMasteryTargets = buildPreflightMasteryTargets({ goldSeconds: hud.paceSecondsRemaining });
   const cargoManifest = buildCargoManifest({ cargoName: hud.cargoName, cargoOnboard: hud.cargoOnboard });
   const resultStats = buildResultStats({ score: hud.score, elapsedSeconds: hud.elapsedSeconds, cargoIntegrity });
+  const bestRunChase = buildBestRunChase(bestRun);
   const resultCoach = buildResultCoach({
     status: hud.status,
     crashReason: hud.crashReason,
@@ -419,6 +420,11 @@ export function App() {
             <Route size={18} />
             <span>{routePlan.label}</span>
             <strong>{routePlan.value}</strong>
+          </div>
+          <div className={`best-chase-briefing best-chase-${bestRunChase.tone}`} aria-label={`${bestRunChase.label}: ${bestRunChase.value}`}>
+            <Trophy size={18} />
+            <span>{bestRunChase.label}</span>
+            <strong>{bestRunChase.value}</strong>
           </div>
           <div className={`cargo-risk-briefing cargo-risk-${cargoRiskReadout.tone}`} aria-label={`${cargoRiskReadout.label}: ${cargoRiskReadout.value}`}>
             <ShieldAlert size={18} />

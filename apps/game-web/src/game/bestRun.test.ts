@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getBestRun, recordBestRun } from "./bestRun";
+import { buildBestRunChase, getBestRun, recordBestRun } from "./bestRun";
 
 describe("personal best run storage", () => {
   it("stores a first delivered run as the personal best", () => {
@@ -32,6 +32,24 @@ describe("personal best run storage", () => {
     expect(recordBestRun(storage, "starter", { score: 1400, elapsedSeconds: 41, medal: "gold" }).isNewBest).toBe(false);
     expect(recordBestRun(storage, "starter", { score: 1400, elapsedSeconds: 37, medal: "gold" }).isNewBest).toBe(true);
     expect(getBestRun(storage, "starter")?.elapsedSeconds).toBe(37);
+  });
+});
+
+describe("personal best chase copy", () => {
+  it("invites the player to set an initial personal best", () => {
+    expect(buildBestRunChase(undefined)).toEqual({
+      label: "First clear",
+      value: "Sets personal best",
+      tone: "empty"
+    });
+  });
+
+  it("formats an existing personal best as a chase target", () => {
+    expect(buildBestRunChase({ score: 3290, elapsedSeconds: 24.667, medal: "gold" })).toEqual({
+      label: "PB target",
+      value: "3290 / 24.7s",
+      tone: "target"
+    });
   });
 });
 

@@ -6,6 +6,12 @@ export type BestRun = {
   medal: RunMedal;
 };
 
+export type BestRunChase = {
+  label: "First clear" | "PB target";
+  value: string;
+  tone: "empty" | "target";
+};
+
 type BestRunStorage = Pick<Storage, "getItem" | "setItem">;
 
 export function getBestRun(storage: BestRunStorage, contractKey: string): BestRun | undefined {
@@ -41,6 +47,22 @@ export function recordBestRun(
 
   storage.setItem(storageKey(contractKey), JSON.stringify(run));
   return { best: run, isNewBest: true };
+}
+
+export function buildBestRunChase(bestRun: BestRun | undefined): BestRunChase {
+  if (!bestRun) {
+    return {
+      label: "First clear",
+      value: "Sets personal best",
+      tone: "empty"
+    };
+  }
+
+  return {
+    label: "PB target",
+    value: `${bestRun.score} / ${bestRun.elapsedSeconds.toFixed(1)}s`,
+    tone: "target"
+  };
 }
 
 function isBetterRun(candidate: BestRun, current: BestRun): boolean {
