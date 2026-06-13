@@ -38,7 +38,12 @@ export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
     if (input.crashReason === "Hull Collision") {
       return {
         label: "Retry target",
-        value: input.contractId === "gravity-slingshot" ? "Hold outer sling lane" : "Clear gravity well",
+        value:
+          input.contractId === "gravity-slingshot"
+            ? "Hold outer sling lane"
+            : input.contractId === "asteroid-sprint"
+            ? "Clear asteroid field"
+            : "Clear gravity well",
         tone: "danger"
       };
     }

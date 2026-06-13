@@ -79,6 +79,26 @@ describe("result retry target", () => {
     });
   });
 
+  it("turns asteroid sprint hull collisions into an asteroid-field target", () => {
+    expect(
+      buildRetryTarget({
+        status: "crashed",
+        contractId: "asteroid-sprint",
+        crashReason: "Hull Collision",
+        medal: "none",
+        elapsedSeconds: 14.2,
+        goldSeconds: 30,
+        score: 0,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Clear asteroid field",
+      tone: "danger"
+    });
+  });
+
   it("turns a saved personal best score gap into a concrete score target", () => {
     expect(
       buildRetryTarget({
