@@ -222,6 +222,22 @@ describe("radio feedback copy", () => {
     ).toContain("Last drop window");
   });
 
+  it("previews the multiplied last-drop radio payout during an active style chain", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        landingStatus: "ready",
+        fuel: 4,
+        maxFuel: 100,
+        cargoDamage: 0,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 2.4
+      })
+    ).toContain("+255");
+  });
+
   it("keeps low last-drop fuel as a warning until the dock is ready", () => {
     expect(
       buildRadioMessage({

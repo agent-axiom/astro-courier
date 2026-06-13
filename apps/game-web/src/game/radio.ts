@@ -123,7 +123,7 @@ export function buildRadioMessage(hud: HudState): string {
   }
 
   if (isLastDropWindowOpen(hud)) {
-    return `Last drop window. Dock clean for +${LAST_DROP_STYLE_BONUS} style.`;
+    return `Last drop window. Dock clean for +${lastDropRadioPayout(hud)} style.`;
   }
 
   if (hud.maxFuel > 0 && hud.fuel / hud.maxFuel <= 0.15) {
@@ -210,4 +210,8 @@ function isLastDropWindowOpen(hud: HudState): boolean {
     hud.maxFuel > 0 &&
     hud.fuel / hud.maxFuel <= LAST_DROP_FUEL_RATIO
   );
+}
+
+function lastDropRadioPayout(hud: HudState): number {
+  return Math.round(LAST_DROP_STYLE_BONUS * Math.max(1, hud.styleMultiplier));
 }
