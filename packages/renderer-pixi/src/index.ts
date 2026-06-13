@@ -118,10 +118,12 @@ export type ShipTrailVisualInput = {
   status: SimulationSnapshot["status"];
   speed: number;
   fuelRatio: number;
+  cargoDamage?: number;
 };
 
 export type ShipTrailVisual = {
   color: number;
+  tone: "sprint" | "comet" | "warning";
   length: number;
   radius: number;
   alpha: number;
@@ -133,11 +135,15 @@ export function shipTrailVisual(input: ShipTrailVisualInput): ShipTrailVisual | 
   }
 
   const pressure = clamp((input.speed - 8) / 42, 0, 1);
+  const lowFuel = input.fuelRatio <= 0.15;
+  const cometReserve = input.speed >= 42 && input.fuelRatio >= 0.55 && (input.cargoDamage ?? 1) <= 0.02;
+  const tone = lowFuel ? "warning" : cometReserve ? "comet" : "sprint";
   return {
-    color: input.fuelRatio <= 0.15 ? 0xff4d6d : 0xff9f1c,
-    length: round(18 + pressure * 28, 2),
+    color: tone === "warning" ? 0xff4d6d : tone === "comet" ? 0x7ce1ff : 0xff9f1c,
+    tone,
+    length: round(18 + pressure * (tone === "comet" ? 34 : 28), 2),
     radius: round(4 + pressure * 8, 2),
-    alpha: round(clamp(0.34 + pressure * 0.38, 0.34, 0.72), 2)
+    alpha: round(clamp(0.34 + pressure * (tone === "comet" ? 0.46 : 0.38), 0.34, tone === "comet" ? 0.8 : 0.72), 2)
   };
 }
 
@@ -380,7 +386,7 @@ class PixiRenderer implements AstroPixiRenderer {
     };
     const speed = Math.hypot(snapshot.ship.velocity.x, snapshot.ship.velocity.y);
     const fuelRatio = snapshot.ship.maxFuel > 0 ? snapshot.ship.fuel / snapshot.ship.maxFuel : 0;
-    const trail = shipTrailVisual({ status: snapshot.status, speed, fuelRatio });
+    const trail = shipTrailVisual({ status: snapshot.status, speed, fuelRatio, cargoDamage: snapshot.ship.cargoDamage });
 
     this.ship.moveTo(nose.x, nose.y).lineTo(left.x, left.y).lineTo(right.x, right.y).closePath().fill(0xfff7d6);
     this.ship.moveTo(nose.x, nose.y).lineTo(left.x, left.y).lineTo(right.x, right.y).closePath().stroke({

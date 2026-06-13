@@ -114,4 +114,18 @@ describe("ship trail visual", () => {
       color: 0xff4d6d
     });
   });
+
+  it("switches clean high-speed reserve runs into a comet trail", () => {
+    expect(shipTrailVisual({ status: "flying", speed: 48, fuelRatio: 0.82, cargoDamage: 0 })).toMatchObject({
+      color: 0x7ce1ff,
+      tone: "comet"
+    });
+  });
+
+  it("keeps damaged high-speed runs on the ordinary sprint trail", () => {
+    expect(shipTrailVisual({ status: "flying", speed: 48, fuelRatio: 0.82, cargoDamage: 0.08 })).toMatchObject({
+      color: 0xff9f1c,
+      tone: "sprint"
+    });
+  });
 });
