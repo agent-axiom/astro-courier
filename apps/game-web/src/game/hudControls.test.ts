@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildBoostControlPresentation, canUseImpulseControl, type ImpulseControlState } from "./hudControls";
+import { buildBoostControlPresentation, buildPrimaryRunControlPresentation, canUseImpulseControl, type ImpulseControlState } from "./hudControls";
 
 describe("HUD impulse controls", () => {
   it("allows boost and brake only during active runs with enough fuel", () => {
@@ -55,6 +55,25 @@ describe("boost control presentation", () => {
     expect(buildBoostControlPresentation({ canBoost: false, boostCooldownSeconds: 0.4, launchBurstSecondsRemaining: 2.4 })).toMatchObject({
       label: "Boost 0.4s",
       tone: "cooldown"
+    });
+  });
+});
+
+describe("primary run control presentation", () => {
+  it("hides the top launch control while the preflight briefing owns launch", () => {
+    expect(buildPrimaryRunControlPresentation({ preflightOpen: true, paused: true })).toEqual({
+      visible: false
+    });
+  });
+
+  it("labels the top run control only after preflight closes", () => {
+    expect(buildPrimaryRunControlPresentation({ preflightOpen: false, paused: true })).toEqual({
+      visible: true,
+      label: "Resume"
+    });
+    expect(buildPrimaryRunControlPresentation({ preflightOpen: false, paused: false })).toEqual({
+      visible: true,
+      label: "Pause"
     });
   });
 });

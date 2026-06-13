@@ -25,6 +25,20 @@ export type BoostControlPresentation = {
   cooldownProgress: number;
 };
 
+export type PrimaryRunControlPresentationInput = {
+  preflightOpen: boolean;
+  paused: boolean;
+};
+
+export type PrimaryRunControlPresentation =
+  | {
+      visible: false;
+    }
+  | {
+      visible: true;
+      label: "Pause" | "Resume";
+    };
+
 export function canUseImpulseControl(state: ImpulseControlState): boolean {
   if (state.preflightOpen || state.paused || state.status !== "flying") {
     return false;
@@ -61,6 +75,17 @@ export function buildBoostControlPresentation(input: BoostControlPresentationInp
     label: "Boost",
     tone: input.canBoost ? "ready" : "disabled",
     cooldownProgress: 0
+  };
+}
+
+export function buildPrimaryRunControlPresentation(input: PrimaryRunControlPresentationInput): PrimaryRunControlPresentation {
+  if (input.preflightOpen) {
+    return { visible: false };
+  }
+
+  return {
+    visible: true,
+    label: input.paused ? "Resume" : "Pause"
   };
 }
 

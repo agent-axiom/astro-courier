@@ -39,7 +39,7 @@ import {
 } from "./game/bestRun";
 import { GameShell, type HudState } from "./game/GameShell";
 import { formatBearingGuidance } from "./game/bearing";
-import { buildBoostControlPresentation, canUseImpulseControl } from "./game/hudControls";
+import { buildBoostControlPresentation, buildPrimaryRunControlPresentation, canUseImpulseControl } from "./game/hudControls";
 import {
   buildContractDangerPayTrait,
   buildContractHazardTrait,
@@ -356,7 +356,7 @@ export function App() {
   });
   const approachRewardReadout = buildApproachRewardReadout({ approachStreakSeconds: hud.approachStreakSeconds });
   const approachStreakStyle = { "--approach-streak-progress": approachRewardReadout?.progress ?? 0 } as CSSProperties;
-  const primaryActionLabel = preflightOpen ? "Launch" : paused ? "Resume" : "Pause";
+  const primaryRunControl = buildPrimaryRunControlPresentation({ preflightOpen, paused });
   const canBoost = canUseImpulseControl({
     action: "boost",
     fuel: hud.fuel,
@@ -689,24 +689,22 @@ export function App() {
           >
             <OctagonMinus size={20} />
           </button>
-          <button
-            type="button"
-            className="icon-button"
-            aria-label={primaryActionLabel}
-            title={primaryActionLabel}
-            onClick={() => {
-              audioRef.current?.unlock();
-              if (preflightOpen) {
-                launchContract();
-                return;
-              }
-              const next = !paused;
-              setPaused(next);
-              shellRef.current?.setPaused(next);
-            }}
-          >
-            {paused ? <Play size={20} /> : <Pause size={20} />}
-          </button>
+          {primaryRunControl.visible ? (
+            <button
+              type="button"
+              className="icon-button"
+              aria-label={primaryRunControl.label}
+              title={primaryRunControl.label}
+              onClick={() => {
+                audioRef.current?.unlock();
+                const next = !paused;
+                setPaused(next);
+                shellRef.current?.setPaused(next);
+              }}
+            >
+              {paused ? <Play size={20} /> : <Pause size={20} />}
+            </button>
+          ) : null}
           <button
             type="button"
             className="icon-button"
