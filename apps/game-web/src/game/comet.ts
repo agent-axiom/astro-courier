@@ -52,7 +52,7 @@ export function buildCometRunReadout(input: CometRunReadoutInput): CometRunReado
   if (fuelReserve < COMET_RESERVE_WARNING_RATIO) {
     return {
       label: "Comet run",
-      value: "Reserve tight",
+      value: "Coast for comet",
       tone: "warning"
     };
   }

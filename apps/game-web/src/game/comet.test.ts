@@ -54,7 +54,7 @@ describe("live comet run readout", () => {
       })
     ).toEqual({
       label: "Comet run",
-      value: "Reserve tight",
+      value: "Coast for comet",
       tone: "warning"
     });
   });
