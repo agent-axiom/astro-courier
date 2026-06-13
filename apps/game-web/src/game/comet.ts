@@ -3,6 +3,17 @@ import type { ContractPaceTier } from "./pace";
 
 export const COMET_RESERVE_MIN_RATIO = 0.75;
 export const COMET_RESERVE_WARNING_RATIO = 0.82;
+const cleanCargoDamageLimit = 0.02;
+
+export type LiveCometDockInput = {
+  status: RunStatus;
+  objectivePhase?: ObjectivePhase;
+  paceTier?: ContractPaceTier;
+  fuel: number;
+  maxFuel: number;
+  cargoDamage?: number;
+  perfectDockReady?: boolean;
+};
 
 export type CometRunReadoutInput = {
   status: RunStatus;
@@ -22,6 +33,18 @@ export type CometRunReadout = {
   tone: "live" | "warning" | "lost";
 };
 
+export function isLiveCometDockArmed(input: LiveCometDockInput): boolean {
+  const fuelReserve = input.maxFuel > 0 ? input.fuel / input.maxFuel : 0;
+  return (
+    input.status === "flying" &&
+    input.objectivePhase === "delivery" &&
+    input.paceTier === "gold" &&
+    fuelReserve >= COMET_RESERVE_MIN_RATIO &&
+    (input.cargoDamage ?? 0) <= cleanCargoDamageLimit &&
+    input.perfectDockReady === true
+  );
+}
+
 export function buildCometRunReadout(input: CometRunReadoutInput): CometRunReadout | undefined {
   if (input.preflightOpen || input.status === "delivered" || input.status === "crashed") {
     return undefined;
@@ -35,7 +58,7 @@ export function buildCometRunReadout(input: CometRunReadoutInput): CometRunReado
     };
   }
 
-  if (input.cargoDamage > 0.02) {
+  if (input.cargoDamage > cleanCargoDamageLimit) {
     return {
       label: "Comet run",
       value: "Cargo scratched",
@@ -52,6 +75,14 @@ export function buildCometRunReadout(input: CometRunReadoutInput): CometRunReado
     };
   }
 
+  if (isLiveCometDockArmed(input)) {
+    return {
+      label: "Comet run",
+      value: "Perfect dock armed",
+      tone: "live"
+    };
+  }
+
   if (fuelReserve < COMET_RESERVE_WARNING_RATIO) {
     return {
       label: "Comet run",
@@ -61,13 +92,6 @@ export function buildCometRunReadout(input: CometRunReadoutInput): CometRunReado
   }
 
   if (input.objectivePhase === "delivery") {
-    if (input.perfectDockReady) {
-      return {
-        label: "Comet run",
-        value: "Perfect dock armed",
-        tone: "live"
-      };
-    }
     if (input.landingStatus === "too-fast") {
       return {
         label: "Comet run",

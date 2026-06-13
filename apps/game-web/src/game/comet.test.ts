@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCometRunReadout } from "./comet";
+import { buildCometRunReadout, isLiveCometDockArmed } from "./comet";
 
 describe("live comet run readout", () => {
   it("stays hidden in preflight and after the run is over", () => {
@@ -183,5 +183,24 @@ describe("live comet run readout", () => {
       value: "Reserve low",
       tone: "lost"
     });
+  });
+
+  it("recognizes live comet dock arming conditions as a shared rule", () => {
+    const armedInput = {
+      status: "flying" as const,
+      objectivePhase: "delivery" as const,
+      paceTier: "gold" as const,
+      fuel: 84,
+      maxFuel: 100,
+      cargoDamage: 0,
+      perfectDockReady: true
+    };
+
+    expect(isLiveCometDockArmed(armedInput)).toBe(true);
+    expect(isLiveCometDockArmed({ ...armedInput, objectivePhase: "pickup" })).toBe(false);
+    expect(isLiveCometDockArmed({ ...armedInput, paceTier: "silver" })).toBe(false);
+    expect(isLiveCometDockArmed({ ...armedInput, fuel: 70 })).toBe(false);
+    expect(isLiveCometDockArmed({ ...armedInput, cargoDamage: 0.05 })).toBe(false);
+    expect(isLiveCometDockArmed({ ...armedInput, perfectDockReady: false })).toBe(false);
   });
 });

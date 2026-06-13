@@ -1,5 +1,5 @@
 import type { ObjectivePhase, RunMedal, RunStatus } from "@astro-courier/shared";
-import { COMET_RESERVE_MIN_RATIO } from "./comet";
+import { isLiveCometDockArmed } from "./comet";
 import type { ContractPaceTier } from "./pace";
 
 export type RunFeedTone = "neutral" | "style" | "success" | "warning" | "danger";
@@ -270,14 +270,7 @@ function hasArmedCometDock(previous: RunFeedSnapshot, current: RunFeedSnapshot):
   if (previous.perfectDockReady || !current.perfectDockReady) {
     return false;
   }
-  const fuelReserve = current.maxFuel > 0 ? current.fuel / current.maxFuel : 0;
-  return (
-    current.status === "flying" &&
-    current.objectivePhase === "delivery" &&
-    current.paceTier === "gold" &&
-    fuelReserve >= COMET_RESERVE_MIN_RATIO &&
-    (current.cargoDamage ?? 0) <= cleanCargoDamageLimit
-  );
+  return isLiveCometDockArmed(current);
 }
 
 function hasStyleChainReachedCriticalWindow(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {

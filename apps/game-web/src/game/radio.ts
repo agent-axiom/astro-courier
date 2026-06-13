@@ -6,7 +6,7 @@ import {
   PERFECT_APPROACH_STYLE_BONUS
 } from "@astro-courier/simulation";
 import type { HudState } from "./GameShell";
-import { COMET_RESERVE_MIN_RATIO, COMET_RESERVE_WARNING_RATIO } from "./comet";
+import { COMET_RESERVE_MIN_RATIO, COMET_RESERVE_WARNING_RATIO, isLiveCometDockArmed } from "./comet";
 import { STYLE_CHAIN_URGENT_SECONDS } from "./style";
 
 export function buildRadioMessage(hud: HudState): string {
@@ -146,15 +146,7 @@ export function buildRadioMessage(hud: HudState): string {
     return "Fuel critical. Coast clean and save the last burn for docking.";
   }
 
-  if (
-    hud.objectivePhase === "delivery" &&
-    hud.cargoOnboard &&
-    hud.paceTier === "gold" &&
-    hud.cargoDamage <= 0.02 &&
-    hud.maxFuel > 0 &&
-    hud.fuel / hud.maxFuel >= COMET_RESERVE_MIN_RATIO &&
-    hud.perfectDockReady
-  ) {
+  if (hud.cargoOnboard && isLiveCometDockArmed(hud)) {
     return "Comet dock armed. Set it down clean for the finish.";
   }
 
