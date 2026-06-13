@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildRetryTarget } from "./retryTarget";
+import { buildResultRetryAction, buildRetryTarget } from "./retryTarget";
 
 describe("result retry target", () => {
   it("asks crashed runs to finish the delivery first", () => {
@@ -167,6 +167,32 @@ describe("result retry target", () => {
       label: "Retry target",
       value: "Chase Express Finish",
       tone: "opportunity"
+    });
+  });
+});
+
+describe("result retry action copy", () => {
+  it("turns failed runs into a direct route retry", () => {
+    expect(buildResultRetryAction({ label: "Retry target", value: "Complete delivery", tone: "danger" })).toEqual({
+      label: "Retry Route"
+    });
+  });
+
+  it("turns personal best defense into a stronger call to action", () => {
+    expect(buildResultRetryAction({ label: "Retry target", value: "Defend 3520 / 24.1s", tone: "success" })).toEqual({
+      label: "Defend PB"
+    });
+  });
+
+  it("turns personal best gaps into a chase call to action", () => {
+    expect(buildResultRetryAction({ label: "Retry target", value: "Find +330 score", tone: "chase" })).toEqual({
+      label: "Chase PB"
+    });
+  });
+
+  it("keeps route improvement opportunities readable", () => {
+    expect(buildResultRetryAction({ label: "Retry target", value: "Chase Express Finish", tone: "opportunity" })).toEqual({
+      label: "Run Again"
     });
   });
 });

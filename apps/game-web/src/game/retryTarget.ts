@@ -21,6 +21,10 @@ export type RetryTarget = {
   tone: "danger" | "chase" | "opportunity" | "success";
 };
 
+export type ResultRetryAction = {
+  label: "Retry Route" | "Defend PB" | "Chase PB" | "Run Again";
+};
+
 export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
   if (input.status === "crashed") {
     if (input.crashReason === "Hard Landing" && input.targetAllowedSpeed !== undefined) {
@@ -94,4 +98,17 @@ export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
     value: input.bestRun ? "Add one more bonus" : "Set first PB",
     tone: "opportunity"
   };
+}
+
+export function buildResultRetryAction(target: RetryTarget): ResultRetryAction {
+  if (target.tone === "danger") {
+    return { label: "Retry Route" };
+  }
+  if (target.tone === "success") {
+    return { label: "Defend PB" };
+  }
+  if (target.tone === "chase") {
+    return { label: "Chase PB" };
+  }
+  return { label: "Run Again" };
 }

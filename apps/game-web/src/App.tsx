@@ -52,7 +52,7 @@ import { buildHazardPressureReadout } from "./game/hazard";
 import { buildResultBoardAction, buildResultBoardPrompt, buildResultCoach } from "./game/resultCoach";
 import { getOverlayVisibility } from "./game/overlays";
 import { buildCometRunReadout } from "./game/comet";
-import { buildRetryTarget } from "./game/retryTarget";
+import { buildResultRetryAction, buildRetryTarget } from "./game/retryTarget";
 
 type GameStore = {
   hud: HudState;
@@ -320,6 +320,7 @@ export function App() {
     isNewBest: newBest,
     bestRun
   });
+  const resultRetryAction = buildResultRetryAction(retryTarget);
   const hazardLoadTrait = buildContractHazardTrait({ hazardSeverityMultiplier: hud.hazardSeverityMultiplier });
   const dangerPayTrait = buildContractDangerPayTrait({ hazardSeverityMultiplier: hud.hazardSeverityMultiplier });
   const dangerPayAmount = dangerPayTrait?.replace("Danger pay ", "");
@@ -866,7 +867,7 @@ export function App() {
           <div className="result-actions">
             <button type="button" className="result-button" onClick={restartToBriefing}>
               <RotateCcw size={18} />
-              Restart
+              {resultRetryAction.label}
             </button>
             {hud.status === "delivered" && resultBoardAction ? (
               <button
