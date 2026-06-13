@@ -20,6 +20,7 @@ const baseHud: HudState = {
     fuelBonus: 0,
     cargoBonus: 0,
     landingBonus: 0,
+    styleBonus: 0,
     incidentPenalty: 0,
     total: 0
   },
@@ -47,6 +48,10 @@ describe("radio feedback copy", () => {
   it("warns about hazard pressure before ordinary approach guidance", () => {
     expect(buildRadioMessage({ ...baseHud, hazardDangerLevel: "inside", hazardDistance: 12 })).toContain("Hazard");
     expect(buildRadioMessage({ ...baseHud, hazardDangerLevel: "near", hazardDistance: 44 })).toContain("Asteroid");
+  });
+
+  it("celebrates clean hazard skims before generic hazard warnings", () => {
+    expect(buildRadioMessage({ ...baseHud, lastMilestone: "Clean Hazard Skim", hazardDangerLevel: "near", hazardDistance: 44 })).toContain("Style");
   });
 
   it("praises a held stable approach before generic landing guidance", () => {

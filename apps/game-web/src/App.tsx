@@ -28,6 +28,7 @@ const initialHud: HudState = {
     fuelBonus: 0,
     cargoBonus: 0,
     landingBonus: 0,
+    styleBonus: 0,
     incidentPenalty: 0,
     total: 0
   },
@@ -377,6 +378,7 @@ function scoreBreakdownRows(hud: HudState): ScoreRow[] {
     { label: "Fuel", value: breakdown.fuelBonus, tone: "bonus" },
     { label: "Cargo", value: breakdown.cargoBonus, tone: "bonus" },
     { label: "Landing", value: breakdown.landingBonus, tone: "bonus" },
+    { label: "Style", value: breakdown.styleBonus, tone: "bonus" },
     { label: "Incident", value: breakdown.incidentPenalty, tone: "penalty" }
   ] satisfies ScoreRow[];
 

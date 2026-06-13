@@ -149,6 +149,8 @@ export type SimulationWorld = {
   crashReason?: CrashReason;
   score: number;
   scoreBreakdown: ScoreBreakdown;
+  styleBonus: number;
+  skimmedHazardIds: string[];
   fuelUsed: number;
   activeContract: ContractContent;
   gravitySources: GravitySourceState[];
@@ -179,6 +181,9 @@ const GRAVITY_SCALE = 70;
 const GRAVITY_SOFTENING = 16;
 const FUEL_BURN_PER_SECOND = 8;
 const BRAKE_BURN_PER_SECOND = 3;
+const HAZARD_SKIM_OUTER_RADIUS = 1.35;
+const HAZARD_SKIM_BASE_BONUS = 140;
+const HAZARD_SKIM_SEVERITY_BONUS = 120;
 
 export function createWorldFromSystem(system: SystemContent, seed: string): SimulationWorld {
   const activeContract = system.contracts[0];
@@ -200,6 +205,8 @@ export function createWorldFromSystem(system: SystemContent, seed: string): Simu
     bestApproachStreakSeconds: 0,
     score: 0,
     scoreBreakdown: createEmptyScoreBreakdown(),
+    styleBonus: 0,
+    skimmedHazardIds: [],
     fuelUsed: 0,
     activeContract,
     gravitySources: system.planets.map((planet) => ({
@@ -525,6 +532,14 @@ function updateHazards(world: SimulationWorld, fixedDt: number): void {
     const distance = distanceBetween(world.ship.position, hazard.position);
     if (distance <= hazard.radius) {
       world.ship.cargoDamage = clamp(world.ship.cargoDamage + hazard.severity * fixedDt * 0.08, 0, 1);
+      continue;
+    }
+
+    const cleanSkim = distance <= hazard.radius * HAZARD_SKIM_OUTER_RADIUS && world.ship.cargoDamage <= 0.02;
+    if (cleanSkim && !world.skimmedHazardIds.includes(hazard.id)) {
+      world.skimmedHazardIds.push(hazard.id);
+      world.styleBonus += Math.round(HAZARD_SKIM_BASE_BONUS + hazard.severity * HAZARD_SKIM_SEVERITY_BONUS);
+      world.lastMilestone = "Clean Hazard Skim";
     }
   }
 }
@@ -642,7 +657,8 @@ function buildScoreBreakdown(world: SimulationWorld): ScoreBreakdown {
     const base = 100;
     const paceBonus = round(world.tick * 0.05, 3);
     const incidentPenalty = round(world.ship.cargoDamage * 100, 3);
-    const total = Math.max(0, Math.round(base + paceBonus - incidentPenalty));
+    const styleBonus = world.styleBonus;
+    const total = Math.max(0, Math.round(base + paceBonus + styleBonus - incidentPenalty));
 
     return {
       base,
@@ -650,6 +666,7 @@ function buildScoreBreakdown(world: SimulationWorld): ScoreBreakdown {
       fuelBonus: 0,
       cargoBonus: 0,
       landingBonus: 0,
+      styleBonus,
       incidentPenalty,
       total
     };
@@ -660,8 +677,9 @@ function buildScoreBreakdown(world: SimulationWorld): ScoreBreakdown {
   const fuelBonus = round(world.ship.fuel * 5, 3);
   const cargoBonus = round((1 - world.ship.cargoDamage) * 500, 3);
   const landingBonus = world.landingRating === "Perfect Landing" ? 300 : 120;
+  const styleBonus = world.styleBonus;
   const incidentPenalty = 0;
-  const total = Math.max(0, Math.round(base + paceBonus + fuelBonus + cargoBonus + landingBonus - incidentPenalty));
+  const total = Math.max(0, Math.round(base + paceBonus + fuelBonus + cargoBonus + landingBonus + styleBonus - incidentPenalty));
 
   return {
     base,
@@ -669,6 +687,7 @@ function buildScoreBreakdown(world: SimulationWorld): ScoreBreakdown {
     fuelBonus,
     cargoBonus,
     landingBonus,
+    styleBonus,
     incidentPenalty,
     total
   };
@@ -681,6 +700,7 @@ function createEmptyScoreBreakdown(): ScoreBreakdown {
     fuelBonus: 0,
     cargoBonus: 0,
     landingBonus: 0,
+    styleBonus: 0,
     incidentPenalty: 0,
     total: 0
   };

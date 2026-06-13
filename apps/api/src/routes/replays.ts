@@ -26,6 +26,7 @@ const scoreBreakdownSchema = z.object({
   fuelBonus: z.number().min(0),
   cargoBonus: z.number().min(0),
   landingBonus: z.number().min(0),
+  styleBonus: z.number().min(0),
   incidentPenalty: z.number().min(0),
   total: z.number().min(0)
 });
@@ -126,6 +127,7 @@ function sameScoreBreakdown(left: RunResultSummary["scoreBreakdown"], right: Run
     left.fuelBonus === right.fuelBonus &&
     left.cargoBonus === right.cargoBonus &&
     left.landingBonus === right.landingBonus &&
+    left.styleBonus === right.styleBonus &&
     left.incidentPenalty === right.incidentPenalty &&
     left.total === right.total
   );

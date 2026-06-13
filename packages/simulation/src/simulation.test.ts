@@ -232,6 +232,36 @@ describe("deterministic Astro Courier simulation", () => {
     expect(snapshotWorld(world).nearestHazard).toBeUndefined();
   });
 
+  it("awards a one-time style bonus for clean hazard skims", () => {
+    const systemWithHazard: SystemContent = {
+      ...starterSystem,
+      hazards: [
+        {
+          id: "skim-field",
+          type: "asteroid_field",
+          position: [180, -180],
+          radius: 40,
+          severity: 0.5
+        }
+      ]
+    };
+    const world = createWorldFromSystem(systemWithHazard, "skim-seed");
+    world.ship.position = { x: 233, y: -180 };
+    world.ship.velocity = { x: 0, y: 0 };
+
+    stepWorld(world, 1 / 60, []);
+    const firstBreakdown = summarizeRun(world).scoreBreakdown;
+
+    expect(world.lastMilestone).toBe("Clean Hazard Skim");
+    expect(firstBreakdown.styleBonus).toBeGreaterThan(0);
+    expect(world.ship.cargoDamage).toBe(0);
+
+    stepWorld(world, 1 / 60, []);
+    const secondBreakdown = summarizeRun(world).scoreBreakdown;
+
+    expect(secondBreakdown.styleBonus).toBe(firstBreakdown.styleBonus);
+  });
+
   it("classifies landing guidance as too-fast, misaligned, or ready", () => {
     const world = createWorldFromSystem(starterSystem, "guide-seed");
     world.ship.position = { x: 0, y: -74 };
@@ -364,6 +394,7 @@ describe("deterministic Astro Courier simulation", () => {
       fuelBonus: 450,
       cargoBonus: 500,
       landingBonus: 300,
+      styleBonus: 0,
       incidentPenalty: 0,
       total: result.score
     });
@@ -374,7 +405,8 @@ describe("deterministic Astro Courier simulation", () => {
           result.scoreBreakdown.paceBonus +
           result.scoreBreakdown.fuelBonus +
           result.scoreBreakdown.cargoBonus +
-          result.scoreBreakdown.landingBonus -
+          result.scoreBreakdown.landingBonus +
+          result.scoreBreakdown.styleBonus -
           result.scoreBreakdown.incidentPenalty
       )
     ).toBe(result.score);
