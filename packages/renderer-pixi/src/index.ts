@@ -276,11 +276,24 @@ export function velocityVectorVisual(input: VelocityVectorVisualInput): Velocity
 }
 
 export function boostBurstVisual(input: BoostBurstVisualInput): BoostBurstVisual | undefined {
-  if (input.status !== "flying" || input.lastMilestone !== "Boost Burn") {
+  if (input.status !== "flying") {
     return undefined;
   }
 
   const pulse = (Math.sin(input.tick * 0.34) + 1) / 2;
+  if (input.lastMilestone === "Assist Burn") {
+    return {
+      color: 0x8ee6b8,
+      radius: round(16 + pulse * 18, 2),
+      alpha: round(0.2 + (1 - pulse) * 0.28, 2),
+      width: round(1.4 + pulse * 2.1, 2)
+    };
+  }
+
+  if (input.lastMilestone !== "Boost Burn") {
+    return undefined;
+  }
+
   return {
     color: 0x7ce1ff,
     radius: round(22 + pulse * 22, 2),

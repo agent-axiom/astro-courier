@@ -243,4 +243,14 @@ describe("boost burst visual", () => {
     expect(early?.alpha).toBeLessThanOrEqual(0.48);
     expect(later?.radius).not.toBe(early?.radius);
   });
+
+  it("returns a tighter green shockwave for assist burns", () => {
+    const assist = boostBurstVisual({ status: "flying", lastMilestone: "Assist Burn", tick: 9 });
+
+    expect(assist).toMatchObject({ color: 0x8ee6b8 });
+    expect(assist?.radius).toBeGreaterThanOrEqual(16);
+    expect(assist?.radius).toBeLessThanOrEqual(34);
+    expect(assist?.width).toBeLessThan(4);
+    expect(assist?.alpha).toBeGreaterThanOrEqual(0.2);
+  });
 });
