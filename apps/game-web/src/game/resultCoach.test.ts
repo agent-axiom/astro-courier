@@ -144,6 +144,25 @@ describe("result coach", () => {
       tone: "success"
     });
   });
+
+  it("coaches express finish runs toward repeating the fast line", () => {
+    expect(
+      buildResultCoach({
+        status: "delivered",
+        lastMilestone: "Express Finish",
+        medal: "gold",
+        grade: "A",
+        cargoDamage: 0,
+        fuel: 36,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 405 }
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Repeat the express line",
+      tone: "success"
+    });
+  });
 });
 
 describe("result board prompt", () => {

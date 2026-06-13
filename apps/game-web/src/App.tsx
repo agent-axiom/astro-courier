@@ -283,6 +283,7 @@ export function App() {
   const resultCoach = buildResultCoach({
     status: hud.status,
     contractId: hud.contractId,
+    lastMilestone: hud.lastMilestone,
     crashReason: hud.crashReason,
     medal: hud.medal,
     grade: hud.grade,

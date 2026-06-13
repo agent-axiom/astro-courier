@@ -3,6 +3,7 @@ import type { CrashReason, RunGrade, RunMedal, RunStatus, ScoreBreakdown } from 
 export type ResultCoachInput = {
   status: RunStatus;
   contractId?: string;
+  lastMilestone?: string;
   crashReason?: CrashReason;
   medal: RunMedal;
   grade: RunGrade;
@@ -98,6 +99,14 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
     return {
       label: "Next run",
       value: "Defend the comet line",
+      tone: "success"
+    };
+  }
+
+  if (input.lastMilestone === "Express Finish") {
+    return {
+      label: "Next run",
+      value: "Repeat the express line",
       tone: "success"
     };
   }
