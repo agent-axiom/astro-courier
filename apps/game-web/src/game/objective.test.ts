@@ -530,6 +530,20 @@ describe("tactical cue", () => {
     });
   });
 
+  it("turns an armed launch burst into an immediate boost cue", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        launchBurstSecondsRemaining: 2.4
+      })
+    ).toEqual({
+      label: "Tactical cue",
+      value: "Burst boost / +120 / 2.4s",
+      tone: "opportunity"
+    });
+  });
+
   it("surfaces damaged cargo recovery while a salvage delivery is still possible", () => {
     expect(
       buildTacticalCue({

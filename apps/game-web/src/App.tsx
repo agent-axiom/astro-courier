@@ -401,6 +401,7 @@ export function App() {
     maxFuel: hud.maxFuel,
     quickPickupSecondsRemaining: hud.quickPickupSecondsRemaining,
     quickPickupBonus: hud.quickPickupBonus,
+    launchBurstSecondsRemaining: hud.launchBurstSecondsRemaining,
     styleMultiplier: hud.styleMultiplier,
     styleChainSecondsRemaining: hud.styleChainSecondsRemaining,
     gravitySlingReady: hud.gravitySlingReady,

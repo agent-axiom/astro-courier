@@ -3,6 +3,7 @@ import {
   ECO_DRIFT_FUEL_USED_LIMIT,
   ECO_DRIFT_STYLE_BONUS,
   EXPRESS_FINISH_STYLE_BONUS,
+  LAUNCH_BURST_STYLE_BONUS,
   LAST_DROP_FUEL_RATIO,
   LAST_DROP_STYLE_BONUS,
   PERFECT_APPROACH_STREAK_SECONDS,
@@ -70,6 +71,7 @@ export type TacticalCueInput = {
   maxFuel?: number;
   quickPickupSecondsRemaining?: number;
   quickPickupBonus?: number;
+  launchBurstSecondsRemaining?: number;
   styleMultiplier?: number;
   styleChainSecondsRemaining?: number;
   gravitySlingReady?: boolean;
@@ -252,6 +254,14 @@ export function buildTacticalCue(input: TacticalCueInput): TacticalCue | undefin
     return {
       label: "Tactical cue",
       value: `Sling now / ${formatGravitySlingPayout(input)}`,
+      tone: "opportunity"
+    };
+  }
+
+  if ((input.launchBurstSecondsRemaining ?? 0) > 0) {
+    return {
+      label: "Tactical cue",
+      value: `Burst boost / +${LAUNCH_BURST_STYLE_BONUS} / ${formatSeconds(input.launchBurstSecondsRemaining)}`,
       tone: "opportunity"
     };
   }
