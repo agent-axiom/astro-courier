@@ -164,6 +164,8 @@ export type SimulationWorld = {
   styleBonus: number;
   styleChainCount: number;
   styleChainSecondsRemaining: number;
+  launchBurstSecondsRemaining: number;
+  launchBurstAwarded: boolean;
   skimmedHazardIds: string[];
   slungGravitySourceIds: string[];
   fuelUsed: number;
@@ -203,6 +205,7 @@ const GRAVITY_SOFTENING = 16;
 const FUEL_BURN_PER_SECOND = 8;
 const BRAKE_BURN_PER_SECOND = 3;
 export const BOOST_COOLDOWN_SECONDS = 1.15;
+const BOOST_IMPULSE_SPEED = 24;
 export const LANDING_ASSIST_FUEL_COST = 1.5;
 const HAZARD_SKIM_OUTER_RADIUS = 1.35;
 export const HAZARD_SKIM_BASE_BONUS = 140;
@@ -215,6 +218,8 @@ const GRAVITY_SLING_OUTER_RADIUS = 3;
 const GRAVITY_SLING_SAFE_SURFACE_RADIUS = 1.3;
 export const QUICK_PICKUP_WINDOW_SECONDS = 12;
 export const QUICK_PICKUP_STYLE_BONUS = 180;
+export const LAUNCH_BURST_WINDOW_SECONDS = 3;
+export const LAUNCH_BURST_STYLE_BONUS = 120;
 export const PERFECT_APPROACH_STREAK_SECONDS = 1;
 export const PERFECT_APPROACH_STYLE_BONUS = 220;
 export const ECO_DRIFT_FUEL_USED_LIMIT = 12;
@@ -269,6 +274,8 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
     styleBonus: 0,
     styleChainCount: 0,
     styleChainSecondsRemaining: 0,
+    launchBurstSecondsRemaining: 0,
+    launchBurstAwarded: false,
     skimmedHazardIds: [],
     slungGravitySourceIds: [],
     fuelUsed: 0,
@@ -327,6 +334,7 @@ export function stepWorld(world: SimulationWorld, fixedDt: number, commands: Pla
   world.lastStyleAward = undefined;
   tickBoostCooldown(world, fixedDt);
   tickStyleChain(world, fixedDt);
+  tickLaunchBurstWindow(world, fixedDt);
 
   let thrust = 0;
   let brake = 0;
@@ -340,10 +348,19 @@ export function stepWorld(world: SimulationWorld, fixedDt: number, commands: Pla
       brake = Math.max(brake, clamp(command.amount, 0, 1));
     } else if (command.type === "BOOST" && world.ship.fuel > 2 && world.ship.boostCooldownSeconds <= 0) {
       thrust = Math.max(thrust, 1);
+      world.ship.velocity = add(world.ship.velocity, {
+        x: Math.cos(world.ship.rotation) * BOOST_IMPULSE_SPEED,
+        y: Math.sin(world.ship.rotation) * BOOST_IMPULSE_SPEED
+      });
       world.ship.fuel -= 2;
       world.fuelUsed += 2;
       world.ship.boostCooldownSeconds = BOOST_COOLDOWN_SECONDS;
       world.lastMilestone = "Boost Burn";
+      if (canAwardLaunchBurst(world)) {
+        world.launchBurstAwarded = true;
+        world.launchBurstSecondsRemaining = 0;
+        awardStyle(world, LAUNCH_BURST_STYLE_BONUS, "Launch Burst");
+      }
     } else if (command.type === "PAUSE") {
       world.status = "paused";
       return world;
@@ -437,6 +454,7 @@ export function snapshotWorld(world: SimulationWorld): SimulationSnapshot {
     styleChainCount: world.styleChainCount,
     styleChainSecondsRemaining: round(world.styleChainSecondsRemaining, 3),
     styleMultiplier: styleMultiplierForChain(world),
+    launchBurstSecondsRemaining: round(world.launchBurstSecondsRemaining, 3),
     elapsedSeconds: world.elapsedSeconds,
     score: world.score,
     objectiveTarget: getObjectiveTarget(world),
@@ -593,6 +611,15 @@ function tickStyleChain(world: SimulationWorld, fixedDt: number): void {
   }
 }
 
+function tickLaunchBurstWindow(world: SimulationWorld, fixedDt: number): void {
+  if (world.launchBurstSecondsRemaining <= 0 || world.launchBurstAwarded) {
+    world.launchBurstSecondsRemaining = 0;
+    return;
+  }
+
+  world.launchBurstSecondsRemaining = round(Math.max(0, world.launchBurstSecondsRemaining - fixedDt), 6);
+}
+
 function awardStyle(world: SimulationWorld, baseBonus: number, milestone: string): void {
   const award = Math.round(baseBonus * styleMultiplierForChain(world));
   world.styleBonus += award;
@@ -608,6 +635,15 @@ function styleMultiplierForChain(world: Pick<SimulationWorld, "styleChainCount" 
   }
 
   return round(1 + Math.min(STYLE_CHAIN_MAX_COUNT, world.styleChainCount) * STYLE_CHAIN_MULTIPLIER_STEP, 2);
+}
+
+function canAwardLaunchBurst(world: SimulationWorld): boolean {
+  return (
+    world.cargoOnboard &&
+    !world.launchBurstAwarded &&
+    world.launchBurstSecondsRemaining > 0 &&
+    world.ship.cargoDamage <= 0.02
+  );
 }
 
 function applyThrust(world: SimulationWorld, fixedDt: number, amount: number): void {
@@ -784,6 +820,7 @@ function resolveLandingOrCrash(world: SimulationWorld): void {
       } else {
         world.lastMilestone = "Cargo Loaded";
       }
+      world.launchBurstSecondsRemaining = LAUNCH_BURST_WINDOW_SECONDS;
       world.ship.velocity = scale(world.ship.velocity, 0.25);
       for (const pad of world.landingPads) {
         pad.active = pad.role === "destination";
@@ -816,8 +853,14 @@ function resolveLandingOrCrash(world: SimulationWorld): void {
       return;
     }
 
-    world.lastMilestone = touchedPad.role === "pickup" ? "Cargo Already Loaded" : "Docked";
-    world.ship.velocity = scale(world.ship.velocity, 0.25);
+    const departingUsedPickup =
+      touchedPad.role === "pickup" &&
+      world.cargoOnboard &&
+      world.ship.velocity.x * Math.cos(touchedPad.normalAngle) + world.ship.velocity.y * Math.sin(touchedPad.normalAngle) > 0;
+    world.lastMilestone = world.lastMilestone ?? (touchedPad.role === "pickup" ? "Cargo Already Loaded" : "Docked");
+    if (!departingUsedPickup) {
+      world.ship.velocity = scale(world.ship.velocity, 0.25);
+    }
     return;
   }
 

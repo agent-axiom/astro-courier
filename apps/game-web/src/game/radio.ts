@@ -40,6 +40,10 @@ export function buildRadioMessage(hud: HudState): string {
     return "Fast pickup logged. Keep that momentum to the destination.";
   }
 
+  if (hud.lastMilestone === "Launch Burst") {
+    return "Launch burst logged. Cargo is loaded, chain is alive, punch out clean.";
+  }
+
   if (hud.lastMilestone === "Assist Burn") {
     return "Assist burn fired. Fuel traded for a softer contact.";
   }

@@ -81,6 +81,7 @@ export type SimulationSnapshot = {
   styleChainCount: number;
   styleChainSecondsRemaining: number;
   styleMultiplier: number;
+  launchBurstSecondsRemaining: number;
   elapsedSeconds: number;
   score: number;
   objectiveTarget?: {

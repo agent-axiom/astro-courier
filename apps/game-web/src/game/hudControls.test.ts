@@ -44,4 +44,16 @@ describe("boost control presentation", () => {
     expect(presentation.cooldownProgress).toBeGreaterThan(0);
     expect(presentation.cooldownProgress).toBeLessThan(1);
   });
+
+  it("promotes ready boosts during the launch burst window", () => {
+    expect(buildBoostControlPresentation({ canBoost: true, boostCooldownSeconds: 0, launchBurstSecondsRemaining: 2.4 })).toEqual({
+      label: "Launch Burst",
+      tone: "burst",
+      cooldownProgress: 0
+    });
+    expect(buildBoostControlPresentation({ canBoost: false, boostCooldownSeconds: 0.4, launchBurstSecondsRemaining: 2.4 })).toMatchObject({
+      label: "Boost 0.4s",
+      tone: "cooldown"
+    });
+  });
 });

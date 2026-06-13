@@ -72,6 +72,7 @@ export type HudState = {
   styleChainCount: number;
   styleChainSecondsRemaining: number;
   styleMultiplier: number;
+  launchBurstSecondsRemaining: number;
   hazardDangerLevel?: "near" | "inside";
   hazardDistance?: number;
   hazardSeverity?: number;
@@ -333,6 +334,7 @@ export class GameShell {
       styleChainCount: snapshot.styleChainCount,
       styleChainSecondsRemaining: snapshot.styleChainSecondsRemaining,
       styleMultiplier: snapshot.styleMultiplier,
+      launchBurstSecondsRemaining: snapshot.launchBurstSecondsRemaining,
       hazardDangerLevel: snapshot.nearestHazard?.dangerLevel,
       hazardDistance: snapshot.nearestHazard?.distance,
       hazardSeverity: snapshot.nearestHazard?.severity,

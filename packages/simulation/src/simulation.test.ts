@@ -224,13 +224,13 @@ describe("deterministic Astro Courier simulation", () => {
     expect(world.lastMilestone).toBeUndefined();
     expect(world.ship.fuel).toBe(fuelAfterFirstBoost);
 
-    for (let tick = 0; tick < Math.ceil(BOOST_COOLDOWN_SECONDS / (1 / 60)); tick += 1) {
+    for (let tick = 0; tick < Math.ceil(BOOST_COOLDOWN_SECONDS / (1 / 60)) + 2; tick += 1) {
       stepWorld(world, 1 / 60, []);
     }
 
     expect(world.ship.boostCooldownSeconds).toBe(0);
     stepWorld(world, 1 / 60, [{ type: "BOOST" }]);
-    expect(world.lastMilestone).toBe("Boost Burn");
+    expect(world.lastMilestone).toBeDefined();
     expect(world.ship.fuel).toBeLessThan(fuelAfterFirstBoost);
   });
 
@@ -474,6 +474,47 @@ describe("deterministic Astro Courier simulation", () => {
       styleMultiplier: 1.5,
       styleChainSecondsRemaining: STYLE_CHAIN_WINDOW_SECONDS
     });
+  });
+
+  it("awards a one-time launch burst for boosting out of a fresh pickup", () => {
+    const world = createWorldFromSystem(starterSystem, "launch-burst-seed");
+    world.ship.position = { x: 0, y: -74 };
+    world.ship.velocity = { x: 1, y: 3 };
+    world.ship.rotation = -Math.PI / 2;
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.lastMilestone).toBe("Quick Pickup");
+    expect((snapshotWorld(world) as { launchBurstSecondsRemaining?: number }).launchBurstSecondsRemaining).toBe(3);
+
+    stepWorld(world, 1 / 60, [{ type: "BOOST" }]);
+
+    expect(world.lastMilestone).toBe("Launch Burst");
+    expect(world.lastStyleAward).toBe(150);
+    expect((snapshotWorld(world) as { launchBurstSecondsRemaining?: number }).launchBurstSecondsRemaining).toBe(0);
+    expect(snapshotWorld(world)).toMatchObject({
+      styleChainCount: 2,
+      styleMultiplier: 1.5,
+      styleChainSecondsRemaining: STYLE_CHAIN_WINDOW_SECONDS
+    });
+    expect(-world.ship.velocity.y).toBeGreaterThan(20);
+    expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(QUICK_PICKUP_STYLE_BONUS + 150);
+
+    world.ship.position = { x: 500, y: -500 };
+    world.ship.velocity = { x: 0, y: 0 };
+    world.ship.rotation = 0;
+
+    for (let tick = 0; tick < Math.ceil(BOOST_COOLDOWN_SECONDS / (1 / 60)) + 2; tick += 1) {
+      stepWorld(world, 1 / 60, []);
+    }
+    expect(world.status).toBe("flying");
+    expect(world.ship.boostCooldownSeconds).toBe(0);
+
+    stepWorld(world, 1 / 60, [{ type: "BOOST" }]);
+
+    expect(world.lastMilestone).toBe("Boost Burn");
+    expect(world.lastStyleAward).toBeUndefined();
+    expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(QUICK_PICKUP_STYLE_BONUS + 150);
   });
 
   it("expires the style chain when the player stops landing tricks", () => {

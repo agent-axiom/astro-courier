@@ -63,6 +63,7 @@ const baseHud: HudState = {
   styleChainCount: 0,
   styleChainSecondsRemaining: 0,
   styleMultiplier: 1,
+  launchBurstSecondsRemaining: 0,
   hazardDangerLevel: undefined,
   hazardDistance: undefined
 };
@@ -135,6 +136,12 @@ describe("radio feedback copy", () => {
   it("celebrates quick cargo pickups before generic objective guidance", () => {
     expect(buildRadioMessage({ ...baseHud, lastMilestone: "Quick Pickup", objectivePhase: "delivery", cargoOnboard: true })).toContain(
       "Fast pickup"
+    );
+  });
+
+  it("celebrates launch bursts before generic delivery guidance", () => {
+    expect(buildRadioMessage({ ...baseHud, lastMilestone: "Launch Burst", objectivePhase: "delivery", cargoOnboard: true })).toContain(
+      "Launch burst"
     );
   });
 

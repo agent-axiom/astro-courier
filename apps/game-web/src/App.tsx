@@ -106,6 +106,7 @@ const initialHud: HudState = {
   styleChainCount: 0,
   styleChainSecondsRemaining: 0,
   styleMultiplier: 1,
+  launchBurstSecondsRemaining: 0,
   hazardDangerLevel: undefined,
   hazardDistance: undefined,
   hazardSeverity: undefined,
@@ -223,7 +224,11 @@ export function App() {
     status: hud.status
   });
   const canBrake = canUseImpulseControl({ action: "brake", fuel: hud.fuel, paused, preflightOpen, status: hud.status });
-  const boostPresentation = buildBoostControlPresentation({ canBoost, boostCooldownSeconds: hud.boostCooldownSeconds });
+  const boostPresentation = buildBoostControlPresentation({
+    canBoost,
+    boostCooldownSeconds: hud.boostCooldownSeconds,
+    launchBurstSecondsRemaining: hud.launchBurstSecondsRemaining
+  });
   const boostButtonStyle = { "--boost-cooldown": boostPresentation.cooldownProgress } as CSSProperties;
   const objectiveDirective = buildObjectiveDirective(hud);
   const objectiveInterceptReadout = buildObjectiveInterceptReadout({
