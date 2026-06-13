@@ -360,4 +360,47 @@ describe("style target cue", () => {
       })
     ).toBeUndefined();
   });
+
+  it("teaches no-brake finesse while clean delivery is still alive", () => {
+    expect(
+      buildStyleTargetCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        styleBonus: 0,
+        cargoDamage: 0.01,
+        manualBrakeUsed: false
+      })
+    ).toEqual({
+      label: "Style target",
+      value: "No brake line / +150 on clean dock",
+      tone: "opportunity"
+    });
+
+    expect(
+      buildStyleTargetCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        styleBonus: 0,
+        cargoDamage: 0,
+        manualBrakeUsed: true
+      })
+    ).toBeUndefined();
+  });
+
+  it("keeps immediate hazard skim cues above the no-brake delivery target", () => {
+    expect(
+      buildStyleTargetCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        styleBonus: 0,
+        cargoDamage: 0,
+        manualBrakeUsed: false,
+        hazardDangerLevel: "near"
+      })
+    ).toEqual({
+      label: "Style target",
+      value: "Clean skim / danger style",
+      tone: "risk"
+    });
+  });
 });

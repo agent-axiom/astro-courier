@@ -824,6 +824,16 @@ describe("deterministic Astro Courier simulation", () => {
     expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(0);
   });
 
+  it("exposes manual brake usage for live finesse guidance", () => {
+    const world = createWorldFromSystem(starterSystem, "manual-brake-snapshot-seed");
+
+    expect(snapshotWorld(world).manualBrakeUsed).toBe(false);
+
+    stepWorld(world, 1 / 60, [{ type: "BRAKE", amount: 0.4 }]);
+
+    expect(snapshotWorld(world).manualBrakeUsed).toBe(true);
+  });
+
   it("scales hazard contact damage by active cargo fragility", () => {
     const systemWithCargoRisk: SystemContent = {
       ...starterSystem,

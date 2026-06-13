@@ -453,6 +453,35 @@ describe("GameShell lifecycle", () => {
     expect(onHud.mock.calls.at(-1)?.[0].lastStyleAward).toBe(180);
   });
 
+  it("publishes manual brake usage for live finesse guidance", async () => {
+    const { renderer, input } = createShellDoubles({
+      commands: () => [{ type: "BRAKE", amount: 0.4 }]
+    });
+    const onHud = vi.fn();
+    let frame: FrameRequestCallback = () => 0;
+    vi.stubGlobal(
+      "requestAnimationFrame",
+      vi.fn((callback: FrameRequestCallback) => {
+        frame = callback;
+        return 7;
+      })
+    );
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    vi.spyOn(performance, "now").mockReturnValue(1000);
+
+    const shell = new GameShell({
+      mount: {} as HTMLElement,
+      onHud,
+      renderer,
+      input
+    });
+
+    await shell.start();
+    frame(1167);
+
+    expect(onHud.mock.calls.at(-1)?.[0].manualBrakeUsed).toBe(true);
+  });
+
   it("executes queued commands once on the next simulation frame", async () => {
     const { renderer, input } = createShellDoubles();
     const onHud = vi.fn();

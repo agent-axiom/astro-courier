@@ -461,6 +461,7 @@ export function snapshotWorld(world: SimulationWorld): SimulationSnapshot {
     status: world.status,
     objectivePhase: world.objectivePhase,
     cargoOnboard: world.cargoOnboard,
+    manualBrakeUsed: world.manualBrakeUsed,
     lastMilestone: world.lastMilestone,
     lastStyleAward: world.lastStyleAward,
     approachStreakSeconds: round(world.approachStreakSeconds, 3),

@@ -55,6 +55,7 @@ export type HudState = {
   boostCooldownSeconds: number;
   cargoDamage: number;
   cargoOnboard: boolean;
+  manualBrakeUsed: boolean;
   speed: number;
   targetDistance?: number;
   targetAllowedSpeed?: number;
@@ -369,6 +370,7 @@ export class GameShell {
       boostCooldownSeconds: snapshot.ship.boostCooldownSeconds,
       cargoDamage: result.cargoDamage,
       cargoOnboard: this.world.cargoOnboard,
+      manualBrakeUsed: snapshot.manualBrakeUsed,
       speed: Math.hypot(this.world.ship.velocity.x, this.world.ship.velocity.y),
       targetDistance: snapshot.objectiveTarget?.distance,
       targetAllowedSpeed: snapshot.objectiveTarget?.allowedApproachSpeed,

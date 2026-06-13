@@ -38,6 +38,7 @@ const baseHud: HudState = {
   boostCooldownSeconds: 0,
   cargoDamage: 0,
   cargoOnboard: false,
+  manualBrakeUsed: false,
   speed: 0,
   medal: "none",
   grade: "F",

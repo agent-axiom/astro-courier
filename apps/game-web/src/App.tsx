@@ -106,6 +106,7 @@ const initialHud: HudState = {
   boostCooldownSeconds: 0,
   cargoDamage: 0,
   cargoOnboard: false,
+  manualBrakeUsed: false,
   speed: 0,
   targetAllowedSpeed: 42,
   lastStyleAward: undefined,
@@ -447,7 +448,8 @@ export function App() {
     cargoDamage: hud.cargoDamage,
     hazardDangerLevel: hud.hazardDangerLevel,
     gravitySlingReady: hud.gravitySlingReady,
-    gravitySlingStyleBonus: hud.gravitySlingStyleBonus
+    gravitySlingStyleBonus: hud.gravitySlingStyleBonus,
+    manualBrakeUsed: hud.manualBrakeUsed
   });
   const styleChipStyle = { "--style-chain-progress": liveStyleReward?.chainProgress ?? 0 } as CSSProperties;
   const preflightMasteryTargets = buildPreflightMasteryTargets({ goldSeconds: hud.paceSecondsRemaining });

@@ -1,4 +1,4 @@
-import { CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS, STYLE_CHAIN_WINDOW_SECONDS } from "@astro-courier/simulation";
+import { CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS, NO_BRAKE_STYLE_BONUS, STYLE_CHAIN_WINDOW_SECONDS } from "@astro-courier/simulation";
 import type { ObjectivePhase, RunStatus } from "@astro-courier/shared";
 
 export const STYLE_CHAIN_URGENT_SECONDS = 1;
@@ -36,6 +36,7 @@ export type StyleTargetCueInput = {
   hazardDangerLevel?: "near" | "inside";
   gravitySlingReady?: boolean;
   gravitySlingStyleBonus?: number;
+  manualBrakeUsed?: boolean;
 };
 
 export type StyleTargetCue = {
@@ -120,6 +121,14 @@ export function buildStyleTargetCue(input: StyleTargetCueInput): StyleTargetCue 
       label: "Style target",
       value: `Clean skim / danger style${chainSuffix}`,
       tone: chainActive ? "chain" : "risk"
+    };
+  }
+
+  if (input.objectivePhase === "delivery" && input.manualBrakeUsed === false && (input.cargoDamage ?? 0) <= 0.02) {
+    return {
+      label: "Style target",
+      value: `No brake line / +${NO_BRAKE_STYLE_BONUS} on clean dock`,
+      tone: "opportunity"
     };
   }
 
