@@ -17,6 +17,20 @@ export type ResultCoach = {
   tone: "danger" | "warning" | "opportunity" | "success";
 };
 
+export type ResultBoardPromptInput = {
+  status: Extract<RunStatus, "delivered" | "crashed">;
+  routeBoardTarget: {
+    value: string;
+    tone: "clear" | "comet" | "complete";
+  };
+};
+
+export type ResultBoardPrompt = {
+  label: "Board target";
+  value: string;
+  tone: "retry" | "clear" | "comet" | "complete";
+};
+
 export function buildResultCoach(input: ResultCoachInput): ResultCoach {
   if (input.status === "crashed") {
     return {
@@ -64,5 +78,21 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
     label: "Next run",
     value: "Tighten landing angle",
     tone: "opportunity"
+  };
+}
+
+export function buildResultBoardPrompt(input: ResultBoardPromptInput): ResultBoardPrompt {
+  if (input.status === "crashed") {
+    return {
+      label: "Board target",
+      value: "Retry current route",
+      tone: "retry"
+    };
+  }
+
+  return {
+    label: "Board target",
+    value: input.routeBoardTarget.value,
+    tone: input.routeBoardTarget.tone
   };
 }

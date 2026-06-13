@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildResultCoach } from "./resultCoach";
+import { buildResultBoardPrompt, buildResultCoach } from "./resultCoach";
 
 const baseBreakdown = {
   base: 1000,
@@ -84,6 +84,24 @@ describe("result coach", () => {
       label: "Next run",
       value: "Defend the comet line",
       tone: "success"
+    });
+  });
+});
+
+describe("result board prompt", () => {
+  it("keeps failed runs focused on retrying the current route", () => {
+    expect(buildResultBoardPrompt({ status: "crashed", routeBoardTarget: { value: "Clear Return Leg", tone: "clear" } })).toEqual({
+      label: "Board target",
+      value: "Retry current route",
+      tone: "retry"
+    });
+  });
+
+  it("surfaces the next board target after successful deliveries", () => {
+    expect(buildResultBoardPrompt({ status: "delivered", routeBoardTarget: { value: "Comet Asteroid Sprint", tone: "comet" } })).toEqual({
+      label: "Board target",
+      value: "Comet Asteroid Sprint",
+      tone: "comet"
     });
   });
 });

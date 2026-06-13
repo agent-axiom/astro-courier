@@ -49,7 +49,7 @@ import { buildApproachRewardReadout, buildDockingSpeedReadout } from "./game/doc
 import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./game/cargo";
 import { buildResultStats } from "./game/resultStats";
 import { buildHazardPressureReadout } from "./game/hazard";
-import { buildResultCoach } from "./game/resultCoach";
+import { buildResultBoardPrompt, buildResultCoach } from "./game/resultCoach";
 import { getOverlayVisibility } from "./game/overlays";
 import { buildCometRunReadout } from "./game/comet";
 import { buildRetryTarget } from "./game/retryTarget";
@@ -257,6 +257,10 @@ export function App() {
     maxFuel: hud.maxFuel,
     scoreBreakdown: hud.scoreBreakdown
   });
+  const resultBoardPrompt =
+    hud.status === "delivered" || hud.status === "crashed"
+      ? buildResultBoardPrompt({ status: hud.status, routeBoardTarget })
+      : undefined;
   const retryTarget = buildRetryTarget({
     status: hud.status,
     medal: hud.medal,
@@ -722,6 +726,21 @@ export function App() {
             <span>{retryTarget.label}</span>
             <strong>{retryTarget.value}</strong>
           </div>
+          {resultBoardPrompt ? (
+            <div className={`result-board-target result-board-target-${resultBoardPrompt.tone}`} aria-label={`${resultBoardPrompt.label}: ${resultBoardPrompt.value}`}>
+              {resultBoardPrompt.tone === "retry" ? (
+                <RotateCcw size={18} />
+              ) : resultBoardPrompt.tone === "complete" ? (
+                <Trophy size={18} />
+              ) : resultBoardPrompt.tone === "comet" ? (
+                <Star size={18} />
+              ) : (
+                <Target size={18} />
+              )}
+              <span>{resultBoardPrompt.label}</span>
+              <strong>{resultBoardPrompt.value}</strong>
+            </div>
+          ) : null}
           <div className="result-actions">
             <button type="button" className="result-button" onClick={restartToBriefing}>
               <RotateCcw size={18} />

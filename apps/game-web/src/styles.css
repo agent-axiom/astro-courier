@@ -1635,6 +1635,57 @@ button {
   color: #bff7d8;
 }
 
+.result-board-target {
+  display: grid;
+  grid-template-columns: 18px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 10px;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 850;
+  text-align: left;
+}
+
+.result-board-target span,
+.result-board-target strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.result-board-target span {
+  color: rgba(255, 255, 255, 0.74);
+  text-transform: uppercase;
+}
+
+.result-board-target strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.result-board-target-retry {
+  background: rgba(255, 111, 145, 0.14);
+  color: #ffadc1;
+}
+
+.result-board-target-clear {
+  background: rgba(124, 225, 255, 0.14);
+  color: #c6f6ff;
+}
+
+.result-board-target-comet {
+  background: rgba(255, 209, 102, 0.16);
+  color: #ffe19a;
+}
+
+.result-board-target-complete {
+  background: rgba(142, 230, 184, 0.16);
+  color: #bff7d8;
+}
+
 .result-actions {
   display: grid;
   width: 100%;
