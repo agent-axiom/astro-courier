@@ -180,6 +180,27 @@ describe("run action feed", () => {
     ]);
   });
 
+  it("announces when a style multiplier becomes live", () => {
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, styleMultiplier: 1, styleChainSecondsRemaining: 0 },
+        { ...baseSnapshot, styleMultiplier: 1.25, styleChainSecondsRemaining: 5.5 }
+      )
+    ).toEqual([
+      {
+        label: "Chain live",
+        value: "x1.25 / 5.5s",
+        tone: "style"
+      }
+    ]);
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, styleMultiplier: 1.5, styleChainSecondsRemaining: 3.2 },
+        { ...baseSnapshot, styleMultiplier: 1.5, styleChainSecondsRemaining: 2.8 }
+      )
+    ).toEqual([]);
+  });
+
   it("announces when an active style chain reaches the critical window", () => {
     expect(
       deriveRunFeedUpdates(

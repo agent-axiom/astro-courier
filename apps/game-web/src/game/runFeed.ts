@@ -82,9 +82,12 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
     }
   }
 
-  if (current.lastMilestone && current.lastMilestone !== previous.lastMilestone && feedMilestones.has(current.lastMilestone)) {
+  const freshMilestone = current.lastMilestone;
+  const freshFeedMilestone =
+    freshMilestone !== undefined && freshMilestone !== previous.lastMilestone && feedMilestones.has(freshMilestone);
+  if (freshFeedMilestone) {
     updates.push({
-      label: current.lastMilestone,
+      label: freshMilestone,
       value: formatMilestoneValue(current.lastStyleAward),
       tone: "style"
     });
@@ -127,10 +130,19 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
     });
   }
 
-  if ((previous.launchBurstSecondsRemaining ?? 0) <= 0 && (current.launchBurstSecondsRemaining ?? 0) > 0) {
+  const launchBurstArmed = (previous.launchBurstSecondsRemaining ?? 0) <= 0 && (current.launchBurstSecondsRemaining ?? 0) > 0;
+  if (launchBurstArmed) {
     updates.push({
       label: "Burst armed",
       value: `Boost in ${formatSeconds(current.launchBurstSecondsRemaining)}${formatChainSuffix(current)}`,
+      tone: "style"
+    });
+  }
+
+  if (!freshFeedMilestone && !launchBurstArmed && hasStyleChainBecomeLive(previous, current)) {
+    updates.push({
+      label: "Chain live",
+      value: `x${(current.styleMultiplier ?? 1).toFixed(2)} / ${formatSeconds(current.styleChainSecondsRemaining)}`,
       tone: "style"
     });
   }
@@ -293,6 +305,12 @@ function hasStyleChainReachedCriticalWindow(previous: RunFeedSnapshot, current: 
     (previous.styleChainSecondsRemaining ?? 0) > criticalStyleChainSeconds &&
     (current.styleChainSecondsRemaining ?? 0) <= criticalStyleChainSeconds
   );
+}
+
+function hasStyleChainBecomeLive(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
+  const previousChainActive = (previous.styleMultiplier ?? 1) > 1 && (previous.styleChainSecondsRemaining ?? 0) > 0;
+  const currentChainActive = (current.styleMultiplier ?? 1) > 1 && (current.styleChainSecondsRemaining ?? 0) > 0;
+  return !previousChainActive && currentChainActive;
 }
 
 function buildMedalDropUpdate(previous: ContractPaceTier | undefined, current: ContractPaceTier | undefined): RunFeedUpdate | undefined {
