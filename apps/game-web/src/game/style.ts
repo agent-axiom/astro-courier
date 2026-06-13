@@ -9,7 +9,7 @@ export type LiveStyleReward = {
   fresh: boolean;
 };
 
-const styleMilestones = new Set(["Clean Hazard Skim", "Quick Pickup", "Perfect Approach"]);
+const styleMilestones = new Set(["Clean Hazard Skim", "Quick Pickup", "Perfect Approach", "Eco Drift"]);
 
 export function buildLiveStyleReward(input: LiveStyleRewardInput): LiveStyleReward | undefined {
   const roundedBonus = Math.round(input.styleBonus);

@@ -21,4 +21,12 @@ describe("live style reward HUD copy", () => {
       fresh: true
     });
   });
+
+  it("treats eco drift as a fresh style moment", () => {
+    expect(buildLiveStyleReward({ styleBonus: 340, lastMilestone: "Eco Drift" })).toEqual({
+      label: "Style chain",
+      value: "+340",
+      fresh: true
+    });
+  });
 });

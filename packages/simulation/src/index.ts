@@ -204,6 +204,8 @@ export const QUICK_PICKUP_WINDOW_SECONDS = 12;
 export const QUICK_PICKUP_STYLE_BONUS = 180;
 export const PERFECT_APPROACH_STREAK_SECONDS = 1;
 export const PERFECT_APPROACH_STYLE_BONUS = 220;
+export const ECO_DRIFT_FUEL_USED_LIMIT = 12;
+export const ECO_DRIFT_STYLE_BONUS = 160;
 
 export function createWorldFromSystem(system: SystemContent, seed: string, options: WorldCreationOptions = {}): SimulationWorld {
   const activeContract = options.contractId
@@ -677,6 +679,9 @@ function resolveLandingOrCrash(world: SimulationWorld): void {
       ) {
         world.styleBonus += PERFECT_APPROACH_STYLE_BONUS;
         world.lastMilestone = "Perfect Approach";
+      } else if (world.fuelUsed <= ECO_DRIFT_FUEL_USED_LIMIT && world.ship.cargoDamage <= 0.02) {
+        world.styleBonus += ECO_DRIFT_STYLE_BONUS;
+        world.lastMilestone = "Eco Drift";
       } else {
         world.lastMilestone = "Delivered";
       }

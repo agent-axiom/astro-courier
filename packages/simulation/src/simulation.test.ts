@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { createCommandBuffer, checksumReplay } from "@astro-courier/engine";
 import {
+  ECO_DRIFT_FUEL_USED_LIMIT,
+  ECO_DRIFT_STYLE_BONUS,
+  QUICK_PICKUP_STYLE_BONUS,
   createWorldFromSystem,
   createWorldReplay,
   predictTrajectory,
@@ -320,6 +323,24 @@ describe("deterministic Astro Courier simulation", () => {
     expect(secondBreakdown.styleBonus).toBe(firstBreakdown.styleBonus);
   });
 
+  it("awards eco drift style for clean low-burn deliveries", () => {
+    const world = createWorldFromSystem(starterSystem, "eco-drift-seed");
+    world.ship.position = { x: 0, y: -74 };
+    world.ship.velocity = { x: 1, y: 3 };
+    world.ship.rotation = -Math.PI / 2;
+    stepWorld(world, 1 / 60, []);
+    world.ship.position = { x: 260, y: -80 };
+    world.ship.velocity = { x: 4, y: 1 };
+    world.ship.rotation = 0;
+    world.fuelUsed = ECO_DRIFT_FUEL_USED_LIMIT - 0.5;
+    stepWorld(world, 1 / 60, []);
+
+    const result = summarizeRun(world);
+
+    expect(world.lastMilestone).toBe("Eco Drift");
+    expect(result.scoreBreakdown.styleBonus).toBe(QUICK_PICKUP_STYLE_BONUS + ECO_DRIFT_STYLE_BONUS);
+  });
+
   it("scales hazard contact damage by active cargo fragility", () => {
     const systemWithCargoRisk: SystemContent = {
       ...starterSystem,
@@ -461,8 +482,8 @@ describe("deterministic Astro Courier simulation", () => {
     rushedDock.ship.rotation = 0;
     stepWorld(rushedDock, 1 / 60, []);
 
-    expect(rushedDock.lastMilestone).toBe("Delivered");
-    expect(summarizeRun(rushedDock).scoreBreakdown.styleBonus).toBe(0);
+    expect(rushedDock.lastMilestone).toBe("Eco Drift");
+    expect(summarizeRun(rushedDock).scoreBreakdown.styleBonus).toBe(ECO_DRIFT_STYLE_BONUS);
   });
 
   it("classifies landing guidance as too-fast, misaligned, or ready", () => {
@@ -623,7 +644,7 @@ describe("deterministic Astro Courier simulation", () => {
       fuelBonus: 450,
       cargoBonus: 500,
       landingBonus: 300,
-      styleBonus: 180,
+      styleBonus: QUICK_PICKUP_STYLE_BONUS + ECO_DRIFT_STYLE_BONUS,
       dangerBonus: 0,
       incidentPenalty: 0,
       total: result.score

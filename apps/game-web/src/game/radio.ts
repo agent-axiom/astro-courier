@@ -13,6 +13,7 @@ export function buildRadioMessage(hud: HudState): string {
 
   if (hud.status === "delivered") {
     if (hud.lastMilestone === "Perfect Approach") return "Perfect approach logged. That docking line was textbook.";
+    if (hud.lastMilestone === "Eco Drift") return "Eco drift logged. Minimal burn, maximum courier finesse.";
     if (hud.medal === "comet") return "Comet Medal confirmed. That route is going on the office wall.";
     if (hud.medal === "gold") return "Gold delivery logged. Clean burn, clean dock.";
     if (hud.medal === "silver") return "Silver delivery logged. Reliable courier work.";
