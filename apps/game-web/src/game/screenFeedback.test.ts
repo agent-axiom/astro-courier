@@ -97,6 +97,19 @@ describe("screen feedback", () => {
     });
   });
 
+  it("maps personal-best pressure to an anticipatory style pulse", () => {
+    expect(buildScreenFeedback(["pb-pressure"])).toEqual({
+      tone: "style",
+      intensity: "medium",
+      durationMs: 360
+    });
+    expect(buildScreenFeedback(["pb-pressure", "pb-lead"])).toEqual({
+      tone: "success",
+      intensity: "medium",
+      durationMs: 420
+    });
+  });
+
   it("stays hidden when no gameplay event needs screen feedback", () => {
     expect(buildScreenFeedback([])).toBeUndefined();
   });

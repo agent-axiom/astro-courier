@@ -6,6 +6,7 @@ describe("game haptics", () => {
     expect(hapticPatternForEvents(["boost-burn"])).toEqual([12]);
     expect(hapticPatternForEvents(["style-hit"])).toEqual([14]);
     expect(hapticPatternForEvents(["launch-burst"])).toEqual([18, 18]);
+    expect(hapticPatternForEvents(["pb-pressure"])).toEqual([12, 18, 12]);
     expect(hapticPatternForEvents(["pb-lead"])).toEqual([16, 20, 16]);
     expect(hapticPatternForEvents(["chain-critical"])).toEqual([10, 18, 10]);
     expect(hapticPatternForEvents(["medal-drop"])).toEqual([18, 28]);

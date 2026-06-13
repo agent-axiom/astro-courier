@@ -6,6 +6,7 @@ export type GameAudioEvent =
   | "ship-crash"
   | "style-hit"
   | "launch-burst"
+  | "pb-pressure"
   | "pb-lead"
   | "chain-critical"
   | "medal-drop"
@@ -34,6 +35,7 @@ export type HudAudioSnapshot = {
 const criticalFuelRatio = 0.15;
 const cleanCargoDamageLimit = 0.02;
 const criticalStyleChainSeconds = 1;
+const bestRunPressureGap = 200;
 const styleMilestones = new Set([
   "Clean Hazard Skim",
   "Needle Thread",
@@ -88,6 +90,10 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
     events.push("pb-lead");
   }
 
+  if (hasEnteredBestRunPressure(previous, current)) {
+    events.push("pb-pressure");
+  }
+
   if (hasStyleChainReachedCriticalWindow(previous, current)) {
     events.push("chain-critical");
   }
@@ -122,6 +128,16 @@ function hasCrossedBestRunScore(previous: HudAudioSnapshot | undefined, current:
     return false;
   }
   return (previous.score ?? 0) <= current.bestRunScore && (current.score ?? 0) > current.bestRunScore;
+}
+
+function hasEnteredBestRunPressure(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {
+  if (!previous || current.bestRunScore === undefined || previous.bestRunScore !== current.bestRunScore) {
+    return false;
+  }
+
+  const previousGap = current.bestRunScore - (previous.score ?? 0);
+  const currentGap = current.bestRunScore - (current.score ?? 0);
+  return previousGap > bestRunPressureGap && currentGap > 0 && currentGap <= bestRunPressureGap;
 }
 
 function hasDroppedMedalWindow(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {

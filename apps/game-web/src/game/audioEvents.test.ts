@@ -80,6 +80,21 @@ describe("HUD audio events", () => {
     ).toEqual([]);
   });
 
+  it("signals when the live run enters personal-best chase pressure", () => {
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, score: 2980, bestRunScore: 3290 },
+        { ...baseSnapshot, score: 3105, bestRunScore: 3290 }
+      )
+    ).toEqual(["pb-pressure"]);
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, score: 3105, bestRunScore: 3290 },
+        { ...baseSnapshot, score: 3180, bestRunScore: 3290 }
+      )
+    ).toEqual([]);
+  });
+
   it("warns once when an active style chain reaches the critical window", () => {
     expect(
       deriveHudAudioEvents(
