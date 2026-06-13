@@ -301,6 +301,7 @@ describe("contract rotation", () => {
     });
 
     expect(lastDropModifiers[0]).toEqual({ label: "Fuel", value: "Below 5%", tone: "fuel" });
+    expect(lastDropModifiers[2]).toEqual({ label: "Cargo", value: "Rush cargo", tone: "speed" });
   });
 
   it("falls back to pressure-based modifier chips for generic routes", () => {

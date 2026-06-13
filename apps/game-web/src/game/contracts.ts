@@ -359,6 +359,9 @@ function hazardModifierTone(multiplier: number | undefined): ContractModifierTon
 }
 
 function cargoModifierValue(input: ContractRoutePlanInput): string {
+  if (input.cargoKind === "time-sensitive") {
+    return "Rush cargo";
+  }
   if (input.cargoFragility < 0.9 || input.cargoKind === "fragile") {
     return "Fragile load";
   }
@@ -369,6 +372,9 @@ function cargoModifierValue(input: ContractRoutePlanInput): string {
 }
 
 function cargoModifierTone(input: ContractRoutePlanInput): ContractModifierTone {
+  if (input.cargoKind === "time-sensitive") {
+    return "speed";
+  }
   if (input.cargoFragility < 0.9 || input.cargoKind === "fragile") {
     return "precision";
   }
