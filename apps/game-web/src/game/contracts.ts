@@ -6,6 +6,19 @@ export type ContractHazardTraitInput = {
   hazardSeverityMultiplier?: number;
 };
 
+export type ContractRoutePlanInput = {
+  cargoKind: string;
+  cargoFragility: number;
+  hazardSeverityMultiplier?: number;
+  goldSeconds: number;
+};
+
+export type ContractRoutePlan = {
+  label: "Route plan";
+  value: string;
+  tone: "danger" | "careful" | "speed" | "balanced";
+};
+
 export function getNextContractId(contracts: readonly ContractIdentity[], currentContractId: string): string {
   if (contracts.length < 2) {
     return currentContractId;
@@ -31,4 +44,36 @@ export function buildContractDangerPayTrait(input: ContractHazardTraitInput): st
     return undefined;
   }
   return `Danger pay +${Math.round((input.hazardSeverityMultiplier - 1) * 400)}`;
+}
+
+export function buildContractRoutePlan(input: ContractRoutePlanInput): ContractRoutePlan {
+  if ((input.hazardSeverityMultiplier ?? 1) >= 1.25) {
+    return {
+      label: "Route plan",
+      value: "Skim wide, cash danger",
+      tone: "danger"
+    };
+  }
+
+  if (input.cargoKind === "fragile" || input.cargoFragility < 0.9) {
+    return {
+      label: "Route plan",
+      value: "Soft dock, protect cargo",
+      tone: "careful"
+    };
+  }
+
+  if (input.goldSeconds <= 25) {
+    return {
+      label: "Route plan",
+      value: "Minimal burns, fast dock",
+      tone: "speed"
+    };
+  }
+
+  return {
+    label: "Route plan",
+    value: "Clean line, spare fuel",
+    tone: "balanced"
+  };
 }

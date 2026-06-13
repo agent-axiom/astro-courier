@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildContractDangerPayTrait, buildContractHazardTrait, getNextContractId } from "./contracts";
+import { buildContractDangerPayTrait, buildContractHazardTrait, buildContractRoutePlan, getNextContractId } from "./contracts";
 
 describe("contract rotation", () => {
   it("returns the next contract id and wraps at the end", () => {
@@ -29,5 +29,48 @@ describe("contract rotation", () => {
     expect(buildContractDangerPayTrait({ hazardSeverityMultiplier: 1.45 })).toBe("Danger pay +180");
     expect(buildContractDangerPayTrait({})).toBeUndefined();
     expect(buildContractDangerPayTrait({ hazardSeverityMultiplier: 1 })).toBeUndefined();
+  });
+
+  it("prioritizes a danger route plan for high hazard contracts", () => {
+    expect(
+      buildContractRoutePlan({
+        cargoKind: "volatile",
+        cargoFragility: 1,
+        hazardSeverityMultiplier: 1.45,
+        goldSeconds: 24
+      })
+    ).toEqual({
+      label: "Route plan",
+      value: "Skim wide, cash danger",
+      tone: "danger"
+    });
+  });
+
+  it("calls out careful handling for fragile low-hazard cargo", () => {
+    expect(
+      buildContractRoutePlan({
+        cargoKind: "fragile",
+        cargoFragility: 0.8,
+        goldSeconds: 35
+      })
+    ).toEqual({
+      label: "Route plan",
+      value: "Soft dock, protect cargo",
+      tone: "careful"
+    });
+  });
+
+  it("spots tight sprint contracts without special cargo pressure", () => {
+    expect(
+      buildContractRoutePlan({
+        cargoKind: "standard",
+        cargoFragility: 1,
+        goldSeconds: 24
+      })
+    ).toEqual({
+      label: "Route plan",
+      value: "Minimal burns, fast dock",
+      tone: "speed"
+    });
   });
 });

@@ -8,6 +8,7 @@ import {
   Pause,
   Play,
   RotateCcw,
+  Route,
   Satellite,
   ShieldAlert,
   Star,
@@ -21,7 +22,7 @@ import { getBestRun, recordBestRun, type BestRun } from "./game/bestRun";
 import { GameShell, type HudState } from "./game/GameShell";
 import { formatBearingGuidance } from "./game/bearing";
 import { canUseImpulseControl } from "./game/hudControls";
-import { buildContractDangerPayTrait, buildContractHazardTrait, getNextContractId } from "./game/contracts";
+import { buildContractDangerPayTrait, buildContractHazardTrait, buildContractRoutePlan, getNextContractId } from "./game/contracts";
 import { buildRadioMessage } from "./game/radio";
 import { buildLiveStyleReward } from "./game/style";
 import { buildObjectiveDirective, buildObjectiveInterceptReadout } from "./game/objective";
@@ -182,6 +183,12 @@ export function App() {
   const hazardLoadTrait = buildContractHazardTrait({ hazardSeverityMultiplier: hud.hazardSeverityMultiplier });
   const dangerPayTrait = buildContractDangerPayTrait({ hazardSeverityMultiplier: hud.hazardSeverityMultiplier });
   const dangerPayAmount = dangerPayTrait?.replace("Danger pay ", "");
+  const routePlan = buildContractRoutePlan({
+    cargoKind: hud.cargoKind,
+    cargoFragility: hud.cargoFragility,
+    hazardSeverityMultiplier: hud.hazardSeverityMultiplier,
+    goldSeconds: hud.paceSecondsRemaining
+  });
   const cargoRiskReadout = buildCargoRiskReadout({
     cargoKind: hud.cargoKind,
     cargoFragility: hud.cargoFragility,
@@ -396,6 +403,11 @@ export function App() {
             <PackageCheck size={18} />
             <span>{cargoManifest.label}</span>
             <strong>{cargoManifest.value}</strong>
+          </div>
+          <div className={`route-plan-briefing route-plan-${routePlan.tone}`} aria-label={`${routePlan.label}: ${routePlan.value}`}>
+            <Route size={18} />
+            <span>{routePlan.label}</span>
+            <strong>{routePlan.value}</strong>
           </div>
           <div className={`cargo-risk-briefing cargo-risk-${cargoRiskReadout.tone}`} aria-label={`${cargoRiskReadout.label}: ${cargoRiskReadout.value}`}>
             <ShieldAlert size={18} />
