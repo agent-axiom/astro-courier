@@ -33,6 +33,8 @@ const initialHud: HudState = {
   contractId: "first-light-delivery",
   contractTitle: "First Light Delivery",
   contractBriefing: "Run the standard Luma courier line. Load cleanly, protect the bottle, and dock with fuel to spare.",
+  contractRiskLabel: "Training Route",
+  contractRewardLabel: "Clean delivery bonuses",
   pickupLabel: "Luma North Pad",
   destinationLabel: "Tea Station Dock A",
   cargoName: "Bottled Starlight",
@@ -317,6 +319,18 @@ export function App() {
           <div className="preflight-kicker">Starter Contract</div>
           <h2>{hud.contractTitle}</h2>
           <p>{hud.contractBriefing}</p>
+          <div className="contract-traits" aria-label="Contract risk and reward">
+            <span>
+              <Gauge size={17} />
+              <small>Risk</small>
+              <strong>{hud.contractRiskLabel}</strong>
+            </span>
+            <span>
+              <Trophy size={17} />
+              <small>Reward</small>
+              <strong>{hud.contractRewardLabel}</strong>
+            </span>
+          </div>
           {pickupRushActive ? (
             <div className="rush-briefing">
               <TimerReset size={18} />
@@ -342,6 +356,10 @@ export function App() {
                   <small>
                     {contract.pickupLabel} -&gt; {contract.destinationLabel}
                   </small>
+                  <div className="contract-option-traits">
+                    <em>{contract.riskLabel}</em>
+                    <em>{contract.rewardLabel}</em>
+                  </div>
                   <strong>Gold {contract.medalTimes.gold}s</strong>
                 </button>
               ))}

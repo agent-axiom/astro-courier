@@ -55,6 +55,8 @@ export type ContractContent = {
   id: string;
   title: string;
   briefing: string;
+  riskLabel: string;
+  rewardLabel: string;
   pickupId: string;
   destinationId: string;
   cargoId: string;

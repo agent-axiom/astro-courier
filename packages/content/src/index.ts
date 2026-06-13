@@ -48,6 +48,8 @@ export const contractSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
   briefing: z.string().min(1),
+  riskLabel: z.string().min(1),
+  rewardLabel: z.string().min(1),
   pickupId: z.string().min(1),
   destinationId: z.string().min(1),
   cargoId: z.string().min(1),
