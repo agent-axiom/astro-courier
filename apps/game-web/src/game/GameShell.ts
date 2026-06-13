@@ -34,6 +34,8 @@ export type HudState = {
   paceSecondsRemaining: number;
   approachStreakSeconds: number;
   bestApproachStreakSeconds: number;
+  hazardDangerLevel?: "near" | "inside";
+  hazardDistance?: number;
 };
 
 export type GameShellOptions = {
@@ -192,7 +194,9 @@ export class GameShell {
       paceTier: pace.tier,
       paceSecondsRemaining: pace.secondsRemaining,
       approachStreakSeconds: snapshot.approachStreakSeconds,
-      bestApproachStreakSeconds: snapshot.bestApproachStreakSeconds
+      bestApproachStreakSeconds: snapshot.bestApproachStreakSeconds,
+      hazardDangerLevel: snapshot.nearestHazard?.dangerLevel,
+      hazardDistance: snapshot.nearestHazard?.distance
     });
   }
 }

@@ -24,7 +24,9 @@ const initialHud: HudState = {
   paceTier: "gold",
   paceSecondsRemaining: 35,
   approachStreakSeconds: 0,
-  bestApproachStreakSeconds: 0
+  bestApproachStreakSeconds: 0,
+  hazardDangerLevel: undefined,
+  hazardDistance: undefined
 };
 
 const useGameStore = create<GameStore>((set) => ({
@@ -148,6 +150,12 @@ export function App() {
           <span>{paceLabel(hud.paceTier)}</span>
           <strong>{hud.paceTier === "overtime" ? "Expired" : `${hud.paceSecondsRemaining.toFixed(1)}s`}</strong>
         </div>
+        {hud.hazardDangerLevel ? (
+          <div className={`hazard-chip hazard-${hud.hazardDangerLevel}`}>
+            <span>{hud.hazardDangerLevel === "inside" ? "Hazard contact" : "Hazard near"}</span>
+            <strong>{hud.hazardDistance === undefined ? "" : `${Math.round(hud.hazardDistance)}m`}</strong>
+          </div>
+        ) : null}
         {hud.landingStatus ? (
           <div className={`guidance-chip guidance-${hud.assistAvailable ? "assist" : hud.landingStatus}`}>
             {guidanceLabel(hud.landingStatus, Boolean(hud.assistAvailable))}

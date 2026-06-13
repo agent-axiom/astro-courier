@@ -17,6 +17,14 @@ export function buildRadioMessage(hud: HudState): string {
     return "Delivery complete. The parcel survived another charming orbital situation.";
   }
 
+  if (hud.hazardDangerLevel === "inside") {
+    return `Hazard contact. Exit the field${hud.hazardDistance === undefined ? "" : `, ${Math.round(hud.hazardDistance)}m from center`}.`;
+  }
+
+  if (hud.hazardDangerLevel === "near") {
+    return `Asteroid field ahead. Skim wide${hud.hazardDistance === undefined ? "" : `, ${Math.round(hud.hazardDistance)}m out`}.`;
+  }
+
   if (hud.assistAvailable) {
     return "Assist burn available. Hold the line and let the legs do their job.";
   }

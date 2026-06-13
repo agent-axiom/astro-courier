@@ -19,7 +19,9 @@ const baseHud: HudState = {
   paceTier: "gold",
   paceSecondsRemaining: 35,
   approachStreakSeconds: 0,
-  bestApproachStreakSeconds: 0
+  bestApproachStreakSeconds: 0,
+  hazardDangerLevel: undefined,
+  hazardDistance: undefined
 };
 
 describe("radio feedback copy", () => {
@@ -31,6 +33,11 @@ describe("radio feedback copy", () => {
   it("surfaces landing assist before generic speed warnings", () => {
     expect(buildRadioMessage({ ...baseHud, landingStatus: "too-fast", assistAvailable: true })).toContain("Assist");
     expect(buildRadioMessage({ ...baseHud, landingStatus: "too-fast", assistAvailable: false })).toContain("Slow");
+  });
+
+  it("warns about hazard pressure before ordinary approach guidance", () => {
+    expect(buildRadioMessage({ ...baseHud, hazardDangerLevel: "inside", hazardDistance: 12 })).toContain("Hazard");
+    expect(buildRadioMessage({ ...baseHud, hazardDangerLevel: "near", hazardDistance: 44 })).toContain("Asteroid");
   });
 
   it("praises a held stable approach before generic landing guidance", () => {

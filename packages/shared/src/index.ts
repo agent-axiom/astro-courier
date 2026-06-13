@@ -106,4 +106,13 @@ export type SimulationSnapshot = {
     radius: number;
     severity: number;
   }>;
+  nearestHazard?: {
+    id: string;
+    type: string;
+    position: Vec2;
+    distance: number;
+    radius: number;
+    severity: number;
+    dangerLevel: "near" | "inside";
+  };
 };

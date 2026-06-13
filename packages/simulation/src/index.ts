@@ -380,7 +380,8 @@ export function snapshotWorld(world: SimulationWorld): SimulationSnapshot {
       position: { ...hazard.position },
       radius: hazard.radius,
       severity: hazard.severity
-    }))
+    })),
+    nearestHazard: getNearestHazard(world)
   };
 }
 
@@ -427,6 +428,40 @@ function classifyLandingGuidance(
     return "misaligned";
   }
   return "ready";
+}
+
+function getNearestHazard(world: SimulationWorld): SimulationSnapshot["nearestHazard"] {
+  let nearest:
+    | {
+        hazard: HazardState;
+        distance: number;
+      }
+    | undefined;
+
+  for (const hazard of world.hazards) {
+    const distance = distanceBetween(world.ship.position, hazard.position);
+    const warningDistance = hazard.radius * 2;
+    if (distance > warningDistance) {
+      continue;
+    }
+    if (!nearest || distance < nearest.distance) {
+      nearest = { hazard, distance };
+    }
+  }
+
+  if (!nearest) {
+    return undefined;
+  }
+
+  return {
+    id: nearest.hazard.id,
+    type: nearest.hazard.type,
+    position: { ...nearest.hazard.position },
+    distance: round(nearest.distance, 3),
+    radius: nearest.hazard.radius,
+    severity: nearest.hazard.severity,
+    dangerLevel: nearest.distance <= nearest.hazard.radius ? "inside" : "near"
+  };
 }
 
 function applyGravity(world: SimulationWorld, fixedDt: number): void {

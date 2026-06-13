@@ -199,6 +199,39 @@ describe("deterministic Astro Courier simulation", () => {
     });
   });
 
+  it("reports nearby hazard pressure without warning across the whole map", () => {
+    const systemWithHazard: SystemContent = {
+      ...starterSystem,
+      hazards: [
+        {
+          id: "test-asteroids",
+          type: "asteroid_field",
+          position: [200, -80],
+          radius: 30,
+          severity: 0.4
+        }
+      ]
+    };
+    const world = createWorldFromSystem(systemWithHazard, "hazard-seed");
+
+    world.ship.position = { x: 245, y: -80 };
+    expect(snapshotWorld(world).nearestHazard).toMatchObject({
+      id: "test-asteroids",
+      dangerLevel: "near",
+      distance: 45
+    });
+
+    world.ship.position = { x: 210, y: -80 };
+    expect(snapshotWorld(world).nearestHazard).toMatchObject({
+      id: "test-asteroids",
+      dangerLevel: "inside",
+      distance: 10
+    });
+
+    world.ship.position = { x: 320, y: -80 };
+    expect(snapshotWorld(world).nearestHazard).toBeUndefined();
+  });
+
   it("classifies landing guidance as too-fast, misaligned, or ready", () => {
     const world = createWorldFromSystem(starterSystem, "guide-seed");
     world.ship.position = { x: 0, y: -74 };

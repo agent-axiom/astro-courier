@@ -226,6 +226,36 @@ button {
   color: #ffadc1;
 }
 
+.hazard-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 36px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: 0.84rem;
+  font-weight: 850;
+}
+
+.hazard-chip span {
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.hazard-chip strong {
+  color: #ffffff;
+}
+
+.hazard-near {
+  background: rgba(255, 209, 102, 0.18);
+  color: #ffe19a;
+}
+
+.hazard-inside {
+  background: rgba(255, 111, 145, 0.18);
+  color: #ffadc1;
+}
+
 .landing-rating {
   min-height: 36px;
   padding: 9px 10px;
@@ -540,7 +570,7 @@ button {
   }
 
   .preflight-overlay {
-    top: 43%;
+    top: 40%;
     width: calc(100vw - 20px);
     padding: 16px;
   }
