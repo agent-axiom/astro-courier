@@ -1270,10 +1270,14 @@ button {
 }
 
 .preflight-button {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  width: 100%;
   min-height: 44px;
   padding: 10px 15px;
   border: 1px solid rgba(142, 230, 184, 0.72);
@@ -1281,7 +1285,9 @@ button {
   background: rgba(142, 230, 184, 0.18);
   color: #eafff3;
   font-weight: 900;
+  box-shadow: 0 -12px 22px rgba(8, 13, 28, 0.68);
   cursor: pointer;
+  backdrop-filter: blur(12px);
 }
 
 .preflight-button:hover {
