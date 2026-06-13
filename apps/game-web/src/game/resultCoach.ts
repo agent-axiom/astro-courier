@@ -93,6 +93,14 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
     };
   }
 
+  if (input.lastMilestone === "Last Drop") {
+    return {
+      label: "Next run",
+      value: "Repeat the last-drop coast",
+      tone: "success"
+    };
+  }
+
   if (input.cargoDamage >= 0.15) {
     return {
       label: "Next run",

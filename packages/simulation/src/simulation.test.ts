@@ -10,6 +10,7 @@ import {
   GRAVITY_SLING_STYLE_BONUS,
   CHAIN_FINISH_STYLE_BONUS,
   DAMAGE_CONTROL_STYLE_BONUS,
+  LAST_DROP_STYLE_BONUS,
   LANDING_ASSIST_FUEL_COST,
   QUICK_PICKUP_STYLE_BONUS,
   STYLE_CHAIN_WINDOW_SECONDS,
@@ -660,6 +661,29 @@ describe("deterministic Astro Courier simulation", () => {
     expect(world.lastMilestone).toBe("Damage Control");
     expect(world.lastStyleAward).toBe(DAMAGE_CONTROL_STYLE_BONUS);
     expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(DAMAGE_CONTROL_STYLE_BONUS);
+  });
+
+  it("awards last drop style for clean deliveries on critical fuel", () => {
+    const world = createWorldFromSystem(starterSystem, "last-drop-seed");
+    world.cargoOnboard = true;
+    world.objectivePhase = "delivery";
+    world.ship.fuel = 4;
+    world.fuelUsed = world.ship.maxFuel - world.ship.fuel;
+    world.elapsedSeconds = starterSystem.contracts[0]!.medalTimes.gold + 1;
+    world.bestApproachStreakSeconds = 0;
+    for (const pad of world.landingPads) {
+      pad.active = pad.role === "destination";
+    }
+    world.ship.position = { x: 260, y: -80 };
+    world.ship.velocity = { x: 4, y: 1 };
+    world.ship.rotation = 0;
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("delivered");
+    expect(world.lastMilestone).toBe("Last Drop");
+    expect(world.lastStyleAward).toBe(LAST_DROP_STYLE_BONUS);
+    expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(LAST_DROP_STYLE_BONUS);
   });
 
   it("scales hazard contact damage by active cargo fragility", () => {

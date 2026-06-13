@@ -23,6 +23,7 @@ export function buildRadioMessage(hud: HudState): string {
     if (hud.lastMilestone === "Chain Finish") return "Chain finish logged. You carried the style window all the way home.";
     if (hud.lastMilestone === "Express Finish") return "Express finish logged. Fast cargo, clean hands, premium route.";
     if (hud.lastMilestone === "Damage Control") return "Damage control logged. Damaged cargo recovered with a soft dock.";
+    if (hud.lastMilestone === "Last Drop") return "Last drop logged. Empty tanks, intact cargo, excellent nerve.";
     if (hud.medal === "comet") return "Comet Medal confirmed. That route is going on the office wall.";
     if (hud.medal === "gold") return "Gold delivery logged. Clean burn, clean dock.";
     if (hud.medal === "silver") return "Silver delivery logged. Reliable courier work.";

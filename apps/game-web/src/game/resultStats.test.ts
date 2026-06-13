@@ -46,6 +46,14 @@ describe("result stat formatting", () => {
     });
   });
 
+  it("names last-drop finishes on the result highlight", () => {
+    expect(buildResultHighlight({ ...baseBreakdown, styleBonus: 170 }, "Last Drop")).toEqual({
+      label: "Run highlight",
+      value: "Last Drop +170",
+      tone: "style"
+    });
+  });
+
   it("keeps generic style highlights for non-style milestones", () => {
     expect(buildResultHighlight({ ...baseBreakdown, styleBonus: 405 }, "Delivered")).toEqual({
       label: "Run highlight",

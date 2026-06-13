@@ -186,6 +186,19 @@ describe("radio feedback copy", () => {
     ).toContain("Damage control");
   });
 
+  it("celebrates last-drop finishes before generic medal copy", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        status: "delivered",
+        medal: "silver",
+        fuel: 4,
+        maxFuel: 100,
+        lastMilestone: "Last Drop"
+      })
+    ).toContain("Last drop");
+  });
+
   it("praises a held stable approach before generic landing guidance", () => {
     expect(buildRadioMessage({ ...baseHud, landingStatus: "ready", approachStreakSeconds: 1.4 })).toContain("Perfect setup");
     expect(buildRadioMessage({ ...baseHud, landingStatus: "ready", approachStreakSeconds: 1.4 })).toContain("+220");

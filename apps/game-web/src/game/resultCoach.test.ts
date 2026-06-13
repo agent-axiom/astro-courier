@@ -301,6 +301,25 @@ describe("result coach", () => {
       tone: "success"
     });
   });
+
+  it("coaches last drop runs toward repeating the clutch coast", () => {
+    expect(
+      buildResultCoach({
+        status: "delivered",
+        lastMilestone: "Last Drop",
+        medal: "silver",
+        grade: "B",
+        cargoDamage: 0,
+        fuel: 4,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 170 }
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Repeat the last-drop coast",
+      tone: "success"
+    });
+  });
 });
 
 describe("result board prompt", () => {
