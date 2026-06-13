@@ -8,7 +8,7 @@ export type BestRun = {
 };
 
 export type BestRunChase = {
-  label: "First clear" | "PB target";
+  label: "First clear" | "PB target" | "PB ghost";
   value: string;
   tone: "empty" | "target";
 };
@@ -127,9 +127,10 @@ export function buildBestRunChase(bestRun: BestRun | undefined): BestRunChase {
     };
   }
 
+  const hasGhostTrail = (bestRun.ghostTrail?.length ?? 0) >= 2;
   return {
-    label: "PB target",
-    value: `${bestRun.score} / ${bestRun.elapsedSeconds.toFixed(1)}s`,
+    label: hasGhostTrail ? "PB ghost" : "PB target",
+    value: `${bestRun.score} / ${bestRun.elapsedSeconds.toFixed(1)}s${hasGhostTrail ? " trail" : ""}`,
     tone: "target"
   };
 }

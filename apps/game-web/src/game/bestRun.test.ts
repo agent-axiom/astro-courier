@@ -90,6 +90,24 @@ describe("personal best chase copy", () => {
       tone: "target"
     });
   });
+
+  it("calls out when a saved personal best has a ghost route loaded", () => {
+    expect(
+      buildBestRunChase({
+        score: 3290,
+        elapsedSeconds: 24.667,
+        medal: "gold",
+        ghostTrail: [
+          { x: 0, y: 0 },
+          { x: 12, y: -4 }
+        ]
+      })
+    ).toEqual({
+      label: "PB ghost",
+      value: "3290 / 24.7s trail",
+      tone: "target"
+    });
+  });
 });
 
 describe("contract option personal best copy", () => {

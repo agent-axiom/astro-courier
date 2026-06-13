@@ -1024,7 +1024,7 @@ export function App() {
             ))}
           </div>
           <div className={`best-chase-briefing best-chase-${bestRunChase.tone}`} aria-label={`${bestRunChase.label}: ${bestRunChase.value}`}>
-            <Trophy size={18} />
+            {bestRunChase.label === "PB ghost" ? <Route size={18} /> : <Trophy size={18} />}
             <span>{bestRunChase.label}</span>
             <strong>{bestRunChase.value}</strong>
           </div>
