@@ -53,6 +53,26 @@ describe("result coach", () => {
     });
   });
 
+  it("coaches asteroid sprint hull collisions toward wider field clearance", () => {
+    expect(
+      buildResultCoach({
+        status: "crashed",
+        contractId: "asteroid-sprint",
+        crashReason: "Hull Collision",
+        medal: "none",
+        grade: "F",
+        cargoDamage: 1,
+        fuel: 40,
+        maxFuel: 100,
+        scoreBreakdown: baseBreakdown
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Give asteroid fields wider clearance",
+      tone: "danger"
+    });
+  });
+
   it("coaches damaged deliveries toward safer hazard lines", () => {
     expect(
       buildResultCoach({

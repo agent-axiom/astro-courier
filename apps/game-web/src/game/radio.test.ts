@@ -310,6 +310,17 @@ describe("radio feedback copy", () => {
     expect(buildRadioMessage({ ...baseHud, status: "paused" })).toContain("Contract loaded");
   });
 
+  it("reports asteroid sprint hull collisions as asteroid impacts", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        status: "crashed",
+        contractId: "asteroid-sprint",
+        crashReason: "Hull Collision"
+      })
+    ).toContain("Asteroid impact");
+  });
+
   it("celebrates strong deliveries and reports crashes", () => {
     expect(buildRadioMessage({ ...baseHud, status: "delivered", medal: "gold", lastMilestone: "Perfect Approach" })).toContain(
       "Perfect approach"
