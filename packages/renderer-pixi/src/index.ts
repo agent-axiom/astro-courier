@@ -140,12 +140,17 @@ class PixiRenderer implements AstroPixiRenderer {
 
     for (const pad of snapshot.landingPads) {
       const center = project(pad.position);
-      const color = pad.destination ? 0xffd166 : 0x8ee6b8;
-      this.world.circle(center.x, center.y, pad.radius).stroke({ color, width: 3, alpha: 0.95 });
+      const color = pad.role === "destination" ? 0xffd166 : pad.role === "pickup" ? 0x8ee6b8 : 0xa0c4ff;
+      const width = pad.active ? 4 : 2;
+      const alpha = pad.active ? 1 : 0.45;
+      if (pad.active) {
+        this.world.circle(center.x, center.y, pad.radius + 9).fill({ color, alpha: 0.12 });
+      }
+      this.world.circle(center.x, center.y, pad.radius).stroke({ color, width, alpha });
       this.world
         .moveTo(center.x, center.y)
         .lineTo(center.x + Math.cos(pad.normalAngle) * pad.radius, center.y + Math.sin(pad.normalAngle) * pad.radius)
-        .stroke({ color, width: 2, alpha: 0.8 });
+        .stroke({ color, width: 2, alpha });
     }
   }
 

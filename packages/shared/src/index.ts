@@ -17,6 +17,7 @@ export type InputFrame = {
 };
 
 export type RunStatus = "flying" | "delivered" | "crashed" | "paused";
+export type ObjectivePhase = "pickup" | "delivery" | "complete";
 
 export type LandingRating =
   | "Perfect Landing"
@@ -51,6 +52,9 @@ export type ReplayEnvelope = {
 export type SimulationSnapshot = {
   tick: number;
   status: RunStatus;
+  objectivePhase: ObjectivePhase;
+  cargoOnboard: boolean;
+  lastMilestone?: string;
   elapsedSeconds: number;
   score: number;
   ship: {
@@ -73,6 +77,8 @@ export type SimulationSnapshot = {
     position: Vec2;
     normalAngle: number;
     radius: number;
+    role: "pickup" | "destination" | "neutral";
+    active: boolean;
     destination: boolean;
   }>;
   hazards: Array<{
@@ -83,4 +89,3 @@ export type SimulationSnapshot = {
     severity: number;
   }>;
 };
-

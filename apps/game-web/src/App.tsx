@@ -1,4 +1,4 @@
-import { Gauge, PackageCheck, Pause, Play, RotateCcw, Satellite, Zap } from "lucide-react";
+import { Gauge, PackageCheck, Pause, Play, RotateCcw, Satellite, Trophy, Zap } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { create } from "zustand";
 import { GameShell, type HudState } from "./game/GameShell";
@@ -10,12 +10,14 @@ type GameStore = {
 
 const initialHud: HudState = {
   status: "flying",
+  objectivePhase: "pickup",
   contractTitle: "First Light Delivery",
   elapsedSeconds: 0,
   score: 0,
   fuel: 100,
   maxFuel: 100,
   cargoDamage: 0,
+  cargoOnboard: false,
   speed: 0
 };
 
@@ -49,6 +51,7 @@ export function App() {
 
   const fuelRatio = hud.maxFuel > 0 ? hud.fuel / hud.maxFuel : 0;
   const cargoIntegrity = Math.max(0, 1 - hud.cargoDamage);
+  const runFinished = hud.status === "delivered" || hud.status === "crashed";
 
   return (
     <main className="app-shell">
@@ -69,7 +72,7 @@ export function App() {
           <Metric
             icon={<PackageCheck size={18} />}
             label="Cargo"
-            value={`${Math.round(cargoIntegrity * 100)}%`}
+            value={hud.cargoOnboard ? `${Math.round(cargoIntegrity * 100)}%` : "Empty"}
             tone={cargoIntegrity < 0.7 ? "warning" : "normal"}
           />
         </div>
@@ -109,6 +112,10 @@ export function App() {
           <strong>{statusLabel(hud.status)}</strong>
         </div>
         <div className="status-row">
+          <span>Objective</span>
+          <strong>{objectiveLabel(hud)}</strong>
+        </div>
+        <div className="status-row">
           <span>Time</span>
           <strong>{hud.elapsedSeconds.toFixed(1)}s</strong>
         </div>
@@ -116,8 +123,33 @@ export function App() {
           <span>Score</span>
           <strong>{hud.score}</strong>
         </div>
+        {hud.lastMilestone && !runFinished ? <div className="milestone">{hud.lastMilestone}</div> : null}
         {hud.landingRating ? <div className="landing-rating">{hud.landingRating}</div> : null}
       </aside>
+
+      {runFinished ? (
+        <section className={`result-overlay result-${hud.status}`} aria-label="Run result">
+          <Trophy aria-hidden="true" size={28} />
+          <h2>{hud.status === "delivered" ? "Delivery Complete" : "Delivery Failed"}</h2>
+          <p>{hud.landingRating ?? statusLabel(hud.status)}</p>
+          <div className="result-stats">
+            <span>{hud.score}</span>
+            <span>{hud.elapsedSeconds.toFixed(1)}s</span>
+            <span>{Math.round(cargoIntegrity * 100)}%</span>
+          </div>
+          <button
+            type="button"
+            className="result-button"
+            onClick={() => {
+              setPaused(false);
+              shellRef.current?.restart();
+            }}
+          >
+            <RotateCcw size={18} />
+            Restart
+          </button>
+        </section>
+      ) : null}
     </main>
   );
 }
@@ -146,3 +178,8 @@ function statusLabel(status: HudState["status"]): string {
   return "In flight";
 }
 
+function objectiveLabel(hud: HudState): string {
+  if (hud.objectivePhase === "complete") return "Complete";
+  if (hud.objectivePhase === "delivery") return "Deliver";
+  return hud.lastMilestone === "Pickup Required" ? "Pickup first" : "Pickup";
+}

@@ -9,18 +9,21 @@ import {
   summarizeRun,
   type SimulationWorld
 } from "@astro-courier/simulation";
-import type { PlayerCommand, RunStatus } from "@astro-courier/shared";
+import type { ObjectivePhase, PlayerCommand, RunStatus } from "@astro-courier/shared";
 import { KeyboardInput } from "./input";
 
 export type HudState = {
   status: RunStatus;
+  objectivePhase: ObjectivePhase;
   contractTitle: string;
   elapsedSeconds: number;
   score: number;
   fuel: number;
   maxFuel: number;
   cargoDamage: number;
+  cargoOnboard: boolean;
   speed: number;
+  lastMilestone?: string;
   landingRating?: string;
 };
 
@@ -54,7 +57,7 @@ export class GameShell {
 
   async start(): Promise<void> {
     await this.renderer.mount(this.mount);
-    this.input.attach();
+    this.input.attach(this.mount);
     this.publishHud();
     this.lastTime = performance.now();
     this.rafId = requestAnimationFrame(this.frame);
@@ -122,17 +125,19 @@ export class GameShell {
     const result = summarizeRun(this.world);
     this.onHud({
       status: this.world.status,
+      objectivePhase: this.world.objectivePhase,
       contractTitle: this.world.activeContract.title,
       elapsedSeconds: result.elapsedSeconds,
       score: result.score,
       fuel: this.world.ship.fuel,
       maxFuel: this.world.ship.maxFuel,
       cargoDamage: result.cargoDamage,
+      cargoOnboard: this.world.cargoOnboard,
       speed: Math.hypot(this.world.ship.velocity.x, this.world.ship.velocity.y),
+      lastMilestone: this.world.lastMilestone,
       landingRating: result.landingRating
     });
   }
 }
 
 export type CommandProducer = (rotation: number) => PlayerCommand[];
-

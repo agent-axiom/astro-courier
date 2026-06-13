@@ -1,6 +1,7 @@
 import type {
   InputFrame,
   LandingRating,
+  ObjectivePhase,
   PlayerCommand,
   ReplayEnvelope,
   RunResultSummary,
@@ -102,6 +103,8 @@ export type LandingPadState = {
   radius: number;
   allowedApproachSpeed: number;
   requiredAngleTolerance: number;
+  role: "pickup" | "destination" | "neutral";
+  active: boolean;
   destination: boolean;
 };
 
@@ -133,6 +136,9 @@ export type SimulationWorld = {
   tick: number;
   elapsedSeconds: number;
   status: RunStatus;
+  objectivePhase: ObjectivePhase;
+  cargoOnboard: boolean;
+  lastMilestone?: string;
   landingRating?: LandingRating;
   score: number;
   fuelUsed: number;
@@ -180,6 +186,8 @@ export function createWorldFromSystem(system: SystemContent, seed: string): Simu
     tick: 0,
     elapsedSeconds: 0,
     status: "flying",
+    objectivePhase: "pickup",
+    cargoOnboard: false,
     score: 0,
     fuelUsed: 0,
     activeContract,
@@ -201,6 +209,9 @@ export function createWorldFromSystem(system: SystemContent, seed: string): Simu
       radius: pad.radius,
       allowedApproachSpeed: pad.allowedApproachSpeed,
       requiredAngleTolerance: pad.requiredAngleTolerance,
+      role:
+        pad.id === activeContract.pickupId ? "pickup" : pad.id === activeContract.destinationId ? "destination" : "neutral",
+      active: pad.id === activeContract.pickupId,
       destination: pad.id === activeContract.destinationId
     })),
     hazards: system.hazards.map((hazard) => ({
@@ -228,6 +239,7 @@ export function stepWorld(world: SimulationWorld, fixedDt: number, commands: Pla
   if (world.status !== "flying") {
     return world;
   }
+  world.lastMilestone = undefined;
 
   let thrust = 0;
   let brake = 0;
@@ -291,11 +303,11 @@ export function createWorldReplay(input: WorldReplayInput): WorldReplayOutput {
 
 export function summarizeRun(world: SimulationWorld): RunResultSummary {
   return {
-    status: world.status,
+      status: world.status,
     elapsedSeconds: round(world.elapsedSeconds, 3),
-    score: world.score,
-    cargoDamage: round(world.ship.cargoDamage, 3),
-    fuelUsed: round(world.fuelUsed, 3),
+      score: world.score,
+      cargoDamage: round(world.ship.cargoDamage, 3),
+      fuelUsed: round(world.fuelUsed, 3),
     landingRating: world.landingRating
   };
 }
@@ -320,6 +332,9 @@ export function snapshotWorld(world: SimulationWorld): SimulationSnapshot {
   return {
     tick: world.tick,
     status: world.status,
+    objectivePhase: world.objectivePhase,
+    cargoOnboard: world.cargoOnboard,
+    lastMilestone: world.lastMilestone,
     elapsedSeconds: world.elapsedSeconds,
     score: world.score,
     ship: {
@@ -342,6 +357,8 @@ export function snapshotWorld(world: SimulationWorld): SimulationSnapshot {
       position: { ...pad.position },
       normalAngle: pad.normalAngle,
       radius: pad.radius,
+      role: pad.role,
+      active: pad.active,
       destination: pad.destination
     })),
     hazards: world.hazards.map((hazard) => ({
@@ -419,16 +436,42 @@ function resolveLandingOrCrash(world: SimulationWorld): void {
     const angleDiff = Math.abs(shortestAngleDelta(world.ship.rotation, touchedPad.normalAngle));
     const isSoftEnough = speed <= touchedPad.allowedApproachSpeed;
     const isAligned = angleDiff <= touchedPad.requiredAngleTolerance;
+    const isSafeDocking = isSoftEnough && isAligned;
 
-    if (touchedPad.destination && isSoftEnough && isAligned) {
+    if (!isSafeDocking) {
+      world.status = "crashed";
+      world.landingRating = "Insurance Event";
+      world.ship.cargoDamage = 1;
+      return;
+    }
+
+    if (touchedPad.role === "pickup" && world.objectivePhase === "pickup") {
+      world.cargoOnboard = true;
+      world.objectivePhase = "delivery";
+      world.lastMilestone = "Cargo Loaded";
+      world.ship.velocity = scale(world.ship.velocity, 0.25);
+      for (const pad of world.landingPads) {
+        pad.active = pad.role === "destination";
+      }
+      return;
+    }
+
+    if (touchedPad.role === "destination" && world.objectivePhase === "pickup") {
+      world.lastMilestone = "Pickup Required";
+      world.ship.velocity = scale(world.ship.velocity, 0.25);
+      return;
+    }
+
+    if (touchedPad.role === "destination" && world.cargoOnboard) {
       world.status = "delivered";
+      world.objectivePhase = "complete";
+      world.lastMilestone = "Delivered";
       world.landingRating = rateLanding(speed, angleDiff, touchedPad, world.ship.cargoDamage);
       return;
     }
 
-    world.status = "crashed";
-    world.landingRating = "Insurance Event";
-    world.ship.cargoDamage = 1;
+    world.lastMilestone = touchedPad.role === "pickup" ? "Cargo Already Loaded" : "Docked";
+    world.ship.velocity = scale(world.ship.velocity, 0.25);
     return;
   }
 
@@ -539,4 +582,3 @@ function round(value: number, digits: number): number {
   const scaleFactor = 10 ** digits;
   return Math.round(value * scaleFactor) / scaleFactor;
 }
-

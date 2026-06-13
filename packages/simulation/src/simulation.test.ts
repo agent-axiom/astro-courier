@@ -129,8 +129,31 @@ describe("deterministic Astro Courier simulation", () => {
     expect(Number.isFinite(world.ship.velocity.y)).toBe(true);
   });
 
-  it("accepts soft aligned docking and rejects fast misaligned docking", () => {
+  it("requires pickup before destination delivery", () => {
+    const world = createWorldFromSystem(starterSystem, "dock-seed");
+    world.ship.position = { x: 260, y: -80 };
+    world.ship.velocity = { x: 4, y: 1 };
+    world.ship.rotation = 0;
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("flying");
+    expect(world.objectivePhase).toBe("pickup");
+    expect(world.cargoOnboard).toBe(false);
+    expect(world.lastMilestone).toBe("Pickup Required");
+  });
+
+  it("loads cargo on the pickup pad and completes on the destination pad", () => {
     const soft = createWorldFromSystem(starterSystem, "dock-seed");
+    soft.ship.position = { x: 0, y: -74 };
+    soft.ship.velocity = { x: 1, y: 3 };
+    soft.ship.rotation = -Math.PI / 2;
+    stepWorld(soft, 1 / 60, []);
+
+    expect(soft.status).toBe("flying");
+    expect(soft.objectivePhase).toBe("delivery");
+    expect(soft.cargoOnboard).toBe(true);
+    expect(soft.lastMilestone).toBe("Cargo Loaded");
+
     soft.ship.position = { x: 260, y: -80 };
     soft.ship.velocity = { x: 4, y: 1 };
     soft.ship.rotation = 0;
@@ -169,4 +192,3 @@ describe("deterministic Astro Courier simulation", () => {
     expect(world.ship.fuel).toBe(before.fuel);
   });
 });
-
