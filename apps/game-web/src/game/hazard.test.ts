@@ -35,6 +35,22 @@ describe("hazard pressure readout", () => {
     });
   });
 
+  it("coaches clean skims toward the high-speed needle thread threshold", () => {
+    expect(
+      buildHazardPressureReadout({
+        hazardDangerLevel: "near",
+        hazardDistance: 44,
+        hazardSeverity: 0.75,
+        speed: 36,
+        cargoDamage: 0.01
+      })
+    ).toEqual({
+      label: "Risk pulse",
+      value: "Thread 42+ / Skim +230 / 44m",
+      tone: "opportunity"
+    });
+  });
+
   it("previews the multiplied skim payout during an active style chain", () => {
     expect(
       buildHazardPressureReadout({

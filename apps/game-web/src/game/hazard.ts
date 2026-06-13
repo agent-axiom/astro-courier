@@ -50,6 +50,13 @@ export function buildHazardPressureReadout(input: HazardPressureInput): HazardPr
     const label = fastSkim ? "Thread" : "Skim";
     const multiplierSuffix = multiplier > 1 ? ` / x${multiplier.toFixed(2)}` : "";
     const distanceSuffix = input.hazardDistance === undefined ? "" : ` / ${Math.round(input.hazardDistance)}m`;
+    if (!fastSkim && input.speed !== undefined) {
+      return {
+        label: "Risk pulse",
+        value: `Thread ${HAZARD_THREAD_SPEED_THRESHOLD}+ / Skim +${payout}${multiplierSuffix}${distanceSuffix}`,
+        tone: "opportunity"
+      };
+    }
     return {
       label: "Risk pulse",
       value: `${label} +${payout}${multiplierSuffix}${distanceSuffix}`,

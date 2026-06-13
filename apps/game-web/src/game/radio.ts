@@ -1,4 +1,4 @@
-import { PERFECT_APPROACH_STREAK_SECONDS, PERFECT_APPROACH_STYLE_BONUS } from "@astro-courier/simulation";
+import { HAZARD_THREAD_SPEED_THRESHOLD, PERFECT_APPROACH_STREAK_SECONDS, PERFECT_APPROACH_STYLE_BONUS } from "@astro-courier/simulation";
 import type { HudState } from "./GameShell";
 import { STYLE_CHAIN_URGENT_SECONDS } from "./style";
 
@@ -53,6 +53,14 @@ export function buildRadioMessage(hud: HudState): string {
   }
 
   if (hud.hazardDangerLevel === "near") {
+    const needleThreadSetupSpeed = HAZARD_THREAD_SPEED_THRESHOLD * 0.65;
+    if (
+      hud.cargoDamage <= 0.02 &&
+      hud.speed >= needleThreadSetupSpeed &&
+      hud.speed < HAZARD_THREAD_SPEED_THRESHOLD
+    ) {
+      return `Thread window nearby. Build ${HAZARD_THREAD_SPEED_THRESHOLD}+ speed or skim clean.`;
+    }
     return `Asteroid field ahead. Skim wide${hud.hazardDistance === undefined ? "" : `, ${Math.round(hud.hazardDistance)}m out`}.`;
   }
 

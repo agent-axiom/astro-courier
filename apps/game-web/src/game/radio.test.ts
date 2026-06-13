@@ -89,6 +89,18 @@ describe("radio feedback copy", () => {
     expect(buildRadioMessage({ ...baseHud, hazardDangerLevel: "near", hazardDistance: 44 })).toContain("Asteroid");
   });
 
+  it("coaches clean hazard skims toward needle thread speed", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        hazardDangerLevel: "near",
+        hazardDistance: 44,
+        cargoDamage: 0,
+        speed: 36
+      })
+    ).toContain("Build 42+ speed");
+  });
+
   it("warns about predicted hazard intercepts before generic objective guidance", () => {
     expect(buildRadioMessage({ ...baseHud, trajectoryRiskLevel: "inside", trajectoryRiskSeconds: 1.2 })).toContain(
       "Trajectory intersects hazard"
