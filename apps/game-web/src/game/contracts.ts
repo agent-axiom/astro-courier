@@ -78,6 +78,12 @@ export type ContractModifier = {
   tone: ContractModifierTone;
 };
 
+export type ContractOptionHook = {
+  label: "Pick for";
+  value: string;
+  tone: ContractModifierTone;
+};
+
 export function getNextContractId(contracts: readonly ContractIdentity[], currentContractId: string): string {
   if (contracts.length < 2) {
     return currentContractId;
@@ -337,6 +343,70 @@ export function buildRoutePressureBriefing(input: ContractRoutePlanInput): Route
     label: "Route pressure",
     value: "Balanced courier line",
     tone: "steady"
+  };
+}
+
+export function buildContractOptionHook(input: ContractRoutePlanInput): ContractOptionHook {
+  if (input.contractId === "gravity-slingshot") {
+    return {
+      label: "Pick for",
+      value: "Gravity arc mastery",
+      tone: "style"
+    };
+  }
+
+  if (input.contractId === "chain-relay") {
+    return {
+      label: "Pick for",
+      value: "Style chain pressure",
+      tone: "style"
+    };
+  }
+
+  if (input.contractId === "last-drop-run") {
+    return {
+      label: "Pick for",
+      value: "Fuel clutch finish",
+      tone: "fuel"
+    };
+  }
+
+  if (input.contractId === "asteroid-sprint" || ((input.hazardSeverityMultiplier ?? 1) >= 1.25 && input.goldSeconds <= 25)) {
+    return {
+      label: "Pick for",
+      value: "Danger pay chase",
+      tone: "danger"
+    };
+  }
+
+  if (input.contractId === "return-leg") {
+    return {
+      label: "Pick for",
+      value: "Reverse line proof",
+      tone: "precision"
+    };
+  }
+
+  if (input.cargoKind === "fragile" || input.cargoFragility < 0.9) {
+    return {
+      label: "Pick for",
+      value: "Clean cargo control",
+      tone: "precision"
+    };
+  }
+
+  if (input.goldSeconds <= 25) {
+    return {
+      label: "Pick for",
+      value: "Gold split sprint",
+      tone: "speed"
+    };
+  }
+
+  return {
+    label: "Pick for",
+    value: "Clean PB setup",
+    tone: "cargo"
   };
 }
 

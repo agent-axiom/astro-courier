@@ -1964,6 +1964,7 @@ button {
 .contract-option span,
 .contract-option small,
 .contract-option em,
+.contract-option b,
 .contract-option strong {
   min-width: 0;
   overflow-wrap: anywhere;
@@ -1979,6 +1980,58 @@ button {
   color: #aebfe2;
   font-size: 0.68rem;
   font-weight: 760;
+}
+
+.contract-option-hook {
+  display: grid;
+  grid-template-columns: 15px auto 1fr;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  min-height: 28px;
+  padding: 5px 6px;
+  border-radius: 6px;
+  font-size: 0.62rem;
+  font-weight: 850;
+}
+
+.contract-option-hook small {
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.58rem;
+  text-transform: uppercase;
+}
+
+.contract-option-hook b {
+  color: #ffffff;
+  font-size: 0.62rem;
+  font-weight: 900;
+  text-align: right;
+}
+
+.contract-option-hook-cargo {
+  background: rgba(142, 230, 184, 0.11);
+  color: #bff7d8;
+}
+
+.contract-option-hook-danger {
+  background: rgba(255, 111, 145, 0.15);
+  color: #ffadc1;
+}
+
+.contract-option-hook-fuel,
+.contract-option-hook-speed {
+  background: rgba(124, 225, 255, 0.14);
+  color: #c6f6ff;
+}
+
+.contract-option-hook-precision {
+  background: rgba(255, 209, 102, 0.15);
+  color: #ffe19a;
+}
+
+.contract-option-hook-style {
+  background: rgba(255, 209, 102, 0.17);
+  color: #ffe19a;
 }
 
 .contract-option-traits {

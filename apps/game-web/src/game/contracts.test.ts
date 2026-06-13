@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildContractDangerPayTrait,
   buildContractModifiers,
+  buildContractOptionHook,
   buildContractHazardTrait,
   buildContractPreflightKicker,
   buildContractRoutePlan,
@@ -360,5 +361,85 @@ describe("contract rotation", () => {
       { label: "Pace", value: "Gold 24s", tone: "speed" },
       { label: "Cargo", value: "Stable load", tone: "cargo" }
     ]);
+  });
+});
+
+describe("contract option hooks", () => {
+  it("gives special routes a clear reason to pick them from the board", () => {
+    expect(
+      buildContractOptionHook({
+        contractId: "gravity-slingshot",
+        cargoKind: "fragile",
+        cargoFragility: 0.8,
+        hazardSeverityMultiplier: 1.2,
+        goldSeconds: 26
+      })
+    ).toEqual({
+      label: "Pick for",
+      value: "Gravity arc mastery",
+      tone: "style"
+    });
+    expect(
+      buildContractOptionHook({
+        contractId: "chain-relay",
+        cargoKind: "unstable",
+        cargoFragility: 1,
+        hazardSeverityMultiplier: 1.3,
+        goldSeconds: 22
+      })
+    ).toEqual({
+      label: "Pick for",
+      value: "Style chain pressure",
+      tone: "style"
+    });
+    expect(
+      buildContractOptionHook({
+        contractId: "last-drop-run",
+        cargoKind: "time-sensitive",
+        cargoFragility: 0.9,
+        goldSeconds: 27
+      })
+    ).toEqual({
+      label: "Pick for",
+      value: "Fuel clutch finish",
+      tone: "fuel"
+    });
+  });
+
+  it("turns pressure traits into readable board hooks", () => {
+    expect(
+      buildContractOptionHook({
+        cargoKind: "volatile",
+        cargoFragility: 1,
+        hazardSeverityMultiplier: 1.45,
+        goldSeconds: 24
+      })
+    ).toEqual({
+      label: "Pick for",
+      value: "Danger pay chase",
+      tone: "danger"
+    });
+    expect(
+      buildContractOptionHook({
+        cargoKind: "fragile",
+        cargoFragility: 0.8,
+        goldSeconds: 35
+      })
+    ).toEqual({
+      label: "Pick for",
+      value: "Clean cargo control",
+      tone: "precision"
+    });
+    expect(
+      buildContractOptionHook({
+        cargoKind: "standard",
+        cargoFragility: 1,
+        goldSeconds: 24
+      })
+    ).toEqual({
+      label: "Pick for",
+      value: "Gold split sprint",
+      tone: "speed"
+    });
   });
 });

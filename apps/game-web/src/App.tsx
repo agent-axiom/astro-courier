@@ -44,6 +44,7 @@ import {
   buildContractDangerPayTrait,
   buildContractHazardTrait,
   buildContractModifiers,
+  buildContractOptionHook,
   buildContractPreflightKicker,
   buildContractRoutePlan,
   buildDailyDispatch,
@@ -1135,6 +1136,13 @@ export function App() {
                 const contractDangerPayTrait = buildContractDangerPayTrait({
                   hazardSeverityMultiplier: contract.hazardSeverityMultiplier
                 });
+                const contractOptionHook = buildContractOptionHook({
+                  contractId: contract.id,
+                  cargoKind: contract.cargoKind,
+                  cargoFragility: contract.cargoFragility,
+                  hazardSeverityMultiplier: contract.hazardSeverityMultiplier,
+                  goldSeconds: contract.medalTimes.gold
+                });
                 const contractRecommendationBadge = contractRecommended ? buildRouteBoardRecommendationBadge(routeBoardTarget) : undefined;
                 return (
                   <button
@@ -1152,6 +1160,26 @@ export function App() {
                     <small>
                       {contract.pickupLabel} -&gt; {contract.destinationLabel}
                     </small>
+                    <div
+                      className={`contract-option-hook contract-option-hook-${contractOptionHook.tone}`}
+                      aria-label={`${contractOptionHook.label}: ${contractOptionHook.value}`}
+                    >
+                      {contractOptionHook.tone === "danger" ? (
+                        <ShieldAlert size={15} />
+                      ) : contractOptionHook.tone === "fuel" ? (
+                        <Zap size={15} />
+                      ) : contractOptionHook.tone === "style" ? (
+                        <Star size={15} />
+                      ) : contractOptionHook.tone === "speed" ? (
+                        <Gauge size={15} />
+                      ) : contractOptionHook.tone === "precision" ? (
+                        <Target size={15} />
+                      ) : (
+                        <PackageCheck size={15} />
+                      )}
+                      <small>{contractOptionHook.label}</small>
+                      <b>{contractOptionHook.value}</b>
+                    </div>
                     <div className="contract-option-traits">
                       <em>{contract.riskLabel}</em>
                       <em>{contract.rewardLabel}</em>
