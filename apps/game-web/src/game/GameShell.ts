@@ -10,7 +10,7 @@ import {
   type SimulationWorld
 } from "@astro-courier/simulation";
 import type { ObjectivePhase, PlayerCommand, RunStatus } from "@astro-courier/shared";
-import { KeyboardInput } from "./input";
+import { KeyboardInput, type InputSource } from "./input";
 
 export type HudState = {
   status: RunStatus;
@@ -30,6 +30,8 @@ export type HudState = {
 export type GameShellOptions = {
   mount: HTMLElement;
   onHud: (hud: HudState) => void;
+  renderer?: AstroPixiRenderer;
+  input?: InputSource;
 };
 
 const fixedDt = 1 / 60;
@@ -39,24 +41,28 @@ export class GameShell {
   private readonly mount: HTMLElement;
   private readonly onHud: (hud: HudState) => void;
   private readonly renderer: AstroPixiRenderer;
-  private readonly input: KeyboardInput;
+  private readonly input: InputSource;
   private world: SimulationWorld;
   private rafId = 0;
   private accumulator = 0;
   private lastTime = 0;
   private hudTimer = 0;
   private paused = false;
+  private destroyed = false;
 
   constructor(options: GameShellOptions) {
     this.mount = options.mount;
     this.onHud = options.onHud;
-    this.renderer = createAstroPixiRenderer();
-    this.input = new KeyboardInput(window);
+    this.renderer = options.renderer ?? createAstroPixiRenderer();
+    this.input = options.input ?? new KeyboardInput(window);
     this.world = this.createFreshWorld();
   }
 
   async start(): Promise<void> {
     await this.renderer.mount(this.mount);
+    if (this.destroyed) {
+      return;
+    }
     this.input.attach(this.mount);
     this.publishHud();
     this.lastTime = performance.now();
@@ -64,9 +70,13 @@ export class GameShell {
   }
 
   restart(): void {
+    if (this.destroyed) {
+      return;
+    }
     this.paused = false;
     this.accumulator = 0;
     this.hudTimer = 0;
+    this.lastTime = performance.now();
     this.world = this.createFreshWorld();
     this.publishHud();
   }
@@ -80,12 +90,16 @@ export class GameShell {
   }
 
   destroy(): void {
+    this.destroyed = true;
     cancelAnimationFrame(this.rafId);
     this.input.detach();
     this.renderer.destroy();
   }
 
   private readonly frame = (timestamp: number) => {
+    if (this.destroyed) {
+      return;
+    }
     const rawDelta = Math.min(0.1, Math.max(0, (timestamp - this.lastTime) / 1000));
     this.lastTime = timestamp;
 

@@ -15,6 +15,12 @@ export type PointerCommandInput = {
   pointer: ScreenPoint;
 };
 
+export type InputSource = {
+  attach(pointerTarget?: HTMLElement): void;
+  detach(): void;
+  commands(currentRotation: number): PlayerCommand[];
+};
+
 export function commandsFromPointer(input: PointerCommandInput): PlayerCommand[] {
   if (!input.active) {
     return [];
