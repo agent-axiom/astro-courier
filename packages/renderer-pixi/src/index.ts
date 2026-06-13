@@ -269,11 +269,13 @@ export type ShipTrailVisualInput = {
   speed: number;
   fuelRatio: number;
   cargoDamage?: number;
+  styleMultiplier?: number;
+  styleChainSecondsRemaining?: number;
 };
 
 export type ShipTrailVisual = {
   color: number;
-  tone: "sprint" | "comet" | "warning";
+  tone: "sprint" | "comet" | "chain" | "warning";
   length: number;
   radius: number;
   alpha: number;
@@ -313,14 +315,18 @@ export function shipTrailVisual(input: ShipTrailVisualInput): ShipTrailVisual | 
 
   const pressure = clamp((input.speed - 8) / 42, 0, 1);
   const lowFuel = input.fuelRatio <= 0.15;
+  const chainActive = (input.styleMultiplier ?? 1) > 1 && (input.styleChainSecondsRemaining ?? 0) > 0;
   const cometReserve = input.speed >= 42 && input.fuelRatio >= 0.55 && (input.cargoDamage ?? 1) <= 0.02;
-  const tone = lowFuel ? "warning" : cometReserve ? "comet" : "sprint";
+  const tone = lowFuel ? "warning" : chainActive ? "chain" : cometReserve ? "comet" : "sprint";
+  const trailBoost = tone === "comet" ? 34 : tone === "chain" ? 32 : 28;
+  const alphaBoost = tone === "comet" ? 0.46 : tone === "chain" ? 0.44 : 0.38;
+  const alphaMax = tone === "comet" ? 0.8 : tone === "chain" ? 0.78 : 0.72;
   return {
-    color: tone === "warning" ? 0xff4d6d : tone === "comet" ? 0x7ce1ff : 0xff9f1c,
+    color: tone === "warning" ? 0xff4d6d : tone === "chain" ? 0x8ee6b8 : tone === "comet" ? 0x7ce1ff : 0xff9f1c,
     tone,
-    length: round(18 + pressure * (tone === "comet" ? 34 : 28), 2),
+    length: round(18 + pressure * trailBoost, 2),
     radius: round(4 + pressure * 8, 2),
-    alpha: round(clamp(0.34 + pressure * (tone === "comet" ? 0.46 : 0.38), 0.34, tone === "comet" ? 0.8 : 0.72), 2)
+    alpha: round(clamp(0.34 + pressure * alphaBoost, 0.34, alphaMax), 2)
   };
 }
 
@@ -740,7 +746,14 @@ class PixiRenderer implements AstroPixiRenderer {
     };
     const speed = Math.hypot(snapshot.ship.velocity.x, snapshot.ship.velocity.y);
     const fuelRatio = snapshot.ship.maxFuel > 0 ? snapshot.ship.fuel / snapshot.ship.maxFuel : 0;
-    const trail = shipTrailVisual({ status: snapshot.status, speed, fuelRatio, cargoDamage: snapshot.ship.cargoDamage });
+    const trail = shipTrailVisual({
+      status: snapshot.status,
+      speed,
+      fuelRatio,
+      cargoDamage: snapshot.ship.cargoDamage,
+      styleMultiplier: snapshot.styleMultiplier,
+      styleChainSecondsRemaining: snapshot.styleChainSecondsRemaining
+    });
     const boostBurst = boostBurstVisual({ status: snapshot.status, lastMilestone: snapshot.lastMilestone, tick: snapshot.tick });
     const velocityVector = velocityVectorVisual({
       status: snapshot.status,

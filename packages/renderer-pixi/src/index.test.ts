@@ -294,6 +294,37 @@ describe("ship trail visual", () => {
       tone: "sprint"
     });
   });
+
+  it("switches active style chains into a brighter chain trail", () => {
+    const sprint = shipTrailVisual({ status: "flying", speed: 34, fuelRatio: 0.72, cargoDamage: 0 });
+    const chain = shipTrailVisual({
+      status: "flying",
+      speed: 34,
+      fuelRatio: 0.72,
+      cargoDamage: 0,
+      styleMultiplier: 1.5,
+      styleChainSecondsRemaining: 2.4
+    });
+
+    expect(chain).toMatchObject({ color: 0x8ee6b8, tone: "chain" });
+    expect(chain?.length).toBeGreaterThan(sprint?.length ?? 0);
+    expect(chain?.alpha).toBeGreaterThan(sprint?.alpha ?? 0);
+  });
+
+  it("keeps low fuel warning trails above style chain trails", () => {
+    expect(
+      shipTrailVisual({
+        status: "flying",
+        speed: 34,
+        fuelRatio: 0.12,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 2.4
+      })
+    ).toMatchObject({
+      color: 0xff4d6d,
+      tone: "warning"
+    });
+  });
 });
 
 describe("velocity vector visual", () => {
