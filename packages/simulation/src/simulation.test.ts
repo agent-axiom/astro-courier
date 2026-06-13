@@ -6,6 +6,7 @@ import {
   BOOST_COOLDOWN_SECONDS,
   ECO_DRIFT_FUEL_USED_LIMIT,
   ECO_DRIFT_STYLE_BONUS,
+  GRAVITY_SLING_STYLE_BONUS,
   CHAIN_FINISH_STYLE_BONUS,
   LANDING_ASSIST_FUEL_COST,
   QUICK_PICKUP_STYLE_BONUS,
@@ -144,6 +145,40 @@ describe("deterministic Astro Courier simulation", () => {
     expect(Number.isFinite(world.ship.position.y)).toBe(true);
     expect(Number.isFinite(world.ship.velocity.x)).toBe(true);
     expect(Number.isFinite(world.ship.velocity.y)).toBe(true);
+  });
+
+  it("awards one gravity sling style hit for a clean high-speed gravity pocket pass", () => {
+    const world = createWorldFromSystem(starterSystem, "gravity-sling-seed");
+    world.ship.position = { x: 0, y: -160 };
+    world.ship.velocity = { x: 58, y: 0 };
+    world.ship.rotation = 0;
+    world.ship.targetRotation = 0;
+
+    stepWorld(world, 1 / 60, []);
+    const firstBreakdown = summarizeRun(world).scoreBreakdown;
+
+    expect(world.lastMilestone).toBe("Gravity Sling");
+    expect(world.lastStyleAward).toBe(GRAVITY_SLING_STYLE_BONUS);
+    expect(firstBreakdown.styleBonus).toBe(GRAVITY_SLING_STYLE_BONUS);
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.lastStyleAward).toBeUndefined();
+    expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(firstBreakdown.styleBonus);
+  });
+
+  it("does not award gravity sling style for a near-surface hard landing", () => {
+    const world = createWorldFromSystem(starterSystem, "gravity-sling-crash-seed");
+    world.ship.position = { x: 0, y: -74 };
+    world.ship.velocity = { x: 58, y: 0 };
+    world.ship.rotation = 0;
+    world.ship.targetRotation = 0;
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("crashed");
+    expect(world.lastMilestone).toBeUndefined();
+    expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(0);
   });
 
   it("requires pickup before destination delivery", () => {

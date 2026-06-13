@@ -257,13 +257,16 @@ describe("boost burst visual", () => {
   it("returns stronger shockwaves for fresh style hits", () => {
     const skim = boostBurstVisual({ status: "flying", lastMilestone: "Clean Hazard Skim", tick: 6 });
     const thread = boostBurstVisual({ status: "flying", lastMilestone: "Needle Thread", tick: 6 });
+    const sling = boostBurstVisual({ status: "flying", lastMilestone: "Gravity Sling", tick: 6 });
     const finish = boostBurstVisual({ status: "delivered", lastMilestone: "Chain Finish", tick: 6 });
 
     expect(skim).toMatchObject({ color: 0xffd166 });
     expect(thread).toMatchObject({ color: 0xf8e59a });
+    expect(sling).toMatchObject({ color: 0x7ce1ff });
     expect(finish).toMatchObject({ color: 0x8ee6b8 });
     expect(thread?.radius).toBeGreaterThan(skim?.radius ?? 0);
-    expect(finish?.radius).toBeGreaterThan(thread?.radius ?? 0);
+    expect(sling?.radius).toBeGreaterThan(thread?.radius ?? 0);
+    expect(finish?.radius).toBeGreaterThan(sling?.radius ?? 0);
     expect(thread?.alpha).toBeGreaterThanOrEqual(skim?.alpha ?? 0);
   });
 });

@@ -165,6 +165,7 @@ export type SimulationWorld = {
   styleChainCount: number;
   styleChainSecondsRemaining: number;
   skimmedHazardIds: string[];
+  slungGravitySourceIds: string[];
   fuelUsed: number;
   activeContract: ContractContent;
   activeCargo: CargoContent;
@@ -208,6 +209,10 @@ export const HAZARD_SKIM_BASE_BONUS = 140;
 export const HAZARD_SKIM_SEVERITY_BONUS = 120;
 export const HAZARD_THREAD_SPEED_THRESHOLD = 42;
 const HAZARD_THREAD_SPEED_BONUS = 120;
+export const GRAVITY_SLING_SPEED_THRESHOLD = 54;
+export const GRAVITY_SLING_STYLE_BONUS = 240;
+const GRAVITY_SLING_OUTER_RADIUS = 3;
+const GRAVITY_SLING_SAFE_SURFACE_RADIUS = 1.3;
 export const QUICK_PICKUP_WINDOW_SECONDS = 12;
 export const QUICK_PICKUP_STYLE_BONUS = 180;
 export const PERFECT_APPROACH_STREAK_SECONDS = 1;
@@ -265,6 +270,7 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
     styleChainCount: 0,
     styleChainSecondsRemaining: 0,
     skimmedHazardIds: [],
+    slungGravitySourceIds: [],
     fuelUsed: 0,
     activeContract,
     activeCargo,
@@ -349,6 +355,7 @@ export function stepWorld(world: SimulationWorld, fixedDt: number, commands: Pla
   applyThrust(world, fixedDt, thrust);
   applyBrake(world, fixedDt, brake);
   integrate(world, fixedDt);
+  updateGravitySling(world);
   applyLandingAssist(world);
   updateApproachStreak(world, fixedDt);
   updateHazards(world, fixedDt);
@@ -634,6 +641,27 @@ function applyBrake(world: SimulationWorld, fixedDt: number, amount: number): vo
 
 function integrate(world: SimulationWorld, fixedDt: number): void {
   world.ship.position = add(world.ship.position, scale(world.ship.velocity, fixedDt));
+}
+
+function updateGravitySling(world: SimulationWorld): void {
+  if (magnitude(world.ship.velocity) < GRAVITY_SLING_SPEED_THRESHOLD || world.ship.cargoDamage > 0.02) {
+    return;
+  }
+
+  for (const source of world.gravitySources) {
+    if (world.slungGravitySourceIds.includes(source.id)) {
+      continue;
+    }
+
+    const distance = distanceBetween(world.ship.position, source.position);
+    const outerRadius = Math.min(source.influenceRadius, source.radius * GRAVITY_SLING_OUTER_RADIUS);
+    const safelyAboveSurface = distance > source.radius * GRAVITY_SLING_SAFE_SURFACE_RADIUS;
+    if (safelyAboveSurface && distance <= outerRadius) {
+      world.slungGravitySourceIds.push(source.id);
+      awardStyle(world, GRAVITY_SLING_STYLE_BONUS, "Gravity Sling");
+      return;
+    }
+  }
 }
 
 function updateHazards(world: SimulationWorld, fixedDt: number): void {

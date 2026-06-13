@@ -114,6 +114,12 @@ describe("radio feedback copy", () => {
     );
   });
 
+  it("celebrates gravity slings before generic objective guidance", () => {
+    expect(buildRadioMessage({ ...baseHud, lastMilestone: "Gravity Sling", objectivePhase: "delivery", cargoOnboard: true })).toContain(
+      "Gravity sling"
+    );
+  });
+
   it("celebrates quick cargo pickups before generic objective guidance", () => {
     expect(buildRadioMessage({ ...baseHud, lastMilestone: "Quick Pickup", objectivePhase: "delivery", cargoOnboard: true })).toContain(
       "Fast pickup"

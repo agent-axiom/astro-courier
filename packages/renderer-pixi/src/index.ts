@@ -347,6 +347,18 @@ function styleShockwaveSpec(milestone?: string):
     };
   }
 
+  if (milestone === "Gravity Sling") {
+    return {
+      color: 0x7ce1ff,
+      baseRadius: 28,
+      radiusPulse: 36,
+      baseAlpha: 0.18,
+      alphaPulse: 0.32,
+      baseWidth: 2.2,
+      widthPulse: 3
+    };
+  }
+
   if (milestone === "Chain Finish") {
     return {
       color: 0x8ee6b8,

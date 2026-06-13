@@ -28,6 +28,10 @@ export function buildRadioMessage(hud: HudState): string {
     return "Needle thread logged. Fast skim, clean cargo, premium style.";
   }
 
+  if (hud.lastMilestone === "Gravity Sling") {
+    return "Gravity sling logged. Fast arc, clean cargo, excellent orbital nerve.";
+  }
+
   if (hud.lastMilestone === "Clean Hazard Skim") {
     return "Style bonus logged. Clean skim, no scratches.";
   }
