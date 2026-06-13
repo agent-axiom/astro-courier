@@ -592,6 +592,29 @@ describe("deterministic Astro Courier simulation", () => {
     expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(320 + Math.round(CHAIN_FINISH_STYLE_BONUS * 1.5));
   });
 
+  it("prioritizes chain finish over perfect approach when both finish conditions are met", () => {
+    const world = createWorldFromSystem(starterSystem, "chain-perfect-finish-seed");
+    world.cargoOnboard = true;
+    world.objectivePhase = "delivery";
+    world.styleBonus = 320;
+    world.styleChainCount = 2;
+    world.styleChainSecondsRemaining = 2.4;
+    world.bestApproachStreakSeconds = 1.2;
+    for (const pad of world.landingPads) {
+      pad.active = pad.role === "destination";
+    }
+    world.ship.position = { x: 260, y: -80 };
+    world.ship.velocity = { x: 4, y: 1 };
+    world.ship.rotation = 0;
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("delivered");
+    expect(world.landingRating).toBe("Perfect Landing");
+    expect(world.lastMilestone).toBe("Chain Finish");
+    expect(world.lastStyleAward).toBe(Math.round(CHAIN_FINISH_STYLE_BONUS * 1.5));
+  });
+
   it("prioritizes express finish over eco drift while the clean delivery is still on gold pace", () => {
     const world = createWorldFromSystem(starterSystem, "express-over-eco-seed");
     world.cargoOnboard = true;

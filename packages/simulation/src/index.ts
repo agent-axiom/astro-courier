@@ -854,13 +854,13 @@ function resolveLandingOrCrash(world: SimulationWorld): void {
       world.status = "delivered";
       world.objectivePhase = "complete";
       world.landingRating = rateLanding(speed, angleDiff, touchedPad, world.ship.cargoDamage);
-      if (
+      if (canFinishStyleChain(world)) {
+        awardStyle(world, CHAIN_FINISH_STYLE_BONUS, "Chain Finish");
+      } else if (
         world.landingRating === "Perfect Landing" &&
         world.bestApproachStreakSeconds >= PERFECT_APPROACH_STREAK_SECONDS
       ) {
         awardStyle(world, PERFECT_APPROACH_STYLE_BONUS, "Perfect Approach");
-      } else if (canFinishStyleChain(world)) {
-        awardStyle(world, CHAIN_FINISH_STYLE_BONUS, "Chain Finish");
       } else if (canAwardExpressFinish(world)) {
         awardStyle(world, EXPRESS_FINISH_STYLE_BONUS, "Express Finish");
       } else if (canAwardLastDrop(world)) {
