@@ -11,6 +11,7 @@ describe("live style reward HUD copy", () => {
       label: "Style bank",
       value: "+180",
       fresh: false,
+      tone: "bank",
       chainProgress: 0
     });
   });
@@ -28,6 +29,7 @@ describe("live style reward HUD copy", () => {
       label: "Style hit",
       value: "+140 hit / +320 bank / x1.25",
       fresh: true,
+      tone: "fresh",
       chainProgress: 0.95
     });
   });
@@ -37,6 +39,7 @@ describe("live style reward HUD copy", () => {
       label: "Style hit",
       value: "+160 hit / +340 bank / x1.50",
       fresh: true,
+      tone: "fresh",
       chainProgress: 1
     });
   });
@@ -54,6 +57,7 @@ describe("live style reward HUD copy", () => {
       label: "Style hit",
       value: "+390 hit / +710 bank / x1.75",
       fresh: true,
+      tone: "fresh",
       chainProgress: 1
     });
   });
@@ -71,6 +75,7 @@ describe("live style reward HUD copy", () => {
       label: "Style hit",
       value: "+525 hit / +525 bank / x1.75",
       fresh: true,
+      tone: "fresh",
       chainProgress: 1
     });
   });
@@ -80,7 +85,18 @@ describe("live style reward HUD copy", () => {
       label: "Style chain",
       value: "+180 / x1.25 / 2.4s",
       fresh: false,
+      tone: "chain",
       chainProgress: 0.6
+    });
+  });
+
+  it("warns when an active style chain is about to expire", () => {
+    expect(buildLiveStyleReward({ styleBonus: 440, styleMultiplier: 1.5, styleChainSecondsRemaining: 0.8 })).toEqual({
+      label: "Style chain",
+      value: "Save chain / x1.50 / 0.8s",
+      fresh: false,
+      tone: "urgent",
+      chainProgress: 0.2
     });
   });
 });

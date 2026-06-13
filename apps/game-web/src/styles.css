@@ -419,12 +419,25 @@ button {
   color: #bff7d8;
 }
 
+.style-chip-urgent {
+  background: rgba(255, 77, 109, 0.16);
+  color: #ffd8df;
+}
+
 .style-chip-chain-active::after {
   opacity: 1;
 }
 
 .style-chip-hot span {
   color: rgba(234, 255, 243, 0.78);
+}
+
+.style-chip-urgent span {
+  color: rgba(255, 226, 232, 0.82);
+}
+
+.style-chip-urgent::after {
+  background: linear-gradient(90deg, #ff4d6d, #ffd166);
 }
 
 .style-burst {

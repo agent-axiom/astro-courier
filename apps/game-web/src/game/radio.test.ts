@@ -129,6 +129,19 @@ describe("radio feedback copy", () => {
     expect(buildRadioMessage({ ...baseHud, fuel: 10, maxFuel: 100, landingStatus: "approach" })).toContain("Fuel critical");
   });
 
+  it("warns when a style chain is about to expire before generic objective guidance", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        styleChainCount: 2,
+        styleChainSecondsRemaining: 0.8,
+        styleMultiplier: 1.5
+      })
+    ).toContain("Style chain fading");
+  });
+
   it("keeps preflight copy distinct from active pickup guidance", () => {
     expect(buildRadioMessage({ ...baseHud, status: "paused" })).toContain("Contract loaded");
   });

@@ -510,7 +510,7 @@ export function App() {
         ) : null}
         {liveStyleReward ? (
           <div
-            className={`style-chip ${liveStyleReward.fresh ? "style-chip-hot" : ""} ${
+            className={`style-chip style-chip-${liveStyleReward.tone} ${liveStyleReward.fresh ? "style-chip-hot" : ""} ${
               liveStyleReward.chainProgress > 0 ? "style-chip-chain-active" : ""
             }`}
             style={styleChipStyle}

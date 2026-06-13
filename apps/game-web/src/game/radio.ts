@@ -1,5 +1,6 @@
 import { PERFECT_APPROACH_STREAK_SECONDS, PERFECT_APPROACH_STYLE_BONUS } from "@astro-courier/simulation";
 import type { HudState } from "./GameShell";
+import { STYLE_CHAIN_URGENT_SECONDS } from "./style";
 
 export function buildRadioMessage(hud: HudState): string {
   if (hud.status === "paused") {
@@ -57,6 +58,10 @@ export function buildRadioMessage(hud: HudState): string {
 
   if (hud.trajectoryRiskLevel === "near") {
     return `Trajectory skims the hazard edge${formatTrajectoryEta(hud.trajectoryRiskSeconds)}. Hold it clean for style.`;
+  }
+
+  if (hud.styleMultiplier > 1 && hud.styleChainSecondsRemaining > 0 && hud.styleChainSecondsRemaining <= STYLE_CHAIN_URGENT_SECONDS) {
+    return "Style chain fading. Hit a skim or clean dock to save it.";
   }
 
   if (hud.maxFuel > 0 && hud.fuel / hud.maxFuel <= 0.15) {
