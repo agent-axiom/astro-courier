@@ -2,6 +2,28 @@ export type ContractIdentity = {
   id: string;
 };
 
+export type DailyDispatchContract = ContractIdentity & {
+  title: string;
+};
+
+export type DailyDispatchInput = {
+  contracts: readonly DailyDispatchContract[];
+  now: Date;
+};
+
+export type DailyDispatch = {
+  label: "Daily dispatch";
+  value: string;
+  contractId: string;
+  seed: string;
+  tone: "daily";
+};
+
+export type DailyDispatchAction = {
+  label: "Open daily";
+  contractId: string;
+};
+
 export type ContractHazardTraitInput = {
   hazardSeverityMultiplier?: number;
 };
@@ -37,6 +59,35 @@ export function getNextContractId(contracts: readonly ContractIdentity[], curren
   }
 
   return contracts[(currentIndex + 1) % contracts.length].id;
+}
+
+export function buildDailyDispatch(input: DailyDispatchInput): DailyDispatch | undefined {
+  if (input.contracts.length === 0) {
+    return undefined;
+  }
+
+  const dayKey = input.now.toISOString().slice(0, 10);
+  const dayNumber = Math.floor(Date.UTC(input.now.getUTCFullYear(), input.now.getUTCMonth(), input.now.getUTCDate()) / 86_400_000);
+  const contract = input.contracts[dayNumber % input.contracts.length];
+
+  return {
+    label: "Daily dispatch",
+    value: contract.title,
+    contractId: contract.id,
+    seed: `daily-${dayKey}-${contract.id}`,
+    tone: "daily"
+  };
+}
+
+export function buildDailyDispatchAction(dispatch: DailyDispatch | undefined, currentContractId: string): DailyDispatchAction | undefined {
+  if (!dispatch || dispatch.contractId === currentContractId) {
+    return undefined;
+  }
+
+  return {
+    label: "Open daily",
+    contractId: dispatch.contractId
+  };
 }
 
 export function buildContractHazardTrait(input: ContractHazardTraitInput): string | undefined {

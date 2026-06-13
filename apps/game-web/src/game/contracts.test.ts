@@ -4,6 +4,8 @@ import {
   buildContractHazardTrait,
   buildContractPreflightKicker,
   buildContractRoutePlan,
+  buildDailyDispatch,
+  buildDailyDispatchAction,
   getNextContractId
 } from "./contracts";
 
@@ -23,6 +25,47 @@ describe("contract rotation", () => {
     expect(getNextContractId([{ id: "solo" }], "solo")).toBe("solo");
     expect(getNextContractId([], "missing")).toBe("missing");
     expect(getNextContractId([{ id: "known" }], "missing")).toBe("missing");
+  });
+
+  it("builds a deterministic daily dispatch from the UTC day", () => {
+    const contracts = [
+      { id: "first-light-delivery", title: "First Light Delivery" },
+      { id: "return-leg", title: "Return Leg" },
+      { id: "asteroid-sprint", title: "Asteroid Sprint" },
+      { id: "gravity-slingshot", title: "Gravity Slingshot" },
+      { id: "chain-relay", title: "Chain Relay" }
+    ];
+
+    expect(buildDailyDispatch({ contracts, now: new Date("2026-06-13T18:30:00Z") })).toEqual({
+      label: "Daily dispatch",
+      value: "Asteroid Sprint",
+      contractId: "asteroid-sprint",
+      seed: "daily-2026-06-13-asteroid-sprint",
+      tone: "daily"
+    });
+    expect(buildDailyDispatch({ contracts, now: new Date("2026-06-13T23:59:59Z") })?.contractId).toBe("asteroid-sprint");
+    expect(buildDailyDispatch({ contracts, now: new Date("2026-06-14T00:00:00Z") })?.contractId).toBe("gravity-slingshot");
+  });
+
+  it("hides daily dispatch when no contracts are available", () => {
+    expect(buildDailyDispatch({ contracts: [], now: new Date("2026-06-13T18:30:00Z") })).toBeUndefined();
+  });
+
+  it("builds a daily dispatch selection action only when the daily route differs", () => {
+    const dispatch = {
+      label: "Daily dispatch" as const,
+      value: "Asteroid Sprint",
+      contractId: "asteroid-sprint",
+      seed: "daily-2026-06-13-asteroid-sprint",
+      tone: "daily" as const
+    };
+
+    expect(buildDailyDispatchAction(dispatch, "first-light-delivery")).toEqual({
+      label: "Open daily",
+      contractId: "asteroid-sprint"
+    });
+    expect(buildDailyDispatchAction(dispatch, "asteroid-sprint")).toBeUndefined();
+    expect(buildDailyDispatchAction(undefined, "asteroid-sprint")).toBeUndefined();
   });
 
   it("formats elevated contract hazard load for briefing cards", () => {

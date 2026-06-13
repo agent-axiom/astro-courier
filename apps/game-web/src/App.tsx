@@ -1,5 +1,6 @@
 import {
   ArrowRight,
+  CalendarDays,
   Flag,
   Gauge,
   MapPin,
@@ -40,7 +41,9 @@ import {
   buildContractDangerPayTrait,
   buildContractHazardTrait,
   buildContractPreflightKicker,
-  buildContractRoutePlan
+  buildContractRoutePlan,
+  buildDailyDispatch,
+  buildDailyDispatchAction
 } from "./game/contracts";
 import { buildRadioMessage } from "./game/radio";
 import { buildLiveStyleReward } from "./game/style";
@@ -325,6 +328,8 @@ export function App() {
   const routeBoardProgress = buildRouteBoardProgress(hud.contractOptions, bestRunsByContract);
   const routeBoardTarget = buildRouteBoardTarget(hud.contractOptions, bestRunsByContract);
   const routeTargetSelectionAction = buildRouteBoardSelectionAction(routeBoardTarget, hud.contractId);
+  const dailyDispatch = buildDailyDispatch({ contracts: hud.contractOptions, now: new Date() });
+  const dailyDispatchAction = buildDailyDispatchAction(dailyDispatch, hud.contractId);
   const bestRunDelta = buildBestRunDelta({
     bestRun,
     run: { score: hud.score, elapsedSeconds: hud.elapsedSeconds, medal: hud.medal },
@@ -434,6 +439,13 @@ export function App() {
       return;
     }
     shellRef.current?.selectContract(routeTargetSelectionAction.contractId);
+  };
+
+  const selectDailyDispatch = () => {
+    if (!dailyDispatchAction) {
+      return;
+    }
+    shellRef.current?.selectContract(dailyDispatchAction.contractId);
   };
 
   return (
@@ -701,6 +713,28 @@ export function App() {
                 {routeBoardTarget.tone === "complete" ? <Trophy size={18} /> : routeBoardTarget.tone === "comet" ? <Star size={18} /> : <Target size={18} />}
                 <span>{routeBoardTarget.label}</span>
                 <strong>{routeBoardTarget.value}</strong>
+              </div>
+            )
+          ) : null}
+          {dailyDispatch ? (
+            dailyDispatchAction ? (
+              <button
+                type="button"
+                className="daily-dispatch-briefing daily-dispatch-action"
+                aria-label={`${dailyDispatch.label}: ${dailyDispatch.value}. ${dailyDispatchAction.label}`}
+                onClick={selectDailyDispatch}
+              >
+                <CalendarDays size={18} />
+                <span>{dailyDispatch.label}</span>
+                <strong>{dailyDispatch.value}</strong>
+                <small>{dailyDispatch.seed}</small>
+              </button>
+            ) : (
+              <div className="daily-dispatch-briefing" aria-label={`${dailyDispatch.label}: ${dailyDispatch.value}`}>
+                <CalendarDays size={18} />
+                <span>{dailyDispatch.label}</span>
+                <strong>{dailyDispatch.value}</strong>
+                <small>{dailyDispatch.seed}</small>
               </div>
             )
           ) : null}
