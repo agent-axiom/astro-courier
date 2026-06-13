@@ -30,6 +30,7 @@ describe("live comet run readout", () => {
       buildCometRunReadout({
         status: "flying",
         preflightOpen: false,
+        objectivePhase: "pickup",
         paceTier: "gold",
         fuel: 82,
         maxFuel: 100,
@@ -39,6 +40,80 @@ describe("live comet run readout", () => {
       label: "Comet run",
       value: "Clean + reserve",
       tone: "live"
+    });
+  });
+
+  it("arms the comet finish when the delivery dock is already perfect-ready", () => {
+    expect(
+      buildCometRunReadout({
+        status: "flying",
+        preflightOpen: false,
+        objectivePhase: "delivery",
+        paceTier: "gold",
+        fuel: 84,
+        maxFuel: 100,
+        cargoDamage: 0,
+        landingStatus: "ready",
+        perfectDockReady: true
+      })
+    ).toEqual({
+      label: "Comet run",
+      value: "Perfect dock armed",
+      tone: "live"
+    });
+  });
+
+  it("coaches the missing final dock condition while comet pace and reserve remain alive", () => {
+    expect(
+      buildCometRunReadout({
+        status: "flying",
+        preflightOpen: false,
+        objectivePhase: "delivery",
+        paceTier: "gold",
+        fuel: 84,
+        maxFuel: 100,
+        cargoDamage: 0,
+        landingStatus: "too-fast",
+        perfectDockReady: false
+      })
+    ).toEqual({
+      label: "Comet run",
+      value: "Slow for perfect dock",
+      tone: "warning"
+    });
+    expect(
+      buildCometRunReadout({
+        status: "flying",
+        preflightOpen: false,
+        objectivePhase: "delivery",
+        paceTier: "gold",
+        fuel: 84,
+        maxFuel: 100,
+        cargoDamage: 0,
+        landingStatus: "misaligned",
+        perfectDockReady: false
+      })
+    ).toEqual({
+      label: "Comet run",
+      value: "Line up perfect dock",
+      tone: "warning"
+    });
+    expect(
+      buildCometRunReadout({
+        status: "flying",
+        preflightOpen: false,
+        objectivePhase: "delivery",
+        paceTier: "gold",
+        fuel: 84,
+        maxFuel: 100,
+        cargoDamage: 0,
+        landingStatus: "ready",
+        perfectDockReady: false
+      })
+    ).toEqual({
+      label: "Comet run",
+      value: "Feather for perfect dock",
+      tone: "warning"
     });
   });
 

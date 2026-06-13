@@ -64,6 +64,7 @@ describe("GameShell lifecycle", () => {
     expect(onHud.mock.calls[0]?.[0].paceTier).toBe("gold");
     expect(onHud.mock.calls[0]?.[0].paceSecondsRemaining).toBe(35);
     expect(onHud.mock.calls[0]?.[0].targetAllowedSpeed).toBe(42);
+    expect(onHud.mock.calls[0]?.[0].perfectDockReady).toBe(false);
     expect(onHud.mock.calls[0]?.[0].quickPickupSecondsRemaining).toBe(12);
     expect(onHud.mock.calls[0]?.[0].quickPickupBonus).toBe(180);
     expect(onHud.mock.calls[0]?.[0].fuelUsed).toBe(0);

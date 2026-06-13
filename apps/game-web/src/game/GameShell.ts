@@ -61,6 +61,7 @@ export type HudState = {
   targetAllowedSpeed?: number;
   targetRelativeBearing?: number;
   landingStatus?: LandingGuidanceStatus;
+  perfectDockReady?: boolean;
   assistAvailable?: boolean;
   lastMilestone?: string;
   lastStyleAward?: number;
@@ -346,6 +347,13 @@ export class GameShell {
     const pace = calculateContractPace(result.elapsedSeconds, this.world.activeContract.medalTimes);
     const activeContract = this.contractOption(this.world.activeContract);
     const trajectoryRisk = this.world.status === "flying" ? this.latestTrajectoryRisk : undefined;
+    const perfectDockReady =
+      snapshot.objectiveTarget === undefined
+        ? undefined
+        : snapshot.objectiveTarget.landingStatus === "ready" &&
+          snapshot.objectiveTarget.speed <= snapshot.objectiveTarget.allowedApproachSpeed * 0.45 &&
+          snapshot.objectiveTarget.angleError <= snapshot.objectiveTarget.requiredAngleTolerance * 0.5 &&
+          result.cargoDamage <= 0.02;
     const replayChecksum =
       this.world.status === "delivered" || this.world.status === "crashed" ? replayFingerprint(this.createReplayEnvelope(result)) : undefined;
     this.onHud({
@@ -378,6 +386,7 @@ export class GameShell {
       targetRelativeBearing:
         snapshot.objectiveTarget === undefined ? undefined : normalizeAngle(snapshot.objectiveTarget.bearing - this.world.ship.rotation),
       landingStatus: snapshot.objectiveTarget?.landingStatus,
+      perfectDockReady,
       assistAvailable: snapshot.objectiveTarget?.assistAvailable,
       lastMilestone: this.world.lastMilestone ?? this.retainedMilestone,
       lastStyleAward: this.world.lastStyleAward ?? this.retainedStyleAward,

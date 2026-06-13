@@ -1,4 +1,4 @@
-import type { RunStatus } from "@astro-courier/shared";
+import type { LandingGuidanceStatus, ObjectivePhase, RunStatus } from "@astro-courier/shared";
 import type { ContractPaceTier } from "./pace";
 
 export const COMET_RESERVE_MIN_RATIO = 0.75;
@@ -7,10 +7,13 @@ export const COMET_RESERVE_WARNING_RATIO = 0.82;
 export type CometRunReadoutInput = {
   status: RunStatus;
   preflightOpen: boolean;
+  objectivePhase?: ObjectivePhase;
   paceTier: ContractPaceTier;
   fuel: number;
   maxFuel: number;
   cargoDamage: number;
+  landingStatus?: LandingGuidanceStatus;
+  perfectDockReady?: boolean;
 };
 
 export type CometRunReadout = {
@@ -55,6 +58,37 @@ export function buildCometRunReadout(input: CometRunReadoutInput): CometRunReado
       value: "Coast for comet",
       tone: "warning"
     };
+  }
+
+  if (input.objectivePhase === "delivery") {
+    if (input.perfectDockReady) {
+      return {
+        label: "Comet run",
+        value: "Perfect dock armed",
+        tone: "live"
+      };
+    }
+    if (input.landingStatus === "too-fast") {
+      return {
+        label: "Comet run",
+        value: "Slow for perfect dock",
+        tone: "warning"
+      };
+    }
+    if (input.landingStatus === "misaligned") {
+      return {
+        label: "Comet run",
+        value: "Line up perfect dock",
+        tone: "warning"
+      };
+    }
+    if (input.landingStatus === "ready") {
+      return {
+        label: "Comet run",
+        value: "Feather for perfect dock",
+        tone: "warning"
+      };
+    }
   }
 
   return {

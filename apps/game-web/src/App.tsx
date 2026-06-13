@@ -450,10 +450,13 @@ export function App() {
   const cometRunReadout = buildCometRunReadout({
     status: hud.status,
     preflightOpen,
+    objectivePhase: hud.objectivePhase,
     paceTier: hud.paceTier,
     fuel: hud.fuel,
     maxFuel: hud.maxFuel,
-    cargoDamage: hud.cargoDamage
+    cargoDamage: hud.cargoDamage,
+    landingStatus: hud.landingStatus,
+    perfectDockReady: hud.perfectDockReady
   });
   const liveStyleReward = buildLiveStyleReward({
     contractId: hud.contractId,
