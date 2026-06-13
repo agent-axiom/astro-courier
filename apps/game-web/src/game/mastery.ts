@@ -1,6 +1,7 @@
 import {
   GRAVITY_SLING_SPEED_THRESHOLD,
   GRAVITY_SLING_STYLE_BONUS,
+  EXPRESS_FINISH_STYLE_BONUS,
   HAZARD_SKIM_BASE_BONUS,
   HAZARD_THREAD_SPEED_THRESHOLD,
   PERFECT_APPROACH_STYLE_BONUS
@@ -22,7 +23,15 @@ export type PreflightBonusObjectiveInput = {
 };
 
 export type PreflightBonusObjective = {
-  label: "Rush pickup" | "Clean skim" | "Perfect dock" | "Needle thread" | "Danger pay" | "Chain finish" | "Gravity sling";
+  label:
+    | "Rush pickup"
+    | "Express finish"
+    | "Clean skim"
+    | "Perfect dock"
+    | "Needle thread"
+    | "Danger pay"
+    | "Chain finish"
+    | "Gravity sling";
   value: string;
 };
 
@@ -44,10 +53,15 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
     label: "Rush pickup",
     value: `+${input.quickPickupBonus}`
   } satisfies PreflightBonusObjective;
+  const expressFinish = {
+    label: "Express finish",
+    value: `+${EXPRESS_FINISH_STYLE_BONUS} / gold pace`
+  } satisfies PreflightBonusObjective;
 
   if ((input.hazardSeverityMultiplier ?? 1) >= 1.25) {
     return [
       rushPickup,
+      expressFinish,
       {
         label: "Needle thread",
         value: `${HAZARD_THREAD_SPEED_THRESHOLD}+ speed`
@@ -62,6 +76,7 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
   if (input.contractId === "gravity-slingshot") {
     return [
       rushPickup,
+      expressFinish,
       {
         label: "Gravity sling",
         value: `+${GRAVITY_SLING_STYLE_BONUS} / ${GRAVITY_SLING_SPEED_THRESHOLD}+ speed`
@@ -75,6 +90,7 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
 
   return [
     rushPickup,
+    expressFinish,
     {
       label: "Clean skim",
       value: `from +${HAZARD_SKIM_BASE_BONUS}`
