@@ -183,6 +183,19 @@ describe("radio feedback copy", () => {
     ).toContain("Style chain fading");
   });
 
+  it("warns when the express finish window is about to close", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        paceTier: "gold",
+        paceSecondsRemaining: 4.2,
+        cargoDamage: 0
+      })
+    ).toContain("Express window");
+  });
+
   it("points fading style chains at an immediate hazard skim before generic hazard copy", () => {
     expect(
       buildRadioMessage({

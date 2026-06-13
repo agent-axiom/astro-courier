@@ -66,6 +66,17 @@ export function buildRadioMessage(hud: HudState): string {
     return urgentStyleChainMessage;
   }
 
+  if (
+    hud.objectivePhase === "delivery" &&
+    hud.cargoOnboard &&
+    hud.paceTier === "gold" &&
+    hud.paceSecondsRemaining > 0 &&
+    hud.paceSecondsRemaining <= 5 &&
+    hud.cargoDamage <= 0.02
+  ) {
+    return `Express window closing. Dock clean in ${hud.paceSecondsRemaining.toFixed(1)}s.`;
+  }
+
   if (hud.hazardDangerLevel === "near") {
     const needleThreadSetupSpeed = HAZARD_THREAD_SPEED_THRESHOLD * 0.65;
     if (
