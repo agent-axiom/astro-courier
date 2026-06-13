@@ -14,6 +14,14 @@ describe("replay capture readout", () => {
     expect(buildReplayCaptureReadout({ status: "flying", replayFrameCount: 1 })?.value).toBe("1 input");
   });
 
+  it("labels live capture as a ghost chase when a saved trail is loaded", () => {
+    expect(buildReplayCaptureReadout({ status: "flying", replayFrameCount: 3, hasGhostTrail: true })).toEqual({
+      label: "Ghost REC",
+      value: "3 chase inputs",
+      tone: "ghost"
+    });
+  });
+
   it("stays hidden before meaningful replay input exists", () => {
     expect(buildReplayCaptureReadout({ status: "flying", replayFrameCount: 0 })).toBeUndefined();
     expect(buildReplayCaptureReadout({ status: "paused", replayFrameCount: 4 })).toBeUndefined();

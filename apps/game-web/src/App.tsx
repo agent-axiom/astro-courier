@@ -487,7 +487,8 @@ export function App() {
   });
   const replayCaptureReadout = buildReplayCaptureReadout({
     status: hud.status,
-    replayFrameCount: hud.replayFrameCount
+    replayFrameCount: hud.replayFrameCount,
+    hasGhostTrail: (bestRun?.ghostTrail?.length ?? 0) >= 2
   });
   const audioTogglePresentation = buildAudioTogglePresentation(audioMuted);
   const cometRunReadout = buildCometRunReadout({

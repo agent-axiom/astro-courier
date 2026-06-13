@@ -950,6 +950,13 @@ button {
   text-align: right;
 }
 
+.replay-capture-ghost {
+  border: 1px solid rgba(84, 241, 214, 0.28);
+  background: linear-gradient(90deg, rgba(84, 241, 214, 0.16), rgba(124, 225, 255, 0.1));
+  color: #c8fff6;
+  box-shadow: 0 0 20px rgba(84, 241, 214, 0.1);
+}
+
 .rush-chip {
   display: flex;
   align-items: center;
