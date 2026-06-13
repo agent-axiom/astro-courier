@@ -7,6 +7,7 @@ import {
   HAZARD_THREAD_SPEED_THRESHOLD,
   LAST_DROP_FUEL_RATIO,
   LAST_DROP_STYLE_BONUS,
+  NO_BRAKE_STYLE_BONUS,
   PERFECT_APPROACH_STYLE_BONUS
 } from "@astro-courier/simulation";
 
@@ -33,6 +34,7 @@ export type PreflightBonusObjective = {
     | "Perfect dock"
     | "Needle thread"
     | "Danger pay"
+    | "No brake"
     | "Last Drop"
     | "Chain finish"
     | "Gravity sling";
@@ -65,6 +67,10 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
     label: "Last Drop",
     value: `+${LAST_DROP_STYLE_BONUS} / <=${Math.round(LAST_DROP_FUEL_RATIO * 100)}% fuel`
   } satisfies PreflightBonusObjective;
+  const noBrake = {
+    label: "No brake",
+    value: `+${NO_BRAKE_STYLE_BONUS} / no manual brake`
+  } satisfies PreflightBonusObjective;
 
   if (input.contractId === "chain-relay") {
     return [
@@ -78,6 +84,7 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
         label: "Needle thread",
         value: `${HAZARD_THREAD_SPEED_THRESHOLD}+ speed`
       },
+      noBrake,
       lastDrop
     ];
   }
@@ -94,6 +101,7 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
         label: "Danger pay",
         value: `+${Math.round(((input.hazardSeverityMultiplier ?? 1) - 1) * 400)}`
       },
+      noBrake,
       lastDrop
     ];
   }
@@ -110,6 +118,7 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
         label: "Perfect dock",
         value: `+${PERFECT_APPROACH_STYLE_BONUS}`
       },
+      noBrake,
       lastDrop
     ];
   }
@@ -126,6 +135,7 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
         label: "Perfect dock",
         value: `+${PERFECT_APPROACH_STYLE_BONUS}`
       },
+      noBrake,
       lastDrop
     ];
   }
@@ -141,6 +151,7 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
       label: "Perfect dock",
       value: `+${PERFECT_APPROACH_STYLE_BONUS}`
     },
+    noBrake,
     lastDrop
   ];
 }

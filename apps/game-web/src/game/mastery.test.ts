@@ -24,6 +24,7 @@ describe("preflight bonus objectives", () => {
       { label: "Express finish", value: "+180 / gold pace" },
       { label: "Clean skim", value: "from +140" },
       { label: "Perfect dock", value: "+220" },
+      { label: "No brake", value: "+150 / no manual brake" },
       { label: "Last Drop", value: "+170 / <=5% fuel" }
     ]);
   });
@@ -40,6 +41,7 @@ describe("preflight bonus objectives", () => {
       { label: "Express finish", value: "+180 / gold pace" },
       { label: "Needle thread", value: "42+ speed" },
       { label: "Danger pay", value: "+180" },
+      { label: "No brake", value: "+150 / no manual brake" },
       { label: "Last Drop", value: "+170 / <=5% fuel" }
     ]);
   });
@@ -56,6 +58,7 @@ describe("preflight bonus objectives", () => {
       { label: "Express finish", value: "+180 / gold pace" },
       { label: "Gravity sling", value: "+240 / 54+ speed" },
       { label: "Perfect dock", value: "+220" },
+      { label: "No brake", value: "+150 / no manual brake" },
       { label: "Last Drop", value: "+170 / <=5% fuel" }
     ]);
   });
@@ -71,6 +74,7 @@ describe("preflight bonus objectives", () => {
       { label: "Express finish", value: "+180 / gold pace" },
       { label: "Chain finish", value: "carry chain home" },
       { label: "Perfect dock", value: "+220" },
+      { label: "No brake", value: "+150 / no manual brake" },
       { label: "Last Drop", value: "+170 / <=5% fuel" }
     ]);
   });
@@ -87,6 +91,7 @@ describe("preflight bonus objectives", () => {
       { label: "Express finish", value: "+180 / gold pace" },
       { label: "Chain finish", value: "5.5s chain window" },
       { label: "Needle thread", value: "42+ speed" },
+      { label: "No brake", value: "+150 / no manual brake" },
       { label: "Last Drop", value: "+170 / <=5% fuel" }
     ]);
   });
