@@ -561,6 +561,22 @@ describe("tactical cue", () => {
     });
   });
 
+  it("prioritizes clearing hazard vectors while damaged cargo is still recoverable", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        trajectoryRiskLevel: "near",
+        trajectoryRiskSeconds: 2.6,
+        cargoDamage: 0.18
+      })
+    ).toEqual({
+      label: "Tactical cue",
+      value: "Clear vector / 2.6s",
+      tone: "urgent"
+    });
+  });
+
   it("surfaces damaged cargo recovery while a salvage delivery is still possible", () => {
     expect(
       buildTacticalCue({

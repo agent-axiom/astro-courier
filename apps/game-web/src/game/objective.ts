@@ -208,6 +208,14 @@ export function buildTacticalCue(input: TacticalCueInput): TacticalCue | undefin
     };
   }
 
+  if (input.trajectoryRiskLevel === "near" && isRecoverableDamagedDelivery(input)) {
+    return {
+      label: "Tactical cue",
+      value: `Clear vector / ${formatSeconds(input.trajectoryRiskSeconds)}`,
+      tone: "urgent"
+    };
+  }
+
   if (input.landingStatus === "too-fast") {
     return {
       label: "Tactical cue",
