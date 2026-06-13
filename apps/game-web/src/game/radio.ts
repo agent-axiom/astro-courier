@@ -151,6 +151,18 @@ export function buildRadioMessage(hud: HudState): string {
     hud.cargoOnboard &&
     hud.paceTier === "gold" &&
     hud.cargoDamage <= 0.02 &&
+    hud.maxFuel > 0 &&
+    hud.fuel / hud.maxFuel >= COMET_RESERVE_MIN_RATIO &&
+    hud.perfectDockReady
+  ) {
+    return "Comet dock armed. Set it down clean for the finish.";
+  }
+
+  if (
+    hud.objectivePhase === "delivery" &&
+    hud.cargoOnboard &&
+    hud.paceTier === "gold" &&
+    hud.cargoDamage <= 0.02 &&
     hud.maxFuel > 0
   ) {
     const fuelReserve = hud.fuel / hud.maxFuel;

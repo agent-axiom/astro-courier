@@ -297,6 +297,22 @@ describe("radio feedback copy", () => {
     ).toContain("Comet reserve tight");
   });
 
+  it("celebrates an armed comet dock before generic landing guidance", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        paceTier: "gold",
+        fuel: 86,
+        maxFuel: 100,
+        cargoDamage: 0,
+        landingStatus: "ready",
+        perfectDockReady: true
+      })
+    ).toContain("Comet dock armed");
+  });
+
   it("warns when a style chain is about to expire before generic objective guidance", () => {
     expect(
       buildRadioMessage({
