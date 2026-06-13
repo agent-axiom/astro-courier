@@ -113,8 +113,8 @@ export function buildStyleTargetCue(input: StyleTargetCueInput): StyleTargetCue 
   if ((input.launchBurstSecondsRemaining ?? 0) > 0) {
     return {
       label: "Style target",
-      value: `Boost burst / +${LAUNCH_BURST_STYLE_BONUS} / ${(input.launchBurstSecondsRemaining ?? 0).toFixed(1)}s`,
-      tone: "opportunity"
+      value: `Boost burst / +${LAUNCH_BURST_STYLE_BONUS} / ${(input.launchBurstSecondsRemaining ?? 0).toFixed(1)}s${chainSuffix}`,
+      tone: chainActive ? "chain" : "opportunity"
     };
   }
 

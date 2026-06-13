@@ -56,6 +56,11 @@ export function buildRadioMessage(hud: HudState): string {
     return "Style bonus logged. Clean skim, no scratches.";
   }
 
+  const urgentStyleChainMessage = buildUrgentStyleChainMessage(hud);
+  if (urgentStyleChainMessage) {
+    return urgentStyleChainMessage;
+  }
+
   if (hud.cargoOnboard && hud.launchBurstSecondsRemaining > 0) {
     return `Launch burst armed. Hit Boost in ${hud.launchBurstSecondsRemaining.toFixed(1)}s to cash the pickup chain.`;
   }
@@ -78,11 +83,6 @@ export function buildRadioMessage(hud: HudState): string {
 
   if (hud.cargoOnboard && hud.cargoDamage > 0.02) {
     return `Cargo integrity ${Math.round(Math.max(0, 1 - hud.cargoDamage) * 100)}%. Keep it out of hazards and dock clean.`;
-  }
-
-  const urgentStyleChainMessage = buildUrgentStyleChainMessage(hud);
-  if (urgentStyleChainMessage) {
-    return urgentStyleChainMessage;
   }
 
   if (isChainRelayCarryWindowOpen(hud)) {
@@ -195,6 +195,10 @@ function buildUrgentStyleChainMessage(hud: HudState): string | undefined {
       return "Style chain fading. Thread the hazard gap now.";
     }
     return "Style chain fading. Skim the hazard edge now.";
+  }
+
+  if (hud.launchBurstSecondsRemaining > 0) {
+    return "Style chain fading. Hit Boost now for the burst.";
   }
 
   if (hud.quickPickupSecondsRemaining > 0) {

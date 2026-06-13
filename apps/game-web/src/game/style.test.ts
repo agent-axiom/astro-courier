@@ -334,6 +334,23 @@ describe("style target cue", () => {
     });
   });
 
+  it("frames launch bursts as chain targets while a multiplier is live", () => {
+    expect(
+      buildStyleTargetCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        styleBonus: 330,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 0.8,
+        launchBurstSecondsRemaining: 2.4
+      })
+    ).toEqual({
+      label: "Style target",
+      value: "Boost burst / +120 / 2.4s / chain x1.50",
+      tone: "chain"
+    });
+  });
+
   it("prioritizes a ready gravity sling over nearby hazard style", () => {
     expect(
       buildStyleTargetCue({

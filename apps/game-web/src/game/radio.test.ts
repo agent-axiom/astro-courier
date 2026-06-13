@@ -366,6 +366,21 @@ describe("radio feedback copy", () => {
     ).toContain("Take the pickup now");
   });
 
+  it("points fading style chains at an armed launch burst before generic delivery guidance", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        quickPickupSecondsRemaining: 0,
+        launchBurstSecondsRemaining: 1.8,
+        styleChainCount: 2,
+        styleChainSecondsRemaining: 0.8,
+        styleMultiplier: 1.5
+      })
+    ).toContain("Hit Boost now for the burst");
+  });
+
   it("coaches gravity sling setup before generic objective guidance", () => {
     expect(
       buildRadioMessage({
