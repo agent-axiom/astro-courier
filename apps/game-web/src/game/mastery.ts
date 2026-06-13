@@ -1,4 +1,5 @@
 import {
+  CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS,
   GRAVITY_SLING_SPEED_THRESHOLD,
   GRAVITY_SLING_STYLE_BONUS,
   EXPRESS_FINISH_STYLE_BONUS,
@@ -71,7 +72,7 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
       expressFinish,
       {
         label: "Chain finish",
-        value: "carry chain home"
+        value: `${CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS.toFixed(1)}s chain window`
       },
       {
         label: "Needle thread",

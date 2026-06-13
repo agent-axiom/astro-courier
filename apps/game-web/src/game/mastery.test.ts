@@ -85,7 +85,7 @@ describe("preflight bonus objectives", () => {
     ).toEqual([
       { label: "Rush pickup", value: "+180" },
       { label: "Express finish", value: "+180 / gold pace" },
-      { label: "Chain finish", value: "carry chain home" },
+      { label: "Chain finish", value: "5.5s chain window" },
       { label: "Needle thread", value: "42+ speed" },
       { label: "Last Drop", value: "+170 / <=5% fuel" }
     ]);
