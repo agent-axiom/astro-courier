@@ -62,6 +62,10 @@ export function buildContractPreflightKicker(input: ContractPreflightKickerInput
     return "Gravity Contract";
   }
 
+  if (input.contractId === "asteroid-sprint") {
+    return "Asteroid Contract";
+  }
+
   if ((input.hazardSeverityMultiplier ?? 1) >= 1.25) {
     return "Danger Contract";
   }
@@ -79,6 +83,14 @@ export function buildContractRoutePlan(input: ContractRoutePlanInput): ContractR
       label: "Route plan",
       value: "Ride gravity, bleed speed",
       tone: "speed"
+    };
+  }
+
+  if (input.contractId === "asteroid-sprint") {
+    return {
+      label: "Route plan",
+      value: "Thread field, cash danger",
+      tone: "danger"
     };
   }
 

@@ -40,7 +40,7 @@ describe("contract rotation", () => {
   it("labels the active preflight contract by route personality", () => {
     expect(buildContractPreflightKicker({ contractId: "first-light-delivery", goldSeconds: 35 })).toBe("Starter Contract");
     expect(buildContractPreflightKicker({ contractId: "asteroid-sprint", goldSeconds: 24, hazardSeverityMultiplier: 1.45 })).toBe(
-      "Danger Contract"
+      "Asteroid Contract"
     );
     expect(buildContractPreflightKicker({ contractId: "return-leg", goldSeconds: 30 })).toBe("Sprint Contract");
     expect(buildContractPreflightKicker({ contractId: "gravity-slingshot", goldSeconds: 26, hazardSeverityMultiplier: 1.2 })).toBe(
@@ -75,6 +75,22 @@ describe("contract rotation", () => {
     ).toEqual({
       label: "Route plan",
       value: "Skim wide, cash danger",
+      tone: "danger"
+    });
+  });
+
+  it("calls out asteroid field threading before generic danger handling", () => {
+    expect(
+      buildContractRoutePlan({
+        contractId: "asteroid-sprint",
+        cargoKind: "volatile",
+        cargoFragility: 1,
+        hazardSeverityMultiplier: 1.45,
+        goldSeconds: 24
+      })
+    ).toEqual({
+      label: "Route plan",
+      value: "Thread field, cash danger",
       tone: "danger"
     });
   });
