@@ -33,6 +33,26 @@ describe("result coach", () => {
     });
   });
 
+  it("coaches gravity route hull collisions toward the sling ring", () => {
+    expect(
+      buildResultCoach({
+        status: "crashed",
+        contractId: "gravity-slingshot",
+        crashReason: "Hull Collision",
+        medal: "none",
+        grade: "F",
+        cargoDamage: 1,
+        fuel: 40,
+        maxFuel: 100,
+        scoreBreakdown: baseBreakdown
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Stay in the outer sling ring",
+      tone: "danger"
+    });
+  });
+
   it("coaches damaged deliveries toward safer hazard lines", () => {
     expect(
       buildResultCoach({

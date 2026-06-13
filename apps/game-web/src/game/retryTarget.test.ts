@@ -59,6 +59,26 @@ describe("result retry target", () => {
     });
   });
 
+  it("turns gravity route hull collisions into a sling-lane target", () => {
+    expect(
+      buildRetryTarget({
+        status: "crashed",
+        contractId: "gravity-slingshot",
+        crashReason: "Hull Collision",
+        medal: "none",
+        elapsedSeconds: 14.2,
+        goldSeconds: 30,
+        score: 0,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Hold outer sling lane",
+      tone: "danger"
+    });
+  });
+
   it("turns a saved personal best score gap into a concrete score target", () => {
     expect(
       buildRetryTarget({

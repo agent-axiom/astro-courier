@@ -51,10 +51,15 @@ export type ResultBoardAction = {
 
 export function buildResultCoach(input: ResultCoachInput): ResultCoach {
   if (input.status === "crashed") {
+    const gravityHullCollision = input.contractId === "gravity-slingshot" && input.crashReason === "Hull Collision";
     return {
       label: "Next run",
       value:
-        input.crashReason === "Hull Collision" ? "Keep orbit outside gravity wells" : "Brake earlier before pad contact",
+        input.crashReason === "Hull Collision"
+          ? gravityHullCollision
+            ? "Stay in the outer sling ring"
+            : "Keep orbit outside gravity wells"
+          : "Brake earlier before pad contact",
       tone: "danger"
     };
   }

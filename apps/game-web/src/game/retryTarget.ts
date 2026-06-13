@@ -3,6 +3,7 @@ import type { BestRun } from "./bestRun";
 
 export type RetryTargetInput = {
   status: RunStatus;
+  contractId?: string;
   crashReason?: CrashReason;
   medal: RunMedal;
   elapsedSeconds: number;
@@ -32,7 +33,7 @@ export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
     if (input.crashReason === "Hull Collision") {
       return {
         label: "Retry target",
-        value: "Clear gravity well",
+        value: input.contractId === "gravity-slingshot" ? "Hold outer sling lane" : "Clear gravity well",
         tone: "danger"
       };
     }

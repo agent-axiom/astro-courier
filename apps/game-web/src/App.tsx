@@ -292,6 +292,7 @@ export function App() {
       : undefined;
   const retryTarget = buildRetryTarget({
     status: hud.status,
+    contractId: hud.contractId,
     crashReason: hud.crashReason,
     medal: hud.medal,
     elapsedSeconds: hud.elapsedSeconds,
