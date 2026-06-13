@@ -42,6 +42,23 @@ describe("live comet run readout", () => {
     });
   });
 
+  it("warns while comet reserve is still possible but tight", () => {
+    expect(
+      buildCometRunReadout({
+        status: "flying",
+        preflightOpen: false,
+        paceTier: "gold",
+        fuel: 78,
+        maxFuel: 100,
+        cargoDamage: 0
+      })
+    ).toEqual({
+      label: "Comet run",
+      value: "Reserve tight",
+      tone: "warning"
+    });
+  });
+
   it("calls out missed gold pace first", () => {
     expect(
       buildCometRunReadout({

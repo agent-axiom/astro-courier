@@ -13,7 +13,7 @@ export type CometRunReadoutInput = {
 export type CometRunReadout = {
   label: "Comet run";
   value: string;
-  tone: "live" | "lost";
+  tone: "live" | "warning" | "lost";
 };
 
 export function buildCometRunReadout(input: CometRunReadoutInput): CometRunReadout | undefined {
@@ -43,6 +43,14 @@ export function buildCometRunReadout(input: CometRunReadoutInput): CometRunReado
       label: "Comet run",
       value: "Reserve low",
       tone: "lost"
+    };
+  }
+
+  if (fuelReserve < 0.82) {
+    return {
+      label: "Comet run",
+      value: "Reserve tight",
+      tone: "warning"
     };
   }
 
