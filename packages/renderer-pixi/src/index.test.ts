@@ -8,7 +8,8 @@ import {
   objectiveGuidanceVisual,
   shipTrailVisual,
   trajectoryHazardDanger,
-  trajectoryPointVisual
+  trajectoryPointVisual,
+  velocityVectorVisual
 } from "./index";
 
 describe("objective beacon pulse", () => {
@@ -203,6 +204,24 @@ describe("ship trail visual", () => {
       color: 0xff9f1c,
       tone: "sprint"
     });
+  });
+});
+
+describe("velocity vector visual", () => {
+  it("stays hidden outside active flight or while nearly stationary", () => {
+    expect(velocityVectorVisual({ status: "paused", velocity: { x: 22, y: 0 } })).toBeUndefined();
+    expect(velocityVectorVisual({ status: "flying", velocity: { x: 4, y: 0 } })).toBeUndefined();
+  });
+
+  it("scales up and changes tone as velocity becomes risky", () => {
+    const cruise = velocityVectorVisual({ status: "flying", velocity: { x: 18, y: 0 }, allowedApproachSpeed: 40 });
+    const overspeed = velocityVectorVisual({ status: "flying", velocity: { x: 52, y: 0 }, allowedApproachSpeed: 30 });
+
+    expect(cruise).toMatchObject({ color: 0x7ce1ff, tone: "cruise" });
+    expect(overspeed).toMatchObject({ color: 0xff4d6d, tone: "overspeed" });
+    expect(overspeed?.length).toBeGreaterThan(cruise?.length ?? 0);
+    expect(overspeed?.alpha).toBeGreaterThan(cruise?.alpha ?? 0);
+    expect(overspeed?.width).toBeGreaterThan(cruise?.width ?? 0);
   });
 });
 

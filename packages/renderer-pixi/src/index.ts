@@ -210,6 +210,20 @@ export type ShipTrailVisual = {
   alpha: number;
 };
 
+export type VelocityVectorVisualInput = {
+  status: SimulationSnapshot["status"];
+  velocity: Vec2;
+  allowedApproachSpeed?: number;
+};
+
+export type VelocityVectorVisual = {
+  color: number;
+  tone: "cruise" | "fast" | "overspeed";
+  length: number;
+  width: number;
+  alpha: number;
+};
+
 export type BoostBurstVisualInput = {
   status: SimulationSnapshot["status"];
   lastMilestone?: string;
@@ -238,6 +252,26 @@ export function shipTrailVisual(input: ShipTrailVisualInput): ShipTrailVisual | 
     length: round(18 + pressure * (tone === "comet" ? 34 : 28), 2),
     radius: round(4 + pressure * 8, 2),
     alpha: round(clamp(0.34 + pressure * (tone === "comet" ? 0.46 : 0.38), 0.34, tone === "comet" ? 0.8 : 0.72), 2)
+  };
+}
+
+export function velocityVectorVisual(input: VelocityVectorVisualInput): VelocityVectorVisual | undefined {
+  const speed = Math.hypot(input.velocity.x, input.velocity.y);
+  if (input.status !== "flying" || speed < 6) {
+    return undefined;
+  }
+
+  const safeSpeed = input.allowedApproachSpeed ?? 40;
+  const tone: VelocityVectorVisual["tone"] =
+    speed > safeSpeed * 1.2 ? "overspeed" : speed > safeSpeed * 0.78 ? "fast" : "cruise";
+  const pressure = clamp((speed - 6) / 48, 0, 1);
+
+  return {
+    color: tone === "overspeed" ? 0xff4d6d : tone === "fast" ? 0xffd166 : 0x7ce1ff,
+    tone,
+    length: round(24 + pressure * 46, 2),
+    width: tone === "overspeed" ? 3 : tone === "fast" ? 2.4 : 1.8,
+    alpha: round(clamp(0.3 + pressure * 0.46 + (tone === "overspeed" ? 0.12 : 0), 0.3, 0.88), 2)
   };
 }
 
@@ -529,6 +563,11 @@ class PixiRenderer implements AstroPixiRenderer {
     const fuelRatio = snapshot.ship.maxFuel > 0 ? snapshot.ship.fuel / snapshot.ship.maxFuel : 0;
     const trail = shipTrailVisual({ status: snapshot.status, speed, fuelRatio, cargoDamage: snapshot.ship.cargoDamage });
     const boostBurst = boostBurstVisual({ status: snapshot.status, lastMilestone: snapshot.lastMilestone, tick: snapshot.tick });
+    const velocityVector = velocityVectorVisual({
+      status: snapshot.status,
+      velocity: snapshot.ship.velocity,
+      allowedApproachSpeed: snapshot.objectiveTarget?.allowedApproachSpeed
+    });
 
     if (boostBurst) {
       this.ship.circle(center.x, center.y, boostBurst.radius).stroke({
@@ -540,6 +579,36 @@ class PixiRenderer implements AstroPixiRenderer {
         color: 0xffffff,
         width: 1,
         alpha: boostBurst.alpha * 0.42
+      });
+    }
+
+    if (velocityVector) {
+      const velocityAngle = Math.atan2(snapshot.ship.velocity.y, snapshot.ship.velocity.x);
+      const start = {
+        x: center.x + Math.cos(velocityAngle) * 20,
+        y: center.y + Math.sin(velocityAngle) * 20
+      };
+      const tip = {
+        x: center.x + Math.cos(velocityAngle) * (20 + velocityVector.length),
+        y: center.y + Math.sin(velocityAngle) * (20 + velocityVector.length)
+      };
+      const leftWing = {
+        x: tip.x - Math.cos(velocityAngle - 0.62) * 12,
+        y: tip.y - Math.sin(velocityAngle - 0.62) * 12
+      };
+      const rightWing = {
+        x: tip.x - Math.cos(velocityAngle + 0.62) * 12,
+        y: tip.y - Math.sin(velocityAngle + 0.62) * 12
+      };
+      this.ship.moveTo(start.x, start.y).lineTo(tip.x, tip.y).stroke({
+        color: velocityVector.color,
+        width: velocityVector.width,
+        alpha: velocityVector.alpha
+      });
+      this.ship.moveTo(leftWing.x, leftWing.y).lineTo(tip.x, tip.y).lineTo(rightWing.x, rightWing.y).stroke({
+        color: velocityVector.color,
+        width: velocityVector.width,
+        alpha: velocityVector.alpha
       });
     }
 
