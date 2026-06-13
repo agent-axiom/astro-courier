@@ -543,7 +543,8 @@ export function App() {
     cargoFragility: hud.cargoFragility,
     cargoDamage: hud.cargoDamage,
     cargoOnboard: hud.cargoOnboard,
-    hazardDangerLevel: hud.hazardDangerLevel
+    hazardDangerLevel: hud.hazardDangerLevel,
+    paceSecondsRemaining: hud.paceSecondsRemaining
   });
   const hazardPressureReadout = buildHazardPressureReadout({
     hazardDangerLevel: hud.hazardDangerLevel,

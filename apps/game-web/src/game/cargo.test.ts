@@ -31,6 +31,38 @@ describe("cargo manifest HUD copy", () => {
     });
   });
 
+  it("surfaces time-sensitive cargo as a gold-window warning", () => {
+    expect(
+      buildCargoRiskReadout({
+        cargoKind: "time-sensitive",
+        cargoFragility: 0.9,
+        cargoDamage: 0,
+        cargoOnboard: false,
+        paceSecondsRemaining: 27.4
+      })
+    ).toEqual({
+      label: "Cargo risk",
+      value: "Rush cargo / 27.4s gold",
+      tone: "warning"
+    });
+  });
+
+  it("raises urgent cargo stress when the rush window is closing onboard", () => {
+    expect(
+      buildCargoRiskReadout({
+        cargoKind: "time-sensitive",
+        cargoFragility: 0.9,
+        cargoDamage: 0,
+        cargoOnboard: true,
+        paceSecondsRemaining: 4.2
+      })
+    ).toEqual({
+      label: "Cargo stress",
+      value: "Rush window 4.2s",
+      tone: "danger"
+    });
+  });
+
   it("switches to stress readout during hazard contact", () => {
     expect(
       buildCargoRiskReadout({

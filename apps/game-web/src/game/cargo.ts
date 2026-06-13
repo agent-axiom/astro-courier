@@ -9,6 +9,7 @@ export type CargoRiskReadoutInput = {
   cargoDamage: number;
   cargoOnboard: boolean;
   hazardDangerLevel?: "near" | "inside";
+  paceSecondsRemaining?: number;
 };
 
 export type CargoManifest = {
@@ -53,6 +54,21 @@ export function buildCargoRiskReadout(input: CargoRiskReadoutInput): CargoRiskRe
         tone: input.cargoDamage >= 0.3 ? "danger" : "warning"
       };
     }
+    if (isRushCargo(input)) {
+      return {
+        label: "Cargo stress",
+        value: `Rush window ${formatRushSeconds(input.paceSecondsRemaining)}`,
+        tone: getRushCargoTone(input.paceSecondsRemaining)
+      };
+    }
+  }
+
+  if (isRushCargo(input)) {
+    return {
+      label: "Cargo risk",
+      value: `Rush cargo / ${formatRushSeconds(input.paceSecondsRemaining)} gold`,
+      tone: getRushCargoTone(input.paceSecondsRemaining)
+    };
   }
 
   return {
@@ -76,4 +92,16 @@ function titleCase(value: string): string {
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+function isRushCargo(input: CargoRiskReadoutInput): input is CargoRiskReadoutInput & { paceSecondsRemaining: number } {
+  return input.cargoKind === "time-sensitive" && typeof input.paceSecondsRemaining === "number" && input.paceSecondsRemaining > 0;
+}
+
+function getRushCargoTone(secondsRemaining: number): CargoRiskReadout["tone"] {
+  return secondsRemaining <= 5 ? "danger" : "warning";
+}
+
+function formatRushSeconds(secondsRemaining: number): string {
+  return `${secondsRemaining.toFixed(1)}s`;
 }
