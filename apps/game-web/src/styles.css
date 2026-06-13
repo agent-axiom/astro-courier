@@ -1714,6 +1714,59 @@ button {
   color: #ffadc1;
 }
 
+.result-highlight {
+  display: grid;
+  grid-template-columns: 18px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 10px;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 850;
+  text-align: left;
+}
+
+.result-highlight span,
+.result-highlight strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.result-highlight span {
+  color: rgba(255, 255, 255, 0.74);
+  text-transform: uppercase;
+}
+
+.result-highlight strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.result-highlight-style {
+  background: rgba(255, 209, 102, 0.16);
+  color: #ffe19a;
+}
+
+.result-highlight-danger {
+  background: rgba(255, 111, 145, 0.15);
+  color: #ffadc1;
+}
+
+.result-highlight-precision,
+.result-highlight-cargo {
+  background: rgba(142, 230, 184, 0.15);
+  color: #bff7d8;
+}
+
+.result-highlight-efficiency,
+.result-highlight-pace {
+  background: rgba(124, 225, 255, 0.14);
+  color: #c6f6ff;
+}
+
 .result-coach {
   display: grid;
   grid-template-columns: 18px auto 1fr;

@@ -47,7 +47,7 @@ import { buildObjectiveDirective, buildObjectiveInterceptReadout } from "./game/
 import { buildPreflightBonusObjectives, buildPreflightMasteryTargets } from "./game/mastery";
 import { buildApproachRewardReadout, buildDockingSpeedReadout } from "./game/docking";
 import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./game/cargo";
-import { buildResultStats } from "./game/resultStats";
+import { buildResultHighlight, buildResultStats } from "./game/resultStats";
 import { buildHazardPressureReadout } from "./game/hazard";
 import { buildResultBoardAction, buildResultBoardPrompt, buildResultCoach } from "./game/resultCoach";
 import { getOverlayVisibility } from "./game/overlays";
@@ -257,6 +257,7 @@ export function App() {
   const preflightBonusObjectives = buildPreflightBonusObjectives({ quickPickupBonus: hud.quickPickupBonus });
   const cargoManifest = buildCargoManifest({ cargoName: hud.cargoName, cargoOnboard: hud.cargoOnboard });
   const resultStats = buildResultStats({ score: hud.score, elapsedSeconds: hud.elapsedSeconds, cargoIntegrity });
+  const resultHighlight = buildResultHighlight(hud.scoreBreakdown);
   const bestRunChase = buildBestRunChase(bestRun);
   const routeBoardProgress = buildRouteBoardProgress(hud.contractOptions, bestRunsByContract);
   const routeBoardTarget = buildRouteBoardTarget(hud.contractOptions, bestRunsByContract);
@@ -786,6 +787,16 @@ export function App() {
               </div>
             ))}
           </div>
+          {resultHighlight ? (
+            <div
+              className={`result-highlight result-highlight-${resultHighlight.tone}`}
+              aria-label={`${resultHighlight.label}: ${resultHighlight.value}`}
+            >
+              <Star size={18} />
+              <span>{resultHighlight.label}</span>
+              <strong>{resultHighlight.value}</strong>
+            </div>
+          ) : null}
           <div className={`result-coach result-coach-${resultCoach.tone}`} aria-label={`${resultCoach.label}: ${resultCoach.value}`}>
             <Flag size={18} />
             <span>{resultCoach.label}</span>
