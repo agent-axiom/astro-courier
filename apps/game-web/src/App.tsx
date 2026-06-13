@@ -75,7 +75,7 @@ import { getOverlayVisibility } from "./game/overlays";
 import { buildCometRunReadout } from "./game/comet";
 import { buildResultRetryAction, buildRetryActionBriefing, buildRetryTarget } from "./game/retryTarget";
 import { buildRunIntensity } from "./game/intensity";
-import { buildCrashReasonLabel } from "./game/crash";
+import { buildCrashDebrief, buildCrashReasonLabel } from "./game/crash";
 import { buildReplayCaptureReadout } from "./game/replayReadout";
 import { deriveHudAudioEvents, type HudAudioSnapshot } from "./game/audioEvents";
 import { createGameAudioController, type GameAudioController } from "./game/gameAudio";
@@ -510,6 +510,7 @@ export function App() {
   const resultStats = buildResultStats({ score: hud.score, elapsedSeconds: hud.elapsedSeconds, cargoIntegrity });
   const resultOutcomePresentation =
     hud.status === "delivered" || hud.status === "crashed" ? buildResultOutcomePresentation(hud.status) : undefined;
+  const crashDebrief = hud.status === "crashed" ? buildCrashDebrief(hud) : undefined;
   const resultHighlight = buildResultHighlight(hud.scoreBreakdown, hud.lastMilestone);
   const replayReceipt = buildReplayReceipt(hud.replayChecksum);
   const bestRunChase = buildBestRunChase(bestRun);
@@ -1317,6 +1318,13 @@ export function App() {
           </span>
           <h2>{hud.status === "delivered" ? "Delivery Complete" : "Delivery Failed"}</h2>
           <p>{hud.status === "crashed" ? buildCrashReasonLabel(hud) : hud.landingRating ?? statusLabel(hud.status)}</p>
+          {crashDebrief ? (
+            <div className={`crash-debrief crash-debrief-${crashDebrief.tone}`} aria-label={`${crashDebrief.label}: ${crashDebrief.value}`}>
+              <ShieldAlert size={16} />
+              <span>{crashDebrief.label}</span>
+              <strong>{crashDebrief.value}</strong>
+            </div>
+          ) : null}
           <div className={`grade-badge grade-${hud.grade.toLowerCase()}`} aria-label={`Run grade ${hud.grade}`}>
             <span>Rank</span>
             <strong>{hud.grade}</strong>
