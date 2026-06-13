@@ -1,6 +1,7 @@
 import { Gauge, PackageCheck, Pause, Play, RotateCcw, Satellite, Trophy, Zap } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { create } from "zustand";
+import { getBestRun, recordBestRun, type BestRun } from "./game/bestRun";
 import { GameShell, type HudState } from "./game/GameShell";
 import { buildRadioMessage } from "./game/radio";
 
@@ -34,13 +35,21 @@ const useGameStore = create<GameStore>((set) => ({
   setHud: (hud) => set({ hud })
 }));
 
+const bestRunKey = "first-light-delivery";
+
 export function App() {
   const canvasMountRef = useRef<HTMLDivElement | null>(null);
   const shellRef = useRef<GameShell | null>(null);
+  const recordedRunRef = useRef<string | null>(null);
   const hud = useGameStore((state) => state.hud);
   const setHud = useGameStore((state) => state.setHud);
   const [paused, setPaused] = useState(true);
   const [preflightOpen, setPreflightOpen] = useState(true);
+  const [bestRun, setBestRun] = useState<BestRun | undefined>(() => {
+    const storage = getBestRunStorage();
+    return storage ? getBestRun(storage, bestRunKey) : undefined;
+  });
+  const [newBest, setNewBest] = useState(false);
 
   useEffect(() => {
     if (!canvasMountRef.current) return undefined;
@@ -58,6 +67,34 @@ export function App() {
       shellRef.current = null;
     };
   }, [setHud]);
+
+  useEffect(() => {
+    if (hud.status !== "delivered") {
+      if (hud.status === "flying" || hud.status === "paused") {
+        recordedRunRef.current = null;
+        setNewBest(false);
+      }
+      return;
+    }
+
+    const runFingerprint = `${hud.score}:${hud.elapsedSeconds}:${hud.medal}`;
+    if (recordedRunRef.current === runFingerprint) {
+      return;
+    }
+
+    recordedRunRef.current = runFingerprint;
+    const storage = getBestRunStorage();
+    if (!storage) {
+      return;
+    }
+    const result = recordBestRun(storage, bestRunKey, {
+      score: hud.score,
+      elapsedSeconds: hud.elapsedSeconds,
+      medal: hud.medal
+    });
+    setBestRun(result.best);
+    setNewBest(result.isNewBest);
+  }, [hud.elapsedSeconds, hud.medal, hud.score, hud.status]);
 
   const fuelRatio = hud.maxFuel > 0 ? hud.fuel / hud.maxFuel : 0;
   const cargoIntegrity = Math.max(0, 1 - hud.cargoDamage);
@@ -211,6 +248,14 @@ export function App() {
           <h2>{hud.status === "delivered" ? "Delivery Complete" : "Delivery Failed"}</h2>
           <p>{hud.landingRating ?? statusLabel(hud.status)}</p>
           {hud.medal !== "none" ? <div className={`medal-banner medal-${hud.medal}`}>{medalLabel(hud.medal)}</div> : null}
+          {hud.status === "delivered" && bestRun ? (
+            <div className={`best-run ${newBest ? "best-run-new" : ""}`}>
+              <span>{newBest ? "New best" : "Personal best"}</span>
+              <strong>
+                {bestRun.score} / {bestRun.elapsedSeconds.toFixed(1)}s
+              </strong>
+            </div>
+          ) : null}
           <div className="result-stats">
             <span>{hud.score}</span>
             <span>{hud.elapsedSeconds.toFixed(1)}s</span>
@@ -281,4 +326,12 @@ function paceLabel(tier: HudState["paceTier"]): string {
   if (tier === "silver") return "Silver pace";
   if (tier === "bronze") return "Bronze pace";
   return "Overtime";
+}
+
+function getBestRunStorage(): Pick<Storage, "getItem" | "setItem"> | undefined {
+  try {
+    return window.localStorage;
+  } catch {
+    return undefined;
+  }
 }
