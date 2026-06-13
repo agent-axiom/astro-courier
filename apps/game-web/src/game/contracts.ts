@@ -132,6 +132,10 @@ export function buildDailyDispatchAction(dispatch: DailyDispatch | undefined, cu
   };
 }
 
+export function buildDailyDispatchBadge(dispatch: DailyDispatch | undefined, contractId: string): string | undefined {
+  return dispatch?.contractId === contractId ? "Daily route" : undefined;
+}
+
 export function buildDailyDispatchStatus(
   dispatch: DailyDispatch | undefined,
   bestRun: DailyDispatchBestRun | undefined

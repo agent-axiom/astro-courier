@@ -8,6 +8,7 @@ import {
   buildContractRoutePlan,
   buildDailyDispatch,
   buildDailyDispatchAction,
+  buildDailyDispatchBadge,
   buildDailyDispatchReset,
   buildDailyDispatchStatus,
   buildLaunchCommitment,
@@ -72,6 +73,20 @@ describe("contract rotation", () => {
     });
     expect(buildDailyDispatchAction(dispatch, "asteroid-sprint")).toBeUndefined();
     expect(buildDailyDispatchAction(undefined, "asteroid-sprint")).toBeUndefined();
+  });
+
+  it("marks the matching contract option as the daily route", () => {
+    const dispatch = {
+      label: "Daily dispatch" as const,
+      value: "Asteroid Sprint",
+      contractId: "asteroid-sprint",
+      seed: "daily-2026-06-13-asteroid-sprint",
+      tone: "daily" as const
+    };
+
+    expect(buildDailyDispatchBadge(dispatch, "asteroid-sprint")).toBe("Daily route");
+    expect(buildDailyDispatchBadge(dispatch, "return-leg")).toBeUndefined();
+    expect(buildDailyDispatchBadge(undefined, "asteroid-sprint")).toBeUndefined();
   });
 
   it("summarizes daily dispatch clear status from the saved route best", () => {

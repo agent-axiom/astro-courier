@@ -2179,6 +2179,12 @@ button {
   color: #ffe19a;
 }
 
+.contract-option-daily {
+  border: 1px solid rgba(124, 225, 255, 0.18);
+  background: rgba(124, 225, 255, 0.15);
+  color: #c6f6ff;
+}
+
 .contract-option-cargo {
   border: 1px solid rgba(255, 255, 255, 0.06);
 }

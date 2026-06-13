@@ -50,6 +50,7 @@ import {
   buildContractRoutePlan,
   buildDailyDispatch,
   buildDailyDispatchAction,
+  buildDailyDispatchBadge,
   buildDailyDispatchReset,
   buildDailyDispatchStatus,
   buildLaunchCommitment,
@@ -1186,6 +1187,7 @@ export function App() {
                   goldSeconds: contract.medalTimes.gold
                 });
                 const contractRecommendationBadge = contractRecommended ? buildRouteBoardRecommendationBadge(routeBoardTarget) : undefined;
+                const contractDailyBadge = buildDailyDispatchBadge(dailyDispatch, contract.id);
                 return (
                   <button
                     key={contract.id}
@@ -1231,6 +1233,7 @@ export function App() {
                       {contractRecommendationBadge ? (
                         <em className={`contract-option-next contract-option-next-${routeBoardTarget.tone}`}>{contractRecommendationBadge}</em>
                       ) : null}
+                      {contractDailyBadge ? <em className="contract-option-daily">{contractDailyBadge}</em> : null}
                       <em className="contract-option-best">{buildContractBestRunLabel(contractBestRun)}</em>
                       <em className={`contract-option-cargo contract-option-cargo-${contractCargoRisk.tone}`}>
                         {buildContractCargoTrait(contract)}
