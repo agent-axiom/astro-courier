@@ -46,6 +46,7 @@ export type GameShellOptions = {
 
 const fixedDt = 1 / 60;
 const maxSubSteps = 5;
+const milestoneHoldSeconds = 1.2;
 
 export class GameShell {
   private readonly mount: HTMLElement;
@@ -58,6 +59,8 @@ export class GameShell {
   private lastTime = 0;
   private hudTimer = 0;
   private paused = false;
+  private retainedMilestone?: string;
+  private retainedMilestoneTimer = 0;
   private destroyed = false;
 
   constructor(options: GameShellOptions) {
@@ -87,6 +90,8 @@ export class GameShell {
     this.paused = paused;
     this.accumulator = 0;
     this.hudTimer = 0;
+    this.retainedMilestone = undefined;
+    this.retainedMilestoneTimer = 0;
     this.lastTime = performance.now();
     this.world = this.createFreshWorld();
     this.publishHud();
@@ -117,15 +122,28 @@ export class GameShell {
     if (!this.paused && this.world.status === "flying") {
       this.accumulator += rawDelta;
       let subSteps = 0;
+      let sawMilestone = false;
 
       while (this.accumulator >= fixedDt && subSteps < maxSubSteps) {
         stepWorld(this.world, fixedDt, this.input.commands(this.world.ship.rotation));
+        if (this.world.lastMilestone) {
+          this.retainedMilestone = this.world.lastMilestone;
+          this.retainedMilestoneTimer = milestoneHoldSeconds;
+          sawMilestone = true;
+        }
         this.accumulator -= fixedDt;
         subSteps += 1;
       }
 
       if (subSteps === maxSubSteps && this.accumulator >= fixedDt) {
         this.accumulator = 0;
+      }
+
+      if (!sawMilestone && this.retainedMilestoneTimer > 0) {
+        this.retainedMilestoneTimer = Math.max(0, this.retainedMilestoneTimer - rawDelta);
+        if (this.retainedMilestoneTimer === 0) {
+          this.retainedMilestone = undefined;
+        }
       }
     }
 
@@ -168,7 +186,7 @@ export class GameShell {
       targetDistance: snapshot.objectiveTarget?.distance,
       landingStatus: snapshot.objectiveTarget?.landingStatus,
       assistAvailable: snapshot.objectiveTarget?.assistAvailable,
-      lastMilestone: this.world.lastMilestone,
+      lastMilestone: this.world.lastMilestone ?? this.retainedMilestone,
       medal: result.medal,
       landingRating: result.landingRating,
       paceTier: pace.tier,

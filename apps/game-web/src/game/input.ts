@@ -54,10 +54,6 @@ export function commandsFromKeyboardState(pressed: ReadonlySet<string>, currentR
   if (isDown(pressed, "ArrowDown") || isDown(pressed, "KeyS") || isDown(pressed, "ShiftLeft") || isDown(pressed, "ShiftRight")) {
     commands.push({ type: "BRAKE", amount: 0.65 });
   }
-  if (isDown(pressed, "KeyE")) {
-    commands.push({ type: "BOOST" });
-  }
-
   return commands;
 }
 
@@ -66,6 +62,7 @@ export class KeyboardInput {
   private readonly pressed = new Set<string>();
   private pointerTarget?: HTMLElement;
   private pointerActive = false;
+  private boostQueued = false;
   private pointer: ScreenPoint = { x: 0, y: 0 };
 
   constructor(target: Window) {
@@ -93,16 +90,26 @@ export class KeyboardInput {
     this.pointerTarget?.removeEventListener("pointermove", this.handlePointerMove);
     this.pressed.clear();
     this.pointerActive = false;
+    this.boostQueued = false;
   }
 
   commands(currentRotation: number): PlayerCommand[] {
-    return [...commandsFromKeyboardState(this.pressed, currentRotation), ...this.pointerCommands()];
+    const commands = commandsFromKeyboardState(this.pressed, currentRotation);
+    if (this.boostQueued) {
+      commands.push({ type: "BOOST" });
+      this.boostQueued = false;
+    }
+    return [...commands, ...this.pointerCommands()];
   }
 
   private readonly handleKeyDown = (event: KeyboardEvent) => {
     if (isGameKey(event.code)) {
       event.preventDefault();
+      const wasPressed = this.pressed.has(event.code);
       this.pressed.add(event.code);
+      if (event.code === "KeyE" && !wasPressed) {
+        this.boostQueued = true;
+      }
     }
   };
 
@@ -116,6 +123,7 @@ export class KeyboardInput {
   private readonly handleBlur = () => {
     this.pressed.clear();
     this.pointerActive = false;
+    this.boostQueued = false;
   };
 
   private readonly handlePointerDown = (event: PointerEvent) => {

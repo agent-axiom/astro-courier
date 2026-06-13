@@ -261,6 +261,16 @@ describe("deterministic Astro Courier simulation", () => {
     expect(reckless.landingRating).toBe("Insurance Event");
   });
 
+  it("reports boost burns as momentary courier feedback", () => {
+    const world = createWorldFromSystem(starterSystem, "boost-seed");
+    const fuelBefore = world.ship.fuel;
+
+    stepWorld(world, 1 / 60, [{ type: "BOOST" }]);
+
+    expect(world.ship.fuel).toBeLessThan(fuelBefore);
+    expect(world.lastMilestone).toBe("Boost Burn");
+  });
+
   it("awards deterministic medals from delivery quality", () => {
     const comet = createWorldFromSystem(starterSystem, "medal-seed");
     comet.ship.position = { x: 0, y: -74 };

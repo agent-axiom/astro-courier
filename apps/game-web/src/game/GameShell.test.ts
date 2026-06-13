@@ -97,9 +97,42 @@ describe("GameShell lifecycle", () => {
     expect(onHud.mock.calls.at(-1)?.[0].paceSecondsRemaining).toBeLessThan(35);
     expect(input.commands).toHaveBeenCalled();
   });
+
+  it("keeps transient simulation milestones visible for the HUD publish frame", async () => {
+    let commandCalls = 0;
+    const { renderer, input } = createShellDoubles({
+      commands: () => {
+        commandCalls += 1;
+        return commandCalls === 1 ? [{ type: "BOOST" }] : [];
+      }
+    });
+    const onHud = vi.fn();
+    let frame: FrameRequestCallback = () => 0;
+    vi.stubGlobal(
+      "requestAnimationFrame",
+      vi.fn((callback: FrameRequestCallback) => {
+        frame = callback;
+        return 7;
+      })
+    );
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    vi.spyOn(performance, "now").mockReturnValue(1000);
+
+    const shell = new GameShell({
+      mount: {} as HTMLElement,
+      onHud,
+      renderer,
+      input
+    });
+
+    await shell.start();
+    frame(1167);
+
+    expect(onHud.mock.calls.at(-1)?.[0].lastMilestone).toBe("Boost Burn");
+  });
 });
 
-function createShellDoubles(options?: { mount?: AstroPixiRenderer["mount"] }) {
+function createShellDoubles(options?: { mount?: AstroPixiRenderer["mount"]; commands?: InputSource["commands"] }) {
   const renderer: AstroPixiRenderer = {
     mount: vi.fn(options?.mount ?? (() => Promise.resolve())),
     render: vi.fn(),
@@ -108,7 +141,7 @@ function createShellDoubles(options?: { mount?: AstroPixiRenderer["mount"] }) {
   const input: InputSource = {
     attach: vi.fn(),
     detach: vi.fn(),
-    commands: vi.fn(() => [])
+    commands: vi.fn(options?.commands ?? (() => []))
   };
 
   return { renderer, input };

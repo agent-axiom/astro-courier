@@ -261,6 +261,7 @@ export function stepWorld(world: SimulationWorld, fixedDt: number, commands: Pla
       thrust = Math.max(thrust, 1);
       world.ship.fuel -= 2;
       world.fuelUsed += 2;
+      world.lastMilestone = "Boost Burn";
     } else if (command.type === "PAUSE") {
       world.status = "paused";
       return world;
