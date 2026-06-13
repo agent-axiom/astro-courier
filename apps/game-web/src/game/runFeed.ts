@@ -12,6 +12,7 @@ export type RunFeedSnapshot = {
   paceTier?: ContractPaceTier;
   fuel: number;
   maxFuel: number;
+  cargoDamage?: number;
   hazardDangerLevel?: "near" | "inside";
   trajectoryRiskLevel?: "near" | "inside";
   trajectoryRiskSeconds?: number;
@@ -38,6 +39,7 @@ export type AppendRunFeedResult = {
 const criticalFuelRatio = 0.15;
 const criticalStyleChainSeconds = 1;
 const bestRunPressureGap = 200;
+const cleanCargoDamageLimit = 0.02;
 const feedMilestones = new Set([
   "Clean Hazard Skim",
   "Needle Thread",
@@ -90,6 +92,14 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
     updates.push({
       label: "Fuel critical",
       value: "Coast and commit",
+      tone: "warning"
+    });
+  }
+
+  if (hasCargoDamageCrossedCleanLimit(previous, current)) {
+    updates.push({
+      label: "Cargo exposed",
+      value: "Protect the load",
       tone: "warning"
     });
   }
@@ -189,6 +199,10 @@ function formatMilestoneValue(styleAward: number | undefined): string {
 
 function isFuelCritical(snapshot: RunFeedSnapshot): boolean {
   return snapshot.maxFuel > 0 && snapshot.fuel / snapshot.maxFuel <= criticalFuelRatio;
+}
+
+function hasCargoDamageCrossedCleanLimit(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
+  return (previous.cargoDamage ?? 0) <= cleanCargoDamageLimit && (current.cargoDamage ?? 0) > cleanCargoDamageLimit;
 }
 
 function formatSeconds(seconds: number | undefined): string {

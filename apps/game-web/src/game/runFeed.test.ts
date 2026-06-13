@@ -195,6 +195,17 @@ describe("run action feed", () => {
     ).toEqual([]);
   });
 
+  it("warns when clean cargo first takes damage", () => {
+    expect(deriveRunFeedUpdates({ ...baseSnapshot, cargoDamage: 0.01 }, { ...baseSnapshot, cargoDamage: 0.05 })).toEqual([
+      {
+        label: "Cargo exposed",
+        value: "Protect the load",
+        tone: "warning"
+      }
+    ]);
+    expect(deriveRunFeedUpdates({ ...baseSnapshot, cargoDamage: 0.05 }, { ...baseSnapshot, cargoDamage: 0.12 })).toEqual([]);
+  });
+
   it("prepends fresh updates and caps the feed", () => {
     const result = appendRunFeedUpdates(
       [

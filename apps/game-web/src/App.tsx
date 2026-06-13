@@ -1404,6 +1404,7 @@ function toRunFeedSnapshot(hud: HudState, bestRun: BestRun | undefined): RunFeed
     paceTier: hud.paceTier,
     fuel: hud.fuel,
     maxFuel: hud.maxFuel,
+    cargoDamage: hud.cargoDamage,
     hazardDangerLevel: hud.hazardDangerLevel,
     trajectoryRiskLevel: hud.trajectoryRiskLevel,
     trajectoryRiskSeconds: hud.trajectoryRiskSeconds,
