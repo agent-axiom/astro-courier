@@ -27,7 +27,7 @@ import { buildRadioMessage } from "./game/radio";
 import { buildLiveStyleReward } from "./game/style";
 import { buildObjectiveDirective, buildObjectiveInterceptReadout } from "./game/objective";
 import { buildPreflightMasteryTargets } from "./game/mastery";
-import { buildDockingSpeedReadout } from "./game/docking";
+import { buildApproachRewardReadout, buildDockingSpeedReadout } from "./game/docking";
 import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./game/cargo";
 import { buildResultStats } from "./game/resultStats";
 import { buildHazardPressureReadout } from "./game/hazard";
@@ -166,6 +166,7 @@ export function App() {
   const targetDistanceLabel = hud.targetDistance === undefined ? "-" : `${Math.round(hud.targetDistance)}m`;
   const bearingGuidance = hud.targetRelativeBearing === undefined ? undefined : formatBearingGuidance(hud.targetRelativeBearing);
   const dockingSpeedReadout = buildDockingSpeedReadout({ speed: hud.speed, allowedSpeed: hud.targetAllowedSpeed });
+  const approachRewardReadout = buildApproachRewardReadout({ approachStreakSeconds: hud.approachStreakSeconds });
   const primaryActionLabel = preflightOpen ? "Launch" : paused ? "Resume" : "Pause";
   const canBoost = canUseImpulseControl({ action: "boost", fuel: hud.fuel, paused, preflightOpen, status: hud.status });
   const canBrake = canUseImpulseControl({ action: "brake", fuel: hud.fuel, paused, preflightOpen, status: hud.status });
@@ -408,10 +409,13 @@ export function App() {
             {guidanceLabel(hud.landingStatus, Boolean(hud.assistAvailable))}
           </div>
         ) : null}
-        {hud.approachStreakSeconds >= 0.25 ? (
-          <div className="streak-chip">
-            <span>Stable approach</span>
-            <strong>{hud.approachStreakSeconds.toFixed(1)}s</strong>
+        {approachRewardReadout ? (
+          <div
+            className={`streak-chip streak-${approachRewardReadout.tone}`}
+            aria-label={`${approachRewardReadout.label}: ${approachRewardReadout.value}`}
+          >
+            <span>{approachRewardReadout.label}</span>
+            <strong>{approachRewardReadout.value}</strong>
           </div>
         ) : null}
         <div className="status-row">
