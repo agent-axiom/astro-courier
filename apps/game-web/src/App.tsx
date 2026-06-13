@@ -65,6 +65,7 @@ import { buildCrashReasonLabel } from "./game/crash";
 import { buildReplayCaptureReadout } from "./game/replayReadout";
 import { deriveHudAudioEvents, type HudAudioSnapshot } from "./game/audioEvents";
 import { createGameAudioController, type GameAudioController } from "./game/gameAudio";
+import { createGameHapticsController, type GameHapticsController } from "./game/gameHaptics";
 import { buildAudioTogglePresentation } from "./game/audioControls";
 import { buildTouchFlightPadPresentation } from "./game/touchControls";
 import { buildScreenFeedback, type ScreenFeedback } from "./game/screenFeedback";
@@ -147,6 +148,7 @@ export function App() {
   const shellRef = useRef<GameShell | null>(null);
   const recordedRunRef = useRef<string | null>(null);
   const audioRef = useRef<GameAudioController | null>(null);
+  const hapticsRef = useRef<GameHapticsController | null>(null);
   const previousAudioSnapshotRef = useRef<HudAudioSnapshot | undefined>(undefined);
   const screenFeedbackTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const hud = useGameStore((state) => state.hud);
@@ -190,6 +192,15 @@ export function App() {
   }, []);
 
   useEffect(() => {
+    const haptics = createGameHapticsController();
+    hapticsRef.current = haptics;
+
+    return () => {
+      hapticsRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
     audioRef.current?.setMuted(audioMuted);
   }, [audioMuted]);
 
@@ -227,6 +238,7 @@ export function App() {
     const events = deriveHudAudioEvents(previousAudioSnapshotRef.current, currentSnapshot);
     previousAudioSnapshotRef.current = currentSnapshot;
     audioRef.current?.play(events);
+    hapticsRef.current?.play(events);
     const feedback = buildScreenFeedback(events);
     if (feedback) {
       if (screenFeedbackTimerRef.current) {
