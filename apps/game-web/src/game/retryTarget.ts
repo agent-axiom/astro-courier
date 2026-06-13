@@ -103,7 +103,7 @@ export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
     };
   }
 
-  if (input.contractId === "return-leg") {
+  if (input.contractId === "return-leg" || input.contractId === "chain-relay") {
     return {
       label: "Retry target",
       value: "Carry Chain Finish",
