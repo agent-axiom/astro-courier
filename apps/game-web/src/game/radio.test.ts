@@ -13,6 +13,8 @@ const baseHud: HudState = {
   pickupLabel: "Luma North Pad",
   destinationLabel: "Tea Station Dock A",
   cargoName: "Bottled Starlight",
+  cargoKind: "fragile",
+  cargoFragility: 0.8,
   contractOptions: [
     {
       id: "first-light-delivery",
@@ -23,6 +25,8 @@ const baseHud: HudState = {
       pickupLabel: "Luma North Pad",
       destinationLabel: "Tea Station Dock A",
       cargoName: "Bottled Starlight",
+      cargoKind: "fragile",
+      cargoFragility: 0.8,
       medalTimes: { bronze: 90, silver: 55, gold: 35 }
     }
   ],

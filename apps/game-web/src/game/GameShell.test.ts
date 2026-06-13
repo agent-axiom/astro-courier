@@ -140,6 +140,8 @@ describe("GameShell lifecycle", () => {
         pickupLabel: "Luma North Pad",
         destinationLabel: "Tea Station Dock A",
         cargoName: "Bottled Starlight",
+        cargoKind: "fragile",
+        cargoFragility: 0.8,
         medalTimes: { bronze: 90, silver: 55, gold: 35 }
       },
       {
@@ -151,6 +153,8 @@ describe("GameShell lifecycle", () => {
         pickupLabel: "Tea Station Dock A",
         destinationLabel: "Luma North Pad",
         cargoName: "Bottled Starlight",
+        cargoKind: "fragile",
+        cargoFragility: 0.8,
         medalTimes: { bronze: 80, silver: 48, gold: 30 }
       },
       {
@@ -162,6 +166,8 @@ describe("GameShell lifecycle", () => {
         pickupLabel: "Luma North Pad",
         destinationLabel: "Tea Station Dock A",
         cargoName: "Volatile Comet Ice",
+        cargoKind: "unstable",
+        cargoFragility: 1,
         medalTimes: { bronze: 70, silver: 42, gold: 24 }
       }
     ]);
@@ -189,12 +195,16 @@ describe("GameShell lifecycle", () => {
       contractId: "asteroid-sprint",
       contractTitle: "Asteroid Sprint",
       contractBriefing: "Thread the asteroid field with volatile comet ice, load fast, and bring the cargo home before the sprint window closes.",
-      cargoName: "Volatile Comet Ice"
+      cargoName: "Volatile Comet Ice",
+      cargoKind: "unstable",
+      cargoFragility: 1
     });
     expect(onHud.mock.calls.at(-1)?.[0].contractOptions).toContainEqual(
       expect.objectContaining({
         id: "asteroid-sprint",
-        briefing: "Thread the asteroid field with volatile comet ice, load fast, and bring the cargo home before the sprint window closes."
+        briefing: "Thread the asteroid field with volatile comet ice, load fast, and bring the cargo home before the sprint window closes.",
+        cargoKind: "unstable",
+        cargoFragility: 1
       })
     );
   });

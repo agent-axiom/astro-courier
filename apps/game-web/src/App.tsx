@@ -9,6 +9,7 @@ import {
   Play,
   RotateCcw,
   Satellite,
+  ShieldAlert,
   Star,
   TimerReset,
   Trophy,
@@ -26,7 +27,7 @@ import { buildLiveStyleReward } from "./game/style";
 import { buildObjectiveDirective } from "./game/objective";
 import { buildPreflightMasteryTargets } from "./game/mastery";
 import { buildDockingSpeedReadout } from "./game/docking";
-import { buildCargoManifest } from "./game/cargo";
+import { buildCargoManifest, buildCargoRiskReadout } from "./game/cargo";
 
 type GameStore = {
   hud: HudState;
@@ -44,6 +45,8 @@ const initialHud: HudState = {
   pickupLabel: "Luma North Pad",
   destinationLabel: "Tea Station Dock A",
   cargoName: "Bottled Starlight",
+  cargoKind: "fragile",
+  cargoFragility: 0.8,
   contractOptions: [],
   elapsedSeconds: 0,
   score: 0,
@@ -166,6 +169,13 @@ export function App() {
   });
   const preflightMasteryTargets = buildPreflightMasteryTargets({ goldSeconds: hud.paceSecondsRemaining });
   const cargoManifest = buildCargoManifest({ cargoName: hud.cargoName, cargoOnboard: hud.cargoOnboard });
+  const cargoRiskReadout = buildCargoRiskReadout({
+    cargoKind: hud.cargoKind,
+    cargoFragility: hud.cargoFragility,
+    cargoDamage: hud.cargoDamage,
+    cargoOnboard: hud.cargoOnboard,
+    hazardDangerLevel: hud.hazardDangerLevel
+  });
 
   const launchContract = () => {
     setPreflightOpen(false);
@@ -318,6 +328,10 @@ export function App() {
             <strong>{hud.hazardDistance === undefined ? "" : `${Math.round(hud.hazardDistance)}m`}</strong>
           </div>
         ) : null}
+        <div className={`cargo-risk-chip cargo-risk-${cargoRiskReadout.tone}`} aria-label={`${cargoRiskReadout.label}: ${cargoRiskReadout.value}`}>
+          <span>{cargoRiskReadout.label}</span>
+          <strong>{cargoRiskReadout.value}</strong>
+        </div>
         {hud.landingStatus ? (
           <div className={`guidance-chip guidance-${hud.assistAvailable ? "assist" : hud.landingStatus}`}>
             {guidanceLabel(hud.landingStatus, Boolean(hud.assistAvailable))}
@@ -350,6 +364,11 @@ export function App() {
             <PackageCheck size={18} />
             <span>{cargoManifest.label}</span>
             <strong>{cargoManifest.value}</strong>
+          </div>
+          <div className={`cargo-risk-briefing cargo-risk-${cargoRiskReadout.tone}`} aria-label={`${cargoRiskReadout.label}: ${cargoRiskReadout.value}`}>
+            <ShieldAlert size={18} />
+            <span>{cargoRiskReadout.label}</span>
+            <strong>{cargoRiskReadout.value}</strong>
           </div>
           <div className="contract-traits" aria-label="Contract risk and reward">
             <span>

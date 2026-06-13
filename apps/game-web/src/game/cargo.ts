@@ -3,9 +3,23 @@ export type CargoManifestInput = {
   cargoOnboard: boolean;
 };
 
+export type CargoRiskReadoutInput = {
+  cargoKind: string;
+  cargoFragility: number;
+  cargoDamage: number;
+  cargoOnboard: boolean;
+  hazardDangerLevel?: "near" | "inside";
+};
+
 export type CargoManifest = {
   label: "Cargo";
   value: string;
+};
+
+export type CargoRiskReadout = {
+  label: "Cargo risk" | "Cargo stress";
+  value: string;
+  tone: "normal" | "warning" | "danger";
 };
 
 export function buildCargoManifest(input: CargoManifestInput): CargoManifest {
@@ -13,4 +27,45 @@ export function buildCargoManifest(input: CargoManifestInput): CargoManifest {
     label: "Cargo",
     value: input.cargoName
   };
+}
+
+export function buildCargoRiskReadout(input: CargoRiskReadoutInput): CargoRiskReadout {
+  if (input.cargoOnboard) {
+    const integrity = `${Math.round(Math.max(0, 1 - input.cargoDamage) * 100)}%`;
+    if (input.hazardDangerLevel === "inside") {
+      return {
+        label: "Cargo stress",
+        value: `${integrity} / contact`,
+        tone: "danger"
+      };
+    }
+    if (input.hazardDangerLevel === "near") {
+      return {
+        label: "Cargo stress",
+        value: `${integrity} / hazard near`,
+        tone: input.cargoFragility >= 0.95 ? "warning" : "normal"
+      };
+    }
+    if (input.cargoDamage > 0.02) {
+      return {
+        label: "Cargo stress",
+        value: `${integrity} intact`,
+        tone: input.cargoDamage >= 0.3 ? "danger" : "warning"
+      };
+    }
+  }
+
+  return {
+    label: "Cargo risk",
+    value: `${titleCase(input.cargoKind)} ${input.cargoFragility.toFixed(2)}x`,
+    tone: input.cargoFragility >= 0.95 || input.cargoKind === "unstable" ? "warning" : "normal"
+  };
+}
+
+function titleCase(value: string): string {
+  return value
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
 }

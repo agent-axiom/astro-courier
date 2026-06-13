@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCargoManifest } from "./cargo";
+import { buildCargoManifest, buildCargoRiskReadout } from "./cargo";
 
 describe("cargo manifest HUD copy", () => {
   it("shows the assigned cargo before pickup", () => {
@@ -13,6 +13,37 @@ describe("cargo manifest HUD copy", () => {
     expect(buildCargoManifest({ cargoName: "Bottled Starlight", cargoOnboard: true })).toEqual({
       label: "Cargo",
       value: "Bottled Starlight"
+    });
+  });
+
+  it("surfaces unstable cargo risk before launch", () => {
+    expect(
+      buildCargoRiskReadout({
+        cargoKind: "unstable",
+        cargoFragility: 1,
+        cargoDamage: 0,
+        cargoOnboard: false
+      })
+    ).toEqual({
+      label: "Cargo risk",
+      value: "Unstable 1.00x",
+      tone: "warning"
+    });
+  });
+
+  it("switches to stress readout during hazard contact", () => {
+    expect(
+      buildCargoRiskReadout({
+        cargoKind: "unstable",
+        cargoFragility: 1,
+        cargoDamage: 0.18,
+        cargoOnboard: true,
+        hazardDangerLevel: "inside"
+      })
+    ).toEqual({
+      label: "Cargo stress",
+      value: "82% / contact",
+      tone: "danger"
     });
   });
 });

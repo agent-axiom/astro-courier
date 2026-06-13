@@ -389,6 +389,41 @@ button {
   color: #ffadc1;
 }
 
+.cargo-risk-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 36px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: 0.84rem;
+  font-weight: 850;
+}
+
+.cargo-risk-chip span {
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.cargo-risk-chip strong {
+  color: #ffffff;
+}
+
+.cargo-risk-normal {
+  background: rgba(142, 230, 184, 0.14);
+  color: #bff7d8;
+}
+
+.cargo-risk-warning {
+  background: rgba(255, 209, 102, 0.17);
+  color: #ffe19a;
+}
+
+.cargo-risk-danger {
+  background: rgba(255, 111, 145, 0.18);
+  color: #ffadc1;
+}
+
 .landing-rating {
   min-height: 36px;
   padding: 9px 10px;
@@ -533,6 +568,35 @@ button {
 }
 
 .cargo-manifest strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.cargo-risk-briefing {
+  display: grid;
+  grid-template-columns: 18px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 9px 10px;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.cargo-risk-briefing span,
+.cargo-risk-briefing strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.cargo-risk-briefing span {
+  color: rgba(255, 255, 255, 0.72);
+  text-transform: uppercase;
+}
+
+.cargo-risk-briefing strong {
   color: #ffffff;
   text-align: right;
 }
