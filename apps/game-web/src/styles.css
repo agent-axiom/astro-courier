@@ -1314,6 +1314,71 @@ button {
   color: #bff7d8;
 }
 
+.contract-modifiers {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.contract-modifier {
+  display: grid;
+  grid-template-columns: 17px 1fr;
+  min-width: 0;
+  min-height: 48px;
+  gap: 3px 7px;
+  align-content: center;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: 0.78rem;
+}
+
+.contract-modifier small,
+.contract-modifier strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.12;
+}
+
+.contract-modifier small {
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.66rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.contract-modifier strong {
+  grid-column: 2;
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.contract-modifier-cargo {
+  background: rgba(142, 230, 184, 0.12);
+  color: #bff7d8;
+}
+
+.contract-modifier-danger {
+  background: rgba(255, 111, 145, 0.14);
+  color: #ffadc1;
+}
+
+.contract-modifier-fuel,
+.contract-modifier-speed {
+  background: rgba(124, 225, 255, 0.14);
+  color: #c6f6ff;
+}
+
+.contract-modifier-precision {
+  background: rgba(255, 209, 102, 0.15);
+  color: #ffe19a;
+}
+
+.contract-modifier-style {
+  background: rgba(255, 209, 102, 0.17);
+  color: #ffe19a;
+}
+
 .best-chase-briefing {
   display: grid;
   grid-template-columns: 18px auto 1fr;

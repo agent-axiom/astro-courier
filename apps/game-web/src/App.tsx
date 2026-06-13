@@ -43,6 +43,7 @@ import { buildBoostControlPresentation, canUseImpulseControl } from "./game/hudC
 import {
   buildContractDangerPayTrait,
   buildContractHazardTrait,
+  buildContractModifiers,
   buildContractPreflightKicker,
   buildContractRoutePlan,
   buildDailyDispatch,
@@ -506,6 +507,13 @@ export function App() {
     hazardSeverityMultiplier: hud.hazardSeverityMultiplier,
     goldSeconds: hud.paceSecondsRemaining
   });
+  const contractModifiers = buildContractModifiers({
+    contractId: hud.contractId,
+    cargoKind: hud.cargoKind,
+    cargoFragility: hud.cargoFragility,
+    hazardSeverityMultiplier: hud.hazardSeverityMultiplier,
+    goldSeconds: hud.paceSecondsRemaining
+  });
   const preflightKicker = buildContractPreflightKicker({
     contractId: hud.contractId,
     hazardSeverityMultiplier: hud.hazardSeverityMultiplier,
@@ -867,6 +875,27 @@ export function App() {
             <Route size={18} />
             <span>{routePlan.label}</span>
             <strong>{routePlan.value}</strong>
+          </div>
+          <div className="contract-modifiers" aria-label="Contract modifiers">
+            {contractModifiers.map((modifier) => (
+              <span key={`${modifier.label}-${modifier.value}`} className={`contract-modifier contract-modifier-${modifier.tone}`}>
+                {modifier.tone === "danger" ? (
+                  <ShieldAlert size={17} />
+                ) : modifier.tone === "fuel" ? (
+                  <Zap size={17} />
+                ) : modifier.tone === "style" ? (
+                  <Star size={17} />
+                ) : modifier.tone === "speed" ? (
+                  <Gauge size={17} />
+                ) : modifier.tone === "precision" ? (
+                  <Target size={17} />
+                ) : (
+                  <PackageCheck size={17} />
+                )}
+                <small>{modifier.label}</small>
+                <strong>{modifier.value}</strong>
+              </span>
+            ))}
           </div>
           <div className={`best-chase-briefing best-chase-${bestRunChase.tone}`} aria-label={`${bestRunChase.label}: ${bestRunChase.value}`}>
             <Trophy size={18} />

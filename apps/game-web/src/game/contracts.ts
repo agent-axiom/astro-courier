@@ -58,6 +58,14 @@ export type ContractRoutePlan = {
   tone: "danger" | "careful" | "speed" | "balanced";
 };
 
+export type ContractModifierTone = "cargo" | "danger" | "fuel" | "precision" | "speed" | "style";
+
+export type ContractModifier = {
+  label: string;
+  value: string;
+  tone: ContractModifierTone;
+};
+
 export function getNextContractId(contracts: readonly ContractIdentity[], currentContractId: string): string {
   if (contracts.length < 2) {
     return currentContractId;
@@ -255,4 +263,81 @@ export function buildContractRoutePlan(input: ContractRoutePlanInput): ContractR
     value: "Clean line, spare fuel",
     tone: "balanced"
   };
+}
+
+export function buildContractModifiers(input: ContractRoutePlanInput): ContractModifier[] {
+  if (input.contractId === "gravity-slingshot") {
+    return [
+      { label: "Sling", value: "+240 style", tone: "style" },
+      { label: "Speed", value: "54+ entry", tone: "speed" },
+      { label: "Cargo", value: "Soft dock", tone: "precision" }
+    ];
+  }
+
+  if (input.contractId === "chain-relay") {
+    return [
+      { label: "Chain", value: "5.5s relay", tone: "style" },
+      { label: "Hazard", value: formatHazardField(input.hazardSeverityMultiplier), tone: "danger" },
+      { label: "Pace", value: `Gold ${input.goldSeconds}s`, tone: "speed" }
+    ];
+  }
+
+  if (input.contractId === "asteroid-sprint") {
+    return [
+      { label: "Thread", value: "Needle pay", tone: "danger" },
+      { label: "Hazard", value: formatHazardField(input.hazardSeverityMultiplier), tone: "danger" },
+      { label: "Pace", value: `Gold ${input.goldSeconds}s`, tone: "speed" }
+    ];
+  }
+
+  if (input.contractId === "last-drop-run") {
+    return [
+      { label: "Fuel", value: "Below 5%", tone: "fuel" },
+      { label: "Burns", value: "Minimal", tone: "speed" },
+      { label: "Cargo", value: cargoModifierValue(input), tone: cargoModifierTone(input) }
+    ];
+  }
+
+  if (input.contractId === "return-leg") {
+    return [
+      { label: "Line", value: "Reverse route", tone: "precision" },
+      { label: "Pace", value: `Gold ${input.goldSeconds}s`, tone: "speed" },
+      { label: "Cargo", value: cargoModifierValue(input), tone: cargoModifierTone(input) }
+    ];
+  }
+
+  return [
+    { label: "Hazard", value: formatHazardField(input.hazardSeverityMultiplier), tone: hazardModifierTone(input.hazardSeverityMultiplier) },
+    { label: "Pace", value: `Gold ${input.goldSeconds}s`, tone: input.goldSeconds <= 30 ? "speed" : "precision" },
+    { label: "Cargo", value: cargoModifierValue(input), tone: cargoModifierTone(input) }
+  ];
+}
+
+function formatHazardField(multiplier: number | undefined): string {
+  const value = multiplier ?? 1;
+  return value > 1 ? `${value.toFixed(2)}x field` : "Standard field";
+}
+
+function hazardModifierTone(multiplier: number | undefined): ContractModifierTone {
+  return (multiplier ?? 1) > 1 ? "danger" : "precision";
+}
+
+function cargoModifierValue(input: ContractRoutePlanInput): string {
+  if (input.cargoFragility < 0.9 || input.cargoKind === "fragile") {
+    return "Fragile load";
+  }
+  if (input.cargoKind === "volatile" || input.cargoKind === "unstable") {
+    return "Stable load";
+  }
+  return "Standard load";
+}
+
+function cargoModifierTone(input: ContractRoutePlanInput): ContractModifierTone {
+  if (input.cargoFragility < 0.9 || input.cargoKind === "fragile") {
+    return "precision";
+  }
+  if (input.cargoKind === "volatile" || input.cargoKind === "unstable") {
+    return "cargo";
+  }
+  return "cargo";
 }

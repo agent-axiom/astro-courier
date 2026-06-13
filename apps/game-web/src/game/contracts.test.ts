@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildContractDangerPayTrait,
+  buildContractModifiers,
   buildContractHazardTrait,
   buildContractPreflightKicker,
   buildContractRoutePlan,
@@ -247,5 +248,45 @@ describe("contract rotation", () => {
       value: "Minimal burns, fast dock",
       tone: "speed"
     });
+  });
+
+  it("builds scan-friendly modifier chips for special contract identities", () => {
+    expect(
+      buildContractModifiers({
+        contractId: "gravity-slingshot",
+        cargoKind: "fragile",
+        cargoFragility: 0.8,
+        hazardSeverityMultiplier: 1.2,
+        goldSeconds: 26
+      })
+    ).toEqual([
+      { label: "Sling", value: "+240 style", tone: "style" },
+      { label: "Speed", value: "54+ entry", tone: "speed" },
+      { label: "Cargo", value: "Soft dock", tone: "precision" }
+    ]);
+
+    const lastDropModifiers = buildContractModifiers({
+      contractId: "last-drop-run",
+      cargoKind: "time-sensitive",
+      cargoFragility: 0.9,
+      goldSeconds: 27
+    });
+
+    expect(lastDropModifiers[0]).toEqual({ label: "Fuel", value: "Below 5%", tone: "fuel" });
+  });
+
+  it("falls back to pressure-based modifier chips for generic routes", () => {
+    expect(
+      buildContractModifiers({
+        cargoKind: "volatile",
+        cargoFragility: 1,
+        hazardSeverityMultiplier: 1.45,
+        goldSeconds: 24
+      })
+    ).toEqual([
+      { label: "Hazard", value: "1.45x field", tone: "danger" },
+      { label: "Pace", value: "Gold 24s", tone: "speed" },
+      { label: "Cargo", value: "Stable load", tone: "cargo" }
+    ]);
   });
 });
