@@ -26,6 +26,45 @@ export function objectiveBeaconPulse(tick: number): { radius: number; alpha: num
   };
 }
 
+type LandingPadVisualInput = Pick<SimulationSnapshot["landingPads"][number], "role" | "active" | "destination">;
+
+export type LandingPadVisual = {
+  color: number;
+  strokeWidth: number;
+  alpha: number;
+  haloAlpha: number;
+  beaconAlpha: number;
+};
+
+export function landingPadVisual(pad: LandingPadVisualInput): LandingPadVisual {
+  const color = pad.role === "destination" ? 0xffd166 : pad.role === "pickup" ? 0x8ee6b8 : 0xa0c4ff;
+  if (pad.active) {
+    return {
+      color,
+      strokeWidth: 4,
+      alpha: 1,
+      haloAlpha: 0.18,
+      beaconAlpha: 0.82
+    };
+  }
+  if (pad.destination) {
+    return {
+      color,
+      strokeWidth: 3,
+      alpha: 0.68,
+      haloAlpha: 0.08,
+      beaconAlpha: 0
+    };
+  }
+  return {
+    color,
+    strokeWidth: 2,
+    alpha: 0.38,
+    haloAlpha: 0,
+    beaconAlpha: 0
+  };
+}
+
 class PixiRenderer implements AstroPixiRenderer {
   private app?: Application;
   private mountElement?: HTMLElement;
@@ -201,17 +240,27 @@ class PixiRenderer implements AstroPixiRenderer {
 
     for (const pad of snapshot.landingPads) {
       const center = project(pad.position);
-      const color = pad.role === "destination" ? 0xffd166 : pad.role === "pickup" ? 0x8ee6b8 : 0xa0c4ff;
-      const width = pad.active ? 4 : 2;
-      const alpha = pad.active ? 1 : 0.45;
-      if (pad.active) {
-        this.world.circle(center.x, center.y, pad.radius + 9).fill({ color, alpha: 0.12 });
+      const visual = landingPadVisual(pad);
+      if (visual.haloAlpha > 0) {
+        this.world.circle(center.x, center.y, pad.radius + 12).fill({ color: visual.color, alpha: visual.haloAlpha * 0.58 });
+        this.world.circle(center.x, center.y, pad.radius + 16).stroke({
+          color: visual.color,
+          width: 1,
+          alpha: visual.haloAlpha
+        });
       }
-      this.world.circle(center.x, center.y, pad.radius).stroke({ color, width, alpha });
+      this.world.circle(center.x, center.y, pad.radius).stroke({
+        color: visual.color,
+        width: visual.strokeWidth,
+        alpha: visual.alpha
+      });
       this.world
         .moveTo(center.x, center.y)
         .lineTo(center.x + Math.cos(pad.normalAngle) * pad.radius, center.y + Math.sin(pad.normalAngle) * pad.radius)
-        .stroke({ color, width: 2, alpha });
+        .stroke({ color: visual.color, width: 2, alpha: visual.alpha });
+      if (visual.beaconAlpha > 0) {
+        this.world.circle(center.x, center.y, 4).fill({ color: visual.color, alpha: visual.beaconAlpha });
+      }
     }
   }
 
