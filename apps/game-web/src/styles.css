@@ -239,6 +239,88 @@ button {
   text-align: center;
 }
 
+.preflight-overlay {
+  position: absolute;
+  top: 52%;
+  left: 50%;
+  display: grid;
+  width: min(390px, calc(100vw - 32px));
+  gap: 13px;
+  padding: 20px;
+  border: 1px solid rgba(160, 196, 255, 0.28);
+  border-radius: 8px;
+  background: rgba(8, 13, 28, 0.8);
+  color: #ffffff;
+  transform: translate(-50%, -50%);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 0 54px rgba(124, 225, 255, 0.12);
+}
+
+.preflight-kicker {
+  color: #7ce1ff;
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.preflight-overlay h2,
+.preflight-overlay p {
+  margin: 0;
+}
+
+.preflight-overlay h2 {
+  font-size: 1.5rem;
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+
+.preflight-overlay p {
+  color: #c9d8f2;
+  font-size: 0.93rem;
+  line-height: 1.45;
+}
+
+.preflight-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.preflight-stats span {
+  display: grid;
+  min-width: 0;
+  min-height: 62px;
+  place-items: center;
+  gap: 5px;
+  padding: 10px 8px;
+  border-radius: 7px;
+  background: rgba(160, 196, 255, 0.1);
+  color: #e8f0ff;
+  font-size: 0.82rem;
+  font-weight: 850;
+  text-align: center;
+}
+
+.preflight-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 15px;
+  border: 1px solid rgba(142, 230, 184, 0.72);
+  border-radius: 8px;
+  background: rgba(142, 230, 184, 0.18);
+  color: #eafff3;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.preflight-button:hover {
+  background: rgba(142, 230, 184, 0.26);
+}
+
 .result-overlay {
   position: absolute;
   top: 50%;
@@ -393,5 +475,21 @@ button {
     right: 10px;
     bottom: 10px;
     width: calc(100vw - 20px);
+  }
+
+  .preflight-overlay {
+    top: 54%;
+    width: calc(100vw - 20px);
+    padding: 16px;
+  }
+
+  .preflight-overlay h2 {
+    font-size: 1.25rem;
+  }
+
+  .preflight-stats span {
+    min-height: 56px;
+    padding: 8px 6px;
+    font-size: 0.76rem;
   }
 }

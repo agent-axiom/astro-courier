@@ -1,6 +1,10 @@
 import type { HudState } from "./GameShell";
 
 export function buildRadioMessage(hud: HudState): string {
+  if (hud.status === "paused") {
+    return "Contract loaded. Review the route and launch when the courier is lined up.";
+  }
+
   if (hud.status === "crashed") {
     return `Insurance desk reports: ${hud.landingRating ?? "courier incident logged"}.`;
   }
@@ -35,4 +39,3 @@ export function buildRadioMessage(hud: HudState): string {
 
   return "Pickup beacon active. Bring the courier close and keep it tidy.";
 }
-

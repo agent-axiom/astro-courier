@@ -10,7 +10,7 @@ type GameStore = {
 };
 
 const initialHud: HudState = {
-  status: "flying",
+  status: "paused",
   objectivePhase: "pickup",
   contractTitle: "First Light Delivery",
   elapsedSeconds: 0,
@@ -33,14 +33,16 @@ export function App() {
   const shellRef = useRef<GameShell | null>(null);
   const hud = useGameStore((state) => state.hud);
   const setHud = useGameStore((state) => state.setHud);
-  const [paused, setPaused] = useState(false);
+  const [paused, setPaused] = useState(true);
+  const [preflightOpen, setPreflightOpen] = useState(true);
 
   useEffect(() => {
     if (!canvasMountRef.current) return undefined;
 
     const shell = new GameShell({
       mount: canvasMountRef.current,
-      onHud: setHud
+      onHud: setHud,
+      initialPaused: true
     });
     shellRef.current = shell;
     void shell.start();
@@ -55,6 +57,20 @@ export function App() {
   const cargoIntegrity = Math.max(0, 1 - hud.cargoDamage);
   const runFinished = hud.status === "delivered" || hud.status === "crashed";
   const radioMessage = buildRadioMessage(hud);
+  const targetDistanceLabel = hud.targetDistance === undefined ? "-" : `${Math.round(hud.targetDistance)}m`;
+  const primaryActionLabel = preflightOpen ? "Launch" : paused ? "Resume" : "Pause";
+
+  const launchContract = () => {
+    setPreflightOpen(false);
+    setPaused(false);
+    shellRef.current?.setPaused(false);
+  };
+
+  const restartToBriefing = () => {
+    setPreflightOpen(true);
+    setPaused(true);
+    shellRef.current?.restart(true);
+  };
 
   return (
     <main className="app-shell">
@@ -84,9 +100,13 @@ export function App() {
           <button
             type="button"
             className="icon-button"
-            aria-label={paused ? "Resume" : "Pause"}
-            title={paused ? "Resume" : "Pause"}
+            aria-label={primaryActionLabel}
+            title={primaryActionLabel}
             onClick={() => {
+              if (preflightOpen) {
+                launchContract();
+                return;
+              }
               const next = !paused;
               setPaused(next);
               shellRef.current?.setPaused(next);
@@ -99,10 +119,7 @@ export function App() {
             className="icon-button"
             aria-label="Restart"
             title="Restart"
-            onClick={() => {
-              setPaused(false);
-              shellRef.current?.restart();
-            }}
+            onClick={restartToBriefing}
           >
             <RotateCcw size={20} />
           </button>
@@ -121,7 +138,7 @@ export function App() {
         </div>
         <div className="status-row">
           <span>Target</span>
-          <strong>{hud.targetDistance === undefined ? "-" : `${Math.round(hud.targetDistance)}m`}</strong>
+          <strong>{targetDistanceLabel}</strong>
         </div>
         {hud.landingStatus ? (
           <div className={`guidance-chip guidance-${hud.assistAvailable ? "assist" : hud.landingStatus}`}>
@@ -140,6 +157,32 @@ export function App() {
         {hud.landingRating ? <div className="landing-rating">{hud.landingRating}</div> : null}
       </aside>
 
+      {preflightOpen && !runFinished ? (
+        <section className="preflight-overlay" aria-label="Launch briefing">
+          <div className="preflight-kicker">Starter Contract</div>
+          <h2>{hud.contractTitle}</h2>
+          <p>Pickup beacon is live. The destination pad is paying for intact cargo and a clean approach.</p>
+          <div className="preflight-stats" aria-label="Contract briefing">
+            <span>
+              <PackageCheck size={18} />
+              Pickup
+            </span>
+            <span>
+              <Gauge size={18} />
+              {targetDistanceLabel}
+            </span>
+            <span>
+              <Zap size={18} />
+              {Math.round(fuelRatio * 100)}%
+            </span>
+          </div>
+          <button type="button" className="preflight-button" onClick={launchContract}>
+            <Play size={18} />
+            Launch Contract
+          </button>
+        </section>
+      ) : null}
+
       {runFinished ? (
         <section className={`result-overlay result-${hud.status}`} aria-label="Run result">
           <Trophy aria-hidden="true" size={28} />
@@ -154,10 +197,7 @@ export function App() {
           <button
             type="button"
             className="result-button"
-            onClick={() => {
-              setPaused(false);
-              shellRef.current?.restart();
-            }}
+            onClick={restartToBriefing}
           >
             <RotateCcw size={18} />
             Restart

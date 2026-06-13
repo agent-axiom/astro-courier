@@ -36,6 +36,7 @@ export type GameShellOptions = {
   onHud: (hud: HudState) => void;
   renderer?: AstroPixiRenderer;
   input?: InputSource;
+  initialPaused?: boolean;
 };
 
 const fixedDt = 1 / 60;
@@ -59,6 +60,7 @@ export class GameShell {
     this.onHud = options.onHud;
     this.renderer = options.renderer ?? createAstroPixiRenderer();
     this.input = options.input ?? new KeyboardInput(window);
+    this.paused = Boolean(options.initialPaused);
     this.world = this.createFreshWorld();
   }
 
@@ -73,11 +75,11 @@ export class GameShell {
     this.rafId = requestAnimationFrame(this.frame);
   }
 
-  restart(): void {
+  restart(paused = false): void {
     if (this.destroyed) {
       return;
     }
-    this.paused = false;
+    this.paused = paused;
     this.accumulator = 0;
     this.hudTimer = 0;
     this.lastTime = performance.now();
@@ -136,7 +138,11 @@ export class GameShell {
 
   private createFreshWorld(): SimulationWorld {
     const system = validateSystemContent(starterRoute);
-    return createWorldFromSystem(system, "local-starter-seed");
+    const world = createWorldFromSystem(system, "local-starter-seed");
+    if (this.paused) {
+      world.status = "paused";
+    }
+    return world;
   }
 
   private publishHud(): void {

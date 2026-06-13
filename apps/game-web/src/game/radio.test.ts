@@ -29,9 +29,12 @@ describe("radio feedback copy", () => {
     expect(buildRadioMessage({ ...baseHud, landingStatus: "too-fast", assistAvailable: false })).toContain("Slow");
   });
 
+  it("keeps preflight copy distinct from active pickup guidance", () => {
+    expect(buildRadioMessage({ ...baseHud, status: "paused" })).toContain("Contract loaded");
+  });
+
   it("celebrates strong deliveries and reports crashes", () => {
     expect(buildRadioMessage({ ...baseHud, status: "delivered", medal: "comet" })).toContain("Comet");
     expect(buildRadioMessage({ ...baseHud, status: "crashed", landingRating: "Insurance Event" })).toContain("Insurance");
   });
 });
-
