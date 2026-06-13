@@ -32,6 +32,10 @@ export function buildRadioMessage(hud: HudState): string {
     return `Hazard contact. Exit the field${hud.hazardDistance === undefined ? "" : `, ${Math.round(hud.hazardDistance)}m from center`}.`;
   }
 
+  if (hud.cargoOnboard && hud.cargoDamage > 0.02) {
+    return `Cargo integrity ${Math.round(Math.max(0, 1 - hud.cargoDamage) * 100)}%. Keep it out of hazards and dock clean.`;
+  }
+
   if (hud.hazardDangerLevel === "near") {
     return `Asteroid field ahead. Skim wide${hud.hazardDistance === undefined ? "" : `, ${Math.round(hud.hazardDistance)}m out`}.`;
   }

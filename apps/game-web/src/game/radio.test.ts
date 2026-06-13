@@ -78,6 +78,18 @@ describe("radio feedback copy", () => {
     expect(buildRadioMessage({ ...baseHud, hazardDangerLevel: "near", hazardDistance: 44 })).toContain("Asteroid");
   });
 
+  it("warns about damaged cargo before generic hazard proximity", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        cargoOnboard: true,
+        cargoDamage: 0.22,
+        hazardDangerLevel: "near",
+        hazardDistance: 44
+      })
+    ).toContain("Cargo integrity 78%");
+  });
+
   it("celebrates clean hazard skims before generic hazard warnings", () => {
     expect(buildRadioMessage({ ...baseHud, lastMilestone: "Clean Hazard Skim", hazardDangerLevel: "near", hazardDistance: 44 })).toContain("Style");
   });
