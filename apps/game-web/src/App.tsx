@@ -9,6 +9,7 @@ import {
   Play,
   RotateCcw,
   Satellite,
+  Star,
   TimerReset,
   Trophy,
   Zap
@@ -23,6 +24,7 @@ import { getNextContractId } from "./game/contracts";
 import { buildRadioMessage } from "./game/radio";
 import { buildLiveStyleReward } from "./game/style";
 import { buildObjectiveDirective } from "./game/objective";
+import { buildPreflightMasteryTargets } from "./game/mastery";
 
 type GameStore = {
   hud: HudState;
@@ -158,6 +160,7 @@ export function App() {
     styleBonus: hud.scoreBreakdown.styleBonus,
     lastMilestone: hud.lastMilestone
   });
+  const preflightMasteryTargets = buildPreflightMasteryTargets({ goldSeconds: hud.paceSecondsRemaining });
 
   const launchContract = () => {
     setPreflightOpen(false);
@@ -389,11 +392,13 @@ export function App() {
               <small>Destination</small>
               <strong>{hud.destinationLabel}</strong>
             </span>
-            <span>
-              <Trophy size={18} />
-              <small>Gold</small>
-              <strong>{hud.paceSecondsRemaining.toFixed(0)}s</strong>
-            </span>
+            {preflightMasteryTargets.map((target) => (
+              <span key={target.label}>
+                {target.label === "Comet" ? <Star size={18} /> : <Trophy size={18} />}
+                <small>{target.label}</small>
+                <strong>{target.value}</strong>
+              </span>
+            ))}
           </div>
           <button type="button" className="preflight-button" onClick={launchContract}>
             <Play size={18} />

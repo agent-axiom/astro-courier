@@ -616,7 +616,7 @@ button {
 
 .preflight-stats {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -970,6 +970,10 @@ button {
     min-height: 68px;
     padding: 8px 6px;
     font-size: 0.76rem;
+  }
+
+  .preflight-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .contract-selector {
