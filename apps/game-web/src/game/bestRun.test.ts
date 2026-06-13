@@ -408,6 +408,16 @@ describe("personal best result delta copy", () => {
 });
 
 describe("live personal best pace copy", () => {
+  const ghostBestRun = {
+    score: 3290,
+    elapsedSeconds: 24.7,
+    medal: "gold" as const,
+    ghostTrail: [
+      { x: 0, y: 0 },
+      { x: 12, y: 8 }
+    ]
+  };
+
   it("stays hidden without a saved best or after the run has finished", () => {
     expect(buildLiveBestPace({ bestRun: undefined, elapsedSeconds: 12, status: "flying" })).toBeUndefined();
     expect(
@@ -430,6 +440,63 @@ describe("live personal best pace copy", () => {
       label: "PB pace",
       value: "6.5s bank",
       tone: "ahead"
+    });
+  });
+
+  it("uses ghost chase copy when the saved best has a replay trail", () => {
+    expect(
+      buildLiveBestPace({
+        bestRun: ghostBestRun,
+        elapsedSeconds: 18.2,
+        status: "flying"
+      })
+    ).toEqual({
+      label: "Ghost chase",
+      value: "6.5s ahead of ghost",
+      tone: "ahead"
+    });
+  });
+
+  it("uses ghost copy for live score leads and score gaps", () => {
+    expect(
+      buildLiveBestPace({
+        bestRun: ghostBestRun,
+        score: 3440,
+        elapsedSeconds: 18.2,
+        status: "flying"
+      })
+    ).toEqual({
+      label: "Ghost chase",
+      value: "+150 ghost lead",
+      tone: "ahead"
+    });
+    expect(
+      buildLiveBestPace({
+        bestRun: ghostBestRun,
+        score: 3040,
+        elapsedSeconds: 27.1,
+        status: "flying"
+      })
+    ).toEqual({
+      label: "Ghost chase",
+      value: "Need +250 vs ghost",
+      tone: "behind"
+    });
+  });
+
+  it("uses ghost clutch copy for live score leads near the dock", () => {
+    expect(
+      buildLiveBestPace({
+        bestRun: ghostBestRun,
+        score: 3440,
+        elapsedSeconds: 22.4,
+        targetDistance: 120,
+        status: "flying"
+      })
+    ).toEqual({
+      label: "Ghost clutch",
+      value: "Defend ghost +150",
+      tone: "clutch"
     });
   });
 

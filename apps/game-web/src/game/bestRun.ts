@@ -40,7 +40,7 @@ export type LiveBestPaceInput = {
 };
 
 export type LiveBestPace = {
-  label: "PB pace" | "PB chase" | "PB clutch";
+  label: "PB pace" | "PB chase" | "PB clutch" | "Ghost chase" | "Ghost clutch";
   value: string;
   tone: "ahead" | "behind" | "clutch";
 };
@@ -308,18 +308,21 @@ export function buildLiveBestPace(input: LiveBestPaceInput): LiveBestPace | unde
     return undefined;
   }
 
+  const hasGhostTrail = (input.bestRun.ghostTrail?.length ?? 0) >= 2;
+  const chaseLabel = hasGhostTrail ? "Ghost chase" : "PB chase";
+  const clutchLabel = hasGhostTrail ? "Ghost clutch" : "PB clutch";
   const scoreDelta = (input.score ?? 0) - input.bestRun.score;
   if (scoreDelta > 0) {
     if ((input.targetDistance ?? Number.POSITIVE_INFINITY) <= 150) {
       return {
-        label: "PB clutch",
-        value: `Defend +${Math.round(scoreDelta)} into dock`,
+        label: clutchLabel,
+        value: hasGhostTrail ? `Defend ghost +${Math.round(scoreDelta)}` : `Defend +${Math.round(scoreDelta)} into dock`,
         tone: "clutch"
       };
     }
     return {
-      label: "PB chase",
-      value: `+${Math.round(scoreDelta)} score lead`,
+      label: chaseLabel,
+      value: hasGhostTrail ? `+${Math.round(scoreDelta)} ghost lead` : `+${Math.round(scoreDelta)} score lead`,
       tone: "ahead"
     };
   }
@@ -327,23 +330,23 @@ export function buildLiveBestPace(input: LiveBestPaceInput): LiveBestPace | unde
   const secondsDelta = input.bestRun.elapsedSeconds - input.elapsedSeconds;
   if (input.score !== undefined && scoreDelta < 0 && secondsDelta < 0) {
     return {
-      label: "PB chase",
-      value: `Need +${Math.round(Math.abs(scoreDelta))} score`,
+      label: chaseLabel,
+      value: hasGhostTrail ? `Need +${Math.round(Math.abs(scoreDelta))} vs ghost` : `Need +${Math.round(Math.abs(scoreDelta))} score`,
       tone: "behind"
     };
   }
 
   if (secondsDelta >= 0) {
     return {
-      label: "PB pace",
-      value: `${secondsDelta.toFixed(1)}s bank`,
+      label: hasGhostTrail ? "Ghost chase" : "PB pace",
+      value: hasGhostTrail ? `${secondsDelta.toFixed(1)}s ahead of ghost` : `${secondsDelta.toFixed(1)}s bank`,
       tone: "ahead"
     };
   }
 
   return {
-    label: "PB pace",
-    value: `${Math.abs(secondsDelta).toFixed(1)}s over`,
+    label: hasGhostTrail ? "Ghost chase" : "PB pace",
+    value: hasGhostTrail ? `${Math.abs(secondsDelta).toFixed(1)}s behind ghost` : `${Math.abs(secondsDelta).toFixed(1)}s over`,
     tone: "behind"
   };
 }
