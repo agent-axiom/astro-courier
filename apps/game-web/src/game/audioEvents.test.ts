@@ -65,6 +65,15 @@ describe("HUD audio events", () => {
     ).toEqual(["trajectory-warning"]);
   });
 
+  it("warns when damaged cargo enters a predicted hazard vector", () => {
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, cargoDamage: 0.18 },
+        { ...baseSnapshot, cargoDamage: 0.18, trajectoryRiskLevel: "near" }
+      )
+    ).toEqual(["trajectory-warning"]);
+  });
+
   it("celebrates the first live personal-best score lead", () => {
     expect(
       deriveHudAudioEvents(

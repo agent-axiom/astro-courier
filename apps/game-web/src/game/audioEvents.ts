@@ -104,6 +104,12 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
 
   if (previous?.trajectoryRiskLevel !== current.trajectoryRiskLevel && current.trajectoryRiskLevel === "inside") {
     events.push("trajectory-warning");
+  } else if (
+    previous?.trajectoryRiskLevel !== current.trajectoryRiskLevel &&
+    current.trajectoryRiskLevel === "near" &&
+    (current.cargoDamage ?? 0) > cleanCargoDamageLimit
+  ) {
+    events.push("trajectory-warning");
   }
 
   return events;
