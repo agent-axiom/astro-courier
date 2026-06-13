@@ -1,4 +1,5 @@
 import {
+  ArrowRight,
   Flag,
   Gauge,
   MapPin,
@@ -18,6 +19,7 @@ import { getBestRun, recordBestRun, type BestRun } from "./game/bestRun";
 import { GameShell, type HudState } from "./game/GameShell";
 import { formatBearingGuidance } from "./game/bearing";
 import { canUseImpulseControl } from "./game/hudControls";
+import { getNextContractId } from "./game/contracts";
 import { buildRadioMessage } from "./game/radio";
 
 type GameStore = {
@@ -144,6 +146,8 @@ export function App() {
   const primaryActionLabel = preflightOpen ? "Launch" : paused ? "Resume" : "Pause";
   const canBoost = canUseImpulseControl({ action: "boost", fuel: hud.fuel, paused, preflightOpen, status: hud.status });
   const canBrake = canUseImpulseControl({ action: "brake", fuel: hud.fuel, paused, preflightOpen, status: hud.status });
+  const nextContractId = getNextContractId(hud.contractOptions, hud.contractId);
+  const canAdvanceContract = hud.status === "delivered" && nextContractId !== hud.contractId;
 
   const launchContract = () => {
     setPreflightOpen(false);
@@ -151,10 +155,21 @@ export function App() {
     shellRef.current?.setPaused(false);
   };
 
-  const restartToBriefing = () => {
+  const openContractBriefing = (contractId = hud.contractId) => {
     setPreflightOpen(true);
     setPaused(true);
     shellRef.current?.restart(true);
+    if (contractId !== hud.contractId) {
+      shellRef.current?.selectContract(contractId);
+    }
+  };
+
+  const restartToBriefing = () => {
+    openContractBriefing();
+  };
+
+  const advanceToNextContract = () => {
+    openContractBriefing(nextContractId);
   };
 
   return (
@@ -388,14 +403,18 @@ export function App() {
               </div>
             ))}
           </div>
-          <button
-            type="button"
-            className="result-button"
-            onClick={restartToBriefing}
-          >
-            <RotateCcw size={18} />
-            Restart
-          </button>
+          <div className="result-actions">
+            <button type="button" className="result-button" onClick={restartToBriefing}>
+              <RotateCcw size={18} />
+              Restart
+            </button>
+            {canAdvanceContract ? (
+              <button type="button" className="result-button result-button-primary" onClick={advanceToNextContract}>
+                <ArrowRight size={18} />
+                Next Contract
+              </button>
+            ) : null}
+          </div>
         </section>
       ) : null}
     </main>

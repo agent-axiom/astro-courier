@@ -762,6 +762,13 @@ button {
   color: #ffadc1;
 }
 
+.result-actions {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
 .result-button {
   display: inline-flex;
   align-items: center;
@@ -777,8 +784,18 @@ button {
   cursor: pointer;
 }
 
+.result-button-primary {
+  border-color: rgba(142, 230, 184, 0.72);
+  background: rgba(142, 230, 184, 0.18);
+  color: #eafff3;
+}
+
 .result-button:hover {
   background: rgba(255, 209, 102, 0.24);
+}
+
+.result-button-primary:hover {
+  background: rgba(142, 230, 184, 0.26);
 }
 
 @media (max-width: 760px) {
