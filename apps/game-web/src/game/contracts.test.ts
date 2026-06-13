@@ -42,7 +42,7 @@ describe("contract rotation", () => {
     expect(buildContractPreflightKicker({ contractId: "asteroid-sprint", goldSeconds: 24, hazardSeverityMultiplier: 1.45 })).toBe(
       "Asteroid Contract"
     );
-    expect(buildContractPreflightKicker({ contractId: "return-leg", goldSeconds: 30 })).toBe("Sprint Contract");
+    expect(buildContractPreflightKicker({ contractId: "return-leg", goldSeconds: 30 })).toBe("Return Contract");
     expect(buildContractPreflightKicker({ contractId: "gravity-slingshot", goldSeconds: 26, hazardSeverityMultiplier: 1.2 })).toBe(
       "Gravity Contract"
     );
@@ -92,6 +92,21 @@ describe("contract rotation", () => {
       label: "Route plan",
       value: "Thread field, cash danger",
       tone: "danger"
+    });
+  });
+
+  it("calls out the return leg before generic sprint handling", () => {
+    expect(
+      buildContractRoutePlan({
+        contractId: "return-leg",
+        cargoKind: "fragile",
+        cargoFragility: 0.8,
+        goldSeconds: 30
+      })
+    ).toEqual({
+      label: "Route plan",
+      value: "Reverse line, brake planet-side",
+      tone: "speed"
     });
   });
 

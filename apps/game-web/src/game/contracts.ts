@@ -58,6 +58,10 @@ export function buildContractPreflightKicker(input: ContractPreflightKickerInput
     return "Starter Contract";
   }
 
+  if (input.contractId === "return-leg") {
+    return "Return Contract";
+  }
+
   if (input.contractId === "gravity-slingshot") {
     return "Gravity Contract";
   }
@@ -82,6 +86,14 @@ export function buildContractRoutePlan(input: ContractRoutePlanInput): ContractR
     return {
       label: "Route plan",
       value: "Ride gravity, bleed speed",
+      tone: "speed"
+    };
+  }
+
+  if (input.contractId === "return-leg") {
+    return {
+      label: "Route plan",
+      value: "Reverse line, brake planet-side",
       tone: "speed"
     };
   }
