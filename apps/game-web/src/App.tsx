@@ -258,7 +258,7 @@ export function App() {
         <section className={`result-overlay result-${hud.status}`} aria-label="Run result">
           <Trophy aria-hidden="true" size={28} />
           <h2>{hud.status === "delivered" ? "Delivery Complete" : "Delivery Failed"}</h2>
-          <p>{hud.landingRating ?? statusLabel(hud.status)}</p>
+          <p>{hud.status === "crashed" ? crashReasonLabel(hud) : hud.landingRating ?? statusLabel(hud.status)}</p>
           {hud.medal !== "none" ? <div className={`medal-banner medal-${hud.medal}`}>{medalLabel(hud.medal)}</div> : null}
           {hud.status === "delivered" && bestRun ? (
             <div className={`best-run ${newBest ? "best-run-new" : ""}`}>
@@ -338,6 +338,12 @@ function paceLabel(tier: HudState["paceTier"]): string {
   if (tier === "silver") return "Silver pace";
   if (tier === "bronze") return "Bronze pace";
   return "Overtime";
+}
+
+function crashReasonLabel(hud: HudState): string {
+  if (hud.crashReason === "Hard Landing") return "Hard landing: slow and align before contact";
+  if (hud.crashReason === "Hull Collision") return "Hull collision: keep clear of gravity wells";
+  return hud.landingRating ?? "Insurance Event";
 }
 
 function getBestRunStorage(): Pick<Storage, "getItem" | "setItem"> | undefined {

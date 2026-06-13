@@ -6,6 +6,8 @@ export function buildRadioMessage(hud: HudState): string {
   }
 
   if (hud.status === "crashed") {
+    if (hud.crashReason === "Hard Landing") return "Insurance desk reports: hard landing. Bleed speed before contact.";
+    if (hud.crashReason === "Hull Collision") return "Insurance desk reports: hull collision. Respect the gravity well.";
     return `Insurance desk reports: ${hud.landingRating ?? "courier incident logged"}.`;
   }
 

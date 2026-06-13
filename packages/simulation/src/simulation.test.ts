@@ -294,6 +294,22 @@ describe("deterministic Astro Courier simulation", () => {
     expect(reckless.landingRating).toBe("Insurance Event");
   });
 
+  it("explains crash causes for hard landings and direct collisions", () => {
+    const hardLanding = createWorldFromSystem(starterSystem, "crash-seed");
+    hardLanding.ship.position = { x: 0, y: -74 };
+    hardLanding.ship.velocity = { x: 82, y: 0 };
+    hardLanding.ship.rotation = -Math.PI / 2;
+    stepWorld(hardLanding, 1 / 60, []);
+
+    const collision = createWorldFromSystem(starterSystem, "crash-seed");
+    collision.ship.position = { x: 0, y: 0 };
+    collision.ship.velocity = { x: 0, y: 0 };
+    stepWorld(collision, 1 / 60, []);
+
+    expect(summarizeRun(hardLanding).crashReason).toBe("Hard Landing");
+    expect(summarizeRun(collision).crashReason).toBe("Hull Collision");
+  });
+
   it("reports boost burns as momentary courier feedback", () => {
     const world = createWorldFromSystem(starterSystem, "boost-seed");
     const fuelBefore = world.ship.fuel;

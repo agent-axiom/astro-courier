@@ -29,7 +29,8 @@ const resultSchema = z.object({
   medal: z.enum(["none", "bronze", "silver", "gold", "comet"]),
   landingRating: z
     .enum(["Perfect Landing", "Soft Landing", "Spicy Landing", "Cargo Survived Somehow", "Insurance Event"])
-    .optional()
+    .optional(),
+  crashReason: z.enum(["Hard Landing", "Hull Collision"]).optional()
 });
 
 const replayValidationSchema = z.object({
@@ -101,6 +102,7 @@ function sameResult(left: RunResultSummary, right: RunResultSummary): boolean {
     left.cargoDamage === right.cargoDamage &&
     left.fuelUsed === right.fuelUsed &&
     left.medal === right.medal &&
-    left.landingRating === right.landingRating
+    left.landingRating === right.landingRating &&
+    left.crashReason === right.crashReason
   );
 }

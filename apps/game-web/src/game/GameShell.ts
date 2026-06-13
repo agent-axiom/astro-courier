@@ -9,7 +9,7 @@ import {
   summarizeRun,
   type SimulationWorld
 } from "@astro-courier/simulation";
-import type { LandingGuidanceStatus, ObjectivePhase, PlayerCommand, RunMedal, RunStatus } from "@astro-courier/shared";
+import type { CrashReason, LandingGuidanceStatus, ObjectivePhase, PlayerCommand, RunMedal, RunStatus } from "@astro-courier/shared";
 import { KeyboardInput, type InputSource } from "./input";
 import { calculateContractPace, type ContractPaceTier } from "./pace";
 
@@ -30,6 +30,7 @@ export type HudState = {
   lastMilestone?: string;
   medal: RunMedal;
   landingRating?: string;
+  crashReason?: CrashReason;
   paceTier: ContractPaceTier;
   paceSecondsRemaining: number;
   approachStreakSeconds: number;
@@ -207,6 +208,7 @@ export class GameShell {
       lastMilestone: this.world.lastMilestone ?? this.retainedMilestone,
       medal: result.medal,
       landingRating: result.landingRating,
+      crashReason: result.crashReason,
       paceTier: pace.tier,
       paceSecondsRemaining: pace.secondsRemaining,
       approachStreakSeconds: snapshot.approachStreakSeconds,

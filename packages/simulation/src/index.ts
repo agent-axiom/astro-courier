@@ -1,4 +1,5 @@
 import type {
+  CrashReason,
   InputFrame,
   LandingRating,
   LandingGuidanceStatus,
@@ -144,6 +145,7 @@ export type SimulationWorld = {
   approachStreakSeconds: number;
   bestApproachStreakSeconds: number;
   landingRating?: LandingRating;
+  crashReason?: CrashReason;
   score: number;
   fuelUsed: number;
   activeContract: ContractContent;
@@ -318,7 +320,8 @@ export function summarizeRun(world: SimulationWorld): RunResultSummary {
     cargoDamage: round(world.ship.cargoDamage, 3),
     fuelUsed: round(world.fuelUsed, 3),
     medal: medalFor(world),
-    landingRating: world.landingRating
+    landingRating: world.landingRating,
+    crashReason: world.crashReason
   };
 }
 
@@ -581,6 +584,7 @@ function resolveLandingOrCrash(world: SimulationWorld): void {
     if (!isSafeDocking) {
       world.status = "crashed";
       world.landingRating = "Insurance Event";
+      world.crashReason = "Hard Landing";
       world.ship.cargoDamage = 1;
       return;
     }
@@ -619,6 +623,7 @@ function resolveLandingOrCrash(world: SimulationWorld): void {
   if (hitGravitySource) {
     world.status = "crashed";
     world.landingRating = "Insurance Event";
+    world.crashReason = "Hull Collision";
     world.ship.cargoDamage = 1;
   }
 }
