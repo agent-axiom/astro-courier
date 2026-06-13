@@ -333,6 +333,44 @@ describe("deterministic Astro Courier simulation", () => {
     expect(summarizeRun(late).scoreBreakdown.styleBonus).toBe(0);
   });
 
+  it("awards a style bonus for perfect deliveries after a stable approach", () => {
+    const cleanApproach = createWorldFromSystem(starterSystem, "perfect-approach-seed");
+    cleanApproach.elapsedSeconds = 18;
+    cleanApproach.ship.position = { x: 0, y: -74 };
+    cleanApproach.ship.velocity = { x: 1, y: 3 };
+    cleanApproach.ship.rotation = -Math.PI / 2;
+    stepWorld(cleanApproach, 1 / 60, []);
+
+    cleanApproach.elapsedSeconds = 24;
+    cleanApproach.bestApproachStreakSeconds = 1.2;
+    cleanApproach.ship.position = { x: 260, y: -80 };
+    cleanApproach.ship.velocity = { x: 4, y: 1 };
+    cleanApproach.ship.rotation = 0;
+    stepWorld(cleanApproach, 1 / 60, []);
+
+    expect(cleanApproach.status).toBe("delivered");
+    expect(cleanApproach.landingRating).toBe("Perfect Landing");
+    expect(cleanApproach.lastMilestone).toBe("Perfect Approach");
+    expect(summarizeRun(cleanApproach).scoreBreakdown.styleBonus).toBe(220);
+
+    const rushedDock = createWorldFromSystem(starterSystem, "rushed-dock-seed");
+    rushedDock.elapsedSeconds = 18;
+    rushedDock.ship.position = { x: 0, y: -74 };
+    rushedDock.ship.velocity = { x: 1, y: 3 };
+    rushedDock.ship.rotation = -Math.PI / 2;
+    stepWorld(rushedDock, 1 / 60, []);
+
+    rushedDock.elapsedSeconds = 24;
+    rushedDock.bestApproachStreakSeconds = 0.8;
+    rushedDock.ship.position = { x: 260, y: -80 };
+    rushedDock.ship.velocity = { x: 4, y: 1 };
+    rushedDock.ship.rotation = 0;
+    stepWorld(rushedDock, 1 / 60, []);
+
+    expect(rushedDock.lastMilestone).toBe("Delivered");
+    expect(summarizeRun(rushedDock).scoreBreakdown.styleBonus).toBe(0);
+  });
+
   it("classifies landing guidance as too-fast, misaligned, or ready", () => {
     const world = createWorldFromSystem(starterSystem, "guide-seed");
     world.ship.position = { x: 0, y: -74 };

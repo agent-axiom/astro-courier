@@ -192,6 +192,8 @@ const HAZARD_SKIM_BASE_BONUS = 140;
 const HAZARD_SKIM_SEVERITY_BONUS = 120;
 export const QUICK_PICKUP_WINDOW_SECONDS = 12;
 export const QUICK_PICKUP_STYLE_BONUS = 180;
+export const PERFECT_APPROACH_STREAK_SECONDS = 1;
+export const PERFECT_APPROACH_STYLE_BONUS = 220;
 
 export function createWorldFromSystem(system: SystemContent, seed: string, options: WorldCreationOptions = {}): SimulationWorld {
   const activeContract = options.contractId
@@ -647,8 +649,16 @@ function resolveLandingOrCrash(world: SimulationWorld): void {
     if (touchedPad.role === "destination" && world.cargoOnboard) {
       world.status = "delivered";
       world.objectivePhase = "complete";
-      world.lastMilestone = "Delivered";
       world.landingRating = rateLanding(speed, angleDiff, touchedPad, world.ship.cargoDamage);
+      if (
+        world.landingRating === "Perfect Landing" &&
+        world.bestApproachStreakSeconds >= PERFECT_APPROACH_STREAK_SECONDS
+      ) {
+        world.styleBonus += PERFECT_APPROACH_STYLE_BONUS;
+        world.lastMilestone = "Perfect Approach";
+      } else {
+        world.lastMilestone = "Delivered";
+      }
       return;
     }
 
