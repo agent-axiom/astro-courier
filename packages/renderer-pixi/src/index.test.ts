@@ -6,7 +6,8 @@ import {
   landingPadVisual,
   objectiveBeaconPulse,
   objectiveGuidanceVisual,
-  shipTrailVisual
+  shipTrailVisual,
+  trajectoryPointVisual
 } from "./index";
 
 describe("objective beacon pulse", () => {
@@ -36,6 +37,23 @@ describe("objective guidance visual", () => {
     expect(readyAssist.lineWidth).toBeGreaterThan(approach.lineWidth);
     expect(readyAssist.markerScale).toBeGreaterThan(approach.markerScale);
     expect(readyAssist.lineAlpha).toBeGreaterThan(approach.lineAlpha);
+  });
+});
+
+describe("trajectory point visual", () => {
+  it("stays hidden unless the run is actively flying", () => {
+    expect(trajectoryPointVisual({ status: "paused", index: 0, total: 8 })).toBeUndefined();
+    expect(trajectoryPointVisual({ status: "delivered", index: 0, total: 8 })).toBeUndefined();
+  });
+
+  it("makes the prediction endpoint more legible than early path dots", () => {
+    const first = trajectoryPointVisual({ status: "flying", index: 0, total: 8 });
+    const last = trajectoryPointVisual({ status: "flying", index: 7, total: 8 });
+
+    expect(first).toMatchObject({ color: 0xf8e59a });
+    expect(last).toMatchObject({ color: 0x7ce1ff });
+    expect(last?.radius).toBeGreaterThan(first?.radius ?? 0);
+    expect(last?.alpha).toBeGreaterThan(first?.alpha ?? 0);
   });
 });
 

@@ -51,6 +51,32 @@ export function objectiveGuidanceVisual(input: ObjectiveGuidanceVisualInput): Ob
   };
 }
 
+export type TrajectoryPointVisualInput = {
+  status: SimulationSnapshot["status"];
+  index: number;
+  total: number;
+};
+
+export type TrajectoryPointVisual = {
+  color: number;
+  radius: number;
+  alpha: number;
+};
+
+export function trajectoryPointVisual(input: TrajectoryPointVisualInput): TrajectoryPointVisual | undefined {
+  if (input.status !== "flying" || input.total <= 0) {
+    return undefined;
+  }
+
+  const progress = clamp(input.index / Math.max(1, input.total - 1), 0, 1);
+  const isEndpoint = input.index >= input.total - 1;
+  return {
+    color: isEndpoint ? 0x7ce1ff : 0xf8e59a,
+    radius: round(isEndpoint ? 4.2 : 2.2 + progress * 0.8, 2),
+    alpha: round(isEndpoint ? 0.78 : 0.18 + progress * 0.42, 2)
+  };
+}
+
 type LandingPadVisualInput = Pick<SimulationSnapshot["landingPads"][number], "role" | "active" | "destination">;
 
 export type LandingPadVisual = {
@@ -298,14 +324,26 @@ class PixiRenderer implements AstroPixiRenderer {
     }
   }
 
-  private drawTrajectory(trajectory: Vec2[], project: (point: Vec2) => Vec2, status: string): void {
+  private drawTrajectory(
+    trajectory: Vec2[],
+    project: (point: Vec2) => Vec2,
+    status: SimulationSnapshot["status"]
+  ): void {
     this.trajectory.clear();
-    if (status !== "flying") return;
 
     for (let index = 0; index < trajectory.length; index += 1) {
       const point = project(trajectory[index]);
-      const alpha = 0.18 + (index / Math.max(1, trajectory.length - 1)) * 0.48;
-      this.trajectory.circle(point.x, point.y, 2.4).fill({ color: 0xf8e59a, alpha });
+      const visual = trajectoryPointVisual({ status, index, total: trajectory.length });
+      if (!visual) continue;
+
+      this.trajectory.circle(point.x, point.y, visual.radius).fill({ color: visual.color, alpha: visual.alpha });
+      if (index === trajectory.length - 1) {
+        this.trajectory.circle(point.x, point.y, visual.radius + 4).stroke({
+          color: visual.color,
+          width: 1,
+          alpha: visual.alpha * 0.42
+        });
+      }
     }
   }
 
