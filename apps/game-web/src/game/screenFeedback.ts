@@ -13,6 +13,9 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[]): ScreenFe
   if (events.includes("delivery-complete")) {
     return { tone: "success", intensity: "heavy", durationMs: 620 };
   }
+  if (events.includes("pb-lead")) {
+    return { tone: "success", intensity: "medium", durationMs: 420 };
+  }
   if (events.includes("hazard-contact")) {
     return { tone: "danger", intensity: "medium", durationMs: 440 };
   }

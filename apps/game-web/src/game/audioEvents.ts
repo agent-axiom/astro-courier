@@ -5,6 +5,7 @@ export type GameAudioEvent =
   | "ship-crash"
   | "style-hit"
   | "launch-burst"
+  | "pb-lead"
   | "assist-burn"
   | "boost-burn"
   | "fuel-critical"
@@ -14,6 +15,8 @@ export type GameAudioEvent =
 export type HudAudioSnapshot = {
   status: RunStatus;
   lastMilestone?: string;
+  score?: number;
+  bestRunScore?: number;
   fuel: number;
   maxFuel: number;
   hazardDangerLevel?: "near" | "inside";
@@ -63,6 +66,10 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
     events.push("fuel-critical");
   }
 
+  if (hasCrossedBestRunScore(previous, current)) {
+    events.push("pb-lead");
+  }
+
   if (previous?.hazardDangerLevel !== "inside" && current.hazardDangerLevel === "inside") {
     events.push("hazard-contact");
   }
@@ -79,4 +86,11 @@ function isFuelCritical(snapshot: HudAudioSnapshot | undefined): boolean {
     return false;
   }
   return snapshot.fuel / snapshot.maxFuel <= criticalFuelRatio;
+}
+
+function hasCrossedBestRunScore(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {
+  if (!previous || current.bestRunScore === undefined || previous.bestRunScore !== current.bestRunScore) {
+    return false;
+  }
+  return (previous.score ?? 0) <= current.bestRunScore && (current.score ?? 0) > current.bestRunScore;
 }

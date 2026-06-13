@@ -52,4 +52,19 @@ describe("HUD audio events", () => {
       deriveHudAudioEvents({ ...baseSnapshot, trajectoryRiskLevel: "near" }, { ...baseSnapshot, trajectoryRiskLevel: "inside" })
     ).toEqual(["trajectory-warning"]);
   });
+
+  it("celebrates the first live personal-best score lead", () => {
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, score: 3280, bestRunScore: 3290 },
+        { ...baseSnapshot, score: 3440, bestRunScore: 3290 }
+      )
+    ).toEqual(["pb-lead"]);
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, score: 3440, bestRunScore: 3290 },
+        { ...baseSnapshot, score: 3510, bestRunScore: 3290 }
+      )
+    ).toEqual([]);
+  });
 });

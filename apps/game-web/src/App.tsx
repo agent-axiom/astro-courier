@@ -250,7 +250,7 @@ export function App() {
   }, [hud.contractOptions]);
 
   useEffect(() => {
-    const currentSnapshot = toHudAudioSnapshot(hud);
+    const currentSnapshot = toHudAudioSnapshot(hud, bestRun);
     const events = deriveHudAudioEvents(previousAudioSnapshotRef.current, currentSnapshot);
     previousAudioSnapshotRef.current = currentSnapshot;
     audioRef.current?.play(events);
@@ -269,7 +269,7 @@ export function App() {
         screenFeedbackTimerRef.current = undefined;
       }, feedback.durationMs);
     }
-  }, [hud.fuel, hud.hazardDangerLevel, hud.lastMilestone, hud.maxFuel, hud.status, hud.trajectoryRiskLevel]);
+  }, [hud.fuel, hud.hazardDangerLevel, hud.lastMilestone, hud.maxFuel, hud.score, hud.status, hud.trajectoryRiskLevel, bestRun?.score]);
 
   useEffect(() => {
     const currentSnapshot = toRunFeedSnapshot(hud, bestRun);
@@ -1289,10 +1289,12 @@ function statusLabel(status: HudState["status"]): string {
   return "In flight";
 }
 
-function toHudAudioSnapshot(hud: HudState): HudAudioSnapshot {
+function toHudAudioSnapshot(hud: HudState, bestRun: BestRun | undefined): HudAudioSnapshot {
   return {
     status: hud.status,
     lastMilestone: hud.lastMilestone,
+    score: hud.score,
+    bestRunScore: bestRun?.score,
     fuel: hud.fuel,
     maxFuel: hud.maxFuel,
     hazardDangerLevel: hud.hazardDangerLevel,

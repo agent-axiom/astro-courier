@@ -60,6 +60,14 @@ describe("screen feedback", () => {
     });
   });
 
+  it("maps personal-best leads to medium success feedback", () => {
+    expect(buildScreenFeedback(["pb-lead"])).toEqual({
+      tone: "success",
+      intensity: "medium",
+      durationMs: 420
+    });
+  });
+
   it("stays hidden when no gameplay event needs screen feedback", () => {
     expect(buildScreenFeedback([])).toBeUndefined();
   });

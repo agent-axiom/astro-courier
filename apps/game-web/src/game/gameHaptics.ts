@@ -26,6 +26,9 @@ export function hapticPatternForEvents(events: readonly GameAudioEvent[]): Hapti
   if (events.includes("trajectory-warning")) {
     return [18, 24, 18];
   }
+  if (events.includes("pb-lead")) {
+    return [16, 20, 16];
+  }
   if (events.includes("launch-burst")) {
     return [18, 18];
   }

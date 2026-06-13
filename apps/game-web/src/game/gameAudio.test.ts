@@ -43,6 +43,17 @@ describe("game audio controller", () => {
     expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.12, 3);
   });
 
+  it("plays a bright success tone for personal-best leads", () => {
+    const context = new FakeAudioContext();
+    const controller = createGameAudioController({ createContext: () => context });
+
+    controller.play(["pb-lead"]);
+
+    expect(context.oscillators).toHaveLength(1);
+    expect(context.oscillators[0]?.frequencyValue).toBe(960);
+    expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.12, 3);
+  });
+
   it("does not create an audio context for empty event batches", () => {
     const createContext = vi.fn(() => new FakeAudioContext());
     const controller = createGameAudioController({ createContext });
