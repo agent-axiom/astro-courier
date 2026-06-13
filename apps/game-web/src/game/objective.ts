@@ -5,6 +5,7 @@ import {
   EXPRESS_FINISH_STYLE_BONUS
 } from "@astro-courier/simulation";
 import type { LandingGuidanceStatus, ObjectivePhase, RunStatus } from "@astro-courier/shared";
+import { COMET_RESERVE_MIN_RATIO, COMET_RESERVE_WARNING_RATIO } from "./comet";
 import type { ContractPaceTier } from "./pace";
 
 export type ObjectiveDirectiveInput = {
@@ -59,6 +60,8 @@ export type TacticalCueInput = {
   paceSecondsRemaining?: number;
   cargoDamage?: number;
   fuelUsed?: number;
+  fuel?: number;
+  maxFuel?: number;
   quickPickupSecondsRemaining?: number;
   quickPickupBonus?: number;
   styleMultiplier?: number;
@@ -230,6 +233,14 @@ export function buildTacticalCue(input: TacticalCueInput): TacticalCue | undefin
     };
   }
 
+  if (isTightCometReserve(input)) {
+    return {
+      label: "Tactical cue",
+      value: `Save comet reserve / ${Math.round(fuelReserve(input) * 100)}%`,
+      tone: "urgent"
+    };
+  }
+
   if (isRecoverableDamagedDelivery(input)) {
     return {
       label: "Tactical cue",
@@ -288,6 +299,19 @@ function isEcoDriftDelivery(input: TacticalCueInput): boolean {
     (input.cargoDamage ?? 0) <= 0.02 &&
     (input.fuelUsed ?? Number.POSITIVE_INFINITY) <= ECO_DRIFT_FUEL_USED_LIMIT
   );
+}
+
+function isTightCometReserve(input: TacticalCueInput): boolean {
+  const reserve = fuelReserve(input);
+  return (
+    isCleanGoldDelivery(input) &&
+    reserve >= COMET_RESERVE_MIN_RATIO &&
+    reserve < COMET_RESERVE_WARNING_RATIO
+  );
+}
+
+function fuelReserve(input: TacticalCueInput): number {
+  return input.maxFuel !== undefined && input.maxFuel > 0 && input.fuel !== undefined ? input.fuel / input.maxFuel : 0;
 }
 
 function buildUrgentChainAction(input: TacticalCueInput): string {

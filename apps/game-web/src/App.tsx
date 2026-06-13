@@ -269,6 +269,8 @@ export function App() {
     paceSecondsRemaining: hud.paceSecondsRemaining,
     cargoDamage: hud.cargoDamage,
     fuelUsed: hud.fuelUsed,
+    fuel: hud.fuel,
+    maxFuel: hud.maxFuel,
     quickPickupSecondsRemaining: hud.quickPickupSecondsRemaining,
     quickPickupBonus: hud.quickPickupBonus,
     styleMultiplier: hud.styleMultiplier,

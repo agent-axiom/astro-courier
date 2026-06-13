@@ -267,6 +267,24 @@ describe("tactical cue", () => {
     });
   });
 
+  it("keeps closing express ahead of tight comet reserve", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        paceTier: "gold",
+        paceSecondsRemaining: 3.8,
+        cargoDamage: 0,
+        fuel: 78,
+        maxFuel: 100
+      })
+    ).toEqual({
+      label: "Tactical cue",
+      value: "Close express / +180 / 3.8s",
+      tone: "opportunity"
+    });
+  });
+
   it("does not promise eco drift while an express finish can still score", () => {
     expect(
       buildTacticalCue({
@@ -276,6 +294,38 @@ describe("tactical cue", () => {
         paceSecondsRemaining: 9.5,
         cargoDamage: 0,
         fuelUsed: 8
+      })
+    ).toBeUndefined();
+  });
+
+  it("warns while comet reserve is tight but still recoverable", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        paceTier: "gold",
+        paceSecondsRemaining: 9.5,
+        cargoDamage: 0,
+        fuel: 78,
+        maxFuel: 100
+      })
+    ).toEqual({
+      label: "Tactical cue",
+      value: "Save comet reserve / 78%",
+      tone: "urgent"
+    });
+  });
+
+  it("does not warn for comet reserve after the reserve floor is already gone", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        paceTier: "gold",
+        paceSecondsRemaining: 9.5,
+        cargoDamage: 0,
+        fuel: 74,
+        maxFuel: 100
       })
     ).toBeUndefined();
   });
