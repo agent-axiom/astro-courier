@@ -40,7 +40,7 @@ describe("preflight bonus objectives", () => {
     ]);
   });
 
-  it("surfaces chain finish as the gravity route bonus target", () => {
+  it("surfaces gravity sling as the gravity route bonus target", () => {
     expect(
       buildPreflightBonusObjectives({
         contractId: "gravity-slingshot",
@@ -49,7 +49,7 @@ describe("preflight bonus objectives", () => {
       })
     ).toEqual([
       { label: "Rush pickup", value: "+180" },
-      { label: "Chain finish", value: "hold combo" },
+      { label: "Gravity sling", value: "+240 / 54+ speed" },
       { label: "Perfect dock", value: "+220" }
     ]);
   });

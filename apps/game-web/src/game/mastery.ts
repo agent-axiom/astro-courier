@@ -1,4 +1,10 @@
-import { HAZARD_SKIM_BASE_BONUS, HAZARD_THREAD_SPEED_THRESHOLD, PERFECT_APPROACH_STYLE_BONUS } from "@astro-courier/simulation";
+import {
+  GRAVITY_SLING_SPEED_THRESHOLD,
+  GRAVITY_SLING_STYLE_BONUS,
+  HAZARD_SKIM_BASE_BONUS,
+  HAZARD_THREAD_SPEED_THRESHOLD,
+  PERFECT_APPROACH_STYLE_BONUS
+} from "@astro-courier/simulation";
 
 export type PreflightMasteryTargetInput = {
   goldSeconds: number;
@@ -16,7 +22,7 @@ export type PreflightBonusObjectiveInput = {
 };
 
 export type PreflightBonusObjective = {
-  label: "Rush pickup" | "Clean skim" | "Perfect dock" | "Needle thread" | "Danger pay" | "Chain finish";
+  label: "Rush pickup" | "Clean skim" | "Perfect dock" | "Needle thread" | "Danger pay" | "Chain finish" | "Gravity sling";
   value: string;
 };
 
@@ -57,8 +63,8 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
     return [
       rushPickup,
       {
-        label: "Chain finish",
-        value: "hold combo"
+        label: "Gravity sling",
+        value: `+${GRAVITY_SLING_STYLE_BONUS} / ${GRAVITY_SLING_SPEED_THRESHOLD}+ speed`
       },
       {
         label: "Perfect dock",
