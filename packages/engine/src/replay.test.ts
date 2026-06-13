@@ -39,7 +39,16 @@ describe("engine replay utilities", () => {
         score: 1400,
         cargoDamage: 0,
         fuelUsed: 12,
-        medal: "gold"
+        medal: "gold",
+        scoreBreakdown: {
+          base: 1000,
+          paceBonus: 200,
+          fuelBonus: 80,
+          cargoBonus: 0,
+          landingBonus: 120,
+          incidentPenalty: 0,
+          total: 1400
+        }
       }
     };
 

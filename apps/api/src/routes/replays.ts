@@ -20,6 +20,16 @@ const inputFrameSchema = z.object({
   command: commandSchema
 });
 
+const scoreBreakdownSchema = z.object({
+  base: z.number().min(0),
+  paceBonus: z.number().min(0),
+  fuelBonus: z.number().min(0),
+  cargoBonus: z.number().min(0),
+  landingBonus: z.number().min(0),
+  incidentPenalty: z.number().min(0),
+  total: z.number().min(0)
+});
+
 const resultSchema = z.object({
   status: z.enum(["flying", "delivered", "crashed", "paused"]),
   elapsedSeconds: z.number().min(0),
@@ -30,7 +40,8 @@ const resultSchema = z.object({
   landingRating: z
     .enum(["Perfect Landing", "Soft Landing", "Spicy Landing", "Cargo Survived Somehow", "Insurance Event"])
     .optional(),
-  crashReason: z.enum(["Hard Landing", "Hull Collision"]).optional()
+  crashReason: z.enum(["Hard Landing", "Hull Collision"]).optional(),
+  scoreBreakdown: scoreBreakdownSchema
 });
 
 const replayValidationSchema = z.object({
@@ -103,6 +114,19 @@ function sameResult(left: RunResultSummary, right: RunResultSummary): boolean {
     left.fuelUsed === right.fuelUsed &&
     left.medal === right.medal &&
     left.landingRating === right.landingRating &&
-    left.crashReason === right.crashReason
+    left.crashReason === right.crashReason &&
+    sameScoreBreakdown(left.scoreBreakdown, right.scoreBreakdown)
+  );
+}
+
+function sameScoreBreakdown(left: RunResultSummary["scoreBreakdown"], right: RunResultSummary["scoreBreakdown"]): boolean {
+  return (
+    left.base === right.base &&
+    left.paceBonus === right.paceBonus &&
+    left.fuelBonus === right.fuelBonus &&
+    left.cargoBonus === right.cargoBonus &&
+    left.landingBonus === right.landingBonus &&
+    left.incidentPenalty === right.incidentPenalty &&
+    left.total === right.total
   );
 }

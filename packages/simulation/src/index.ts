@@ -8,6 +8,7 @@ import type {
   ReplayEnvelope,
   RunMedal,
   RunResultSummary,
+  ScoreBreakdown,
   RunStatus,
   SimulationSnapshot,
   Vec2
@@ -147,6 +148,7 @@ export type SimulationWorld = {
   landingRating?: LandingRating;
   crashReason?: CrashReason;
   score: number;
+  scoreBreakdown: ScoreBreakdown;
   fuelUsed: number;
   activeContract: ContractContent;
   gravitySources: GravitySourceState[];
@@ -197,6 +199,7 @@ export function createWorldFromSystem(system: SystemContent, seed: string): Simu
     approachStreakSeconds: 0,
     bestApproachStreakSeconds: 0,
     score: 0,
+    scoreBreakdown: createEmptyScoreBreakdown(),
     fuelUsed: 0,
     activeContract,
     gravitySources: system.planets.map((planet) => ({
@@ -321,7 +324,8 @@ export function summarizeRun(world: SimulationWorld): RunResultSummary {
     fuelUsed: round(world.fuelUsed, 3),
     medal: medalFor(world),
     landingRating: world.landingRating,
-    crashReason: world.crashReason
+    crashReason: world.crashReason,
+    scoreBreakdown: { ...world.scoreBreakdown }
   };
 }
 
@@ -629,16 +633,57 @@ function resolveLandingOrCrash(world: SimulationWorld): void {
 }
 
 function updateScore(world: SimulationWorld): void {
+  world.scoreBreakdown = buildScoreBreakdown(world);
+  world.score = world.scoreBreakdown.total;
+}
+
+function buildScoreBreakdown(world: SimulationWorld): ScoreBreakdown {
   if (world.status !== "delivered") {
-    world.score = Math.max(0, Math.round(100 + world.tick * 0.05 - world.ship.cargoDamage * 100));
-    return;
+    const base = 100;
+    const paceBonus = round(world.tick * 0.05, 3);
+    const incidentPenalty = round(world.ship.cargoDamage * 100, 3);
+    const total = Math.max(0, Math.round(base + paceBonus - incidentPenalty));
+
+    return {
+      base,
+      paceBonus,
+      fuelBonus: 0,
+      cargoBonus: 0,
+      landingBonus: 0,
+      incidentPenalty,
+      total
+    };
   }
 
-  const timeBonus = Math.max(0, 700 - world.elapsedSeconds * 8);
-  const fuelBonus = world.ship.fuel * 5;
-  const cargoBonus = (1 - world.ship.cargoDamage) * 500;
+  const base = 1000;
+  const paceBonus = round(Math.max(0, 700 - world.elapsedSeconds * 8), 3);
+  const fuelBonus = round(world.ship.fuel * 5, 3);
+  const cargoBonus = round((1 - world.ship.cargoDamage) * 500, 3);
   const landingBonus = world.landingRating === "Perfect Landing" ? 300 : 120;
-  world.score = Math.max(0, Math.round(1000 + timeBonus + fuelBonus + cargoBonus + landingBonus));
+  const incidentPenalty = 0;
+  const total = Math.max(0, Math.round(base + paceBonus + fuelBonus + cargoBonus + landingBonus - incidentPenalty));
+
+  return {
+    base,
+    paceBonus,
+    fuelBonus,
+    cargoBonus,
+    landingBonus,
+    incidentPenalty,
+    total
+  };
+}
+
+function createEmptyScoreBreakdown(): ScoreBreakdown {
+  return {
+    base: 0,
+    paceBonus: 0,
+    fuelBonus: 0,
+    cargoBonus: 0,
+    landingBonus: 0,
+    incidentPenalty: 0,
+    total: 0
+  };
 }
 
 function medalFor(world: SimulationWorld): RunMedal {

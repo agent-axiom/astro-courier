@@ -346,6 +346,40 @@ describe("deterministic Astro Courier simulation", () => {
     expect(summarizeRun(failed).medal).toBe("none");
   });
 
+  it("explains delivered score totals with a stable score breakdown", () => {
+    const world = createWorldFromSystem(starterSystem, "score-seed");
+    world.ship.position = { x: 0, y: -74 };
+    world.ship.velocity = { x: 1, y: 3 };
+    world.ship.rotation = -Math.PI / 2;
+    stepWorld(world, 1 / 60, []);
+    world.ship.position = { x: 260, y: -80 };
+    world.ship.velocity = { x: 4, y: 1 };
+    world.ship.rotation = 0;
+    stepWorld(world, 1 / 60, []);
+
+    const result = summarizeRun(world);
+
+    expect(result.scoreBreakdown).toMatchObject({
+      base: 1000,
+      fuelBonus: 450,
+      cargoBonus: 500,
+      landingBonus: 300,
+      incidentPenalty: 0,
+      total: result.score
+    });
+    expect(result.scoreBreakdown.paceBonus).toBeGreaterThan(690);
+    expect(
+      Math.round(
+        result.scoreBreakdown.base +
+          result.scoreBreakdown.paceBonus +
+          result.scoreBreakdown.fuelBonus +
+          result.scoreBreakdown.cargoBonus +
+          result.scoreBreakdown.landingBonus -
+          result.scoreBreakdown.incidentPenalty
+      )
+    ).toBe(result.score);
+  });
+
   it("predicts a finite trajectory without mutating the live world", () => {
     const world = createWorldFromSystem(starterSystem, "preview-seed");
     const before = {

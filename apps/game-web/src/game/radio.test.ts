@@ -14,6 +14,15 @@ const baseHud: HudState = {
   cargoOnboard: false,
   speed: 0,
   medal: "none",
+  scoreBreakdown: {
+    base: 0,
+    paceBonus: 0,
+    fuelBonus: 0,
+    cargoBonus: 0,
+    landingBonus: 0,
+    incidentPenalty: 0,
+    total: 0
+  },
   landingStatus: "approach",
   targetDistance: 220,
   paceTier: "gold",

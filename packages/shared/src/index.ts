@@ -29,6 +29,16 @@ export type LandingRating =
 export type RunMedal = "none" | "bronze" | "silver" | "gold" | "comet";
 export type CrashReason = "Hard Landing" | "Hull Collision";
 
+export type ScoreBreakdown = {
+  base: number;
+  paceBonus: number;
+  fuelBonus: number;
+  cargoBonus: number;
+  landingBonus: number;
+  incidentPenalty: number;
+  total: number;
+};
+
 export type RunResultSummary = {
   status: RunStatus;
   elapsedSeconds: number;
@@ -38,6 +48,7 @@ export type RunResultSummary = {
   medal: RunMedal;
   landingRating?: LandingRating;
   crashReason?: CrashReason;
+  scoreBreakdown: ScoreBreakdown;
 };
 
 export type ReplayEnvelope = {

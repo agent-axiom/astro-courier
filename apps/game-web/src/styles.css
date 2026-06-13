@@ -425,7 +425,7 @@ button {
   top: 50%;
   left: 50%;
   display: grid;
-  width: min(340px, calc(100vw - 32px));
+  width: min(380px, calc(100vw - 32px));
   gap: 12px;
   justify-items: center;
   padding: 20px;
@@ -529,6 +529,38 @@ button {
   border-radius: 7px;
   background: rgba(160, 196, 255, 0.1);
   font-weight: 800;
+}
+
+.score-breakdown {
+  display: grid;
+  width: 100%;
+  gap: 5px;
+}
+
+.score-row {
+  display: flex;
+  min-height: 28px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px 10px;
+  border-radius: 7px;
+  background: rgba(160, 196, 255, 0.08);
+  color: #d8e6ff;
+  font-size: 0.78rem;
+  font-weight: 760;
+}
+
+.score-row span {
+  color: rgba(216, 230, 255, 0.74);
+}
+
+.score-row strong {
+  color: #ffffff;
+}
+
+.score-row-penalty strong {
+  color: #ffadc1;
 }
 
 .result-button {

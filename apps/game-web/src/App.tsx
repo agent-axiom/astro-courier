@@ -22,6 +22,15 @@ const initialHud: HudState = {
   cargoOnboard: false,
   speed: 0,
   medal: "none",
+  scoreBreakdown: {
+    base: 0,
+    paceBonus: 0,
+    fuelBonus: 0,
+    cargoBonus: 0,
+    landingBonus: 0,
+    incidentPenalty: 0,
+    total: 0
+  },
   paceTier: "gold",
   paceSecondsRemaining: 35,
   approachStreakSeconds: 0,
@@ -273,6 +282,14 @@ export function App() {
             <span>{hud.elapsedSeconds.toFixed(1)}s</span>
             <span>{Math.round(cargoIntegrity * 100)}%</span>
           </div>
+          <div className="score-breakdown" aria-label="Score breakdown">
+            {scoreBreakdownRows(hud).map((row) => (
+              <div key={row.label} className={row.tone === "penalty" ? "score-row score-row-penalty" : "score-row"}>
+                <span>{row.label}</span>
+                <strong>{formatScoreValue(row.value, row.tone)}</strong>
+              </div>
+            ))}
+          </div>
           <button
             type="button"
             className="result-button"
@@ -344,6 +361,33 @@ function crashReasonLabel(hud: HudState): string {
   if (hud.crashReason === "Hard Landing") return "Hard landing: slow and align before contact";
   if (hud.crashReason === "Hull Collision") return "Hull collision: keep clear of gravity wells";
   return hud.landingRating ?? "Insurance Event";
+}
+
+type ScoreRow = {
+  label: string;
+  value: number;
+  tone: "base" | "bonus" | "penalty";
+};
+
+function scoreBreakdownRows(hud: HudState): ScoreRow[] {
+  const breakdown = hud.scoreBreakdown;
+  const rows = [
+    { label: "Base", value: breakdown.base, tone: "base" },
+    { label: "Pace", value: breakdown.paceBonus, tone: "bonus" },
+    { label: "Fuel", value: breakdown.fuelBonus, tone: "bonus" },
+    { label: "Cargo", value: breakdown.cargoBonus, tone: "bonus" },
+    { label: "Landing", value: breakdown.landingBonus, tone: "bonus" },
+    { label: "Incident", value: breakdown.incidentPenalty, tone: "penalty" }
+  ] satisfies ScoreRow[];
+
+  return rows.filter((row) => row.tone === "base" || row.value > 0);
+}
+
+function formatScoreValue(value: number, tone: ScoreRow["tone"]): string {
+  const rounded = Math.round(value);
+  if (tone === "base") return `${rounded}`;
+  if (tone === "penalty") return `-${rounded}`;
+  return `+${rounded}`;
 }
 
 function getBestRunStorage(): Pick<Storage, "getItem" | "setItem"> | undefined {
