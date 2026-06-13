@@ -164,6 +164,44 @@ describe("result coach", () => {
     });
   });
 
+  it("coaches perfect approach runs toward repeating the soft dock", () => {
+    expect(
+      buildResultCoach({
+        status: "delivered",
+        lastMilestone: "Perfect Approach",
+        medal: "gold",
+        grade: "A",
+        cargoDamage: 0,
+        fuel: 46,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 220, landingBonus: 300 }
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Repeat the soft dock",
+      tone: "success"
+    });
+  });
+
+  it("coaches chain finish runs toward carrying the chain home again", () => {
+    expect(
+      buildResultCoach({
+        status: "delivered",
+        lastMilestone: "Chain Finish",
+        medal: "gold",
+        grade: "A",
+        cargoDamage: 0,
+        fuel: 40,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 650 }
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Carry the chain home",
+      tone: "success"
+    });
+  });
+
   it("coaches eco drift runs toward repeating the low-burn line", () => {
     expect(
       buildResultCoach({

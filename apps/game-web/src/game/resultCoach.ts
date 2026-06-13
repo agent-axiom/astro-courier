@@ -127,6 +127,22 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
     };
   }
 
+  if (input.lastMilestone === "Perfect Approach") {
+    return {
+      label: "Next run",
+      value: "Repeat the soft dock",
+      tone: "success"
+    };
+  }
+
+  if (input.lastMilestone === "Chain Finish") {
+    return {
+      label: "Next run",
+      value: "Carry the chain home",
+      tone: "success"
+    };
+  }
+
   return {
     label: "Next run",
     value: "Tighten landing angle",
