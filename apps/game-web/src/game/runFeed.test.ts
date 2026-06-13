@@ -72,6 +72,27 @@ describe("run action feed", () => {
     ]);
   });
 
+  it("announces cargo pickup when the run transitions to delivery", () => {
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, objectivePhase: "pickup" },
+        { ...baseSnapshot, objectivePhase: "delivery" }
+      )
+    ).toEqual([
+      {
+        label: "Cargo loaded",
+        value: "Dock outbound",
+        tone: "success"
+      }
+    ]);
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, objectivePhase: "delivery" },
+        { ...baseSnapshot, objectivePhase: "delivery" }
+      )
+    ).toEqual([]);
+  });
+
   it("derives medal-aware terminal updates for strong deliveries", () => {
     expect(deriveRunFeedUpdates(baseSnapshot, { ...baseSnapshot, status: "delivered", medal: "comet" })).toEqual([
       {

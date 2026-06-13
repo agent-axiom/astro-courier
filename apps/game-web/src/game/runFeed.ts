@@ -90,6 +90,14 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
     });
   }
 
+  if (previous.objectivePhase === "pickup" && current.objectivePhase === "delivery") {
+    updates.push({
+      label: "Cargo loaded",
+      value: "Dock outbound",
+      tone: "success"
+    });
+  }
+
   if (!isFuelCritical(previous) && isFuelCritical(current)) {
     updates.push({
       label: "Fuel critical",
