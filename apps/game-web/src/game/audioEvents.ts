@@ -9,6 +9,8 @@ export type GameAudioEvent =
   | "launch-burst"
   | "pb-pressure"
   | "pb-lead"
+  | "ghost-pressure"
+  | "ghost-pass"
   | "comet-armed"
   | "chain-critical"
   | "medal-drop"
@@ -25,6 +27,7 @@ export type HudAudioSnapshot = {
   lastMilestone?: string;
   score?: number;
   bestRunScore?: number;
+  bestRunHasGhostTrail?: boolean;
   paceTier?: ContractPaceTier;
   perfectDockReady?: boolean;
   styleMultiplier?: number;
@@ -92,11 +95,11 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
   }
 
   if (hasCrossedBestRunScore(previous, current)) {
-    events.push("pb-lead");
+    events.push(current.bestRunHasGhostTrail ? "ghost-pass" : "pb-lead");
   }
 
   if (hasEnteredBestRunPressure(previous, current)) {
-    events.push("pb-pressure");
+    events.push(current.bestRunHasGhostTrail ? "ghost-pressure" : "pb-pressure");
   }
 
   if (hasArmedCometDock(previous, current)) {

@@ -108,6 +108,11 @@ describe("screen feedback", () => {
       intensity: "medium",
       durationMs: 420
     });
+    expect(buildScreenFeedback(["ghost-pass"])).toEqual({
+      tone: "success",
+      intensity: "heavy",
+      durationMs: 520
+    });
   });
 
   it("maps personal-best pressure to an anticipatory style pulse", () => {
@@ -120,6 +125,16 @@ describe("screen feedback", () => {
       tone: "success",
       intensity: "medium",
       durationMs: 420
+    });
+    expect(buildScreenFeedback(["ghost-pressure"])).toEqual({
+      tone: "style",
+      intensity: "medium",
+      durationMs: 420
+    });
+    expect(buildScreenFeedback(["ghost-pressure", "ghost-pass"])).toEqual({
+      tone: "success",
+      intensity: "heavy",
+      durationMs: 520
     });
   });
 

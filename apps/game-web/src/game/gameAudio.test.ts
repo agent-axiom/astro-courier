@@ -54,6 +54,17 @@ describe("game audio controller", () => {
     expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.12, 3);
   });
 
+  it("plays a glassy pass tone for ghost overtakes", () => {
+    const context = new FakeAudioContext();
+    const controller = createGameAudioController({ createContext: () => context });
+
+    controller.play(["ghost-pass"]);
+
+    expect(context.oscillators).toHaveLength(1);
+    expect(context.oscillators[0]?.frequencyValue).toBe(1120);
+    expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.13, 3);
+  });
+
   it("plays an anticipatory tone for personal-best pressure", () => {
     const context = new FakeAudioContext();
     const controller = createGameAudioController({ createContext: () => context });
@@ -62,6 +73,17 @@ describe("game audio controller", () => {
 
     expect(context.oscillators).toHaveLength(1);
     expect(context.oscillators[0]?.frequencyValue).toBe(760);
+    expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.1, 3);
+  });
+
+  it("plays an anticipatory shimmer for ghost pressure", () => {
+    const context = new FakeAudioContext();
+    const controller = createGameAudioController({ createContext: () => context });
+
+    controller.play(["ghost-pressure"]);
+
+    expect(context.oscillators).toHaveLength(1);
+    expect(context.oscillators[0]?.frequencyValue).toBe(880);
     expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.1, 3);
   });
 

@@ -1425,6 +1425,7 @@ function toHudAudioSnapshot(hud: HudState, bestRun: BestRun | undefined): HudAud
     lastMilestone: hud.lastMilestone,
     score: hud.score,
     bestRunScore: bestRun?.score,
+    bestRunHasGhostTrail: (bestRun?.ghostTrail?.length ?? 0) >= 2,
     paceTier: hud.paceTier,
     perfectDockReady: hud.perfectDockReady,
     styleMultiplier: hud.styleMultiplier,

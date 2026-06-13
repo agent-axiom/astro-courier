@@ -125,6 +125,15 @@ describe("HUD audio events", () => {
     ).toEqual([]);
   });
 
+  it("celebrates passing a saved personal-best ghost trail distinctly", () => {
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, score: 3280, bestRunScore: 3290, bestRunHasGhostTrail: true },
+        { ...baseSnapshot, score: 3440, bestRunScore: 3290, bestRunHasGhostTrail: true }
+      )
+    ).toEqual(["ghost-pass"]);
+  });
+
   it("signals when the live run enters personal-best chase pressure", () => {
     expect(
       deriveHudAudioEvents(
@@ -138,6 +147,15 @@ describe("HUD audio events", () => {
         { ...baseSnapshot, score: 3180, bestRunScore: 3290 }
       )
     ).toEqual([]);
+  });
+
+  it("signals ghost pressure distinctly when a replay trail is loaded", () => {
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, score: 2980, bestRunScore: 3290, bestRunHasGhostTrail: true },
+        { ...baseSnapshot, score: 3105, bestRunScore: 3290, bestRunHasGhostTrail: true }
+      )
+    ).toEqual(["ghost-pressure"]);
   });
 
   it("warns once when an active style chain reaches the critical window", () => {
