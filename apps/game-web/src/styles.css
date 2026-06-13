@@ -458,6 +458,36 @@ button {
   color: #ffe19a;
 }
 
+.replay-capture-chip {
+  display: grid;
+  grid-template-columns: 16px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  background: rgba(124, 225, 255, 0.12);
+  color: #c6f6ff;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.replay-capture-chip span,
+.replay-capture-chip strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.replay-capture-chip span {
+  color: rgba(198, 246, 255, 0.76);
+}
+
+.replay-capture-chip strong {
+  color: #ffffff;
+  text-align: right;
+}
+
 .rush-chip {
   display: flex;
   align-items: center;

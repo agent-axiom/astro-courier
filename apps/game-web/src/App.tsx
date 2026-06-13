@@ -60,6 +60,7 @@ import { buildCometRunReadout } from "./game/comet";
 import { buildResultRetryAction, buildRetryTarget } from "./game/retryTarget";
 import { buildRunIntensity } from "./game/intensity";
 import { buildCrashReasonLabel } from "./game/crash";
+import { buildReplayCaptureReadout } from "./game/replayReadout";
 
 type GameStore = {
   hud: HudState;
@@ -296,6 +297,10 @@ export function App() {
     score: hud.score,
     elapsedSeconds: hud.elapsedSeconds,
     status: hud.status
+  });
+  const replayCaptureReadout = buildReplayCaptureReadout({
+    status: hud.status,
+    replayFrameCount: hud.replayFrameCount
   });
   const cometRunReadout = buildCometRunReadout({
     status: hud.status,
@@ -611,6 +616,16 @@ export function App() {
           <div className={`best-pace-chip best-pace-${liveBestPace.tone}`} aria-label={`${liveBestPace.label}: ${liveBestPace.value}`}>
             <span>{liveBestPace.label}</span>
             <strong>{liveBestPace.value}</strong>
+          </div>
+        ) : null}
+        {replayCaptureReadout ? (
+          <div
+            className={`replay-capture-chip replay-capture-${replayCaptureReadout.tone}`}
+            aria-label={`${replayCaptureReadout.label}: ${replayCaptureReadout.value}`}
+          >
+            <Satellite size={16} />
+            <span>{replayCaptureReadout.label}</span>
+            <strong>{replayCaptureReadout.value}</strong>
           </div>
         ) : null}
         {pickupRushActive ? (
