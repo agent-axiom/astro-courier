@@ -68,6 +68,16 @@ export function buildRadioMessage(hud: HudState): string {
     return "Style chain fading. Hit a skim or clean dock to save it.";
   }
 
+  if (hud.gravitySlingDistance !== undefined) {
+    if (hud.gravitySlingReady) {
+      const multiplier = Math.max(1, hud.styleMultiplier);
+      const payout = hud.gravitySlingStyleBonus === undefined ? undefined : Math.round(hud.gravitySlingStyleBonus * multiplier);
+      return `Sling window open${payout === undefined ? "" : ` for +${payout}`}. Hold the fast gravity arc.`;
+    }
+
+    return `Gravity pocket live. Build ${hud.gravitySlingSpeedThreshold ?? 54}+ speed for a sling bonus.`;
+  }
+
   if (hud.maxFuel > 0 && hud.fuel / hud.maxFuel <= 0.15) {
     return "Fuel critical. Coast clean and save the last burn for docking.";
   }

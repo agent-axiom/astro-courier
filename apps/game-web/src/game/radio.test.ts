@@ -148,6 +148,32 @@ describe("radio feedback copy", () => {
     ).toContain("Style chain fading");
   });
 
+  it("coaches gravity sling setup before generic objective guidance", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        gravitySlingDistance: 160,
+        gravitySlingReady: false,
+        gravitySlingSpeedThreshold: 54,
+        gravitySlingStyleBonus: 240
+      })
+    ).toContain("Build 54+ speed");
+  });
+
+  it("calls out a ready gravity sling window with payout", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        gravitySlingDistance: 150,
+        gravitySlingReady: true,
+        gravitySlingSpeedThreshold: 54,
+        gravitySlingStyleBonus: 240
+      })
+    ).toContain("Sling window open for +240");
+  });
+
   it("keeps preflight copy distinct from active pickup guidance", () => {
     expect(buildRadioMessage({ ...baseHud, status: "paused" })).toContain("Contract loaded");
   });
