@@ -53,6 +53,7 @@ import { buildResultBoardAction, buildResultBoardPrompt, buildResultCoach } from
 import { getOverlayVisibility } from "./game/overlays";
 import { buildCometRunReadout } from "./game/comet";
 import { buildResultRetryAction, buildRetryTarget } from "./game/retryTarget";
+import { buildRunIntensity } from "./game/intensity";
 
 type GameStore = {
   hud: HudState;
@@ -208,6 +209,19 @@ export function App() {
   const cargoIntegrity = Math.max(0, 1 - hud.cargoDamage);
   const runFinished = hud.status === "delivered" || hud.status === "crashed";
   const overlays = getOverlayVisibility({ status: hud.status, preflightOpen });
+  const runIntensity = buildRunIntensity({
+    status: hud.status,
+    preflightOpen,
+    fuelRatio,
+    objectivePhase: hud.objectivePhase,
+    paceTier: hud.paceTier,
+    paceSecondsRemaining: hud.paceSecondsRemaining,
+    cargoDamage: hud.cargoDamage,
+    hazardDangerLevel: hud.hazardDangerLevel,
+    trajectoryRiskLevel: hud.trajectoryRiskLevel,
+    styleMultiplier: hud.styleMultiplier,
+    styleChainSecondsRemaining: hud.styleChainSecondsRemaining
+  });
   const pickupRushActive = hud.objectivePhase === "pickup" && hud.quickPickupSecondsRemaining > 0 && !runFinished;
   const radioMessage = buildRadioMessage(hud);
   const targetDistanceLabel = hud.targetDistance === undefined ? "-" : `${Math.round(hud.targetDistance)}m`;
@@ -392,7 +406,7 @@ export function App() {
   };
 
   return (
-    <main className="app-shell">
+    <main className={`app-shell app-intensity-${runIntensity}`}>
       <div ref={canvasMountRef} className="game-canvas" aria-label="Astro Courier gameplay canvas" />
 
       <header className="top-hud">
