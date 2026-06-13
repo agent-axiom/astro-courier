@@ -23,6 +23,7 @@ const initialHud: HudState = {
   cargoOnboard: false,
   speed: 0,
   medal: "none",
+  grade: "F",
   scoreBreakdown: {
     base: 0,
     paceBonus: 0,
@@ -284,6 +285,10 @@ export function App() {
           <Trophy aria-hidden="true" size={28} />
           <h2>{hud.status === "delivered" ? "Delivery Complete" : "Delivery Failed"}</h2>
           <p>{hud.status === "crashed" ? crashReasonLabel(hud) : hud.landingRating ?? statusLabel(hud.status)}</p>
+          <div className={`grade-badge grade-${hud.grade.toLowerCase()}`} aria-label={`Run grade ${hud.grade}`}>
+            <span>Rank</span>
+            <strong>{hud.grade}</strong>
+          </div>
           {hud.medal !== "none" ? <div className={`medal-banner medal-${hud.medal}`}>{medalLabel(hud.medal)}</div> : null}
           {hud.status === "delivered" && bestRun ? (
             <div className={`best-run ${newBest ? "best-run-new" : ""}`}>

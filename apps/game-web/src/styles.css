@@ -475,6 +475,47 @@ button {
   font-weight: 900;
 }
 
+.grade-badge {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 46px;
+  padding: 8px 12px;
+  border-radius: 7px;
+  background: rgba(160, 196, 255, 0.1);
+  color: #e8f0ff;
+  text-align: left;
+}
+
+.grade-badge span {
+  color: rgba(232, 240, 255, 0.74);
+  font-size: 0.76rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.grade-badge strong {
+  color: #ffffff;
+  font-size: 1.55rem;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.grade-s {
+  background: linear-gradient(90deg, rgba(124, 225, 255, 0.18), rgba(255, 209, 102, 0.18));
+}
+
+.grade-a,
+.grade-b {
+  background: rgba(142, 230, 184, 0.16);
+}
+
+.grade-f {
+  background: rgba(255, 111, 145, 0.14);
+}
+
 .medal-comet {
   background: linear-gradient(90deg, rgba(124, 225, 255, 0.18), rgba(255, 209, 102, 0.2));
   color: #effcff;

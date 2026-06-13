@@ -14,6 +14,7 @@ const baseHud: HudState = {
   cargoOnboard: false,
   speed: 0,
   medal: "none",
+  grade: "F",
   scoreBreakdown: {
     base: 0,
     paceBonus: 0,

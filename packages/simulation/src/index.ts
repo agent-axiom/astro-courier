@@ -6,6 +6,7 @@ import type {
   ObjectivePhase,
   PlayerCommand,
   ReplayEnvelope,
+  RunGrade,
   RunMedal,
   RunResultSummary,
   ScoreBreakdown,
@@ -330,6 +331,7 @@ export function summarizeRun(world: SimulationWorld): RunResultSummary {
     cargoDamage: round(world.ship.cargoDamage, 3),
     fuelUsed: round(world.fuelUsed, 3),
     medal: medalFor(world),
+    grade: gradeFor(world),
     landingRating: world.landingRating,
     crashReason: world.crashReason,
     scoreBreakdown: { ...world.scoreBreakdown }
@@ -733,6 +735,19 @@ function medalFor(world: SimulationWorld): RunMedal {
     return "bronze";
   }
   return "none";
+}
+
+function gradeFor(world: SimulationWorld): RunGrade {
+  if (world.status !== "delivered") {
+    return "F";
+  }
+
+  const medal = medalFor(world);
+  if (medal === "comet") return "S";
+  if (medal === "gold") return world.ship.cargoDamage <= 0.08 ? "A" : "B";
+  if (medal === "silver") return "B";
+  if (medal === "bronze") return "C";
+  return "D";
 }
 
 function rateLanding(

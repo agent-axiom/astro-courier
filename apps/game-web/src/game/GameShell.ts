@@ -14,6 +14,7 @@ import type {
   LandingGuidanceStatus,
   ObjectivePhase,
   PlayerCommand,
+  RunGrade,
   RunMedal,
   RunStatus,
   ScoreBreakdown
@@ -37,6 +38,7 @@ export type HudState = {
   assistAvailable?: boolean;
   lastMilestone?: string;
   medal: RunMedal;
+  grade: RunGrade;
   landingRating?: string;
   crashReason?: CrashReason;
   scoreBreakdown: ScoreBreakdown;
@@ -216,6 +218,7 @@ export class GameShell {
       assistAvailable: snapshot.objectiveTarget?.assistAvailable,
       lastMilestone: this.world.lastMilestone ?? this.retainedMilestone,
       medal: result.medal,
+      grade: result.grade,
       landingRating: result.landingRating,
       crashReason: result.crashReason,
       scoreBreakdown: result.scoreBreakdown,

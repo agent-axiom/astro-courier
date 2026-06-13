@@ -40,6 +40,7 @@ describe("engine replay utilities", () => {
         cargoDamage: 0,
         fuelUsed: 12,
         medal: "gold",
+        grade: "A",
         scoreBreakdown: {
           base: 1000,
           paceBonus: 200,

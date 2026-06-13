@@ -28,6 +28,7 @@ export type LandingRating =
   | "Insurance Event";
 export type RunMedal = "none" | "bronze" | "silver" | "gold" | "comet";
 export type CrashReason = "Hard Landing" | "Hull Collision";
+export type RunGrade = "S" | "A" | "B" | "C" | "D" | "F";
 
 export type ScoreBreakdown = {
   base: number;
@@ -47,6 +48,7 @@ export type RunResultSummary = {
   cargoDamage: number;
   fuelUsed: number;
   medal: RunMedal;
+  grade: RunGrade;
   landingRating?: LandingRating;
   crashReason?: CrashReason;
   scoreBreakdown: ScoreBreakdown;

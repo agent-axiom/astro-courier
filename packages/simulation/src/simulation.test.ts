@@ -376,6 +376,32 @@ describe("deterministic Astro Courier simulation", () => {
     expect(summarizeRun(failed).medal).toBe("none");
   });
 
+  it("grades run results for instant retry feedback", () => {
+    const comet = createWorldFromSystem(starterSystem, "grade-seed");
+    comet.ship.position = { x: 0, y: -74 };
+    comet.ship.velocity = { x: 1, y: 3 };
+    comet.ship.rotation = -Math.PI / 2;
+    stepWorld(comet, 1 / 60, []);
+    comet.ship.position = { x: 260, y: -80 };
+    comet.ship.velocity = { x: 4, y: 1 };
+    comet.ship.rotation = 0;
+    stepWorld(comet, 1 / 60, []);
+
+    const silver = createWorldFromSystem(starterSystem, "grade-seed");
+    silver.status = "delivered";
+    silver.elapsedSeconds = 44;
+    silver.landingRating = "Soft Landing";
+    silver.ship.cargoDamage = 0;
+    silver.fuelUsed = 48;
+
+    const failed = createWorldFromSystem(starterSystem, "grade-seed");
+    failed.status = "crashed";
+
+    expect(summarizeRun(comet).grade).toBe("S");
+    expect(summarizeRun(silver).grade).toBe("B");
+    expect(summarizeRun(failed).grade).toBe("F");
+  });
+
   it("explains delivered score totals with a stable score breakdown", () => {
     const world = createWorldFromSystem(starterSystem, "score-seed");
     world.ship.position = { x: 0, y: -74 };
