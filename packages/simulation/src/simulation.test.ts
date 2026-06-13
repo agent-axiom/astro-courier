@@ -320,6 +320,50 @@ describe("deterministic Astro Courier simulation", () => {
     expect(secondBreakdown.styleBonus).toBe(firstBreakdown.styleBonus);
   });
 
+  it("scales hazard contact damage by active cargo fragility", () => {
+    const systemWithCargoRisk: SystemContent = {
+      ...starterSystem,
+      hazards: [
+        {
+          id: "contact-field",
+          type: "asteroid_field",
+          position: [120, 0],
+          radius: 50,
+          severity: 0.7
+        }
+      ],
+      contracts: [
+        {
+          ...starterSystem.contracts[0],
+          id: "fragile-run",
+          cargoId: "bottled-starlight"
+        },
+        {
+          ...starterSystem.contracts[0],
+          id: "volatile-run",
+          cargoId: "volatile-comet-ice"
+        }
+      ],
+      cargo: [
+        ...starterSystem.cargo,
+        {
+          id: "volatile-comet-ice",
+          name: "Volatile Comet Ice",
+          kind: "unstable",
+          fragility: 1
+        }
+      ]
+    };
+    const fragile = createWorldFromSystem(systemWithCargoRisk, "cargo-risk-seed", { contractId: "fragile-run" });
+    const volatile = createWorldFromSystem(systemWithCargoRisk, "cargo-risk-seed", { contractId: "volatile-run" });
+
+    stepWorld(fragile, 1 / 60, []);
+    stepWorld(volatile, 1 / 60, []);
+
+    expect(fragile.ship.cargoDamage).toBeGreaterThan(0);
+    expect(volatile.ship.cargoDamage).toBeGreaterThan(fragile.ship.cargoDamage);
+  });
+
   it("awards a one-time style bonus for quick cargo pickup", () => {
     const quick = createWorldFromSystem(starterSystem, "quick-pickup-seed");
     quick.elapsedSeconds = 8;

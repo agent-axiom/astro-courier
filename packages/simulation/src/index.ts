@@ -162,6 +162,7 @@ export type SimulationWorld = {
   skimmedHazardIds: string[];
   fuelUsed: number;
   activeContract: ContractContent;
+  activeCargo: CargoContent;
   gravitySources: GravitySourceState[];
   landingPads: LandingPadState[];
   hazards: HazardState[];
@@ -213,6 +214,10 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
     }
     throw new Error(`System "${system.id}" does not define a contract`);
   }
+  const activeCargo = system.cargo.find((cargo) => cargo.id === activeContract.cargoId);
+  if (!activeCargo) {
+    throw new Error(`System "${system.id}" does not define cargo "${activeContract.cargoId}"`);
+  }
   const shipStart = activeContract.shipStart;
   const shipPosition = shipStart?.position ?? system.ship.startPosition;
   const shipVelocity = shipStart?.velocity ?? system.ship.startVelocity;
@@ -236,6 +241,7 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
     skimmedHazardIds: [],
     fuelUsed: 0,
     activeContract,
+    activeCargo,
     gravitySources: system.planets.map((planet) => ({
       id: planet.id,
       name: planet.name,
@@ -559,7 +565,8 @@ function updateHazards(world: SimulationWorld, fixedDt: number): void {
   for (const hazard of world.hazards) {
     const distance = distanceBetween(world.ship.position, hazard.position);
     if (distance <= hazard.radius) {
-      world.ship.cargoDamage = clamp(world.ship.cargoDamage + hazard.severity * fixedDt * 0.08, 0, 1);
+      const fragilityMultiplier = Math.max(0.25, world.activeCargo.fragility);
+      world.ship.cargoDamage = clamp(world.ship.cargoDamage + hazard.severity * fixedDt * 0.08 * fragilityMultiplier, 0, 1);
       continue;
     }
 
