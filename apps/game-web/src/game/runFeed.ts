@@ -36,6 +36,7 @@ export type AppendRunFeedResult = {
 };
 
 const criticalFuelRatio = 0.15;
+const criticalStyleChainSeconds = 1;
 const feedMilestones = new Set([
   "Clean Hazard Skim",
   "Needle Thread",
@@ -110,6 +111,14 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
       label: "Burst armed",
       value: `Boost in ${formatSeconds(current.launchBurstSecondsRemaining)}${formatChainSuffix(current)}`,
       tone: "style"
+    });
+  }
+
+  if (hasStyleChainReachedCriticalWindow(previous, current)) {
+    updates.push({
+      label: "Chain fading",
+      value: `Save in ${formatSeconds(current.styleChainSecondsRemaining)}`,
+      tone: "warning"
     });
   }
 
@@ -188,6 +197,17 @@ function hasCrossedBestRunScore(previous: RunFeedSnapshot, current: RunFeedSnaps
     return false;
   }
   return (previous.score ?? 0) <= current.bestRunScore && (current.score ?? 0) > current.bestRunScore;
+}
+
+function hasStyleChainReachedCriticalWindow(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
+  const currentChainActive = (current.styleMultiplier ?? 1) > 1 && (current.styleChainSecondsRemaining ?? 0) > 0;
+  if (!currentChainActive) {
+    return false;
+  }
+  return (
+    (previous.styleChainSecondsRemaining ?? 0) > criticalStyleChainSeconds &&
+    (current.styleChainSecondsRemaining ?? 0) <= criticalStyleChainSeconds
+  );
 }
 
 function buildMedalDropUpdate(previous: ContractPaceTier | undefined, current: ContractPaceTier | undefined): RunFeedUpdate | undefined {

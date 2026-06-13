@@ -121,6 +121,27 @@ describe("run action feed", () => {
     ]);
   });
 
+  it("announces when an active style chain reaches the critical window", () => {
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, styleMultiplier: 1.5, styleChainSecondsRemaining: 1.4 },
+        { ...baseSnapshot, styleMultiplier: 1.5, styleChainSecondsRemaining: 0.8 }
+      )
+    ).toEqual([
+      {
+        label: "Chain fading",
+        value: "Save in 0.8s",
+        tone: "warning"
+      }
+    ]);
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, styleMultiplier: 1.5, styleChainSecondsRemaining: 0.8 },
+        { ...baseSnapshot, styleMultiplier: 1.5, styleChainSecondsRemaining: 0.5 }
+      )
+    ).toEqual([]);
+  });
+
   it("announces when the live run loses the gold medal window", () => {
     expect(deriveRunFeedUpdates({ ...baseSnapshot, paceTier: "gold" }, { ...baseSnapshot, paceTier: "silver" })).toEqual([
       {
