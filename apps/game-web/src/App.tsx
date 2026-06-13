@@ -276,7 +276,8 @@ export function App() {
     styleMultiplier: hud.styleMultiplier,
     styleChainSecondsRemaining: hud.styleChainSecondsRemaining,
     gravitySlingReady: hud.gravitySlingReady,
-    gravitySlingStyleBonus: hud.gravitySlingStyleBonus
+    gravitySlingStyleBonus: hud.gravitySlingStyleBonus,
+    approachStreakSeconds: hud.approachStreakSeconds
   });
   const liveBestPace = buildLiveBestPace({
     bestRun,

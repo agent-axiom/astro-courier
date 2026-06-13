@@ -2,7 +2,9 @@ import {
   DAMAGE_CONTROL_STYLE_BONUS,
   ECO_DRIFT_FUEL_USED_LIMIT,
   ECO_DRIFT_STYLE_BONUS,
-  EXPRESS_FINISH_STYLE_BONUS
+  EXPRESS_FINISH_STYLE_BONUS,
+  PERFECT_APPROACH_STREAK_SECONDS,
+  PERFECT_APPROACH_STYLE_BONUS
 } from "@astro-courier/simulation";
 import type { LandingGuidanceStatus, ObjectivePhase, RunStatus } from "@astro-courier/shared";
 import { COMET_RESERVE_MIN_RATIO, COMET_RESERVE_WARNING_RATIO } from "./comet";
@@ -68,6 +70,7 @@ export type TacticalCueInput = {
   styleChainSecondsRemaining?: number;
   gravitySlingReady?: boolean;
   gravitySlingStyleBonus?: number;
+  approachStreakSeconds?: number;
 };
 
 export type TacticalCue = {
@@ -217,6 +220,14 @@ export function buildTacticalCue(input: TacticalCueInput): TacticalCue | undefin
     };
   }
 
+  if (isBankedPerfectApproach(input)) {
+    return {
+      label: "Tactical cue",
+      value: `Soft dock / +${PERFECT_APPROACH_STYLE_BONUS}`,
+      tone: "opportunity"
+    };
+  }
+
   if (isReadyGravitySling(input)) {
     return {
       label: "Tactical cue",
@@ -292,6 +303,14 @@ function isReadyGravitySling(input: TacticalCueInput): boolean {
   );
 }
 
+function isBankedPerfectApproach(input: TacticalCueInput): boolean {
+  return (
+    input.landingStatus === "ready" &&
+    (input.approachStreakSeconds ?? 0) >= PERFECT_APPROACH_STREAK_SECONDS &&
+    (input.cargoDamage ?? 0) <= 0.02
+  );
+}
+
 function isEcoDriftDelivery(input: TacticalCueInput): boolean {
   return (
     input.objectivePhase === "delivery" &&
@@ -317,6 +336,10 @@ function fuelReserve(input: TacticalCueInput): number {
 function buildUrgentChainAction(input: TacticalCueInput): string {
   if (isReadyGravitySling(input)) {
     return `Sling now / x${styleMultiplier(input).toFixed(2)}`;
+  }
+
+  if (isBankedPerfectApproach(input)) {
+    return `Soft dock / +${PERFECT_APPROACH_STYLE_BONUS}`;
   }
 
   return "Save chain";

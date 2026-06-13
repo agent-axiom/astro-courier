@@ -233,6 +233,24 @@ describe("tactical cue", () => {
     });
   });
 
+  it("points an urgent style chain at a banked perfect approach", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        landingStatus: "ready",
+        approachStreakSeconds: 1.2,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 0.8,
+        cargoDamage: 0
+      })
+    ).toEqual({
+      label: "Tactical cue",
+      value: "Soft dock / +220 / 0.8s",
+      tone: "urgent"
+    });
+  });
+
   it("surfaces a ready gravity sling payout as an immediate opportunity", () => {
     expect(
       buildTacticalCue({
@@ -248,6 +266,34 @@ describe("tactical cue", () => {
       value: "Sling now / +360 / x1.50",
       tone: "opportunity"
     });
+  });
+
+  it("surfaces a banked perfect approach dock payout", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        landingStatus: "ready",
+        approachStreakSeconds: 1.2,
+        cargoDamage: 0
+      })
+    ).toEqual({
+      label: "Tactical cue",
+      value: "Soft dock / +220",
+      tone: "opportunity"
+    });
+  });
+
+  it("does not call a perfect approach before the setup is banked", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        landingStatus: "ready",
+        approachStreakSeconds: 0.6,
+        cargoDamage: 0
+      })
+    ).toBeUndefined();
   });
 
   it("keeps express finish ahead of eco drift while the clean gold window is closing", () => {
