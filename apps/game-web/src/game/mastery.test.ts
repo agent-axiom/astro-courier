@@ -74,4 +74,20 @@ describe("preflight bonus objectives", () => {
       { label: "Last Drop", value: "+170 / <=5% fuel" }
     ]);
   });
+
+  it("surfaces chain finish as the chain relay bonus target before hazard pay", () => {
+    expect(
+      buildPreflightBonusObjectives({
+        contractId: "chain-relay",
+        quickPickupBonus: 180,
+        hazardSeverityMultiplier: 1.3
+      })
+    ).toEqual([
+      { label: "Rush pickup", value: "+180" },
+      { label: "Express finish", value: "+180 / gold pace" },
+      { label: "Chain finish", value: "carry chain home" },
+      { label: "Needle thread", value: "42+ speed" },
+      { label: "Last Drop", value: "+170 / <=5% fuel" }
+    ]);
+  });
 });

@@ -65,6 +65,22 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
     value: `+${LAST_DROP_STYLE_BONUS} / <=${Math.round(LAST_DROP_FUEL_RATIO * 100)}% fuel`
   } satisfies PreflightBonusObjective;
 
+  if (input.contractId === "chain-relay") {
+    return [
+      rushPickup,
+      expressFinish,
+      {
+        label: "Chain finish",
+        value: "carry chain home"
+      },
+      {
+        label: "Needle thread",
+        value: `${HAZARD_THREAD_SPEED_THRESHOLD}+ speed`
+      },
+      lastDrop
+    ];
+  }
+
   if ((input.hazardSeverityMultiplier ?? 1) >= 1.25) {
     return [
       rushPickup,
