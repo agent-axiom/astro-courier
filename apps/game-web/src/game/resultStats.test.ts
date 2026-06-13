@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildReplayReceipt, buildResultHighlight, buildResultStats } from "./resultStats";
+import { buildReplayReceipt, buildResultHighlight, buildResultOutcomePresentation, buildResultStats } from "./resultStats";
 
 const baseBreakdown = {
   base: 1000,
@@ -14,6 +14,17 @@ const baseBreakdown = {
 };
 
 describe("result stat formatting", () => {
+  it("presents delivered and failed outcomes with distinct result icon tones", () => {
+    expect(buildResultOutcomePresentation("delivered")).toEqual({
+      icon: "trophy",
+      tone: "success"
+    });
+    expect(buildResultOutcomePresentation("crashed")).toEqual({
+      icon: "alert",
+      tone: "danger"
+    });
+  });
+
   it("labels score, time, and cargo integrity for the result overlay", () => {
     expect(buildResultStats({ score: 2400, elapsedSeconds: 31.26, cargoIntegrity: 0.874 })).toEqual([
       { label: "Score", value: "2400" },

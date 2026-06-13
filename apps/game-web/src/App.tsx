@@ -62,7 +62,7 @@ import { buildExpressFinishReadout, buildObjectiveDirective, buildObjectiveInter
 import { buildPreflightBonusObjectives, buildPreflightMasteryTargets } from "./game/mastery";
 import { buildApproachRewardReadout, buildDockingSpeedReadout } from "./game/docking";
 import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./game/cargo";
-import { buildReplayReceipt, buildResultHighlight, buildResultStats } from "./game/resultStats";
+import { buildReplayReceipt, buildResultHighlight, buildResultOutcomePresentation, buildResultStats } from "./game/resultStats";
 import { buildHazardPressureReadout } from "./game/hazard";
 import { buildResultBoardAction, buildResultBoardMasteryPrompt, buildResultBoardPrompt, buildResultCoach } from "./game/resultCoach";
 import { getOverlayVisibility } from "./game/overlays";
@@ -502,6 +502,8 @@ export function App() {
   });
   const cargoManifest = buildCargoManifest({ cargoName: hud.cargoName, cargoOnboard: hud.cargoOnboard });
   const resultStats = buildResultStats({ score: hud.score, elapsedSeconds: hud.elapsedSeconds, cargoIntegrity });
+  const resultOutcomePresentation =
+    hud.status === "delivered" || hud.status === "crashed" ? buildResultOutcomePresentation(hud.status) : undefined;
   const resultHighlight = buildResultHighlight(hud.scoreBreakdown, hud.lastMilestone);
   const replayReceipt = buildReplayReceipt(hud.replayChecksum);
   const bestRunChase = buildBestRunChase(bestRun);
@@ -1295,7 +1297,9 @@ export function App() {
 
       {overlays.result ? (
         <section className={`result-overlay result-${hud.status}`} aria-label="Run result">
-          <Trophy aria-hidden="true" size={28} />
+          <span className={`result-icon result-icon-${resultOutcomePresentation?.tone ?? "success"}`} aria-hidden="true">
+            {resultOutcomePresentation?.icon === "alert" ? <ShieldAlert size={28} /> : <Trophy size={28} />}
+          </span>
           <h2>{hud.status === "delivered" ? "Delivery Complete" : "Delivery Failed"}</h2>
           <p>{hud.status === "crashed" ? buildCrashReasonLabel(hud) : hud.landingRating ?? statusLabel(hud.status)}</p>
           <div className={`grade-badge grade-${hud.grade.toLowerCase()}`} aria-label={`Run grade ${hud.grade}`}>

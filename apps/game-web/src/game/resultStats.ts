@@ -1,4 +1,4 @@
-import type { ScoreBreakdown } from "@astro-courier/shared";
+import type { RunStatus, ScoreBreakdown } from "@astro-courier/shared";
 
 export type ResultStatsInput = {
   score: number;
@@ -23,6 +23,11 @@ export type ReplayReceipt = {
   tone: "verified";
 };
 
+export type ResultOutcomePresentation = {
+  icon: "alert" | "trophy";
+  tone: "danger" | "success";
+};
+
 const styleMilestones = new Set([
   "Clean Hazard Skim",
   "Needle Thread",
@@ -45,6 +50,20 @@ export function buildResultStats(input: ResultStatsInput): ResultStat[] {
     { label: "Time", value: `${input.elapsedSeconds.toFixed(1)}s` },
     { label: "Cargo", value: `${Math.round(Math.max(0, input.cargoIntegrity) * 100)}%` }
   ];
+}
+
+export function buildResultOutcomePresentation(status: Extract<RunStatus, "crashed" | "delivered">): ResultOutcomePresentation {
+  if (status === "crashed") {
+    return {
+      icon: "alert",
+      tone: "danger"
+    };
+  }
+
+  return {
+    icon: "trophy",
+    tone: "success"
+  };
 }
 
 export function buildResultHighlight(breakdown: ScoreBreakdown, lastMilestone?: string): ResultHighlight | undefined {
