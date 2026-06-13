@@ -156,9 +156,10 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
       tone: "danger"
     });
   } else if (previous.trajectoryRiskLevel !== current.trajectoryRiskLevel && current.trajectoryRiskLevel === "near") {
+    const damagedCargo = (current.cargoDamage ?? 0) > cleanCargoDamageLimit;
     updates.push({
-      label: "Hazard vector",
-      value: `Thread in ${formatSeconds(current.trajectoryRiskSeconds)}`,
+      label: damagedCargo ? "Damaged vector" : "Hazard vector",
+      value: `${damagedCargo ? "Clear" : "Thread"} in ${formatSeconds(current.trajectoryRiskSeconds)}`,
       tone: "warning"
     });
   }

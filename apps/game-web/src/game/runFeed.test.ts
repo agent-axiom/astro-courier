@@ -86,6 +86,20 @@ describe("run action feed", () => {
         tone: "warning"
       }
     ]);
+    expect(
+      deriveRunFeedUpdates({ ...baseSnapshot, cargoDamage: 0.18 }, {
+        ...baseSnapshot,
+        trajectoryRiskLevel: "near",
+        trajectoryRiskSeconds: 2.4,
+        cargoDamage: 0.18
+      })
+    ).toEqual([
+      {
+        label: "Damaged vector",
+        value: "Clear in 2.4s",
+        tone: "warning"
+      }
+    ]);
   });
 
   it("announces when a launch burst window opens after pickup", () => {
