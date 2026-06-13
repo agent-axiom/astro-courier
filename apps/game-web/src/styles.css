@@ -1134,6 +1134,16 @@ button {
   background: rgba(124, 225, 255, 0.16);
 }
 
+.contract-option-recommended {
+  border-color: rgba(255, 209, 102, 0.56);
+  background: rgba(255, 209, 102, 0.1);
+}
+
+.contract-option-recommended.contract-option-active {
+  border-color: rgba(255, 209, 102, 0.78);
+  background: linear-gradient(135deg, rgba(124, 225, 255, 0.16), rgba(255, 209, 102, 0.12));
+}
+
 .contract-option span,
 .contract-option small,
 .contract-option em,
@@ -1191,6 +1201,20 @@ button {
 
 .contract-option-mastery-comet {
   background: rgba(255, 209, 102, 0.18);
+  color: #ffe19a;
+}
+
+.contract-option-next {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.contract-option-next-clear {
+  background: rgba(124, 225, 255, 0.16);
+  color: #c6f6ff;
+}
+
+.contract-option-next-comet {
+  background: rgba(255, 209, 102, 0.2);
   color: #ffe19a;
 }
 

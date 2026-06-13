@@ -143,7 +143,7 @@ describe("route board next target copy", () => {
         "asteroid-sprint": undefined,
         "gravity-slingshot": undefined
       })
-    ).toEqual({ label: "Next target", value: "Clear Return Leg", tone: "clear" });
+    ).toEqual({ label: "Next target", value: "Clear Return Leg", tone: "clear", contractId: "return-leg" });
   });
 
   it("switches to comet chase once every route is cleared", () => {
@@ -154,7 +154,7 @@ describe("route board next target copy", () => {
         "asteroid-sprint": { score: 2400, elapsedSeconds: 35.5, medal: "gold" },
         "gravity-slingshot": { score: 2100, elapsedSeconds: 48.6, medal: "bronze" }
       })
-    ).toEqual({ label: "Next target", value: "Comet First Light", tone: "comet" });
+    ).toEqual({ label: "Next target", value: "Comet First Light", tone: "comet", contractId: "first-light-delivery" });
   });
 
   it("celebrates a fully mastered route board", () => {

@@ -60,6 +60,7 @@ export type RouteBoardTarget = {
   label: "Next target";
   value: string;
   tone: "clear" | "comet" | "complete";
+  contractId?: string;
 };
 
 type BestRunStorage = Pick<Storage, "getItem" | "setItem">;
@@ -164,12 +165,22 @@ export function buildRouteBoardTarget(
 ): RouteBoardTarget {
   const unclearedContract = contracts.find((contract) => !bestRunsByContract[contract.id]);
   if (unclearedContract) {
-    return { label: "Next target", value: `Clear ${unclearedContract.title}`, tone: "clear" };
+    return {
+      label: "Next target",
+      value: `Clear ${unclearedContract.title}`,
+      tone: "clear",
+      contractId: unclearedContract.id
+    };
   }
 
   const unmasteredContract = contracts.find((contract) => bestRunsByContract[contract.id]?.medal !== "comet");
   if (unmasteredContract) {
-    return { label: "Next target", value: `Comet ${unmasteredContract.title}`, tone: "comet" };
+    return {
+      label: "Next target",
+      value: `Comet ${unmasteredContract.title}`,
+      tone: "comet",
+      contractId: unmasteredContract.id
+    };
   }
 
   return { label: "Next target", value: "Board mastered", tone: "complete" };

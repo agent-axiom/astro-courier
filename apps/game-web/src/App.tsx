@@ -605,6 +605,7 @@ export function App() {
               {hud.contractOptions.map((contract) => {
                 const contractBestRun = bestRunsByContract[contract.id];
                 const contractMasteryBadge = buildContractMasteryBadge(contractBestRun);
+                const contractRecommended = routeBoardTarget.contractId === contract.id;
                 const contractCargoRisk = buildCargoRiskReadout({
                   cargoKind: contract.cargoKind,
                   cargoFragility: contract.cargoFragility,
@@ -621,7 +622,9 @@ export function App() {
                   <button
                     key={contract.id}
                     type="button"
-                    className={`contract-option ${contract.id === hud.contractId ? "contract-option-active" : ""}`}
+                    className={`contract-option ${contract.id === hud.contractId ? "contract-option-active" : ""} ${
+                      contractRecommended ? "contract-option-recommended" : ""
+                    }`}
                     aria-pressed={contract.id === hud.contractId}
                     onClick={() => {
                       shellRef.current?.selectContract(contract.id);
@@ -637,6 +640,7 @@ export function App() {
                       <em className={`contract-option-mastery contract-option-mastery-${contractMasteryBadge.tone}`}>
                         {contractMasteryBadge.value}
                       </em>
+                      {contractRecommended ? <em className={`contract-option-next contract-option-next-${routeBoardTarget.tone}`}>Next</em> : null}
                       <em className="contract-option-best">{buildContractBestRunLabel(contractBestRun)}</em>
                       <em className={`contract-option-cargo contract-option-cargo-${contractCargoRisk.tone}`}>
                         {buildContractCargoTrait(contract)}
