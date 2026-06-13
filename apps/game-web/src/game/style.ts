@@ -31,7 +31,8 @@ const styleMilestones = new Set([
   "Perfect Approach",
   "Eco Drift",
   "Chain Finish",
-  "Express Finish"
+  "Express Finish",
+  "Damage Control"
 ]);
 
 export function buildLiveStyleReward(input: LiveStyleRewardInput): LiveStyleReward | undefined {

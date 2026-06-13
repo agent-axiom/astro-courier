@@ -134,6 +134,24 @@ describe("live style reward HUD copy", () => {
     });
   });
 
+  it("treats damage control as a fresh style moment", () => {
+    expect(
+      buildLiveStyleReward({
+        styleBonus: 315,
+        lastStyleAward: 175,
+        lastMilestone: "Damage Control",
+        styleMultiplier: 1.25,
+        styleChainSecondsRemaining: 4
+      })
+    ).toEqual({
+      label: "Style hit",
+      value: "+175 hit / +315 bank / x1.25",
+      fresh: true,
+      tone: "fresh",
+      chainProgress: 1
+    });
+  });
+
   it("shows an active chain even between fresh milestones", () => {
     expect(buildLiveStyleReward({ styleBonus: 180, styleMultiplier: 1.25, styleChainSecondsRemaining: 2.4 })).toEqual({
       label: "Style chain",

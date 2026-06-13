@@ -65,6 +65,22 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
     };
   }
 
+  if (input.lastMilestone === "Eco Drift") {
+    return {
+      label: "Next run",
+      value: "Repeat the low-burn line",
+      tone: "success"
+    };
+  }
+
+  if (input.lastMilestone === "Damage Control") {
+    return {
+      label: "Next run",
+      value: "Repeat the salvage dock",
+      tone: "success"
+    };
+  }
+
   if (input.cargoDamage >= 0.15) {
     return {
       label: "Next run",

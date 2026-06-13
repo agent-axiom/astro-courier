@@ -163,6 +163,44 @@ describe("result coach", () => {
       tone: "success"
     });
   });
+
+  it("coaches eco drift runs toward repeating the low-burn line", () => {
+    expect(
+      buildResultCoach({
+        status: "delivered",
+        lastMilestone: "Eco Drift",
+        medal: "gold",
+        grade: "A",
+        cargoDamage: 0,
+        fuel: 72,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 160, fuelBonus: 280 }
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Repeat the low-burn line",
+      tone: "success"
+    });
+  });
+
+  it("coaches damage control runs toward repeating the salvage dock", () => {
+    expect(
+      buildResultCoach({
+        status: "delivered",
+        lastMilestone: "Damage Control",
+        medal: "silver",
+        grade: "B",
+        cargoDamage: 0.18,
+        fuel: 44,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 140 }
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Repeat the salvage dock",
+      tone: "success"
+    });
+  });
 });
 
 describe("result board prompt", () => {
