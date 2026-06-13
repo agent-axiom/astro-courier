@@ -126,6 +126,7 @@ describe("GameShell lifecycle", () => {
       pickupLabel: "Tea Station Dock A",
       destinationLabel: "Luma North Pad",
       cargoName: "Bottled Starlight",
+      targetDistance: 60,
       paceSecondsRemaining: 30
     });
     expect(onHud.mock.calls.at(-1)?.[0].contractOptions).toEqual([

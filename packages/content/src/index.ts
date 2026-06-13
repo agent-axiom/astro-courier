@@ -44,12 +44,19 @@ export const cargoSchema = z.object({
   fragility: z.number().min(0).max(1)
 });
 
+export const contractShipStartSchema = z.object({
+  position: vec2Schema,
+  velocity: vec2Schema,
+  rotation: z.number().finite()
+});
+
 export const contractSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
   briefing: z.string().min(1),
   riskLabel: z.string().min(1),
   rewardLabel: z.string().min(1),
+  shipStart: contractShipStartSchema.optional(),
   pickupId: z.string().min(1),
   destinationId: z.string().min(1),
   cargoId: z.string().min(1),

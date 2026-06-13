@@ -157,6 +157,11 @@ describe("deterministic Astro Courier simulation", () => {
           briefing: "Reverse the route under tighter timing.",
           riskLabel: "Tight Timer",
           rewardLabel: "Gold pace pressure",
+          shipStart: {
+            position: [200, -80],
+            velocity: [0, 0],
+            rotation: 0
+          },
           pickupId: "dock-a",
           destinationId: "north-pad",
           cargoId: "bottled-starlight",
@@ -179,9 +184,13 @@ describe("deterministic Astro Courier simulation", () => {
 
     expect(world.contractId).toBe("return-leg");
     expect(world.activeContract.title).toBe("Return Leg");
+    expect(world.ship.position).toEqual({ x: 200, y: -80 });
+    expect(world.ship.velocity).toEqual({ x: 0, y: 0 });
+    expect(world.ship.rotation).toBe(0);
     expect(snapshotWorld(world).objectiveTarget).toMatchObject({
       id: "dock-a",
-      role: "pickup"
+      role: "pickup",
+      distance: 60
     });
     expect(replay.contractId).toBe("return-leg");
   });

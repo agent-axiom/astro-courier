@@ -57,6 +57,11 @@ export type ContractContent = {
   briefing: string;
   riskLabel: string;
   rewardLabel: string;
+  shipStart?: {
+    position: [number, number];
+    velocity: [number, number];
+    rotation: number;
+  };
   pickupId: string;
   destinationId: string;
   cargoId: string;
@@ -208,6 +213,10 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
     }
     throw new Error(`System "${system.id}" does not define a contract`);
   }
+  const shipStart = activeContract.shipStart;
+  const shipPosition = shipStart?.position ?? system.ship.startPosition;
+  const shipVelocity = shipStart?.velocity ?? system.ship.startVelocity;
+  const shipRotation = shipStart?.rotation ?? system.ship.rotation;
 
   return {
     systemId: system.id,
@@ -258,10 +267,10 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
       severity: hazard.severity
     })),
     ship: {
-      position: toVec2(system.ship.startPosition),
-      velocity: toVec2(system.ship.startVelocity),
-      rotation: system.ship.rotation,
-      targetRotation: system.ship.rotation,
+      position: toVec2(shipPosition),
+      velocity: toVec2(shipVelocity),
+      rotation: shipRotation,
+      targetRotation: shipRotation,
       fuel: system.ship.fuel,
       maxFuel: system.ship.fuel,
       thrustPower: system.ship.thrustPower,

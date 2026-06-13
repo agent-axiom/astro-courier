@@ -81,6 +81,11 @@
       "briefing": "Reverse the route under tighter timing. The station handoff is easy; the planet-side return is the test.",
       "riskLabel": "Tight Timer",
       "rewardLabel": "Gold pace pressure",
+      "shipStart": {
+        "position": [360, -140],
+        "velocity": [0, 0],
+        "rotation": 0
+      },
       "pickupId": "dock-a",
       "destinationId": "north-pad",
       "cargoId": "bottled-starlight",
