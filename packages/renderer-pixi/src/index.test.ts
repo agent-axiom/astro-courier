@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { hazardFieldVisual, hazardVignetteEffect, landingPadVisual, objectiveBeaconPulse, shipTrailVisual } from "./index";
+import {
+  hazardFieldVisual,
+  hazardVignetteEffect,
+  landingPadVisual,
+  objectiveBeaconPulse,
+  objectiveGuidanceVisual,
+  shipTrailVisual
+} from "./index";
 
 describe("objective beacon pulse", () => {
   it("returns bounded radius and alpha values across the pulse cycle", () => {
@@ -8,6 +15,26 @@ describe("objective beacon pulse", () => {
     expect(samples.every((sample) => sample.radius >= 34 && sample.radius <= 50)).toBe(true);
     expect(samples.every((sample) => sample.alpha >= 0.18 && sample.alpha <= 0.72)).toBe(true);
     expect(new Set(samples.map((sample) => sample.radius)).size).toBeGreaterThan(1);
+  });
+});
+
+describe("objective guidance visual", () => {
+  it("makes close targets more assertive than distant route markers", () => {
+    const far = objectiveGuidanceVisual({ distance: 900, landingStatus: "approach", assistAvailable: false });
+    const close = objectiveGuidanceVisual({ distance: 80, landingStatus: "approach", assistAvailable: false });
+
+    expect(close.lineAlpha).toBeGreaterThan(far.lineAlpha);
+    expect(close.markerScale).toBeGreaterThan(far.markerScale);
+    expect(close.edgeAlpha).toBeGreaterThan(far.edgeAlpha);
+  });
+
+  it("boosts ready assist guidance as a precision docking cue", () => {
+    const approach = objectiveGuidanceVisual({ distance: 120, landingStatus: "approach", assistAvailable: false });
+    const readyAssist = objectiveGuidanceVisual({ distance: 120, landingStatus: "ready", assistAvailable: true });
+
+    expect(readyAssist.lineWidth).toBeGreaterThan(approach.lineWidth);
+    expect(readyAssist.markerScale).toBeGreaterThan(approach.markerScale);
+    expect(readyAssist.lineAlpha).toBeGreaterThan(approach.lineAlpha);
   });
 });
 

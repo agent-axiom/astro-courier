@@ -26,6 +26,31 @@ export function objectiveBeaconPulse(tick: number): { radius: number; alpha: num
   };
 }
 
+export type ObjectiveGuidanceVisualInput = {
+  distance: number;
+  landingStatus: LandingGuidanceStatus;
+  assistAvailable: boolean;
+};
+
+export type ObjectiveGuidanceVisual = {
+  lineAlpha: number;
+  lineWidth: number;
+  markerScale: number;
+  edgeAlpha: number;
+};
+
+export function objectiveGuidanceVisual(input: ObjectiveGuidanceVisualInput): ObjectiveGuidanceVisual {
+  const proximity = 1 - clamp((input.distance - 60) / 840, 0, 1);
+  const precisionBoost = input.assistAvailable || input.landingStatus === "ready" ? 1 : 0;
+
+  return {
+    lineAlpha: round(clamp(0.14 + proximity * 0.18 + precisionBoost * 0.08, 0.14, 0.44), 2),
+    lineWidth: round(2 + precisionBoost, 2),
+    markerScale: round(clamp(0.86 + proximity * 0.28 + precisionBoost * 0.14, 0.86, 1.28), 2),
+    edgeAlpha: round(clamp(0.68 + proximity * 0.2 + precisionBoost * 0.08, 0.68, 0.96), 2)
+  };
+}
+
 type LandingPadVisualInput = Pick<SimulationSnapshot["landingPads"][number], "role" | "active" | "destination">;
 
 export type LandingPadVisual = {
@@ -270,40 +295,55 @@ class PixiRenderer implements AstroPixiRenderer {
     const targetPoint = project(target.position);
     const color = guidanceColor(target.landingStatus, target.assistAvailable);
     const pulse = objectiveBeaconPulse(snapshot.tick);
+    const visual = objectiveGuidanceVisual({
+      distance: target.distance,
+      landingStatus: target.landingStatus,
+      assistAvailable: target.assistAvailable
+    });
     const targetOnScreen =
       targetPoint.x >= 0 && targetPoint.x <= viewport.width && targetPoint.y >= 0 && targetPoint.y <= viewport.height;
 
-    this.guidance.moveTo(ship.x, ship.y).lineTo(targetPoint.x, targetPoint.y).stroke({ color, width: 2, alpha: 0.22 });
+    this.guidance.moveTo(ship.x, ship.y).lineTo(targetPoint.x, targetPoint.y).stroke({
+      color,
+      width: visual.lineWidth,
+      alpha: visual.lineAlpha
+    });
 
     if (targetOnScreen) {
-      this.guidance.circle(targetPoint.x, targetPoint.y, pulse.radius + 12).stroke({
+      this.guidance.circle(targetPoint.x, targetPoint.y, (pulse.radius + 12) * visual.markerScale).stroke({
         color,
         width: 1,
         alpha: pulse.alpha * 0.28
       });
-      this.guidance.circle(targetPoint.x, targetPoint.y, pulse.radius).stroke({ color, width: 3, alpha: pulse.alpha });
-      this.guidance.circle(targetPoint.x, targetPoint.y, 34).stroke({ color, width: 2, alpha: 0.65 });
-      this.guidance.circle(targetPoint.x, targetPoint.y, 5).fill({ color, alpha: 0.9 });
+      this.guidance
+        .circle(targetPoint.x, targetPoint.y, pulse.radius * visual.markerScale)
+        .stroke({ color, width: visual.lineWidth + 1, alpha: pulse.alpha });
+      this.guidance.circle(targetPoint.x, targetPoint.y, 34 * visual.markerScale).stroke({
+        color,
+        width: visual.lineWidth,
+        alpha: 0.65
+      });
+      this.guidance.circle(targetPoint.x, targetPoint.y, 5 * visual.markerScale).fill({ color, alpha: 0.9 });
       return;
     }
 
     const clamped = clampToViewport(targetPoint, viewport, 28);
     const angle = Math.atan2(targetPoint.y - ship.y, targetPoint.x - ship.x);
     const nose = {
-      x: clamped.x + Math.cos(angle) * 14,
-      y: clamped.y + Math.sin(angle) * 14
+      x: clamped.x + Math.cos(angle) * 14 * visual.markerScale,
+      y: clamped.y + Math.sin(angle) * 14 * visual.markerScale
     };
     const left = {
-      x: clamped.x + Math.cos(angle + 2.5) * 10,
-      y: clamped.y + Math.sin(angle + 2.5) * 10
+      x: clamped.x + Math.cos(angle + 2.5) * 10 * visual.markerScale,
+      y: clamped.y + Math.sin(angle + 2.5) * 10 * visual.markerScale
     };
     const right = {
-      x: clamped.x + Math.cos(angle - 2.5) * 10,
-      y: clamped.y + Math.sin(angle - 2.5) * 10
+      x: clamped.x + Math.cos(angle - 2.5) * 10 * visual.markerScale,
+      y: clamped.y + Math.sin(angle - 2.5) * 10 * visual.markerScale
     };
     this.guidance.moveTo(nose.x, nose.y).lineTo(left.x, left.y).lineTo(right.x, right.y).closePath().fill({
       color,
-      alpha: 0.88
+      alpha: visual.edgeAlpha
     });
   }
 
