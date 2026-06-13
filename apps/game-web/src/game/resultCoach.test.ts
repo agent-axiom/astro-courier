@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildResultBoardAction, buildResultBoardPrompt, buildResultCoach } from "./resultCoach";
+import { buildResultBoardAction, buildResultBoardMasteryPrompt, buildResultBoardPrompt, buildResultCoach } from "./resultCoach";
 
 const baseBreakdown = {
   base: 1000,
@@ -433,6 +433,40 @@ describe("result board prompt", () => {
       value: "Comet Asteroid Sprint",
       tone: "comet"
     });
+  });
+});
+
+describe("result board mastery prompt", () => {
+  it("surfaces board mastery progress after successful deliveries", () => {
+    expect(
+      buildResultBoardMasteryPrompt({
+        status: "delivered",
+        routeBoardMastery: { label: "Board mastery", value: "3 routes to clear", tone: "progress" }
+      })
+    ).toEqual({
+      label: "Board mastery",
+      value: "3 routes to clear",
+      tone: "progress"
+    });
+    expect(
+      buildResultBoardMasteryPrompt({
+        status: "delivered",
+        routeBoardMastery: { label: "Board mastery", value: "Full comet sweep", tone: "complete" }
+      })
+    ).toEqual({
+      label: "Board mastery",
+      value: "Full comet sweep",
+      tone: "complete"
+    });
+  });
+
+  it("stays hidden after crashes so retry guidance owns the result", () => {
+    expect(
+      buildResultBoardMasteryPrompt({
+        status: "crashed",
+        routeBoardMastery: { label: "Board mastery", value: "3 routes to clear", tone: "progress" }
+      })
+    ).toBeUndefined();
   });
 });
 

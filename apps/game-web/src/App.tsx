@@ -63,7 +63,7 @@ import { buildApproachRewardReadout, buildDockingSpeedReadout } from "./game/doc
 import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./game/cargo";
 import { buildReplayReceipt, buildResultHighlight, buildResultStats } from "./game/resultStats";
 import { buildHazardPressureReadout } from "./game/hazard";
-import { buildResultBoardAction, buildResultBoardPrompt, buildResultCoach } from "./game/resultCoach";
+import { buildResultBoardAction, buildResultBoardMasteryPrompt, buildResultBoardPrompt, buildResultCoach } from "./game/resultCoach";
 import { getOverlayVisibility } from "./game/overlays";
 import { buildCometRunReadout } from "./game/comet";
 import { buildResultRetryAction, buildRetryActionBriefing, buildRetryTarget } from "./game/retryTarget";
@@ -521,6 +521,10 @@ export function App() {
   const resultBoardPrompt =
     hud.status === "delivered" || hud.status === "crashed"
       ? buildResultBoardPrompt({ status: hud.status, routeBoardTarget })
+      : undefined;
+  const resultBoardMasteryPrompt =
+    hud.status === "delivered" || hud.status === "crashed"
+      ? buildResultBoardMasteryPrompt({ status: hud.status, routeBoardMastery })
       : undefined;
   const resultBoardAction =
     hud.status === "delivered" || hud.status === "crashed"
@@ -1340,6 +1344,16 @@ export function App() {
               )}
               <span>{resultBoardPrompt.label}</span>
               <strong>{resultBoardPrompt.value}</strong>
+            </div>
+          ) : null}
+          {resultBoardMasteryPrompt ? (
+            <div
+              className={`result-board-mastery result-board-mastery-${resultBoardMasteryPrompt.tone}`}
+              aria-label={`${resultBoardMasteryPrompt.label}: ${resultBoardMasteryPrompt.value}`}
+            >
+              {resultBoardMasteryPrompt.tone === "complete" ? <Trophy size={18} /> : <Route size={18} />}
+              <span>{resultBoardMasteryPrompt.label}</span>
+              <strong>{resultBoardMasteryPrompt.value}</strong>
             </div>
           ) : null}
           <div className="result-actions">

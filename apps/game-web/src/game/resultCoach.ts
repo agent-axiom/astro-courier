@@ -36,6 +36,21 @@ export type ResultBoardPrompt = {
   tone: "retry" | "clear" | "comet" | "complete";
 };
 
+export type ResultBoardMasteryPromptInput = {
+  status: Extract<RunStatus, "delivered" | "crashed">;
+  routeBoardMastery: {
+    label: "Board mastery";
+    value: string;
+    tone: "open" | "progress" | "mastery" | "complete";
+  };
+};
+
+export type ResultBoardMasteryPrompt = {
+  label: "Board mastery";
+  value: string;
+  tone: "open" | "progress" | "mastery" | "complete";
+};
+
 export type ResultBoardActionInput = {
   status: Extract<RunStatus, "delivered" | "crashed">;
   currentContractId: string;
@@ -208,6 +223,14 @@ export function buildResultBoardPrompt(input: ResultBoardPromptInput): ResultBoa
     value: input.routeBoardTarget.value,
     tone: input.routeBoardTarget.tone
   };
+}
+
+export function buildResultBoardMasteryPrompt(input: ResultBoardMasteryPromptInput): ResultBoardMasteryPrompt | undefined {
+  if (input.status === "crashed") {
+    return undefined;
+  }
+
+  return input.routeBoardMastery;
 }
 
 export function buildResultBoardAction(input: ResultBoardActionInput): ResultBoardAction {
