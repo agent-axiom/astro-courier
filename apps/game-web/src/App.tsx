@@ -51,6 +51,7 @@ import {
   buildDailyDispatchAction,
   buildDailyDispatchReset,
   buildDailyDispatchStatus,
+  buildLaunchCommitment,
   buildRoutePressureBriefing
 } from "./game/contracts";
 import { buildRadioMessage } from "./game/radio";
@@ -549,6 +550,13 @@ export function App() {
     goldSeconds: hud.paceSecondsRemaining
   });
   const routePressure = buildRoutePressureBriefing({
+    contractId: hud.contractId,
+    cargoKind: hud.cargoKind,
+    cargoFragility: hud.cargoFragility,
+    hazardSeverityMultiplier: hud.hazardSeverityMultiplier,
+    goldSeconds: hud.paceSecondsRemaining
+  });
+  const launchCommitment = buildLaunchCommitment({
     contractId: hud.contractId,
     cargoKind: hud.cargoKind,
     cargoFragility: hud.cargoFragility,
@@ -1221,9 +1229,15 @@ export function App() {
               </span>
             ))}
           </div>
-          <button type="button" className="preflight-button" onClick={launchContract}>
+          <button
+            type="button"
+            className={`preflight-button preflight-button-${launchCommitment.tone}`}
+            aria-label={`Launch Contract. ${launchCommitment.label}: ${launchCommitment.value}`}
+            onClick={launchContract}
+          >
             <Play size={18} />
-            Launch Contract
+            <span>Launch Contract</span>
+            <small>{launchCommitment.value}</small>
           </button>
         </section>
       ) : null}

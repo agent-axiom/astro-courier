@@ -70,6 +70,12 @@ export type RoutePressureBriefing = {
   tone: "hot" | "tempo" | "care" | "steady";
 };
 
+export type LaunchCommitment = {
+  label: "Launch intent";
+  value: string;
+  tone: RoutePressureBriefing["tone"];
+};
+
 export type ContractModifierTone = "cargo" | "danger" | "fuel" | "precision" | "speed" | "style";
 
 export type ContractModifier = {
@@ -343,6 +349,39 @@ export function buildRoutePressureBriefing(input: ContractRoutePlanInput): Route
     label: "Route pressure",
     value: "Balanced courier line",
     tone: "steady"
+  };
+}
+
+export function buildLaunchCommitment(input: ContractRoutePlanInput): LaunchCommitment {
+  const pressure = buildRoutePressureBriefing(input);
+  if (pressure.tone === "hot") {
+    return {
+      label: "Launch intent",
+      value: "Commit high payout run",
+      tone: pressure.tone
+    };
+  }
+
+  if (pressure.tone === "tempo") {
+    return {
+      label: "Launch intent",
+      value: "Commit fuel clutch",
+      tone: pressure.tone
+    };
+  }
+
+  if (pressure.tone === "care") {
+    return {
+      label: "Launch intent",
+      value: "Commit clean cargo",
+      tone: pressure.tone
+    };
+  }
+
+  return {
+    label: "Launch intent",
+    value: "Commit clean courier line",
+    tone: pressure.tone
   };
 }
 

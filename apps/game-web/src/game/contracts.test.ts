@@ -10,6 +10,7 @@ import {
   buildDailyDispatchAction,
   buildDailyDispatchReset,
   buildDailyDispatchStatus,
+  buildLaunchCommitment,
   buildRoutePressureBriefing,
   getNextContractId
 } from "./contracts";
@@ -440,6 +441,58 @@ describe("contract option hooks", () => {
       label: "Pick for",
       value: "Gold split sprint",
       tone: "speed"
+    });
+  });
+});
+
+describe("launch commitment", () => {
+  it("turns selected route pressure into CTA subcopy", () => {
+    expect(
+      buildLaunchCommitment({
+        contractId: "asteroid-sprint",
+        cargoKind: "volatile",
+        cargoFragility: 1,
+        hazardSeverityMultiplier: 1.45,
+        goldSeconds: 24
+      })
+    ).toEqual({
+      label: "Launch intent",
+      value: "Commit high payout run",
+      tone: "hot"
+    });
+    expect(
+      buildLaunchCommitment({
+        contractId: "last-drop-run",
+        cargoKind: "time-sensitive",
+        cargoFragility: 0.9,
+        goldSeconds: 27
+      })
+    ).toEqual({
+      label: "Launch intent",
+      value: "Commit fuel clutch",
+      tone: "tempo"
+    });
+    expect(
+      buildLaunchCommitment({
+        cargoKind: "fragile",
+        cargoFragility: 0.8,
+        goldSeconds: 35
+      })
+    ).toEqual({
+      label: "Launch intent",
+      value: "Commit clean cargo",
+      tone: "care"
+    });
+    expect(
+      buildLaunchCommitment({
+        cargoKind: "standard",
+        cargoFragility: 1,
+        goldSeconds: 35
+      })
+    ).toEqual({
+      label: "Launch intent",
+      value: "Commit clean courier line",
+      tone: "steady"
     });
   });
 });

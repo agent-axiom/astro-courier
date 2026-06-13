@@ -2167,12 +2167,13 @@ button {
   position: sticky;
   bottom: 0;
   z-index: 3;
-  display: inline-flex;
+  display: grid;
+  grid-template-columns: 18px minmax(0, auto);
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 2px 8px;
   width: 100%;
-  min-height: 44px;
+  min-height: 52px;
   padding: 10px 15px;
   border: 1px solid rgba(142, 230, 184, 0.72);
   border-radius: 8px;
@@ -2184,8 +2185,46 @@ button {
   backdrop-filter: blur(12px);
 }
 
+.preflight-button span,
+.preflight-button small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.1;
+}
+
+.preflight-button span {
+  font-size: 0.92rem;
+}
+
+.preflight-button small {
+  grid-column: 2;
+  color: rgba(234, 255, 243, 0.76);
+  font-size: 0.68rem;
+  font-weight: 850;
+}
+
+.preflight-button-hot {
+  border-color: rgba(255, 111, 145, 0.66);
+  background: rgba(255, 111, 145, 0.18);
+}
+
+.preflight-button-tempo {
+  border-color: rgba(124, 225, 255, 0.66);
+  background: rgba(124, 225, 255, 0.17);
+}
+
+.preflight-button-care {
+  border-color: rgba(255, 209, 102, 0.66);
+  background: rgba(255, 209, 102, 0.16);
+}
+
+.preflight-button-steady {
+  border-color: rgba(142, 230, 184, 0.72);
+  background: rgba(142, 230, 184, 0.18);
+}
+
 .preflight-button:hover {
-  background: rgba(142, 230, 184, 0.26);
+  filter: brightness(1.12);
 }
 
 .result-overlay {
