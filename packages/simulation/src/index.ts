@@ -206,6 +206,8 @@ export const LANDING_ASSIST_FUEL_COST = 1.5;
 const HAZARD_SKIM_OUTER_RADIUS = 1.35;
 export const HAZARD_SKIM_BASE_BONUS = 140;
 export const HAZARD_SKIM_SEVERITY_BONUS = 120;
+export const HAZARD_THREAD_SPEED_THRESHOLD = 42;
+const HAZARD_THREAD_SPEED_BONUS = 120;
 export const QUICK_PICKUP_WINDOW_SECONDS = 12;
 export const QUICK_PICKUP_STYLE_BONUS = 180;
 export const PERFECT_APPROACH_STREAK_SECONDS = 1;
@@ -219,6 +221,10 @@ const STYLE_CHAIN_MAX_COUNT = 4;
 
 export function calculateHazardSkimStyleBonus(severity: number): number {
   return Math.round(HAZARD_SKIM_BASE_BONUS + clamp(severity, 0, 1) * HAZARD_SKIM_SEVERITY_BONUS);
+}
+
+export function calculateHazardThreadStyleBonus(severity: number): number {
+  return calculateHazardSkimStyleBonus(severity) + HAZARD_THREAD_SPEED_BONUS;
 }
 
 export function createWorldFromSystem(system: SystemContent, seed: string, options: WorldCreationOptions = {}): SimulationWorld {
@@ -641,8 +647,13 @@ function updateHazards(world: SimulationWorld, fixedDt: number): void {
 
     const cleanSkim = distance <= hazard.radius * HAZARD_SKIM_OUTER_RADIUS && world.ship.cargoDamage <= 0.02;
     if (cleanSkim && !world.skimmedHazardIds.includes(hazard.id)) {
+      const fastSkim = magnitude(world.ship.velocity) >= HAZARD_THREAD_SPEED_THRESHOLD;
       world.skimmedHazardIds.push(hazard.id);
-      awardStyle(world, calculateHazardSkimStyleBonus(hazard.severity), "Clean Hazard Skim");
+      awardStyle(
+        world,
+        fastSkim ? calculateHazardThreadStyleBonus(hazard.severity) : calculateHazardSkimStyleBonus(hazard.severity),
+        fastSkim ? "Needle Thread" : "Clean Hazard Skim"
+      );
     }
   }
 }

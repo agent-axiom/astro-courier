@@ -51,6 +51,23 @@ describe("hazard pressure readout", () => {
     });
   });
 
+  it("previews a larger needle thread payout when a clean skim is fast", () => {
+    expect(
+      buildHazardPressureReadout({
+        hazardDangerLevel: "near",
+        hazardDistance: 44,
+        hazardSeverity: 0.75,
+        styleMultiplier: 1.5,
+        speed: 46,
+        cargoDamage: 0.01
+      })
+    ).toEqual({
+      label: "Risk pulse",
+      value: "Thread +525 / x1.50 / 44m",
+      tone: "opportunity"
+    });
+  });
+
   it("shows a predicted hazard intercept before current proximity", () => {
     expect(
       buildHazardPressureReadout({

@@ -109,6 +109,9 @@ describe("radio feedback copy", () => {
 
   it("celebrates clean hazard skims before generic hazard warnings", () => {
     expect(buildRadioMessage({ ...baseHud, lastMilestone: "Clean Hazard Skim", hazardDangerLevel: "near", hazardDistance: 44 })).toContain("Style");
+    expect(buildRadioMessage({ ...baseHud, lastMilestone: "Needle Thread", hazardDangerLevel: "near", hazardDistance: 44 })).toContain(
+      "Needle thread"
+    );
   });
 
   it("celebrates quick cargo pickups before generic objective guidance", () => {

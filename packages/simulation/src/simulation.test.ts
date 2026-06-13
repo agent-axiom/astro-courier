@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createCommandBuffer, checksumReplay } from "@astro-courier/engine";
 import {
+  calculateHazardThreadStyleBonus,
   calculateHazardSkimStyleBonus,
   BOOST_COOLDOWN_SECONDS,
   ECO_DRIFT_FUEL_USED_LIMIT,
@@ -355,6 +356,32 @@ describe("deterministic Astro Courier simulation", () => {
     const secondBreakdown = summarizeRun(world).scoreBreakdown;
 
     expect(secondBreakdown.styleBonus).toBe(firstBreakdown.styleBonus);
+  });
+
+  it("upgrades clean high-speed hazard skims into needle thread style hits", () => {
+    const systemWithHazard: SystemContent = {
+      ...starterSystem,
+      hazards: [
+        {
+          id: "thread-field",
+          type: "asteroid_field",
+          position: [180, -180],
+          radius: 40,
+          severity: 0.75
+        }
+      ]
+    };
+    const world = createWorldFromSystem(systemWithHazard, "needle-thread-seed");
+    world.ship.position = { x: 233, y: -180 };
+    world.ship.velocity = { x: 46, y: 0 };
+
+    stepWorld(world, 1 / 60, []);
+
+    const threadBonus = calculateHazardThreadStyleBonus(0.75);
+    expect(world.lastMilestone).toBe("Needle Thread");
+    expect(world.lastStyleAward).toBe(threadBonus);
+    expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(threadBonus);
+    expect(world.ship.cargoDamage).toBe(0);
   });
 
   it("chains style rewards into a short multiplier window", () => {

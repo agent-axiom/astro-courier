@@ -23,6 +23,10 @@ export function buildRadioMessage(hud: HudState): string {
     return "Delivery complete. The parcel survived another charming orbital situation.";
   }
 
+  if (hud.lastMilestone === "Needle Thread") {
+    return "Needle thread logged. Fast skim, clean cargo, premium style.";
+  }
+
   if (hud.lastMilestone === "Clean Hazard Skim") {
     return "Style bonus logged. Clean skim, no scratches.";
   }

@@ -1,10 +1,15 @@
-import { calculateHazardSkimStyleBonus } from "@astro-courier/simulation";
+import {
+  HAZARD_THREAD_SPEED_THRESHOLD,
+  calculateHazardSkimStyleBonus,
+  calculateHazardThreadStyleBonus
+} from "@astro-courier/simulation";
 
 export type HazardPressureInput = {
   hazardDangerLevel?: "near" | "inside";
   hazardDistance?: number;
   hazardSeverity?: number;
   styleMultiplier?: number;
+  speed?: number;
   trajectoryRiskLevel?: "near" | "inside";
   trajectoryRiskSeconds?: number;
   cargoDamage?: number;
@@ -31,21 +36,26 @@ export function buildHazardPressureReadout(input: HazardPressureInput): HazardPr
   }
 
   const cargoDamage = input.cargoDamage ?? 0;
+  const fastSkim = (input.speed ?? 0) >= HAZARD_THREAD_SPEED_THRESHOLD;
   if (cargoDamage <= 0.02 && input.hazardSeverity !== undefined) {
     const multiplier = Math.max(1, input.styleMultiplier ?? 1);
-    const payout = Math.round(calculateHazardSkimStyleBonus(input.hazardSeverity) * multiplier);
+    const basePayout = fastSkim
+      ? calculateHazardThreadStyleBonus(input.hazardSeverity)
+      : calculateHazardSkimStyleBonus(input.hazardSeverity);
+    const payout = Math.round(basePayout * multiplier);
+    const label = fastSkim ? "Thread" : "Skim";
     const multiplierSuffix = multiplier > 1 ? ` / x${multiplier.toFixed(2)}` : "";
     const distanceSuffix = input.hazardDistance === undefined ? "" : ` / ${Math.round(input.hazardDistance)}m`;
     return {
       label: "Risk pulse",
-      value: `Skim +${payout}${multiplierSuffix}${distanceSuffix}`,
+      value: `${label} +${payout}${multiplierSuffix}${distanceSuffix}`,
       tone: "opportunity"
     };
   }
 
   return {
     label: "Risk pulse",
-    value: cargoDamage <= 0.02 ? `Skim window${distance}` : `Keep wide${distance}`,
+    value: cargoDamage <= 0.02 ? `${fastSkim ? "Thread" : "Skim"} window${distance}` : `Keep wide${distance}`,
     tone: cargoDamage <= 0.02 ? "opportunity" : "warning"
   };
 }
