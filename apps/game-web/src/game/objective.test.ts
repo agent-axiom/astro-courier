@@ -215,6 +215,53 @@ describe("tactical cue", () => {
     });
   });
 
+  it("keeps express finish ahead of eco drift while the clean gold window is closing", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        paceTier: "gold",
+        paceSecondsRemaining: 3.8,
+        cargoDamage: 0,
+        fuelUsed: 8
+      })
+    ).toEqual({
+      label: "Tactical cue",
+      value: "Close express / +180 / 3.8s",
+      tone: "opportunity"
+    });
+  });
+
+  it("does not promise eco drift while an express finish can still score", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        paceTier: "gold",
+        paceSecondsRemaining: 9.5,
+        cargoDamage: 0,
+        fuelUsed: 8
+      })
+    ).toBeUndefined();
+  });
+
+  it("surfaces eco drift when clean delivery is still fuel-efficient outside express pace", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        paceTier: "silver",
+        paceSecondsRemaining: 9.5,
+        cargoDamage: 0,
+        fuelUsed: 8
+      })
+    ).toEqual({
+      label: "Tactical cue",
+      value: "Eco drift / +160",
+      tone: "opportunity"
+    });
+  });
+
   it("turns an active pickup rush into an immediate cue", () => {
     expect(
       buildTacticalCue({

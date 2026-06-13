@@ -34,6 +34,7 @@ const baseHud: HudState = {
   score: 0,
   fuel: 100,
   maxFuel: 100,
+  fuelUsed: 0,
   boostCooldownSeconds: 0,
   cargoDamage: 0,
   cargoOnboard: false,

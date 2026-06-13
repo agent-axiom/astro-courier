@@ -66,6 +66,7 @@ describe("GameShell lifecycle", () => {
     expect(onHud.mock.calls[0]?.[0].targetAllowedSpeed).toBe(42);
     expect(onHud.mock.calls[0]?.[0].quickPickupSecondsRemaining).toBe(12);
     expect(onHud.mock.calls[0]?.[0].quickPickupBonus).toBe(180);
+    expect(onHud.mock.calls[0]?.[0].fuelUsed).toBe(0);
     expect(onHud.mock.calls[0]?.[0].hazardSeverity).toBe(0.2);
     expect(input.commands).not.toHaveBeenCalled();
     expect(renderer.render).toHaveBeenCalled();
@@ -455,6 +456,7 @@ describe("GameShell lifecycle", () => {
 
     expect(onHud.mock.calls.at(-2)?.[0].lastMilestone).toBe("Boost Burn");
     expect(fuelAfterBoost).toBeLessThan(100);
+    expect(onHud.mock.calls.at(-2)?.[0].fuelUsed).toBeGreaterThan(0);
     expect(fuelAfterNextFrame).toBe(fuelAfterBoost);
   });
 });

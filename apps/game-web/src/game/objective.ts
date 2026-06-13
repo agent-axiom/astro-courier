@@ -1,4 +1,9 @@
-import { DAMAGE_CONTROL_STYLE_BONUS, EXPRESS_FINISH_STYLE_BONUS } from "@astro-courier/simulation";
+import {
+  DAMAGE_CONTROL_STYLE_BONUS,
+  ECO_DRIFT_FUEL_USED_LIMIT,
+  ECO_DRIFT_STYLE_BONUS,
+  EXPRESS_FINISH_STYLE_BONUS
+} from "@astro-courier/simulation";
 import type { LandingGuidanceStatus, ObjectivePhase, RunStatus } from "@astro-courier/shared";
 import type { ContractPaceTier } from "./pace";
 
@@ -53,6 +58,7 @@ export type TacticalCueInput = {
   paceTier?: ContractPaceTier;
   paceSecondsRemaining?: number;
   cargoDamage?: number;
+  fuelUsed?: number;
   quickPickupSecondsRemaining?: number;
   quickPickupBonus?: number;
   styleMultiplier?: number;
@@ -222,6 +228,14 @@ export function buildTacticalCue(input: TacticalCueInput): TacticalCue | undefin
     };
   }
 
+  if (isEcoDriftDelivery(input)) {
+    return {
+      label: "Tactical cue",
+      value: `Eco drift / +${ECO_DRIFT_STYLE_BONUS}`,
+      tone: "opportunity"
+    };
+  }
+
   const quickPickupSecondsRemaining = input.quickPickupSecondsRemaining ?? 0;
   const quickPickupBonus = input.quickPickupBonus ?? 0;
   if (input.objectivePhase === "pickup" && quickPickupSecondsRemaining > 0 && quickPickupBonus > 0) {
@@ -247,6 +261,15 @@ function isCleanGoldDelivery(input: TacticalCueInput): boolean {
 function isRecoverableDamagedDelivery(input: TacticalCueInput): boolean {
   const cargoDamage = input.cargoDamage ?? 0;
   return input.objectivePhase === "delivery" && cargoDamage > 0.02 && cargoDamage <= 0.35;
+}
+
+function isEcoDriftDelivery(input: TacticalCueInput): boolean {
+  return (
+    input.objectivePhase === "delivery" &&
+    !isCleanGoldDelivery(input) &&
+    (input.cargoDamage ?? 0) <= 0.02 &&
+    (input.fuelUsed ?? Number.POSITIVE_INFINITY) <= ECO_DRIFT_FUEL_USED_LIMIT
+  );
 }
 
 function formatSeconds(seconds?: number): string {
