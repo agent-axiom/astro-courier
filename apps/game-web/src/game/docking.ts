@@ -3,6 +3,7 @@ import { PERFECT_APPROACH_STREAK_SECONDS, PERFECT_APPROACH_STYLE_BONUS } from "@
 export type DockingSpeedReadoutInput = {
   speed: number;
   allowedSpeed?: number;
+  targetDistance?: number;
 };
 
 export type DockingSpeedReadout = {
@@ -21,15 +22,21 @@ export type ApproachRewardReadout = {
   tone: "charging" | "ready";
 };
 
+const FINAL_APPROACH_BRAKE_DISTANCE = 70;
+
 export function buildDockingSpeedReadout(input: DockingSpeedReadoutInput): DockingSpeedReadout | undefined {
   if (input.allowedSpeed === undefined) {
     return undefined;
   }
 
+  const speedValue = `${input.speed.toFixed(1)} / ${input.allowedSpeed.toFixed(1)}`;
+  const overLimit = input.speed > input.allowedSpeed;
+  const finalApproach = input.targetDistance !== undefined && input.targetDistance <= FINAL_APPROACH_BRAKE_DISTANCE;
+
   return {
     label: "Dock speed",
-    value: `${input.speed.toFixed(1)} / ${input.allowedSpeed.toFixed(1)}`,
-    tone: input.speed > input.allowedSpeed ? "over-limit" : "normal"
+    value: overLimit && finalApproach ? `Brake now ${speedValue}` : speedValue,
+    tone: overLimit ? "over-limit" : "normal"
   };
 }
 

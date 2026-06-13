@@ -227,7 +227,11 @@ export function App() {
   const radioMessage = buildRadioMessage(hud);
   const targetDistanceLabel = hud.targetDistance === undefined ? "-" : `${Math.round(hud.targetDistance)}m`;
   const bearingGuidance = hud.targetRelativeBearing === undefined ? undefined : formatBearingGuidance(hud.targetRelativeBearing);
-  const dockingSpeedReadout = buildDockingSpeedReadout({ speed: hud.speed, allowedSpeed: hud.targetAllowedSpeed });
+  const dockingSpeedReadout = buildDockingSpeedReadout({
+    speed: hud.speed,
+    allowedSpeed: hud.targetAllowedSpeed,
+    targetDistance: hud.targetDistance
+  });
   const approachRewardReadout = buildApproachRewardReadout({ approachStreakSeconds: hud.approachStreakSeconds });
   const primaryActionLabel = preflightOpen ? "Launch" : paused ? "Resume" : "Pause";
   const canBoost = canUseImpulseControl({

@@ -21,6 +21,22 @@ describe("docking speed readout", () => {
       tone: "over-limit"
     });
   });
+
+  it("commands braking when the ship is over limit on final approach", () => {
+    expect(buildDockingSpeedReadout({ speed: 44, allowedSpeed: 42, targetDistance: 54 })).toEqual({
+      label: "Dock speed",
+      value: "Brake now 44.0 / 42.0",
+      tone: "over-limit"
+    });
+  });
+
+  it("keeps normal final approach speed readouts compact", () => {
+    expect(buildDockingSpeedReadout({ speed: 32, allowedSpeed: 42, targetDistance: 54 })).toEqual({
+      label: "Dock speed",
+      value: "32.0 / 42.0",
+      tone: "normal"
+    });
+  });
 });
 
 describe("approach reward readout", () => {
