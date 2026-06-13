@@ -417,7 +417,9 @@ export function App() {
   const boostPresentation = buildBoostControlPresentation({
     canBoost,
     boostCooldownSeconds: hud.boostCooldownSeconds,
-    launchBurstSecondsRemaining: hud.launchBurstSecondsRemaining
+    launchBurstSecondsRemaining: hud.launchBurstSecondsRemaining,
+    styleMultiplier: hud.styleMultiplier,
+    styleChainSecondsRemaining: hud.styleChainSecondsRemaining
   });
   const brakePresentation = buildBrakeControlPresentation({
     canBrake,

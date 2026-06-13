@@ -482,6 +482,15 @@ button {
     0 0 22px rgba(142, 230, 184, 0.18);
 }
 
+.boost-button-chain {
+  border-color: rgba(255, 209, 102, 0.68);
+  background: rgba(55, 44, 23, 0.7);
+  color: #fff2c4;
+  box-shadow:
+    0 0 0 1px rgba(255, 209, 102, 0.12) inset,
+    0 0 20px rgba(255, 209, 102, 0.15);
+}
+
 .boost-button-cooldown:disabled {
   border-color: rgba(255, 209, 102, 0.42);
   color: rgba(255, 209, 102, 0.68);

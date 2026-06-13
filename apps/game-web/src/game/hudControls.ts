@@ -16,12 +16,14 @@ export type BoostControlPresentationInput = {
   canBoost: boolean;
   boostCooldownSeconds: number;
   launchBurstSecondsRemaining?: number;
+  styleMultiplier?: number;
+  styleChainSecondsRemaining?: number;
 };
 
 export type BoostControlPresentation = {
   label: string;
   badge?: string;
-  tone: "ready" | "burst" | "cooldown" | "disabled";
+  tone: "ready" | "burst" | "chain" | "cooldown" | "disabled";
   cooldownProgress: number;
 };
 
@@ -80,6 +82,16 @@ export function buildBoostControlPresentation(input: BoostControlPresentationInp
       label: `Launch Burst ${launchBurstBadge}`,
       badge: launchBurstBadge,
       tone: "burst",
+      cooldownProgress: 0
+    };
+  }
+
+  if (input.canBoost && (input.styleMultiplier ?? 1) > 1 && (input.styleChainSecondsRemaining ?? 0) > 0) {
+    const chainBadge = `x${(input.styleMultiplier ?? 1).toFixed(2)}`;
+    return {
+      label: `Boost chain ${chainBadge}`,
+      badge: chainBadge,
+      tone: "chain",
       cooldownProgress: 0
     };
   }

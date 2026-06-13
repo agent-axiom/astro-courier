@@ -63,6 +63,22 @@ describe("boost control presentation", () => {
       tone: "cooldown"
     });
   });
+
+  it("promotes ready boosts while a style chain is live", () => {
+    expect(
+      buildBoostControlPresentation({
+        canBoost: true,
+        boostCooldownSeconds: 0,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 0.8
+      })
+    ).toEqual({
+      label: "Boost chain x1.50",
+      badge: "x1.50",
+      tone: "chain",
+      cooldownProgress: 0
+    });
+  });
 });
 
 describe("brake control presentation", () => {
