@@ -139,6 +139,18 @@ describe("radio feedback copy", () => {
     );
   });
 
+  it("arms launch burst guidance before generic quick pickup copy", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        lastMilestone: "Quick Pickup",
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        launchBurstSecondsRemaining: 2.4
+      })
+    ).toContain("Launch burst armed");
+  });
+
   it("celebrates launch bursts before generic delivery guidance", () => {
     expect(buildRadioMessage({ ...baseHud, lastMilestone: "Launch Burst", objectivePhase: "delivery", cargoOnboard: true })).toContain(
       "Launch burst"

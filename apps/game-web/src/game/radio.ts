@@ -37,6 +37,10 @@ export function buildRadioMessage(hud: HudState): string {
     return "Style bonus logged. Clean skim, no scratches.";
   }
 
+  if (hud.cargoOnboard && hud.launchBurstSecondsRemaining > 0) {
+    return `Launch burst armed. Hit Boost in ${hud.launchBurstSecondsRemaining.toFixed(1)}s to cash the pickup chain.`;
+  }
+
   if (hud.lastMilestone === "Quick Pickup") {
     return "Fast pickup logged. Keep that momentum to the destination.";
   }
