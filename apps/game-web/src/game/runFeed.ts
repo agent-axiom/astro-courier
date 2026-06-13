@@ -1,4 +1,5 @@
-import type { ObjectivePhase, RunMedal, RunStatus } from "@astro-courier/shared";
+import { PERFECT_APPROACH_STREAK_SECONDS, PERFECT_APPROACH_STYLE_BONUS } from "@astro-courier/simulation";
+import type { LandingGuidanceStatus, ObjectivePhase, RunMedal, RunStatus } from "@astro-courier/shared";
 import { isLiveCometDockArmed } from "./comet";
 import type { ContractPaceTier } from "./pace";
 
@@ -21,7 +22,9 @@ export type RunFeedSnapshot = {
   trajectoryRiskLevel?: "near" | "inside";
   trajectoryRiskSeconds?: number;
   launchBurstSecondsRemaining?: number;
+  landingStatus?: LandingGuidanceStatus;
   perfectDockReady?: boolean;
+  approachStreakSeconds?: number;
   styleMultiplier?: number;
   styleChainSecondsRemaining?: number;
 };
@@ -179,6 +182,12 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
       value: "Perfect dock lined",
       tone: "style"
     });
+  } else if (hasArmedPerfectApproach(previous, current)) {
+    updates.push({
+      label: "Perfect setup",
+      value: `Soft dock +${PERFECT_APPROACH_STYLE_BONUS}`,
+      tone: "style"
+    });
   }
 
   if (previous.trajectoryRiskLevel !== current.trajectoryRiskLevel && current.trajectoryRiskLevel === "inside") {
@@ -294,6 +303,16 @@ function hasArmedCometDock(previous: RunFeedSnapshot, current: RunFeedSnapshot):
     return false;
   }
   return isLiveCometDockArmed(current);
+}
+
+function hasArmedPerfectApproach(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
+  return (
+    current.objectivePhase === "delivery" &&
+    current.landingStatus === "ready" &&
+    (current.cargoDamage ?? 0) <= cleanCargoDamageLimit &&
+    (previous.approachStreakSeconds ?? 0) < PERFECT_APPROACH_STREAK_SECONDS &&
+    (current.approachStreakSeconds ?? 0) >= PERFECT_APPROACH_STREAK_SECONDS
+  );
 }
 
 function hasStyleChainReachedCriticalWindow(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {

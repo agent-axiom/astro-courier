@@ -340,6 +340,33 @@ describe("run action feed", () => {
     ).toEqual([]);
   });
 
+  it("announces when a perfect approach setup becomes ready outside comet conditions", () => {
+    const setupSnapshot = {
+      ...baseSnapshot,
+      objectivePhase: "delivery" as const,
+      landingStatus: "ready" as const,
+      cargoDamage: 0
+    };
+    expect(
+      deriveRunFeedUpdates(
+        { ...setupSnapshot, approachStreakSeconds: 0.8 },
+        { ...setupSnapshot, approachStreakSeconds: 1.2 }
+      )
+    ).toEqual([
+      {
+        label: "Perfect setup",
+        value: "Soft dock +220",
+        tone: "style"
+      }
+    ]);
+    expect(
+      deriveRunFeedUpdates(
+        { ...setupSnapshot, approachStreakSeconds: 1.2 },
+        { ...setupSnapshot, approachStreakSeconds: 1.5 }
+      )
+    ).toEqual([]);
+  });
+
   it("warns when clean cargo first takes damage", () => {
     expect(deriveRunFeedUpdates({ ...baseSnapshot, cargoDamage: 0.01 }, { ...baseSnapshot, cargoDamage: 0.05 })).toEqual([
       {

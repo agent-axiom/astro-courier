@@ -1573,7 +1573,9 @@ function toRunFeedSnapshot(hud: HudState, bestRun: BestRun | undefined): RunFeed
     trajectoryRiskLevel: hud.trajectoryRiskLevel,
     trajectoryRiskSeconds: hud.trajectoryRiskSeconds,
     launchBurstSecondsRemaining: hud.launchBurstSecondsRemaining,
+    landingStatus: hud.landingStatus,
     perfectDockReady: hud.perfectDockReady,
+    approachStreakSeconds: hud.approachStreakSeconds,
     styleMultiplier: hud.styleMultiplier,
     styleChainSecondsRemaining: hud.styleChainSecondsRemaining
   };
