@@ -276,6 +276,34 @@ button {
   gap: 8px;
 }
 
+.medal-banner {
+  min-height: 38px;
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 7px;
+  font-weight: 900;
+}
+
+.medal-comet {
+  background: linear-gradient(90deg, rgba(124, 225, 255, 0.18), rgba(255, 209, 102, 0.2));
+  color: #effcff;
+}
+
+.medal-gold {
+  background: rgba(255, 209, 102, 0.18);
+  color: #ffe19a;
+}
+
+.medal-silver {
+  background: rgba(216, 230, 255, 0.14);
+  color: #e8f0ff;
+}
+
+.medal-bronze {
+  background: rgba(213, 143, 94, 0.2);
+  color: #ffd5b5;
+}
+
 .result-stats span {
   min-width: 0;
   padding: 9px 8px;

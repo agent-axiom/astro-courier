@@ -18,7 +18,8 @@ const initialHud: HudState = {
   maxFuel: 100,
   cargoDamage: 0,
   cargoOnboard: false,
-  speed: 0
+  speed: 0,
+  medal: "none"
 };
 
 const useGameStore = create<GameStore>((set) => ({
@@ -141,6 +142,7 @@ export function App() {
           <Trophy aria-hidden="true" size={28} />
           <h2>{hud.status === "delivered" ? "Delivery Complete" : "Delivery Failed"}</h2>
           <p>{hud.landingRating ?? statusLabel(hud.status)}</p>
+          {hud.medal !== "none" ? <div className={`medal-banner medal-${hud.medal}`}>{medalLabel(hud.medal)}</div> : null}
           <div className="result-stats">
             <span>{hud.score}</span>
             <span>{hud.elapsedSeconds.toFixed(1)}s</span>
@@ -199,4 +201,12 @@ function guidanceLabel(status: NonNullable<HudState["landingStatus"]>, assistAva
   if (status === "too-fast") return "Slow down";
   if (status === "misaligned") return "Align ship";
   return "Approach target";
+}
+
+function medalLabel(medal: HudState["medal"]): string {
+  if (medal === "comet") return "Comet Medal";
+  if (medal === "gold") return "Gold Medal";
+  if (medal === "silver") return "Silver Medal";
+  if (medal === "bronze") return "Bronze Medal";
+  return "No Medal";
 }

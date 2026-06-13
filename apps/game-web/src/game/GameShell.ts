@@ -9,7 +9,7 @@ import {
   summarizeRun,
   type SimulationWorld
 } from "@astro-courier/simulation";
-import type { LandingGuidanceStatus, ObjectivePhase, PlayerCommand, RunStatus } from "@astro-courier/shared";
+import type { LandingGuidanceStatus, ObjectivePhase, PlayerCommand, RunMedal, RunStatus } from "@astro-courier/shared";
 import { KeyboardInput, type InputSource } from "./input";
 
 export type HudState = {
@@ -27,6 +27,7 @@ export type HudState = {
   landingStatus?: LandingGuidanceStatus;
   assistAvailable?: boolean;
   lastMilestone?: string;
+  medal: RunMedal;
   landingRating?: string;
 };
 
@@ -156,6 +157,7 @@ export class GameShell {
       landingStatus: snapshot.objectiveTarget?.landingStatus,
       assistAvailable: snapshot.objectiveTarget?.assistAvailable,
       lastMilestone: this.world.lastMilestone,
+      medal: result.medal,
       landingRating: result.landingRating
     });
   }

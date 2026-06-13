@@ -26,6 +26,7 @@ export type LandingRating =
   | "Spicy Landing"
   | "Cargo Survived Somehow"
   | "Insurance Event";
+export type RunMedal = "none" | "bronze" | "silver" | "gold" | "comet";
 
 export type RunResultSummary = {
   status: RunStatus;
@@ -33,6 +34,7 @@ export type RunResultSummary = {
   score: number;
   cargoDamage: number;
   fuelUsed: number;
+  medal: RunMedal;
   landingRating?: LandingRating;
 };
 

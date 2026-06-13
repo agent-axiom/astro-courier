@@ -38,7 +38,8 @@ describe("engine replay utilities", () => {
         elapsedSeconds: 18.5,
         score: 1400,
         cargoDamage: 0,
-        fuelUsed: 12
+        fuelUsed: 12,
+        medal: "gold"
       }
     };
 
@@ -71,4 +72,3 @@ describe("engine replay utilities", () => {
     expect(result.alpha).toBeLessThan(1);
   });
 });
-

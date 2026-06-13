@@ -240,6 +240,32 @@ describe("deterministic Astro Courier simulation", () => {
     expect(reckless.landingRating).toBe("Insurance Event");
   });
 
+  it("awards deterministic medals from delivery quality", () => {
+    const comet = createWorldFromSystem(starterSystem, "medal-seed");
+    comet.ship.position = { x: 0, y: -74 };
+    comet.ship.velocity = { x: 1, y: 3 };
+    comet.ship.rotation = -Math.PI / 2;
+    stepWorld(comet, 1 / 60, []);
+    comet.ship.position = { x: 260, y: -80 };
+    comet.ship.velocity = { x: 4, y: 1 };
+    comet.ship.rotation = 0;
+    stepWorld(comet, 1 / 60, []);
+
+    const silver = createWorldFromSystem(starterSystem, "medal-seed");
+    silver.status = "delivered";
+    silver.elapsedSeconds = 44;
+    silver.landingRating = "Soft Landing";
+    silver.ship.cargoDamage = 0;
+    silver.fuelUsed = 48;
+
+    const failed = createWorldFromSystem(starterSystem, "medal-seed");
+    failed.status = "crashed";
+
+    expect(summarizeRun(comet).medal).toBe("comet");
+    expect(summarizeRun(silver).medal).toBe("silver");
+    expect(summarizeRun(failed).medal).toBe("none");
+  });
+
   it("predicts a finite trajectory without mutating the live world", () => {
     const world = createWorldFromSystem(starterSystem, "preview-seed");
     const before = {

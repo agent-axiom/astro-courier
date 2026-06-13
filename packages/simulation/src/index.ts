@@ -5,6 +5,7 @@ import type {
   ObjectivePhase,
   PlayerCommand,
   ReplayEnvelope,
+  RunMedal,
   RunResultSummary,
   RunStatus,
   SimulationSnapshot,
@@ -310,6 +311,7 @@ export function summarizeRun(world: SimulationWorld): RunResultSummary {
     score: world.score,
     cargoDamage: round(world.ship.cargoDamage, 3),
     fuelUsed: round(world.fuelUsed, 3),
+    medal: medalFor(world),
     landingRating: world.landingRating
   };
 }
@@ -567,6 +569,35 @@ function updateScore(world: SimulationWorld): void {
   const cargoBonus = (1 - world.ship.cargoDamage) * 500;
   const landingBonus = world.landingRating === "Perfect Landing" ? 300 : 120;
   world.score = Math.max(0, Math.round(1000 + timeBonus + fuelBonus + cargoBonus + landingBonus));
+}
+
+function medalFor(world: SimulationWorld): RunMedal {
+  if (world.status !== "delivered") {
+    return "none";
+  }
+
+  const thresholds = world.activeContract.medalTimes;
+  const cargoIntact = world.ship.cargoDamage <= 0.02;
+  const efficientFuel = world.fuelUsed <= world.ship.maxFuel * 0.25;
+
+  if (
+    world.elapsedSeconds <= thresholds.gold &&
+    cargoIntact &&
+    efficientFuel &&
+    world.landingRating === "Perfect Landing"
+  ) {
+    return "comet";
+  }
+  if (world.elapsedSeconds <= thresholds.gold) {
+    return "gold";
+  }
+  if (world.elapsedSeconds <= thresholds.silver) {
+    return "silver";
+  }
+  if (world.elapsedSeconds <= thresholds.bronze) {
+    return "bronze";
+  }
+  return "none";
 }
 
 function rateLanding(

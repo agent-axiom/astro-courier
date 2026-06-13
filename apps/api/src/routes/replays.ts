@@ -26,6 +26,7 @@ const resultSchema = z.object({
   score: z.number().min(0),
   cargoDamage: z.number().min(0).max(1),
   fuelUsed: z.number().min(0),
+  medal: z.enum(["none", "bronze", "silver", "gold", "comet"]),
   landingRating: z
     .enum(["Perfect Landing", "Soft Landing", "Spicy Landing", "Cargo Survived Somehow", "Insurance Event"])
     .optional()
@@ -99,7 +100,7 @@ function sameResult(left: RunResultSummary, right: RunResultSummary): boolean {
     left.score === right.score &&
     left.cargoDamage === right.cargoDamage &&
     left.fuelUsed === right.fuelUsed &&
+    left.medal === right.medal &&
     left.landingRating === right.landingRating
   );
 }
-
