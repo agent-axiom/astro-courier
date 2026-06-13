@@ -61,6 +61,8 @@ import { buildResultRetryAction, buildRetryTarget } from "./game/retryTarget";
 import { buildRunIntensity } from "./game/intensity";
 import { buildCrashReasonLabel } from "./game/crash";
 import { buildReplayCaptureReadout } from "./game/replayReadout";
+import { deriveHudAudioEvents, type HudAudioSnapshot } from "./game/audioEvents";
+import { createGameAudioController, type GameAudioController } from "./game/gameAudio";
 
 type GameStore = {
   hud: HudState;
@@ -134,6 +136,8 @@ export function App() {
   const canvasMountRef = useRef<HTMLDivElement | null>(null);
   const shellRef = useRef<GameShell | null>(null);
   const recordedRunRef = useRef<string | null>(null);
+  const audioRef = useRef<GameAudioController | null>(null);
+  const previousAudioSnapshotRef = useRef<HudAudioSnapshot | undefined>(undefined);
   const hud = useGameStore((state) => state.hud);
   const setHud = useGameStore((state) => state.setHud);
   const [paused, setPaused] = useState(true);
@@ -163,6 +167,16 @@ export function App() {
   }, [setHud]);
 
   useEffect(() => {
+    const audio = createGameAudioController();
+    audioRef.current = audio;
+
+    return () => {
+      audio.destroy();
+      audioRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
     const storage = getBestRunStorage();
     setBestRun(storage ? getBestRun(storage, hud.contractId) : undefined);
     setNewBest(false);
@@ -182,6 +196,13 @@ export function App() {
     }
     setBestRunsByContract(nextBestRuns);
   }, [hud.contractOptions]);
+
+  useEffect(() => {
+    const currentSnapshot = toHudAudioSnapshot(hud);
+    const events = deriveHudAudioEvents(previousAudioSnapshotRef.current, currentSnapshot);
+    previousAudioSnapshotRef.current = currentSnapshot;
+    audioRef.current?.play(events);
+  }, [hud.fuel, hud.hazardDangerLevel, hud.lastMilestone, hud.maxFuel, hud.status]);
 
   useEffect(() => {
     if (hud.status !== "delivered") {
@@ -422,12 +443,14 @@ export function App() {
   });
 
   const launchContract = () => {
+    audioRef.current?.unlock();
     setPreflightOpen(false);
     setPaused(false);
     shellRef.current?.setPaused(false);
   };
 
   const openContractBriefing = (contractId = hud.contractId) => {
+    audioRef.current?.unlock();
     setPreflightOpen(true);
     setPaused(true);
     shellRef.current?.restart(true);
@@ -441,6 +464,7 @@ export function App() {
   };
 
   const openResultBoardTarget = () => {
+    audioRef.current?.unlock();
     if (!resultBoardAction) {
       return;
     }
@@ -448,6 +472,7 @@ export function App() {
   };
 
   const selectRouteBoardTarget = () => {
+    audioRef.current?.unlock();
     if (!routeTargetSelectionAction) {
       return;
     }
@@ -455,6 +480,7 @@ export function App() {
   };
 
   const selectDailyDispatch = () => {
+    audioRef.current?.unlock();
     if (!dailyDispatchAction) {
       return;
     }
@@ -495,6 +521,7 @@ export function App() {
             data-boost-badge={boostPresentation.badge}
             disabled={!canBoost}
             onClick={() => {
+              audioRef.current?.unlock();
               shellRef.current?.queueCommand({ type: "BOOST" });
             }}
           >
@@ -507,6 +534,7 @@ export function App() {
             title="Brake"
             disabled={!canBrake}
             onClick={() => {
+              audioRef.current?.unlock();
               shellRef.current?.queueCommand({ type: "BRAKE", amount: 1 });
             }}
           >
@@ -518,6 +546,7 @@ export function App() {
             aria-label={primaryActionLabel}
             title={primaryActionLabel}
             onClick={() => {
+              audioRef.current?.unlock();
               if (preflightOpen) {
                 launchContract();
                 return;
@@ -1032,6 +1061,16 @@ function statusLabel(status: HudState["status"]): string {
   if (status === "crashed") return "Crashed";
   if (status === "paused") return "Paused";
   return "In flight";
+}
+
+function toHudAudioSnapshot(hud: HudState): HudAudioSnapshot {
+  return {
+    status: hud.status,
+    lastMilestone: hud.lastMilestone,
+    fuel: hud.fuel,
+    maxFuel: hud.maxFuel,
+    hazardDangerLevel: hud.hazardDangerLevel
+  };
 }
 
 function guidanceLabel(status: NonNullable<HudState["landingStatus"]>, assistAvailable: boolean): string {

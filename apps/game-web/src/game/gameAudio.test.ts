@@ -1,0 +1,92 @@
+import { describe, expect, it, vi } from "vitest";
+import {
+  createGameAudioController,
+  type GameAudioContextLike,
+  type GameAudioGainLike,
+  type GameAudioOscillatorLike
+} from "./gameAudio";
+
+describe("game audio controller", () => {
+  it("lazily creates an audio context and schedules tones for events", () => {
+    const context = new FakeAudioContext();
+    const createContext = vi.fn(() => context);
+    const controller = createGameAudioController({ createContext });
+
+    controller.play(["style-hit"]);
+
+    expect(createContext).toHaveBeenCalledTimes(1);
+    expect(context.oscillators).toHaveLength(1);
+    expect(context.oscillators[0]?.frequencyValue).toBe(720);
+    expect(context.oscillators[0]?.startedAt).toBe(0);
+    expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.08, 3);
+  });
+
+  it("does not create an audio context for empty event batches", () => {
+    const createContext = vi.fn(() => new FakeAudioContext());
+    const controller = createGameAudioController({ createContext });
+
+    controller.play([]);
+
+    expect(createContext).not.toHaveBeenCalled();
+  });
+});
+
+class FakeAudioContext implements GameAudioContextLike {
+  readonly destination = {};
+  readonly oscillators: FakeOscillator[] = [];
+  readonly gains: FakeGain[] = [];
+  currentTime = 0;
+  state: "running" | "suspended" = "running";
+
+  createOscillator(): GameAudioOscillatorLike {
+    const oscillator = new FakeOscillator();
+    this.oscillators.push(oscillator);
+    return oscillator;
+  }
+
+  createGain(): GameAudioGainLike {
+    const gain = new FakeGain();
+    this.gains.push(gain);
+    return gain;
+  }
+
+  resume(): Promise<void> {
+    this.state = "running";
+    return Promise.resolve();
+  }
+}
+
+class FakeOscillator {
+  readonly frequency = {
+    setValueAtTime: (value: number) => {
+      this.frequencyValue = value;
+    }
+  };
+  frequencyValue = 0;
+  startedAt = 0;
+  stoppedAt = 0;
+
+  connect(): void {
+    return undefined;
+  }
+
+  start(time: number): void {
+    this.startedAt = time;
+  }
+
+  stop(time: number): void {
+    this.stoppedAt = time;
+  }
+}
+
+class FakeGain {
+  readonly gain = {
+    setValueAtTime: () => undefined,
+    linearRampToValueAtTime: () => undefined,
+    exponentialRampToValueAtTime: () => undefined
+  };
+
+  connect(): void {
+    return undefined;
+  }
+}
