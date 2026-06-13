@@ -24,7 +24,7 @@ import { canUseImpulseControl } from "./game/hudControls";
 import { buildContractDangerPayTrait, buildContractHazardTrait, getNextContractId } from "./game/contracts";
 import { buildRadioMessage } from "./game/radio";
 import { buildLiveStyleReward } from "./game/style";
-import { buildObjectiveDirective } from "./game/objective";
+import { buildObjectiveDirective, buildObjectiveInterceptReadout } from "./game/objective";
 import { buildPreflightMasteryTargets } from "./game/mastery";
 import { buildDockingSpeedReadout } from "./game/docking";
 import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./game/cargo";
@@ -167,6 +167,11 @@ export function App() {
   const nextContractId = getNextContractId(hud.contractOptions, hud.contractId);
   const canAdvanceContract = hud.status === "delivered" && nextContractId !== hud.contractId;
   const objectiveDirective = buildObjectiveDirective(hud);
+  const objectiveInterceptReadout = buildObjectiveInterceptReadout({
+    status: hud.status,
+    targetDistance: hud.targetDistance,
+    speed: hud.speed
+  });
   const liveStyleReward = buildLiveStyleReward({
     styleBonus: hud.scoreBreakdown.styleBonus,
     lastMilestone: hud.lastMilestone
@@ -305,6 +310,16 @@ export function App() {
           <span>Target</span>
           <strong>{targetDistanceLabel}</strong>
         </div>
+        {objectiveInterceptReadout ? (
+          <div
+            className={`intercept-chip intercept-${objectiveInterceptReadout.tone}`}
+            aria-label={`${objectiveInterceptReadout.label}: ${objectiveInterceptReadout.value}`}
+          >
+            <TimerReset size={16} />
+            <span>{objectiveInterceptReadout.label}</span>
+            <strong>{objectiveInterceptReadout.value}</strong>
+          </div>
+        ) : null}
         {bearingGuidance ? (
           <div className={`bearing-chip bearing-${bearingGuidance.tone}`}>
             <span>{bearingGuidance.label}</span>

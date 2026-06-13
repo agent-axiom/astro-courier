@@ -359,6 +359,50 @@ button {
   color: rgba(255, 220, 229, 0.78);
 }
 
+.intercept-chip {
+  display: grid;
+  grid-template-columns: 16px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: 0.84rem;
+  font-weight: 850;
+}
+
+.intercept-chip span,
+.intercept-chip strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.intercept-chip span {
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.intercept-chip strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.intercept-fast {
+  background: rgba(142, 230, 184, 0.15);
+  color: #bff7d8;
+}
+
+.intercept-steady {
+  background: rgba(124, 225, 255, 0.14);
+  color: #c6f6ff;
+}
+
+.intercept-slow,
+.intercept-hold {
+  background: rgba(255, 209, 102, 0.17);
+  color: #ffe19a;
+}
+
 .risk-pulse-chip {
   display: grid;
   grid-template-columns: 16px auto 1fr;
