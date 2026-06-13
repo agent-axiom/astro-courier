@@ -18,6 +18,14 @@ export function createAstroPixiRenderer(): AstroPixiRenderer {
   return new PixiRenderer();
 }
 
+export function objectiveBeaconPulse(tick: number): { radius: number; alpha: number } {
+  const wave = (Math.sin(tick * 0.12) + 1) / 2;
+  return {
+    radius: round(34 + wave * 16, 2),
+    alpha: round(0.18 + (1 - wave) * 0.54, 2)
+  };
+}
+
 class PixiRenderer implements AstroPixiRenderer {
   private app?: Application;
   private mountElement?: HTMLElement;
@@ -135,17 +143,24 @@ class PixiRenderer implements AstroPixiRenderer {
   ): void {
     this.guidance.clear();
     const target = snapshot.objectiveTarget;
-    if (!target || snapshot.status !== "flying") return;
+    if (!target || (snapshot.status !== "flying" && snapshot.status !== "paused")) return;
 
     const ship = project(snapshot.ship.position);
     const targetPoint = project(target.position);
     const color = guidanceColor(target.landingStatus, target.assistAvailable);
+    const pulse = objectiveBeaconPulse(snapshot.tick);
     const targetOnScreen =
       targetPoint.x >= 0 && targetPoint.x <= viewport.width && targetPoint.y >= 0 && targetPoint.y <= viewport.height;
 
     this.guidance.moveTo(ship.x, ship.y).lineTo(targetPoint.x, targetPoint.y).stroke({ color, width: 2, alpha: 0.22 });
 
     if (targetOnScreen) {
+      this.guidance.circle(targetPoint.x, targetPoint.y, pulse.radius + 12).stroke({
+        color,
+        width: 1,
+        alpha: pulse.alpha * 0.28
+      });
+      this.guidance.circle(targetPoint.x, targetPoint.y, pulse.radius).stroke({ color, width: 3, alpha: pulse.alpha });
       this.guidance.circle(targetPoint.x, targetPoint.y, 34).stroke({ color, width: 2, alpha: 0.65 });
       this.guidance.circle(targetPoint.x, targetPoint.y, 5).fill({ color, alpha: 0.9 });
       return;
@@ -296,4 +311,9 @@ function clampToViewport(point: Vec2, viewport: { width: number; height: number 
     x: Math.min(viewport.width - inset, Math.max(inset, point.x)),
     y: Math.min(viewport.height - inset, Math.max(inset, point.y))
   };
+}
+
+function round(value: number, digits: number): number {
+  const scale = 10 ** digits;
+  return Math.round(value * scale) / scale;
 }
