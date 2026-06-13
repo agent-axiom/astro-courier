@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildBestRunChase, getBestRun, recordBestRun } from "./bestRun";
+import { buildBestRunChase, buildBestRunDelta, getBestRun, recordBestRun } from "./bestRun";
 
 describe("personal best run storage", () => {
   it("stores a first delivered run as the personal best", () => {
@@ -49,6 +49,74 @@ describe("personal best chase copy", () => {
       label: "PB target",
       value: "3290 / 24.7s",
       tone: "target"
+    });
+  });
+});
+
+describe("personal best result delta copy", () => {
+  it("stays hidden before a contract has any saved best", () => {
+    expect(
+      buildBestRunDelta({
+        bestRun: undefined,
+        run: { score: 1800, elapsedSeconds: 31.2, medal: "silver" },
+        isNewBest: false
+      })
+    ).toBeUndefined();
+  });
+
+  it("celebrates a new personal best result", () => {
+    expect(
+      buildBestRunDelta({
+        bestRun: { score: 2200, elapsedSeconds: 28.4, medal: "gold" },
+        run: { score: 2200, elapsedSeconds: 28.4, medal: "gold" },
+        isNewBest: true
+      })
+    ).toEqual({
+      label: "PB delta",
+      value: "New personal best",
+      tone: "success"
+    });
+  });
+
+  it("shows the score gap when the saved best is still ahead", () => {
+    expect(
+      buildBestRunDelta({
+        bestRun: { score: 3290, elapsedSeconds: 24.7, medal: "gold" },
+        run: { score: 3040, elapsedSeconds: 23.8, medal: "gold" },
+        isNewBest: false
+      })
+    ).toEqual({
+      label: "PB delta",
+      value: "Need +250 score",
+      tone: "chase"
+    });
+  });
+
+  it("shows the time gap when the score is tied but the saved best is faster", () => {
+    expect(
+      buildBestRunDelta({
+        bestRun: { score: 3290, elapsedSeconds: 24.7, medal: "gold" },
+        run: { score: 3290, elapsedSeconds: 26.1, medal: "gold" },
+        isNewBest: false
+      })
+    ).toEqual({
+      label: "PB delta",
+      value: "Need 1.4s faster",
+      tone: "chase"
+    });
+  });
+
+  it("recognizes an exact personal best match", () => {
+    expect(
+      buildBestRunDelta({
+        bestRun: { score: 3290, elapsedSeconds: 24.7, medal: "gold" },
+        run: { score: 3290, elapsedSeconds: 24.7, medal: "gold" },
+        isNewBest: false
+      })
+    ).toEqual({
+      label: "PB delta",
+      value: "Matched personal best",
+      tone: "success"
     });
   });
 });

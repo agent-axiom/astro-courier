@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { create } from "zustand";
-import { buildBestRunChase, getBestRun, recordBestRun, type BestRun } from "./game/bestRun";
+import { buildBestRunChase, buildBestRunDelta, getBestRun, recordBestRun, type BestRun } from "./game/bestRun";
 import { GameShell, type HudState } from "./game/GameShell";
 import { formatBearingGuidance } from "./game/bearing";
 import { canUseImpulseControl } from "./game/hudControls";
@@ -182,6 +182,11 @@ export function App() {
   const cargoManifest = buildCargoManifest({ cargoName: hud.cargoName, cargoOnboard: hud.cargoOnboard });
   const resultStats = buildResultStats({ score: hud.score, elapsedSeconds: hud.elapsedSeconds, cargoIntegrity });
   const bestRunChase = buildBestRunChase(bestRun);
+  const bestRunDelta = buildBestRunDelta({
+    bestRun,
+    run: { score: hud.score, elapsedSeconds: hud.elapsedSeconds, medal: hud.medal },
+    isNewBest: newBest
+  });
   const resultCoach = buildResultCoach({
     status: hud.status,
     crashReason: hud.crashReason,
@@ -552,6 +557,12 @@ export function App() {
               <strong>
                 {bestRun.score} / {bestRun.elapsedSeconds.toFixed(1)}s
               </strong>
+            </div>
+          ) : null}
+          {hud.status === "delivered" && bestRunDelta ? (
+            <div className={`best-delta best-delta-${bestRunDelta.tone}`} aria-label={`${bestRunDelta.label}: ${bestRunDelta.value}`}>
+              <span>{bestRunDelta.label}</span>
+              <strong>{bestRunDelta.value}</strong>
             </div>
           ) : null}
           <div className="result-stats">

@@ -1179,6 +1179,47 @@ button {
   color: #bff7d8;
 }
 
+.best-delta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 34px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 850;
+  text-align: left;
+}
+
+.best-delta span,
+.best-delta strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.best-delta span {
+  color: rgba(255, 255, 255, 0.74);
+  text-transform: uppercase;
+}
+
+.best-delta strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.best-delta-success {
+  background: rgba(142, 230, 184, 0.16);
+  color: #bff7d8;
+}
+
+.best-delta-chase {
+  background: rgba(255, 209, 102, 0.16);
+  color: #ffe19a;
+}
+
 .result-stats span {
   display: grid;
   gap: 4px;

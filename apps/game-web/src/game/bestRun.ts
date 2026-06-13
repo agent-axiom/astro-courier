@@ -12,6 +12,18 @@ export type BestRunChase = {
   tone: "empty" | "target";
 };
 
+export type BestRunDeltaInput = {
+  bestRun: BestRun | undefined;
+  run: BestRun;
+  isNewBest: boolean;
+};
+
+export type BestRunDelta = {
+  label: "PB delta";
+  value: string;
+  tone: "success" | "chase";
+};
+
 type BestRunStorage = Pick<Storage, "getItem" | "setItem">;
 
 export function getBestRun(storage: BestRunStorage, contractKey: string): BestRun | undefined {
@@ -62,6 +74,44 @@ export function buildBestRunChase(bestRun: BestRun | undefined): BestRunChase {
     label: "PB target",
     value: `${bestRun.score} / ${bestRun.elapsedSeconds.toFixed(1)}s`,
     tone: "target"
+  };
+}
+
+export function buildBestRunDelta(input: BestRunDeltaInput): BestRunDelta | undefined {
+  if (!input.bestRun) {
+    return undefined;
+  }
+
+  if (input.isNewBest) {
+    return {
+      label: "PB delta",
+      value: "New personal best",
+      tone: "success"
+    };
+  }
+
+  const scoreGap = input.bestRun.score - input.run.score;
+  if (scoreGap > 0) {
+    return {
+      label: "PB delta",
+      value: `Need +${Math.round(scoreGap)} score`,
+      tone: "chase"
+    };
+  }
+
+  const timeGap = input.run.elapsedSeconds - input.bestRun.elapsedSeconds;
+  if (timeGap <= 0.05) {
+    return {
+      label: "PB delta",
+      value: "Matched personal best",
+      tone: "success"
+    };
+  }
+
+  return {
+    label: "PB delta",
+    value: `Need ${timeGap.toFixed(1)}s faster`,
+    tone: "chase"
   };
 }
 
