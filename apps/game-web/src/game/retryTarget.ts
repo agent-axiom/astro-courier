@@ -23,7 +23,7 @@ export type RetryTarget = {
 };
 
 export type ResultRetryAction = {
-  label: "Retry Route" | "Defend PB" | "Chase PB" | "Repeat Line" | "Run Again";
+  label: "Retry Route" | "Defend PB" | "Chase PB" | "Repeat Line" | "Clean Run" | "Run Again";
   mode: "restart-run";
 };
 
@@ -168,6 +168,9 @@ export function buildResultRetryAction(target: RetryTarget): ResultRetryAction {
   }
   if (target.value.startsWith("Repeat ")) {
     return { label: "Repeat Line", mode: "restart-run" };
+  }
+  if (target.value === "Restore clean cargo") {
+    return { label: "Clean Run", mode: "restart-run" };
   }
   return { label: "Run Again", mode: "restart-run" };
 }

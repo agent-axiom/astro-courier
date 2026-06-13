@@ -431,6 +431,13 @@ describe("result retry action copy", () => {
     });
   });
 
+  it("turns clean-cargo recovery into a specific clean-run call to action", () => {
+    expect(buildResultRetryAction({ label: "Retry target", value: "Restore clean cargo", tone: "opportunity" })).toEqual({
+      label: "Clean Run",
+      mode: "restart-run"
+    });
+  });
+
   it("keeps route improvement opportunities readable", () => {
     expect(buildResultRetryAction({ label: "Retry target", value: "Chase Express Finish", tone: "opportunity" })).toEqual({
       label: "Run Again",
