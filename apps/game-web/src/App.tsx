@@ -2,6 +2,7 @@ import { Gauge, PackageCheck, Pause, Play, RotateCcw, Satellite, Trophy, Zap } f
 import { useEffect, useRef, useState } from "react";
 import { create } from "zustand";
 import { GameShell, type HudState } from "./game/GameShell";
+import { buildRadioMessage } from "./game/radio";
 
 type GameStore = {
   hud: HudState;
@@ -53,6 +54,7 @@ export function App() {
   const fuelRatio = hud.maxFuel > 0 ? hud.fuel / hud.maxFuel : 0;
   const cargoIntegrity = Math.max(0, 1 - hud.cargoDamage);
   const runFinished = hud.status === "delivered" || hud.status === "crashed";
+  const radioMessage = buildRadioMessage(hud);
 
   return (
     <main className="app-shell">
@@ -108,6 +110,7 @@ export function App() {
       </header>
 
       <aside className="run-panel" aria-label="Delivery status">
+        <div className="radio-message">{radioMessage}</div>
         <div className="status-row">
           <span>Status</span>
           <strong>{statusLabel(hud.status)}</strong>
