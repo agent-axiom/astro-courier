@@ -4,6 +4,7 @@ import {
   boostSparkVisual,
   cameraFocus,
   cargoAuraVisual,
+  cargoFractureVisual,
   ghostTrailSegmentVisual,
   ghostTrailPointVisual,
   gravitySlingCueVisual,
@@ -644,6 +645,39 @@ describe("cargo aura visual", () => {
     expect(strained?.alpha).toBeGreaterThan(secure?.alpha ?? 0);
     expect(critical?.radius).toBeGreaterThan(strained?.radius ?? 0);
     expect(critical?.width).toBeGreaterThan(strained?.width ?? 0);
+  });
+});
+
+describe("cargo fracture visual", () => {
+  it("stays hidden until onboard cargo is actually damaged in flight", () => {
+    expect(cargoFractureVisual({ status: "flying", cargoOnboard: false, cargoDamage: 0.22, tick: 10 })).toBeUndefined();
+    expect(cargoFractureVisual({ status: "paused", cargoOnboard: true, cargoDamage: 0.22, tick: 10 })).toBeUndefined();
+    expect(cargoFractureVisual({ status: "flying", cargoOnboard: true, cargoDamage: 0.01, tick: 10 })).toBeUndefined();
+  });
+
+  it("adds readable crack arcs as cargo damage escalates", () => {
+    const strained = cargoFractureVisual({ status: "flying", cargoOnboard: true, cargoDamage: 0.14, tick: 8 });
+    const critical = cargoFractureVisual({ status: "flying", cargoOnboard: true, cargoDamage: 0.46, tick: 8 });
+
+    expect(strained).toMatchObject({ color: 0xffd166, tone: "strained", cracks: 3 });
+    expect(critical).toMatchObject({ color: 0xff4d6d, tone: "critical", cracks: 5 });
+    expect(critical?.radius).toBeGreaterThan(strained?.radius ?? 0);
+    expect(critical?.length).toBeGreaterThan(strained?.length ?? 0);
+    expect(critical?.alpha).toBeGreaterThan(strained?.alpha ?? 0);
+  });
+
+  it("animates crack placement over time without changing damage severity", () => {
+    const early = cargoFractureVisual({ status: "flying", cargoOnboard: true, cargoDamage: 0.22, tick: 4 });
+    const later = cargoFractureVisual({ status: "flying", cargoOnboard: true, cargoDamage: 0.22, tick: 24 });
+
+    expect(later?.spin).not.toBe(early?.spin);
+    expect(later).toMatchObject({
+      color: early?.color,
+      tone: early?.tone,
+      cracks: early?.cracks,
+      radius: early?.radius,
+      length: early?.length
+    });
   });
 });
 

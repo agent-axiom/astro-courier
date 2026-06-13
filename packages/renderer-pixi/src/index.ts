@@ -556,6 +556,21 @@ export type CargoAuraVisual = {
   width: number;
 };
 
+export type CargoFractureVisualInput = Pick<SimulationSnapshot, "status" | "cargoOnboard" | "tick"> & {
+  cargoDamage: number;
+};
+
+export type CargoFractureVisual = {
+  color: number;
+  tone: "strained" | "critical";
+  cracks: number;
+  radius: number;
+  length: number;
+  alpha: number;
+  width: number;
+  spin: number;
+};
+
 export type VelocityVectorVisualInput = {
   status: SimulationSnapshot["status"];
   velocity: Vec2;
@@ -636,6 +651,27 @@ export function cargoAuraVisual(input: CargoAuraVisualInput): CargoAuraVisual | 
     radius: round(25 + pressure * 10, 2),
     alpha: round(0.22 + pressure * 0.22, 2),
     width: round(1.6 + pressure * 1.6, 2)
+  };
+}
+
+export function cargoFractureVisual(input: CargoFractureVisualInput): CargoFractureVisual | undefined {
+  if (input.status !== "flying" || !input.cargoOnboard || input.cargoDamage <= 0.02) {
+    return undefined;
+  }
+
+  const damage = clamp(input.cargoDamage, 0, 1);
+  const pressure = clamp((damage - 0.02) / 0.48, 0, 1);
+  const tone: CargoFractureVisual["tone"] = damage >= 0.3 ? "critical" : "strained";
+
+  return {
+    color: tone === "critical" ? 0xff4d6d : 0xffd166,
+    tone,
+    cracks: tone === "critical" ? 5 : 3,
+    radius: round(29 + pressure * 10, 2),
+    length: round(7 + pressure * 9, 2),
+    alpha: round(0.32 + pressure * 0.38, 2),
+    width: round(1.2 + pressure * 1.1, 2),
+    spin: round((input.tick * 0.08) % (Math.PI * 2), 2)
   };
 }
 
@@ -1272,6 +1308,12 @@ class PixiRenderer implements AstroPixiRenderer {
       cargoOnboard: snapshot.cargoOnboard,
       cargoDamage: snapshot.ship.cargoDamage
     });
+    const cargoFracture = cargoFractureVisual({
+      status: snapshot.status,
+      cargoOnboard: snapshot.cargoOnboard,
+      cargoDamage: snapshot.ship.cargoDamage,
+      tick: snapshot.tick
+    });
     const velocityVector = velocityVectorVisual({
       status: snapshot.status,
       velocity: snapshot.ship.velocity,
@@ -1302,6 +1344,29 @@ class PixiRenderer implements AstroPixiRenderer {
         width: cargoAura.width,
         alpha: cargoAura.alpha
       });
+    }
+
+    if (cargoFracture) {
+      for (let index = 0; index < cargoFracture.cracks; index += 1) {
+        const angleOffset = cargoFracture.spin + (Math.PI * 2 * index) / cargoFracture.cracks;
+        const start = {
+          x: center.x + Math.cos(angleOffset) * cargoFracture.radius,
+          y: center.y + Math.sin(angleOffset) * cargoFracture.radius
+        };
+        const kink = {
+          x: start.x + Math.cos(angleOffset + 0.58) * cargoFracture.length * 0.48,
+          y: start.y + Math.sin(angleOffset + 0.58) * cargoFracture.length * 0.48
+        };
+        const end = {
+          x: kink.x + Math.cos(angleOffset - 0.42) * cargoFracture.length * 0.52,
+          y: kink.y + Math.sin(angleOffset - 0.42) * cargoFracture.length * 0.52
+        };
+        this.ship.moveTo(start.x, start.y).lineTo(kink.x, kink.y).lineTo(end.x, end.y).stroke({
+          color: cargoFracture.color,
+          width: cargoFracture.width,
+          alpha: cargoFracture.alpha
+        });
+      }
     }
 
     if (velocityVector) {
