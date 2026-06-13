@@ -32,6 +32,7 @@ import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } fr
 import { buildResultStats } from "./game/resultStats";
 import { buildHazardPressureReadout } from "./game/hazard";
 import { buildResultCoach } from "./game/resultCoach";
+import { getOverlayVisibility } from "./game/overlays";
 
 type GameStore = {
   hud: HudState;
@@ -159,6 +160,7 @@ export function App() {
   const fuelRatio = hud.maxFuel > 0 ? hud.fuel / hud.maxFuel : 0;
   const cargoIntegrity = Math.max(0, 1 - hud.cargoDamage);
   const runFinished = hud.status === "delivered" || hud.status === "crashed";
+  const overlays = getOverlayVisibility({ status: hud.status, preflightOpen });
   const pickupRushActive = hud.objectivePhase === "pickup" && hud.quickPickupSecondsRemaining > 0 && !runFinished;
   const radioMessage = buildRadioMessage(hud);
   const targetDistanceLabel = hud.targetDistance === undefined ? "-" : `${Math.round(hud.targetDistance)}m`;
@@ -424,7 +426,7 @@ export function App() {
         {hud.landingRating ? <div className="landing-rating">{hud.landingRating}</div> : null}
       </aside>
 
-      {preflightOpen && !runFinished ? (
+      {overlays.preflight ? (
         <section className="preflight-overlay" aria-label="Launch briefing">
           <div className="preflight-kicker">Starter Contract</div>
           <h2>{hud.contractTitle}</h2>
@@ -554,7 +556,7 @@ export function App() {
         </section>
       ) : null}
 
-      {runFinished ? (
+      {overlays.result ? (
         <section className={`result-overlay result-${hud.status}`} aria-label="Run result">
           <Trophy aria-hidden="true" size={28} />
           <h2>{hud.status === "delivered" ? "Delivery Complete" : "Delivery Failed"}</h2>
