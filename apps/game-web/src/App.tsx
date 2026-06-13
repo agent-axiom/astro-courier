@@ -561,6 +561,19 @@ export function App() {
     cargoDamage: hud.cargoDamage
   });
 
+  const resetRunUiState = () => {
+    recordedRunRef.current = null;
+    previousRunFeedSnapshotRef.current = undefined;
+    nextRunFeedIdRef.current = 1;
+    setRunFeed([]);
+    setNewBest(false);
+    if (screenFeedbackTimerRef.current) {
+      clearTimeout(screenFeedbackTimerRef.current);
+      screenFeedbackTimerRef.current = undefined;
+    }
+    setScreenFeedback(undefined);
+  };
+
   const launchContract = () => {
     audioRef.current?.unlock();
     setPreflightOpen(false);
@@ -570,6 +583,7 @@ export function App() {
 
   const openContractBriefing = (contractId = hud.contractId) => {
     audioRef.current?.unlock();
+    resetRunUiState();
     setPreflightOpen(true);
     setPaused(true);
     shellRef.current?.restart(true);
@@ -578,8 +592,22 @@ export function App() {
     }
   };
 
+  const restartActiveRun = () => {
+    audioRef.current?.unlock();
+    resetRunUiState();
+    setPreflightOpen(false);
+    setPaused(false);
+    shellRef.current?.restart(false);
+  };
+
   const restartToBriefing = () => {
     openContractBriefing();
+  };
+
+  const runResultRetryAction = () => {
+    if (resultRetryAction.mode === "restart-run") {
+      restartActiveRun();
+    }
   };
 
   const openResultBoardTarget = () => {
@@ -1209,7 +1237,7 @@ export function App() {
             </div>
           ) : null}
           <div className="result-actions">
-            <button type="button" className="result-button" onClick={restartToBriefing}>
+            <button type="button" className="result-button" onClick={runResultRetryAction}>
               <RotateCcw size={18} />
               {resultRetryAction.label}
             </button>

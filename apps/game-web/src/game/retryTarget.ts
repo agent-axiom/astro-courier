@@ -23,6 +23,7 @@ export type RetryTarget = {
 
 export type ResultRetryAction = {
   label: "Retry Route" | "Defend PB" | "Chase PB" | "Repeat Line" | "Run Again";
+  mode: "restart-run";
 };
 
 export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
@@ -139,16 +140,16 @@ function buildRepeatableMilestoneTarget(lastMilestone?: string): RetryTarget | u
 
 export function buildResultRetryAction(target: RetryTarget): ResultRetryAction {
   if (target.tone === "danger") {
-    return { label: "Retry Route" };
+    return { label: "Retry Route", mode: "restart-run" };
   }
   if (target.tone === "success") {
-    return { label: "Defend PB" };
+    return { label: "Defend PB", mode: "restart-run" };
   }
   if (target.tone === "chase") {
-    return { label: "Chase PB" };
+    return { label: "Chase PB", mode: "restart-run" };
   }
   if (target.value.startsWith("Repeat ")) {
-    return { label: "Repeat Line" };
+    return { label: "Repeat Line", mode: "restart-run" };
   }
-  return { label: "Run Again" };
+  return { label: "Run Again", mode: "restart-run" };
 }

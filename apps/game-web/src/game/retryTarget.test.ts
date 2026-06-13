@@ -349,31 +349,36 @@ describe("result retry target", () => {
 describe("result retry action copy", () => {
   it("turns failed runs into a direct route retry", () => {
     expect(buildResultRetryAction({ label: "Retry target", value: "Complete delivery", tone: "danger" })).toEqual({
-      label: "Retry Route"
+      label: "Retry Route",
+      mode: "restart-run"
     });
   });
 
   it("turns personal best defense into a stronger call to action", () => {
     expect(buildResultRetryAction({ label: "Retry target", value: "Defend 3520 / 24.1s", tone: "success" })).toEqual({
-      label: "Defend PB"
+      label: "Defend PB",
+      mode: "restart-run"
     });
   });
 
   it("turns personal best gaps into a chase call to action", () => {
     expect(buildResultRetryAction({ label: "Retry target", value: "Find +330 score", tone: "chase" })).toEqual({
-      label: "Chase PB"
+      label: "Chase PB",
+      mode: "restart-run"
     });
   });
 
   it("turns repeatable style targets into a repeat-line call to action", () => {
     expect(buildResultRetryAction({ label: "Retry target", value: "Repeat Chain Finish", tone: "opportunity" })).toEqual({
-      label: "Repeat Line"
+      label: "Repeat Line",
+      mode: "restart-run"
     });
   });
 
   it("keeps route improvement opportunities readable", () => {
     expect(buildResultRetryAction({ label: "Retry target", value: "Chase Express Finish", tone: "opportunity" })).toEqual({
-      label: "Run Again"
+      label: "Run Again",
+      mode: "restart-run"
     });
   });
 });
