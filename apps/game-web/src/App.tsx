@@ -15,7 +15,9 @@ type GameStore = {
 const initialHud: HudState = {
   status: "paused",
   objectivePhase: "pickup",
+  contractId: "first-light-delivery",
   contractTitle: "First Light Delivery",
+  contractOptions: [],
   elapsedSeconds: 0,
   score: 0,
   fuel: 100,
@@ -48,8 +50,6 @@ const useGameStore = create<GameStore>((set) => ({
   setHud: (hud) => set({ hud })
 }));
 
-const bestRunKey = "first-light-delivery";
-
 export function App() {
   const canvasMountRef = useRef<HTMLDivElement | null>(null);
   const shellRef = useRef<GameShell | null>(null);
@@ -60,7 +60,7 @@ export function App() {
   const [preflightOpen, setPreflightOpen] = useState(true);
   const [bestRun, setBestRun] = useState<BestRun | undefined>(() => {
     const storage = getBestRunStorage();
-    return storage ? getBestRun(storage, bestRunKey) : undefined;
+    return storage ? getBestRun(storage, initialHud.contractId) : undefined;
   });
   const [newBest, setNewBest] = useState(false);
 
@@ -82,6 +82,13 @@ export function App() {
   }, [setHud]);
 
   useEffect(() => {
+    const storage = getBestRunStorage();
+    setBestRun(storage ? getBestRun(storage, hud.contractId) : undefined);
+    setNewBest(false);
+    recordedRunRef.current = null;
+  }, [hud.contractId]);
+
+  useEffect(() => {
     if (hud.status !== "delivered") {
       if (hud.status === "flying" || hud.status === "paused") {
         recordedRunRef.current = null;
@@ -90,7 +97,7 @@ export function App() {
       return;
     }
 
-    const runFingerprint = `${hud.score}:${hud.elapsedSeconds}:${hud.medal}`;
+    const runFingerprint = `${hud.contractId}:${hud.score}:${hud.elapsedSeconds}:${hud.medal}`;
     if (recordedRunRef.current === runFingerprint) {
       return;
     }
@@ -100,14 +107,14 @@ export function App() {
     if (!storage) {
       return;
     }
-    const result = recordBestRun(storage, bestRunKey, {
+    const result = recordBestRun(storage, hud.contractId, {
       score: hud.score,
       elapsedSeconds: hud.elapsedSeconds,
       medal: hud.medal
     });
     setBestRun(result.best);
     setNewBest(result.isNewBest);
-  }, [hud.elapsedSeconds, hud.medal, hud.score, hud.status]);
+  }, [hud.contractId, hud.elapsedSeconds, hud.medal, hud.score, hud.status]);
 
   const fuelRatio = hud.maxFuel > 0 ? hud.fuel / hud.maxFuel : 0;
   const cargoIntegrity = Math.max(0, 1 - hud.cargoDamage);
@@ -267,6 +274,24 @@ export function App() {
           <div className="preflight-kicker">Starter Contract</div>
           <h2>{hud.contractTitle}</h2>
           <p>Pickup beacon is live. The destination pad is paying for intact cargo and a clean approach.</p>
+          {hud.contractOptions.length > 1 ? (
+            <div className="contract-selector" aria-label="Contract selection">
+              {hud.contractOptions.map((contract) => (
+                <button
+                  key={contract.id}
+                  type="button"
+                  className={`contract-option ${contract.id === hud.contractId ? "contract-option-active" : ""}`}
+                  aria-pressed={contract.id === hud.contractId}
+                  onClick={() => {
+                    shellRef.current?.selectContract(contract.id);
+                  }}
+                >
+                  <span>{contract.title}</span>
+                  <strong>Gold {contract.medalTimes.gold}s</strong>
+                </button>
+              ))}
+            </div>
+          ) : null}
           <div className="preflight-stats" aria-label="Contract briefing">
             <span>
               <PackageCheck size={18} />

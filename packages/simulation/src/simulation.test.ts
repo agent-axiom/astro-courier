@@ -143,6 +143,49 @@ describe("deterministic Astro Courier simulation", () => {
     expect(world.lastMilestone).toBe("Pickup Required");
   });
 
+  it("can start worlds and replays from a selected contract", () => {
+    const systemWithChoice: SystemContent = {
+      ...starterSystem,
+      contracts: [
+        ...starterSystem.contracts,
+        {
+          id: "return-leg",
+          title: "Return Leg",
+          pickupId: "dock-a",
+          destinationId: "north-pad",
+          cargoId: "bottled-starlight",
+          medalTimes: {
+            bronze: 80,
+            silver: 48,
+            gold: 30
+          }
+        }
+      ]
+    };
+    const world = createWorldFromSystem(systemWithChoice, "contract-seed", { contractId: "return-leg" });
+    const replay = createWorldReplay({
+      system: systemWithChoice,
+      seed: "contract-seed",
+      commandBuffer: createCommandBuffer([]),
+      ticks: 1,
+      contractId: "return-leg"
+    }).replay;
+
+    expect(world.contractId).toBe("return-leg");
+    expect(world.activeContract.title).toBe("Return Leg");
+    expect(snapshotWorld(world).objectiveTarget).toMatchObject({
+      id: "dock-a",
+      role: "pickup"
+    });
+    expect(replay.contractId).toBe("return-leg");
+  });
+
+  it("rejects unknown selected contracts", () => {
+    expect(() => createWorldFromSystem(starterSystem, "missing-contract-seed", { contractId: "missing-contract" })).toThrow(
+      'System "test-route" does not define contract "missing-contract"'
+    );
+  });
+
   it("loads cargo on the pickup pad and completes on the destination pad", () => {
     const soft = createWorldFromSystem(starterSystem, "dock-seed");
     soft.ship.position = { x: 0, y: -74 };

@@ -415,6 +415,51 @@ button {
   line-height: 1.45;
 }
 
+.contract-selector {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.contract-option {
+  display: grid;
+  min-width: 0;
+  min-height: 58px;
+  gap: 5px;
+  align-content: center;
+  padding: 10px;
+  border: 1px solid rgba(160, 196, 255, 0.22);
+  border-radius: 7px;
+  background: rgba(160, 196, 255, 0.09);
+  color: #e8f0ff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.contract-option:hover,
+.contract-option-active {
+  border-color: rgba(124, 225, 255, 0.7);
+  background: rgba(124, 225, 255, 0.16);
+}
+
+.contract-option span,
+.contract-option strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.contract-option span {
+  font-size: 0.84rem;
+  font-weight: 900;
+}
+
+.contract-option strong {
+  color: #ffe19a;
+  font-size: 0.74rem;
+  font-weight: 850;
+}
+
 .preflight-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -726,5 +771,9 @@ button {
     min-height: 56px;
     padding: 8px 6px;
     font-size: 0.76rem;
+  }
+
+  .contract-selector {
+    grid-template-columns: 1fr;
   }
 }

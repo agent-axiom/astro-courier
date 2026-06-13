@@ -5,7 +5,11 @@ import type { HudState } from "./GameShell";
 const baseHud: HudState = {
   status: "flying",
   objectivePhase: "pickup",
+  contractId: "first-light-delivery",
   contractTitle: "First Light Delivery",
+  contractOptions: [
+    { id: "first-light-delivery", title: "First Light Delivery", medalTimes: { bronze: 90, silver: 55, gold: 35 } }
+  ],
   elapsedSeconds: 0,
   score: 0,
   fuel: 100,

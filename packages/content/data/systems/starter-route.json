@@ -71,6 +71,18 @@
         "silver": 55,
         "gold": 35
       }
+    },
+    {
+      "id": "return-leg",
+      "title": "Return Leg",
+      "pickupId": "dock-a",
+      "destinationId": "north-pad",
+      "cargoId": "bottled-starlight",
+      "medalTimes": {
+        "bronze": 80,
+        "silver": 48,
+        "gold": 30
+      }
     }
   ],
   "cargo": [
@@ -82,4 +94,3 @@
     }
   ]
 }
-

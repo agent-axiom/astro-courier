@@ -98,6 +98,36 @@ describe("GameShell lifecycle", () => {
     expect(input.commands).toHaveBeenCalled();
   });
 
+  it("can switch contracts while waiting in preflight mode", async () => {
+    const { renderer, input } = createShellDoubles();
+    const onHud = vi.fn();
+    vi.stubGlobal("requestAnimationFrame", vi.fn(() => 7));
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    vi.spyOn(performance, "now").mockReturnValue(1000);
+
+    const shell = new GameShell({
+      mount: {} as HTMLElement,
+      onHud,
+      renderer,
+      input,
+      initialPaused: true
+    });
+
+    await shell.start();
+    (shell as GameShell & { selectContract: (contractId: string) => void }).selectContract("return-leg");
+
+    expect(onHud.mock.calls.at(-1)?.[0]).toMatchObject({
+      status: "paused",
+      contractId: "return-leg",
+      contractTitle: "Return Leg",
+      paceSecondsRemaining: 30
+    });
+    expect(onHud.mock.calls.at(-1)?.[0].contractOptions).toEqual([
+      { id: "first-light-delivery", title: "First Light Delivery", medalTimes: { bronze: 90, silver: 55, gold: 35 } },
+      { id: "return-leg", title: "Return Leg", medalTimes: { bronze: 80, silver: 48, gold: 30 } }
+    ]);
+  });
+
   it("keeps transient simulation milestones visible for the HUD publish frame", async () => {
     let commandCalls = 0;
     const { renderer, input } = createShellDoubles({

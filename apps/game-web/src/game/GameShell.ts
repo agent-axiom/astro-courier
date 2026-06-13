@@ -7,6 +7,7 @@ import {
   snapshotWorld,
   stepWorld,
   summarizeRun,
+  type ContractContent,
   type SimulationWorld
 } from "@astro-courier/simulation";
 import type {
@@ -26,7 +27,9 @@ import { normalizeAngle } from "./bearing";
 export type HudState = {
   status: RunStatus;
   objectivePhase: ObjectivePhase;
+  contractId: string;
   contractTitle: string;
+  contractOptions: ContractOption[];
   elapsedSeconds: number;
   score: number;
   fuel: number;
@@ -52,6 +55,8 @@ export type HudState = {
   hazardDistance?: number;
 };
 
+export type ContractOption = Pick<ContractContent, "id" | "title" | "medalTimes">;
+
 export type GameShellOptions = {
   mount: HTMLElement;
   onHud: (hud: HudState) => void;
@@ -69,6 +74,7 @@ export class GameShell {
   private readonly onHud: (hud: HudState) => void;
   private readonly renderer: AstroPixiRenderer;
   private readonly input: InputSource;
+  private readonly system = validateSystemContent(starterRoute);
   private world: SimulationWorld;
   private rafId = 0;
   private accumulator = 0;
@@ -78,6 +84,7 @@ export class GameShell {
   private retainedMilestone?: string;
   private retainedMilestoneTimer = 0;
   private readonly queuedCommands: PlayerCommand[] = [];
+  private selectedContractId?: string;
   private destroyed = false;
 
   constructor(options: GameShellOptions) {
@@ -105,6 +112,26 @@ export class GameShell {
       return;
     }
     this.paused = paused;
+    this.accumulator = 0;
+    this.hudTimer = 0;
+    this.retainedMilestone = undefined;
+    this.retainedMilestoneTimer = 0;
+    this.queuedCommands.length = 0;
+    this.lastTime = performance.now();
+    this.world = this.createFreshWorld();
+    this.publishHud();
+  }
+
+  selectContract(contractId: string): void {
+    if (this.destroyed || this.world.status !== "paused") {
+      return;
+    }
+    if (!this.system.contracts.some((contract) => contract.id === contractId)) {
+      throw new Error(`Unknown contract "${contractId}"`);
+    }
+
+    this.selectedContractId = contractId;
+    this.paused = true;
     this.accumulator = 0;
     this.hudTimer = 0;
     this.retainedMilestone = undefined;
@@ -192,8 +219,7 @@ export class GameShell {
   }
 
   private createFreshWorld(): SimulationWorld {
-    const system = validateSystemContent(starterRoute);
-    const world = createWorldFromSystem(system, "local-starter-seed");
+    const world = createWorldFromSystem(this.system, "local-starter-seed", { contractId: this.selectedContractId });
     if (this.paused) {
       world.status = "paused";
     }
@@ -207,7 +233,9 @@ export class GameShell {
     this.onHud({
       status: this.world.status,
       objectivePhase: this.world.objectivePhase,
+      contractId: this.world.contractId,
       contractTitle: this.world.activeContract.title,
+      contractOptions: this.contractOptions(),
       elapsedSeconds: result.elapsedSeconds,
       score: result.score,
       fuel: this.world.ship.fuel,
@@ -233,6 +261,14 @@ export class GameShell {
       hazardDangerLevel: snapshot.nearestHazard?.dangerLevel,
       hazardDistance: snapshot.nearestHazard?.distance
     });
+  }
+
+  private contractOptions(): ContractOption[] {
+    return this.system.contracts.map((contract) => ({
+      id: contract.id,
+      title: contract.title,
+      medalTimes: contract.medalTimes
+    }));
   }
 }
 

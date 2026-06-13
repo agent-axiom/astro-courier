@@ -92,7 +92,8 @@ export function registerReplayRoutes(server: FastifyInstance): void {
       system,
       seed: body.rngSeed,
       commandBuffer: createCommandBuffer(body.inputFrames as InputFrame[]),
-      ticks: body.ticks
+      ticks: body.ticks,
+      contractId: body.contractId
     }).replay;
 
     const checksum = checksumReplay(replay);

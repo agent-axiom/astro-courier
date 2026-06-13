@@ -166,11 +166,16 @@ export type TrajectoryOptions = {
   sampleEvery: number;
 };
 
+export type WorldCreationOptions = {
+  contractId?: string;
+};
+
 export type WorldReplayInput = {
   system: SystemContent;
   seed: string;
   commandBuffer: CommandBuffer;
   ticks: number;
+  contractId?: string;
 };
 
 export type WorldReplayOutput = {
@@ -186,9 +191,14 @@ const HAZARD_SKIM_OUTER_RADIUS = 1.35;
 const HAZARD_SKIM_BASE_BONUS = 140;
 const HAZARD_SKIM_SEVERITY_BONUS = 120;
 
-export function createWorldFromSystem(system: SystemContent, seed: string): SimulationWorld {
-  const activeContract = system.contracts[0];
+export function createWorldFromSystem(system: SystemContent, seed: string, options: WorldCreationOptions = {}): SimulationWorld {
+  const activeContract = options.contractId
+    ? system.contracts.find((contract) => contract.id === options.contractId)
+    : system.contracts[0];
   if (!activeContract) {
+    if (options.contractId) {
+      throw new Error(`System "${system.id}" does not define contract "${options.contractId}"`);
+    }
     throw new Error(`System "${system.id}" does not define a contract`);
   }
 
@@ -299,7 +309,7 @@ export function stepWorld(world: SimulationWorld, fixedDt: number, commands: Pla
 }
 
 export function createWorldReplay(input: WorldReplayInput): WorldReplayOutput {
-  const world = createWorldFromSystem(input.system, input.seed);
+  const world = createWorldFromSystem(input.system, input.seed, { contractId: input.contractId });
 
   for (let tick = 0; tick < input.ticks && world.status === "flying"; tick += 1) {
     stepWorld(world, 1 / 60, input.commandBuffer.commandsForTick(tick));
