@@ -862,6 +862,50 @@ button {
   color: #bff7d8;
 }
 
+.route-target-briefing {
+  display: grid;
+  grid-template-columns: 18px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 9px 10px;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.route-target-briefing span,
+.route-target-briefing strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.route-target-briefing span {
+  color: rgba(255, 255, 255, 0.76);
+  text-transform: uppercase;
+}
+
+.route-target-briefing strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.route-target-clear {
+  background: rgba(124, 225, 255, 0.13);
+  color: #c6f6ff;
+}
+
+.route-target-comet {
+  background: rgba(255, 209, 102, 0.16);
+  color: #ffe19a;
+}
+
+.route-target-complete {
+  background: rgba(142, 230, 184, 0.17);
+  color: #bff7d8;
+}
+
 .cargo-risk-briefing {
   display: grid;
   grid-template-columns: 18px auto 1fr;

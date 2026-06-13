@@ -46,10 +46,20 @@ export type RouteBoardContract = {
   id: string;
 };
 
+export type RouteBoardTargetContract = RouteBoardContract & {
+  title: string;
+};
+
 export type RouteBoardProgress = {
   label: "Routes cleared" | "Comet clears";
   value: string;
   tone: "open" | "progress" | "mastery" | "complete";
+};
+
+export type RouteBoardTarget = {
+  label: "Next target";
+  value: string;
+  tone: "clear" | "comet" | "complete";
 };
 
 type BestRunStorage = Pick<Storage, "getItem" | "setItem">;
@@ -146,6 +156,23 @@ export function buildRouteBoardProgress(
       tone: comets === total && total > 0 ? "complete" : comets > 0 ? "mastery" : "open"
     }
   ];
+}
+
+export function buildRouteBoardTarget(
+  contracts: readonly RouteBoardTargetContract[],
+  bestRunsByContract: Readonly<Record<string, BestRun | undefined>>
+): RouteBoardTarget {
+  const unclearedContract = contracts.find((contract) => !bestRunsByContract[contract.id]);
+  if (unclearedContract) {
+    return { label: "Next target", value: `Clear ${unclearedContract.title}`, tone: "clear" };
+  }
+
+  const unmasteredContract = contracts.find((contract) => bestRunsByContract[contract.id]?.medal !== "comet");
+  if (unmasteredContract) {
+    return { label: "Next target", value: `Comet ${unmasteredContract.title}`, tone: "comet" };
+  }
+
+  return { label: "Next target", value: "Board mastered", tone: "complete" };
 }
 
 export function buildBestRunDelta(input: BestRunDeltaInput): BestRunDelta | undefined {

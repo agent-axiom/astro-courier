@@ -26,6 +26,7 @@ import {
   buildContractBestRunLabel,
   buildLiveBestPace,
   buildRouteBoardProgress,
+  buildRouteBoardTarget,
   getBestRun,
   recordBestRun,
   type BestRun
@@ -240,6 +241,7 @@ export function App() {
   const resultStats = buildResultStats({ score: hud.score, elapsedSeconds: hud.elapsedSeconds, cargoIntegrity });
   const bestRunChase = buildBestRunChase(bestRun);
   const routeBoardProgress = buildRouteBoardProgress(hud.contractOptions, bestRunsByContract);
+  const routeBoardTarget = buildRouteBoardTarget(hud.contractOptions, bestRunsByContract);
   const bestRunDelta = buildBestRunDelta({
     bestRun,
     run: { score: hud.score, elapsedSeconds: hud.elapsedSeconds, medal: hud.medal },
@@ -530,6 +532,13 @@ export function App() {
                   <strong>{item.value}</strong>
                 </span>
               ))}
+            </div>
+          ) : null}
+          {hud.contractOptions.length > 0 ? (
+            <div className={`route-target-briefing route-target-${routeBoardTarget.tone}`} aria-label={`${routeBoardTarget.label}: ${routeBoardTarget.value}`}>
+              {routeBoardTarget.tone === "complete" ? <Trophy size={18} /> : routeBoardTarget.tone === "comet" ? <Star size={18} /> : <Target size={18} />}
+              <span>{routeBoardTarget.label}</span>
+              <strong>{routeBoardTarget.value}</strong>
             </div>
           ) : null}
           <div className={`cargo-risk-briefing cargo-risk-${cargoRiskReadout.tone}`} aria-label={`${cargoRiskReadout.label}: ${cargoRiskReadout.value}`}>

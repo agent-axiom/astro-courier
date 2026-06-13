@@ -6,6 +6,7 @@ import {
   buildContractBestRunLabel,
   buildLiveBestPace,
   buildRouteBoardProgress,
+  buildRouteBoardTarget,
   getBestRun,
   recordBestRun
 } from "./bestRun";
@@ -123,6 +124,48 @@ describe("route board progress copy", () => {
       { label: "Routes cleared", value: "4/4", tone: "complete" },
       { label: "Comet clears", value: "4/4", tone: "complete" }
     ]);
+  });
+});
+
+describe("route board next target copy", () => {
+  const contracts = [
+    { id: "first-light-delivery", title: "First Light" },
+    { id: "return-leg", title: "Return Leg" },
+    { id: "asteroid-sprint", title: "Asteroid Sprint" },
+    { id: "gravity-slingshot", title: "Gravity Slingshot" }
+  ];
+
+  it("prioritizes the first route without any clear", () => {
+    expect(
+      buildRouteBoardTarget(contracts, {
+        "first-light-delivery": { score: 1800, elapsedSeconds: 34.2, medal: "silver" },
+        "return-leg": undefined,
+        "asteroid-sprint": undefined,
+        "gravity-slingshot": undefined
+      })
+    ).toEqual({ label: "Next target", value: "Clear Return Leg", tone: "clear" });
+  });
+
+  it("switches to comet chase once every route is cleared", () => {
+    expect(
+      buildRouteBoardTarget(contracts, {
+        "first-light-delivery": { score: 1800, elapsedSeconds: 34.2, medal: "silver" },
+        "return-leg": { score: 2600, elapsedSeconds: 27.1, medal: "comet" },
+        "asteroid-sprint": { score: 2400, elapsedSeconds: 35.5, medal: "gold" },
+        "gravity-slingshot": { score: 2100, elapsedSeconds: 48.6, medal: "bronze" }
+      })
+    ).toEqual({ label: "Next target", value: "Comet First Light", tone: "comet" });
+  });
+
+  it("celebrates a fully mastered route board", () => {
+    expect(
+      buildRouteBoardTarget(contracts, {
+        "first-light-delivery": { score: 3200, elapsedSeconds: 22.4, medal: "comet" },
+        "return-leg": { score: 3100, elapsedSeconds: 23.1, medal: "comet" },
+        "asteroid-sprint": { score: 3500, elapsedSeconds: 21.8, medal: "comet" },
+        "gravity-slingshot": { score: 3300, elapsedSeconds: 20.9, medal: "comet" }
+      })
+    ).toEqual({ label: "Next target", value: "Board mastered", tone: "complete" });
   });
 });
 
