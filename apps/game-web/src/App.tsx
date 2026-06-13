@@ -1140,7 +1140,7 @@ export function App() {
                   <Zap size={17} />
                 ) : objective.label === "Clean skim" || objective.label === "Needle thread" || objective.label === "Danger pay" ? (
                   <ShieldAlert size={17} />
-                ) : objective.label === "Chain finish" ? (
+                ) : objective.label === "Chain finish" || objective.label === "Comet finish" ? (
                   <Star size={17} />
                 ) : objective.label === "Last Drop" ? (
                   <Zap size={17} />

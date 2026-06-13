@@ -1,5 +1,6 @@
 import {
   CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS,
+  COMET_FINISH_STYLE_BONUS,
   GRAVITY_SLING_SPEED_THRESHOLD,
   GRAVITY_SLING_STYLE_BONUS,
   EXPRESS_FINISH_STYLE_BONUS,
@@ -32,6 +33,7 @@ export type PreflightBonusObjective = {
     | "Rush pickup"
     | "Launch burst"
     | "Express finish"
+    | "Comet finish"
     | "Clean skim"
     | "Perfect dock"
     | "Needle thread"
@@ -65,6 +67,10 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
     label: "Express finish",
     value: `+${EXPRESS_FINISH_STYLE_BONUS} / gold pace`
   } satisfies PreflightBonusObjective;
+  const cometFinish = {
+    label: "Comet finish",
+    value: `+${COMET_FINISH_STYLE_BONUS} / perfect comet`
+  } satisfies PreflightBonusObjective;
   const launchBurst = {
     label: "Launch burst",
     value: `+${LAUNCH_BURST_STYLE_BONUS} / boost after pickup`
@@ -83,6 +89,7 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
       rushPickup,
       launchBurst,
       expressFinish,
+      cometFinish,
       {
         label: "Chain finish",
         value: `${CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS.toFixed(1)}s chain window`
@@ -101,6 +108,7 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
       rushPickup,
       launchBurst,
       expressFinish,
+      cometFinish,
       {
         label: "Needle thread",
         value: `${HAZARD_THREAD_SPEED_THRESHOLD}+ speed`
@@ -119,6 +127,7 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
       rushPickup,
       launchBurst,
       expressFinish,
+      cometFinish,
       {
         label: "Gravity sling",
         value: `+${GRAVITY_SLING_STYLE_BONUS} / ${GRAVITY_SLING_SPEED_THRESHOLD}+ speed`
@@ -137,6 +146,7 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
       rushPickup,
       launchBurst,
       expressFinish,
+      cometFinish,
       {
         label: "Chain finish",
         value: "carry chain home"
@@ -154,6 +164,7 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
     rushPickup,
     launchBurst,
     expressFinish,
+    cometFinish,
     {
       label: "Clean skim",
       value: `from +${HAZARD_SKIM_BASE_BONUS}`
