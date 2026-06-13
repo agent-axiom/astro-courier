@@ -848,12 +848,12 @@ function resolveLandingOrCrash(world: SimulationWorld): void {
         world.bestApproachStreakSeconds >= PERFECT_APPROACH_STREAK_SECONDS
       ) {
         awardStyle(world, PERFECT_APPROACH_STYLE_BONUS, "Perfect Approach");
-      } else if (world.fuelUsed <= ECO_DRIFT_FUEL_USED_LIMIT && world.ship.cargoDamage <= 0.02) {
-        awardStyle(world, ECO_DRIFT_STYLE_BONUS, "Eco Drift");
       } else if (canFinishStyleChain(world)) {
         awardStyle(world, CHAIN_FINISH_STYLE_BONUS, "Chain Finish");
       } else if (canAwardExpressFinish(world)) {
         awardStyle(world, EXPRESS_FINISH_STYLE_BONUS, "Express Finish");
+      } else if (world.fuelUsed <= ECO_DRIFT_FUEL_USED_LIMIT && world.ship.cargoDamage <= 0.02) {
+        awardStyle(world, ECO_DRIFT_STYLE_BONUS, "Eco Drift");
       } else {
         world.lastMilestone = "Delivered";
       }
