@@ -7,8 +7,18 @@ const baseHud: HudState = {
   objectivePhase: "pickup",
   contractId: "first-light-delivery",
   contractTitle: "First Light Delivery",
+  pickupLabel: "Luma North Pad",
+  destinationLabel: "Tea Station Dock A",
+  cargoName: "Bottled Starlight",
   contractOptions: [
-    { id: "first-light-delivery", title: "First Light Delivery", medalTimes: { bronze: 90, silver: 55, gold: 35 } }
+    {
+      id: "first-light-delivery",
+      title: "First Light Delivery",
+      pickupLabel: "Luma North Pad",
+      destinationLabel: "Tea Station Dock A",
+      cargoName: "Bottled Starlight",
+      medalTimes: { bronze: 90, silver: 55, gold: 35 }
+    }
   ],
   elapsedSeconds: 0,
   score: 0,

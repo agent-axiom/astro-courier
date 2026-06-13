@@ -120,11 +120,28 @@ describe("GameShell lifecycle", () => {
       status: "paused",
       contractId: "return-leg",
       contractTitle: "Return Leg",
+      pickupLabel: "Tea Station Dock A",
+      destinationLabel: "Luma North Pad",
+      cargoName: "Bottled Starlight",
       paceSecondsRemaining: 30
     });
     expect(onHud.mock.calls.at(-1)?.[0].contractOptions).toEqual([
-      { id: "first-light-delivery", title: "First Light Delivery", medalTimes: { bronze: 90, silver: 55, gold: 35 } },
-      { id: "return-leg", title: "Return Leg", medalTimes: { bronze: 80, silver: 48, gold: 30 } }
+      {
+        id: "first-light-delivery",
+        title: "First Light Delivery",
+        pickupLabel: "Luma North Pad",
+        destinationLabel: "Tea Station Dock A",
+        cargoName: "Bottled Starlight",
+        medalTimes: { bronze: 90, silver: 55, gold: 35 }
+      },
+      {
+        id: "return-leg",
+        title: "Return Leg",
+        pickupLabel: "Tea Station Dock A",
+        destinationLabel: "Luma North Pad",
+        cargoName: "Bottled Starlight",
+        medalTimes: { bronze: 80, silver: 48, gold: 30 }
+      }
     ]);
   });
 

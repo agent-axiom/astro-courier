@@ -1,4 +1,4 @@
-import { Gauge, OctagonMinus, PackageCheck, Pause, Play, RotateCcw, Satellite, Trophy, Zap } from "lucide-react";
+import { Flag, Gauge, MapPin, OctagonMinus, PackageCheck, Pause, Play, RotateCcw, Satellite, Trophy, Zap } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { create } from "zustand";
 import { getBestRun, recordBestRun, type BestRun } from "./game/bestRun";
@@ -17,6 +17,9 @@ const initialHud: HudState = {
   objectivePhase: "pickup",
   contractId: "first-light-delivery",
   contractTitle: "First Light Delivery",
+  pickupLabel: "Luma North Pad",
+  destinationLabel: "Tea Station Dock A",
+  cargoName: "Bottled Starlight",
   contractOptions: [],
   elapsedSeconds: 0,
   score: 0,
@@ -273,7 +276,9 @@ export function App() {
         <section className="preflight-overlay" aria-label="Launch briefing">
           <div className="preflight-kicker">Starter Contract</div>
           <h2>{hud.contractTitle}</h2>
-          <p>Pickup beacon is live. The destination pad is paying for intact cargo and a clean approach.</p>
+          <p>
+            Move {hud.cargoName} from {hud.pickupLabel} to {hud.destinationLabel}. Fast, intact cargo pays best.
+          </p>
           {hud.contractOptions.length > 1 ? (
             <div className="contract-selector" aria-label="Contract selection">
               {hud.contractOptions.map((contract) => (
@@ -287,6 +292,9 @@ export function App() {
                   }}
                 >
                   <span>{contract.title}</span>
+                  <small>
+                    {contract.pickupLabel} -&gt; {contract.destinationLabel}
+                  </small>
                   <strong>Gold {contract.medalTimes.gold}s</strong>
                 </button>
               ))}
@@ -294,16 +302,19 @@ export function App() {
           ) : null}
           <div className="preflight-stats" aria-label="Contract briefing">
             <span>
-              <PackageCheck size={18} />
-              Pickup
+              <MapPin size={18} />
+              <small>Pickup</small>
+              <strong>{hud.pickupLabel}</strong>
+            </span>
+            <span>
+              <Flag size={18} />
+              <small>Destination</small>
+              <strong>{hud.destinationLabel}</strong>
             </span>
             <span>
               <Trophy size={18} />
-              Gold {hud.paceSecondsRemaining.toFixed(0)}s
-            </span>
-            <span>
-              <Zap size={18} />
-              {Math.round(fuelRatio * 100)}%
+              <small>Gold</small>
+              <strong>{hud.paceSecondsRemaining.toFixed(0)}s</strong>
             </span>
           </div>
           <button type="button" className="preflight-button" onClick={launchContract}>

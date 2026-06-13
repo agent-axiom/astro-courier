@@ -424,8 +424,8 @@ button {
 .contract-option {
   display: grid;
   min-width: 0;
-  min-height: 58px;
-  gap: 5px;
+  min-height: 76px;
+  gap: 4px;
   align-content: center;
   padding: 10px;
   border: 1px solid rgba(160, 196, 255, 0.22);
@@ -443,6 +443,7 @@ button {
 }
 
 .contract-option span,
+.contract-option small,
 .contract-option strong {
   min-width: 0;
   overflow-wrap: anywhere;
@@ -452,6 +453,12 @@ button {
 .contract-option span {
   font-size: 0.84rem;
   font-weight: 900;
+}
+
+.contract-option small {
+  color: #aebfe2;
+  font-size: 0.68rem;
+  font-weight: 760;
 }
 
 .contract-option strong {
@@ -469,7 +476,7 @@ button {
 .preflight-stats span {
   display: grid;
   min-width: 0;
-  min-height: 62px;
+  min-height: 72px;
   place-items: center;
   gap: 5px;
   padding: 10px 8px;
@@ -479,6 +486,25 @@ button {
   font-size: 0.82rem;
   font-weight: 850;
   text-align: center;
+}
+
+.preflight-stats small,
+.preflight-stats strong {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  line-height: 1.12;
+}
+
+.preflight-stats small {
+  color: #9fb3d8;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+.preflight-stats strong {
+  color: #ffffff;
+  font-size: 0.78rem;
 }
 
 .preflight-button {
@@ -768,7 +794,7 @@ button {
   }
 
   .preflight-stats span {
-    min-height: 56px;
+    min-height: 68px;
     padding: 8px 6px;
     font-size: 0.76rem;
   }

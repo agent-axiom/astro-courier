@@ -29,6 +29,9 @@ export type HudState = {
   objectivePhase: ObjectivePhase;
   contractId: string;
   contractTitle: string;
+  pickupLabel: string;
+  destinationLabel: string;
+  cargoName: string;
   contractOptions: ContractOption[];
   elapsedSeconds: number;
   score: number;
@@ -55,7 +58,11 @@ export type HudState = {
   hazardDistance?: number;
 };
 
-export type ContractOption = Pick<ContractContent, "id" | "title" | "medalTimes">;
+export type ContractOption = Pick<ContractContent, "id" | "title" | "medalTimes"> & {
+  pickupLabel: string;
+  destinationLabel: string;
+  cargoName: string;
+};
 
 export type GameShellOptions = {
   mount: HTMLElement;
@@ -230,11 +237,15 @@ export class GameShell {
     const result = summarizeRun(this.world);
     const snapshot = snapshotWorld(this.world);
     const pace = calculateContractPace(result.elapsedSeconds, this.world.activeContract.medalTimes);
+    const activeContract = this.contractOption(this.world.activeContract);
     this.onHud({
       status: this.world.status,
       objectivePhase: this.world.objectivePhase,
       contractId: this.world.contractId,
-      contractTitle: this.world.activeContract.title,
+      contractTitle: activeContract.title,
+      pickupLabel: activeContract.pickupLabel,
+      destinationLabel: activeContract.destinationLabel,
+      cargoName: activeContract.cargoName,
       contractOptions: this.contractOptions(),
       elapsedSeconds: result.elapsedSeconds,
       score: result.score,
@@ -264,12 +275,45 @@ export class GameShell {
   }
 
   private contractOptions(): ContractOption[] {
-    return this.system.contracts.map((contract) => ({
+    return this.system.contracts.map((contract) => this.contractOption(contract));
+  }
+
+  private contractOption(contract: ContractContent): ContractOption {
+    return {
       id: contract.id,
       title: contract.title,
+      pickupLabel: this.padLabel(contract.pickupId),
+      destinationLabel: this.padLabel(contract.destinationId),
+      cargoName: this.cargoName(contract.cargoId),
       medalTimes: contract.medalTimes
-    }));
+    };
+  }
+
+  private padLabel(padId: string): string {
+    for (const planet of this.system.planets) {
+      if (planet.landingPads.some((pad) => pad.id === padId)) {
+        return `${planet.name} ${titleFromId(padId)}`;
+      }
+    }
+    for (const station of this.system.stations) {
+      if (station.landingPads.some((pad) => pad.id === padId)) {
+        return `${station.name} ${titleFromId(padId)}`;
+      }
+    }
+    return titleFromId(padId);
+  }
+
+  private cargoName(cargoId: string): string {
+    return this.system.cargo.find((cargo) => cargo.id === cargoId)?.name ?? titleFromId(cargoId);
   }
 }
 
 export type CommandProducer = (rotation: number) => PlayerCommand[];
+
+function titleFromId(id: string): string {
+  return id
+    .split("-")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
