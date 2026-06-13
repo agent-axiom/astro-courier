@@ -364,6 +364,41 @@ describe("deterministic Astro Courier simulation", () => {
     expect(volatile.ship.cargoDamage).toBeGreaterThan(fragile.ship.cargoDamage);
   });
 
+  it("scales hazard severity by the selected contract risk modifier", () => {
+    const systemWithContractRisk: SystemContent = {
+      ...starterSystem,
+      hazards: [
+        {
+          id: "contract-field",
+          type: "asteroid_field",
+          position: [120, 0],
+          radius: 50,
+          severity: 0.4
+        }
+      ],
+      contracts: [
+        {
+          ...starterSystem.contracts[0],
+          id: "training-run"
+        },
+        {
+          ...starterSystem.contracts[0],
+          id: "sprint-run",
+          hazardSeverityMultiplier: 1.5
+        }
+      ]
+    };
+    const training = createWorldFromSystem(systemWithContractRisk, "contract-risk-seed", { contractId: "training-run" });
+    const sprint = createWorldFromSystem(systemWithContractRisk, "contract-risk-seed", { contractId: "sprint-run" });
+
+    stepWorld(training, 1 / 60, []);
+    stepWorld(sprint, 1 / 60, []);
+
+    expect(training.hazards[0]?.severity).toBe(0.4);
+    expect(sprint.hazards[0]?.severity).toBe(0.6);
+    expect(sprint.ship.cargoDamage).toBeGreaterThan(training.ship.cargoDamage);
+  });
+
   it("awards a one-time style bonus for quick cargo pickup", () => {
     const quick = createWorldFromSystem(starterSystem, "quick-pickup-seed");
     quick.elapsedSeconds = 8;

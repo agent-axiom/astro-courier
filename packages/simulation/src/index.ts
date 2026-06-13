@@ -65,6 +65,7 @@ export type ContractContent = {
   pickupId: string;
   destinationId: string;
   cargoId: string;
+  hazardSeverityMultiplier?: number;
   medalTimes: {
     bronze: number;
     silver: number;
@@ -222,6 +223,7 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
   const shipPosition = shipStart?.position ?? system.ship.startPosition;
   const shipVelocity = shipStart?.velocity ?? system.ship.startVelocity;
   const shipRotation = shipStart?.rotation ?? system.ship.rotation;
+  const hazardSeverityMultiplier = activeContract.hazardSeverityMultiplier ?? 1;
 
   return {
     systemId: system.id,
@@ -270,7 +272,7 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
       type: hazard.type,
       position: toVec2(hazard.position),
       radius: hazard.radius,
-      severity: hazard.severity
+      severity: round(clamp(hazard.severity * hazardSeverityMultiplier, 0, 1), 3)
     })),
     ship: {
       position: toVec2(shipPosition),

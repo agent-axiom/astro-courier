@@ -17,6 +17,7 @@ describe("content schemas", () => {
     expect(parsed.contracts.find((contract) => contract.id === "asteroid-sprint")?.riskLabel).toBe("Asteroid Field");
     expect(parsed.contracts.find((contract) => contract.id === "asteroid-sprint")?.rewardLabel).toBe("Skim style bonuses");
     expect(parsed.contracts.find((contract) => contract.id === "asteroid-sprint")?.cargoId).toBe("volatile-comet-ice");
+    expect(parsed.contracts.find((contract) => contract.id === "asteroid-sprint")?.hazardSeverityMultiplier).toBe(1.45);
     expect(parsed.cargo.find((cargo) => cargo.id === "volatile-comet-ice")).toMatchObject({
       name: "Volatile Comet Ice",
       kind: "unstable",

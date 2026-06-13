@@ -104,6 +104,7 @@
       "pickupId": "north-pad",
       "destinationId": "dock-a",
       "cargoId": "volatile-comet-ice",
+      "hazardSeverityMultiplier": 1.45,
       "medalTimes": {
         "bronze": 70,
         "silver": 42,
