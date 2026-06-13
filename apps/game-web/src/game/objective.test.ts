@@ -215,6 +215,41 @@ describe("tactical cue", () => {
     });
   });
 
+  it("points an urgent style chain at a ready gravity sling", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        gravitySlingReady: true,
+        gravitySlingStyleBonus: 240,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 0.8,
+        cargoDamage: 0
+      })
+    ).toEqual({
+      label: "Tactical cue",
+      value: "Sling now / x1.50 / 0.8s",
+      tone: "urgent"
+    });
+  });
+
+  it("surfaces a ready gravity sling payout as an immediate opportunity", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        gravitySlingReady: true,
+        gravitySlingStyleBonus: 240,
+        styleMultiplier: 1.5,
+        cargoDamage: 0
+      })
+    ).toEqual({
+      label: "Tactical cue",
+      value: "Sling now / +360 / x1.50",
+      tone: "opportunity"
+    });
+  });
+
   it("keeps express finish ahead of eco drift while the clean gold window is closing", () => {
     expect(
       buildTacticalCue({

@@ -63,6 +63,8 @@ export type TacticalCueInput = {
   quickPickupBonus?: number;
   styleMultiplier?: number;
   styleChainSecondsRemaining?: number;
+  gravitySlingReady?: boolean;
+  gravitySlingStyleBonus?: number;
 };
 
 export type TacticalCue = {
@@ -207,8 +209,16 @@ export function buildTacticalCue(input: TacticalCueInput): TacticalCue | undefin
   if (urgentStyleChain) {
     return {
       label: "Tactical cue",
-      value: `Save chain / ${formatSeconds(input.styleChainSecondsRemaining)}`,
+      value: `${buildUrgentChainAction(input)} / ${formatSeconds(input.styleChainSecondsRemaining)}`,
       tone: "urgent"
+    };
+  }
+
+  if (isReadyGravitySling(input)) {
+    return {
+      label: "Tactical cue",
+      value: `Sling now / ${formatGravitySlingPayout(input)}`,
+      tone: "opportunity"
     };
   }
 
@@ -263,6 +273,14 @@ function isRecoverableDamagedDelivery(input: TacticalCueInput): boolean {
   return input.objectivePhase === "delivery" && cargoDamage > 0.02 && cargoDamage <= 0.35;
 }
 
+function isReadyGravitySling(input: TacticalCueInput): boolean {
+  return (
+    input.gravitySlingReady === true &&
+    (input.gravitySlingStyleBonus ?? 0) > 0 &&
+    (input.cargoDamage ?? 0) <= 0.02
+  );
+}
+
 function isEcoDriftDelivery(input: TacticalCueInput): boolean {
   return (
     input.objectivePhase === "delivery" &&
@@ -270,6 +288,25 @@ function isEcoDriftDelivery(input: TacticalCueInput): boolean {
     (input.cargoDamage ?? 0) <= 0.02 &&
     (input.fuelUsed ?? Number.POSITIVE_INFINITY) <= ECO_DRIFT_FUEL_USED_LIMIT
   );
+}
+
+function buildUrgentChainAction(input: TacticalCueInput): string {
+  if (isReadyGravitySling(input)) {
+    return `Sling now / x${styleMultiplier(input).toFixed(2)}`;
+  }
+
+  return "Save chain";
+}
+
+function formatGravitySlingPayout(input: TacticalCueInput): string {
+  const multiplier = styleMultiplier(input);
+  const payout = Math.round((input.gravitySlingStyleBonus ?? 0) * multiplier);
+  const multiplierSuffix = multiplier > 1 ? ` / x${multiplier.toFixed(2)}` : "";
+  return `+${payout}${multiplierSuffix}`;
+}
+
+function styleMultiplier(input: TacticalCueInput): number {
+  return Math.max(1, input.styleMultiplier ?? 1);
 }
 
 function formatSeconds(seconds?: number): string {

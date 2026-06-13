@@ -272,7 +272,9 @@ export function App() {
     quickPickupSecondsRemaining: hud.quickPickupSecondsRemaining,
     quickPickupBonus: hud.quickPickupBonus,
     styleMultiplier: hud.styleMultiplier,
-    styleChainSecondsRemaining: hud.styleChainSecondsRemaining
+    styleChainSecondsRemaining: hud.styleChainSecondsRemaining,
+    gravitySlingReady: hud.gravitySlingReady,
+    gravitySlingStyleBonus: hud.gravitySlingStyleBonus
   });
   const liveBestPace = buildLiveBestPace({
     bestRun,
