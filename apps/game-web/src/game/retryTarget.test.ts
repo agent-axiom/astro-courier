@@ -473,6 +473,24 @@ describe("result retry action copy", () => {
     });
   });
 
+  it("turns concrete failure targets into specific repair calls to action", () => {
+    expect(buildResultRetryAction({ label: "Retry target", value: "Dock under 38.0", tone: "danger" })).toEqual({
+      label: "Fix Dock",
+      tone: "danger",
+      mode: "restart-run"
+    });
+    expect(buildResultRetryAction({ label: "Retry target", value: "Clear asteroid field", tone: "danger" })).toEqual({
+      label: "Clear Lane",
+      tone: "danger",
+      mode: "restart-run"
+    });
+    expect(buildResultRetryAction({ label: "Retry target", value: "Hold outer sling lane", tone: "danger" })).toEqual({
+      label: "Clear Lane",
+      tone: "danger",
+      mode: "restart-run"
+    });
+  });
+
   it("turns personal best defense into a stronger call to action", () => {
     expect(buildResultRetryAction({ label: "Retry target", value: "Defend 3520 / 24.1s", tone: "success" })).toEqual({
       label: "Defend PB",
@@ -601,6 +619,26 @@ describe("result retry action briefing", () => {
     ).toEqual({
       label: "Next run",
       value: "Fix the failure point",
+      tone: "danger"
+    });
+    expect(
+      buildRetryActionBriefing(
+        { label: "Fix Dock", tone: "danger", mode: "restart-run" },
+        { label: "Retry target", value: "Dock under 38.0", tone: "danger" }
+      )
+    ).toEqual({
+      label: "Next run",
+      value: "Feather final brake",
+      tone: "danger"
+    });
+    expect(
+      buildRetryActionBriefing(
+        { label: "Clear Lane", tone: "danger", mode: "restart-run" },
+        { label: "Retry target", value: "Clear asteroid field", tone: "danger" }
+      )
+    ).toEqual({
+      label: "Next run",
+      value: "Widen the route line",
       tone: "danger"
     });
   });

@@ -28,6 +28,8 @@ export type RetryTarget = {
 export type ResultRetryAction = {
   label:
     | "Retry Route"
+    | "Fix Dock"
+    | "Clear Lane"
     | "Defend PB"
     | "Chase PB"
     | "Repeat Line"
@@ -182,6 +184,12 @@ function buildRepeatableMilestoneTarget(lastMilestone?: string): RetryTarget | u
 
 export function buildResultRetryAction(target: RetryTarget): ResultRetryAction {
   if (target.tone === "danger") {
+    if (target.value.startsWith("Dock under ")) {
+      return { label: "Fix Dock", tone: "danger", mode: "restart-run" };
+    }
+    if (isLaneRepairTarget(target.value)) {
+      return { label: "Clear Lane", tone: "danger", mode: "restart-run" };
+    }
     return { label: "Retry Route", tone: "danger", mode: "restart-run" };
   }
   if (target.tone === "success") {
@@ -215,6 +223,20 @@ export function buildResultRetryAction(target: RetryTarget): ResultRetryAction {
 }
 
 export function buildRetryActionBriefing(action: ResultRetryAction, target: RetryTarget): RetryActionBriefing {
+  if (action.label === "Fix Dock") {
+    return {
+      label: "Next run",
+      value: "Feather final brake",
+      tone: "danger"
+    };
+  }
+  if (action.label === "Clear Lane") {
+    return {
+      label: "Next run",
+      value: "Widen the route line",
+      tone: "danger"
+    };
+  }
   if (action.label === "Defend PB") {
     return {
       label: "Next run",
@@ -290,6 +312,15 @@ export function buildRetryActionBriefing(action: ResultRetryAction, target: Retr
     value: target.value,
     tone: target.tone
   };
+}
+
+function isLaneRepairTarget(value: string): boolean {
+  return (
+    value === "Clear gravity well" ||
+    value === "Hold outer sling lane" ||
+    value === "Clear relay lane" ||
+    value === "Clear asteroid field"
+  );
 }
 
 function buildCometNearMissTarget(input: RetryTargetInput): RetryTarget | undefined {
