@@ -88,6 +88,22 @@ describe("run action feed", () => {
     ]);
   });
 
+  it("announces when a launch burst window opens after pickup", () => {
+    expect(deriveRunFeedUpdates(baseSnapshot, { ...baseSnapshot, launchBurstSecondsRemaining: 2.4 })).toEqual([
+      {
+        label: "Burst armed",
+        value: "Boost in 2.4s",
+        tone: "style"
+      }
+    ]);
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, launchBurstSecondsRemaining: 2.4 },
+        { ...baseSnapshot, launchBurstSecondsRemaining: 1.8 }
+      )
+    ).toEqual([]);
+  });
+
   it("prepends fresh updates and caps the feed", () => {
     const result = appendRunFeedUpdates(
       [

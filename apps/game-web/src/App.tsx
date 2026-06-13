@@ -1303,7 +1303,8 @@ function toRunFeedSnapshot(hud: HudState): RunFeedSnapshot {
     maxFuel: hud.maxFuel,
     hazardDangerLevel: hud.hazardDangerLevel,
     trajectoryRiskLevel: hud.trajectoryRiskLevel,
-    trajectoryRiskSeconds: hud.trajectoryRiskSeconds
+    trajectoryRiskSeconds: hud.trajectoryRiskSeconds,
+    launchBurstSecondsRemaining: hud.launchBurstSecondsRemaining
   };
 }
 

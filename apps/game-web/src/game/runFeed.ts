@@ -11,6 +11,7 @@ export type RunFeedSnapshot = {
   hazardDangerLevel?: "near" | "inside";
   trajectoryRiskLevel?: "near" | "inside";
   trajectoryRiskSeconds?: number;
+  launchBurstSecondsRemaining?: number;
 };
 
 export type RunFeedUpdate = {
@@ -90,6 +91,14 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
       label: "Hazard contact",
       value: "Break field",
       tone: "danger"
+    });
+  }
+
+  if ((previous.launchBurstSecondsRemaining ?? 0) <= 0 && (current.launchBurstSecondsRemaining ?? 0) > 0) {
+    updates.push({
+      label: "Burst armed",
+      value: `Boost in ${formatSeconds(current.launchBurstSecondsRemaining)}`,
+      tone: "style"
     });
   }
 
