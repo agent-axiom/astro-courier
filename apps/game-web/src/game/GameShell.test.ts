@@ -144,6 +144,14 @@ describe("GameShell lifecycle", () => {
         destinationLabel: "Luma North Pad",
         cargoName: "Bottled Starlight",
         medalTimes: { bronze: 80, silver: 48, gold: 30 }
+      },
+      {
+        id: "asteroid-sprint",
+        title: "Asteroid Sprint",
+        pickupLabel: "Luma North Pad",
+        destinationLabel: "Tea Station Dock A",
+        cargoName: "Bottled Starlight",
+        medalTimes: { bronze: 70, silver: 42, gold: 24 }
       }
     ]);
   });

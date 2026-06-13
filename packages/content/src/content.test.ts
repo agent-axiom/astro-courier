@@ -8,7 +8,11 @@ describe("content schemas", () => {
 
     expect(parsed.id).toBe("starter-route");
     expect(parsed.contracts[0]?.id).toBe("first-light-delivery");
-    expect(parsed.contracts.map((contract) => contract.id)).toContain("return-leg");
+    expect(parsed.contracts.map((contract) => contract.id)).toEqual([
+      "first-light-delivery",
+      "return-leg",
+      "asteroid-sprint"
+    ]);
     expect(parsed.planets[0]?.landingPads[0]?.allowedApproachSpeed).toBeGreaterThan(0);
   });
 

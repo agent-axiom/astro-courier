@@ -6,11 +6,11 @@ describe("contract rotation", () => {
     const contracts = [
       { id: "first-light-delivery" },
       { id: "return-leg" },
-      { id: "hazard-sprint" }
+      { id: "asteroid-sprint" }
     ];
 
     expect(getNextContractId(contracts, "first-light-delivery")).toBe("return-leg");
-    expect(getNextContractId(contracts, "hazard-sprint")).toBe("first-light-delivery");
+    expect(getNextContractId(contracts, "asteroid-sprint")).toBe("first-light-delivery");
   });
 
   it("keeps the current contract when there is no safe next option", () => {

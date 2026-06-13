@@ -83,6 +83,18 @@
         "silver": 48,
         "gold": 30
       }
+    },
+    {
+      "id": "asteroid-sprint",
+      "title": "Asteroid Sprint",
+      "pickupId": "north-pad",
+      "destinationId": "dock-a",
+      "cargoId": "bottled-starlight",
+      "medalTimes": {
+        "bronze": 70,
+        "silver": 42,
+        "gold": 24
+      }
     }
   ],
   "cargo": [
