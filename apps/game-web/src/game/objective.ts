@@ -56,6 +56,26 @@ export type ExpressFinishReadout = {
   tone: "open" | "urgent";
 };
 
+export type RouteFocusReadoutInput = {
+  status: RunStatus;
+  contractId?: string;
+  objectivePhase: ObjectivePhase;
+  hazardDangerLevel?: "near" | "inside";
+  landingStatus?: LandingGuidanceStatus;
+  fuel?: number;
+  maxFuel?: number;
+  gravitySlingReady?: boolean;
+  gravitySlingStyleBonus?: number;
+  styleMultiplier?: number;
+  styleChainSecondsRemaining?: number;
+};
+
+export type RouteFocusReadout = {
+  label: "Route focus";
+  value: string;
+  tone: "danger" | "fuel" | "precision" | "speed" | "style";
+};
+
 export type TacticalCueInput = {
   status: RunStatus;
   contractId?: string;
@@ -185,6 +205,87 @@ export function buildObjectiveInterceptReadout(
     label: "Intercept",
     value: `ETA ${etaSeconds.toFixed(1)}s`,
     tone: etaSeconds <= 8 ? "fast" : etaSeconds <= 20 ? "steady" : "slow"
+  };
+}
+
+export function buildRouteFocusReadout(input: RouteFocusReadoutInput): RouteFocusReadout | undefined {
+  if (input.status !== "flying") {
+    return undefined;
+  }
+
+  if (input.contractId === "gravity-slingshot") {
+    if (input.gravitySlingReady === true && (input.gravitySlingStyleBonus ?? 0) > 0) {
+      return {
+        label: "Route focus",
+        value: `Sling armed / +${Math.round((input.gravitySlingStyleBonus ?? 0) * styleMultiplier(input))}`,
+        tone: "style"
+      };
+    }
+
+    return {
+      label: "Route focus",
+      value: "Build sling entry / 54+ speed",
+      tone: "speed"
+    };
+  }
+
+  if (input.contractId === "chain-relay") {
+    if ((input.styleMultiplier ?? 1) > 1 && (input.styleChainSecondsRemaining ?? 0) > 0) {
+      return {
+        label: "Route focus",
+        value: `Keep relay / x${styleMultiplier(input).toFixed(2)}`,
+        tone: "style"
+      };
+    }
+
+    return {
+      label: "Route focus",
+      value: "Prime relay / skim danger",
+      tone: "style"
+    };
+  }
+
+  if (input.contractId === "last-drop-run") {
+    if (
+      input.objectivePhase === "delivery" &&
+      input.landingStatus === "ready" &&
+      fuelReserve(input) > 0 &&
+      fuelReserve(input) <= LAST_DROP_FUEL_RATIO
+    ) {
+      return {
+        label: "Route focus",
+        value: "Cash Last Drop / dock now",
+        tone: "fuel"
+      };
+    }
+
+    return {
+      label: "Route focus",
+      value: input.objectivePhase === "delivery" ? "Spend to 5% / save dock" : "Save fuel / load clean",
+      tone: "fuel"
+    };
+  }
+
+  if (input.contractId === "asteroid-sprint") {
+    return {
+      label: "Route focus",
+      value: input.hazardDangerLevel ? "Thread active / danger pay" : "Seek field / stay clean",
+      tone: "danger"
+    };
+  }
+
+  if (input.contractId === "return-leg") {
+    return {
+      label: "Route focus",
+      value: "Reverse line / brake late",
+      tone: "precision"
+    };
+  }
+
+  return {
+    label: "Route focus",
+    value: input.objectivePhase === "pickup" ? "Load cargo / rush pickup" : "Clean delivery / soft dock",
+    tone: input.objectivePhase === "pickup" ? "speed" : "precision"
   };
 }
 

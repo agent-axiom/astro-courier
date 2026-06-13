@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { buildExpressFinishReadout, buildObjectiveDirective, buildObjectiveInterceptReadout, buildTacticalCue } from "./objective";
+import {
+  buildExpressFinishReadout,
+  buildObjectiveDirective,
+  buildObjectiveInterceptReadout,
+  buildRouteFocusReadout,
+  buildTacticalCue
+} from "./objective";
 
 describe("objective directive HUD copy", () => {
   it("points pickup phase at the pickup pad", () => {
@@ -175,6 +181,50 @@ describe("express finish readout", () => {
         paceTier: "gold",
         paceSecondsRemaining: 8.6,
         cargoDamage: 0.03
+      })
+    ).toBeUndefined();
+  });
+});
+
+describe("route focus readout", () => {
+  it("turns route identity into a live strategic focus", () => {
+    expect(
+      buildRouteFocusReadout({
+        status: "flying",
+        contractId: "gravity-slingshot",
+        objectivePhase: "delivery",
+        gravitySlingReady: true,
+        gravitySlingStyleBonus: 240,
+        styleMultiplier: 1.5
+      })
+    ).toEqual({
+      label: "Route focus",
+      value: "Sling armed / +360",
+      tone: "style"
+    });
+
+    expect(
+      buildRouteFocusReadout({
+        status: "flying",
+        contractId: "last-drop-run",
+        objectivePhase: "delivery",
+        fuel: 4,
+        maxFuel: 100,
+        landingStatus: "ready"
+      })
+    ).toEqual({
+      label: "Route focus",
+      value: "Cash Last Drop / dock now",
+      tone: "fuel"
+    });
+  });
+
+  it("hides after the run leaves active flight", () => {
+    expect(
+      buildRouteFocusReadout({
+        status: "crashed",
+        contractId: "asteroid-sprint",
+        objectivePhase: "delivery"
       })
     ).toBeUndefined();
   });

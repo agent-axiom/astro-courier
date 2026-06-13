@@ -59,7 +59,13 @@ import {
 } from "./game/contracts";
 import { buildRadioMessage } from "./game/radio";
 import { buildLiveStyleReward, buildStyleTargetCue } from "./game/style";
-import { buildExpressFinishReadout, buildObjectiveDirective, buildObjectiveInterceptReadout, buildTacticalCue } from "./game/objective";
+import {
+  buildExpressFinishReadout,
+  buildObjectiveDirective,
+  buildObjectiveInterceptReadout,
+  buildRouteFocusReadout,
+  buildTacticalCue
+} from "./game/objective";
 import { buildPreflightBonusObjectives, buildPreflightMasteryTargets } from "./game/mastery";
 import { buildApproachRewardReadout, buildDockingSpeedReadout } from "./game/docking";
 import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./game/cargo";
@@ -449,6 +455,19 @@ export function App() {
     gravitySlingReady: hud.gravitySlingReady,
     gravitySlingStyleBonus: hud.gravitySlingStyleBonus,
     approachStreakSeconds: hud.approachStreakSeconds
+  });
+  const routeFocusReadout = buildRouteFocusReadout({
+    status: hud.status,
+    contractId: hud.contractId,
+    objectivePhase: hud.objectivePhase,
+    hazardDangerLevel: hud.hazardDangerLevel,
+    landingStatus: hud.landingStatus,
+    fuel: hud.fuel,
+    maxFuel: hud.maxFuel,
+    gravitySlingReady: hud.gravitySlingReady,
+    gravitySlingStyleBonus: hud.gravitySlingStyleBonus,
+    styleMultiplier: hud.styleMultiplier,
+    styleChainSecondsRemaining: hud.styleChainSecondsRemaining
   });
   const liveBestPace = buildLiveBestPace({
     bestRun,
@@ -873,6 +892,13 @@ export function App() {
           <span>{objectiveDirective.label}</span>
           <strong>{objectiveDirective.value}</strong>
         </div>
+        {routeFocusReadout ? (
+          <div className={`route-focus-chip route-focus-${routeFocusReadout.tone}`} aria-label={`${routeFocusReadout.label}: ${routeFocusReadout.value}`}>
+            <Route size={16} />
+            <span>{routeFocusReadout.label}</span>
+            <strong>{routeFocusReadout.value}</strong>
+          </div>
+        ) : null}
         <div className="status-row">
           <span>Target</span>
           <strong>{targetDistanceLabel}</strong>

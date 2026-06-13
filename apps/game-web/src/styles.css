@@ -647,6 +647,65 @@ button {
   color: #bff7d8;
 }
 
+.route-focus-chip {
+  display: grid;
+  grid-template-columns: 16px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.route-focus-chip span,
+.route-focus-chip strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.route-focus-chip span {
+  color: rgba(255, 255, 255, 0.74);
+}
+
+.route-focus-chip strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.route-focus-danger {
+  border-color: rgba(255, 111, 145, 0.26);
+  background: rgba(255, 111, 145, 0.15);
+  color: #ffadc1;
+}
+
+.route-focus-fuel {
+  border-color: rgba(142, 230, 184, 0.26);
+  background: rgba(142, 230, 184, 0.14);
+  color: #bff7d8;
+}
+
+.route-focus-precision {
+  border-color: rgba(160, 196, 255, 0.24);
+  background: rgba(160, 196, 255, 0.12);
+  color: #d8e6ff;
+}
+
+.route-focus-speed {
+  border-color: rgba(124, 225, 255, 0.24);
+  background: rgba(124, 225, 255, 0.13);
+  color: #c6f6ff;
+}
+
+.route-focus-style {
+  border-color: rgba(255, 209, 102, 0.28);
+  background: rgba(255, 209, 102, 0.15);
+  color: #ffe19a;
+}
+
 .status-row {
   display: flex;
   justify-content: space-between;
