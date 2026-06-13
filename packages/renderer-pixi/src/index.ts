@@ -154,6 +154,19 @@ export type ShipTrailVisual = {
   alpha: number;
 };
 
+export type BoostBurstVisualInput = {
+  status: SimulationSnapshot["status"];
+  lastMilestone?: string;
+  tick: number;
+};
+
+export type BoostBurstVisual = {
+  color: number;
+  radius: number;
+  alpha: number;
+  width: number;
+};
+
 export function shipTrailVisual(input: ShipTrailVisualInput): ShipTrailVisual | undefined {
   if (input.status !== "flying" || input.speed <= 8) {
     return undefined;
@@ -169,6 +182,20 @@ export function shipTrailVisual(input: ShipTrailVisualInput): ShipTrailVisual | 
     length: round(18 + pressure * (tone === "comet" ? 34 : 28), 2),
     radius: round(4 + pressure * 8, 2),
     alpha: round(clamp(0.34 + pressure * (tone === "comet" ? 0.46 : 0.38), 0.34, tone === "comet" ? 0.8 : 0.72), 2)
+  };
+}
+
+export function boostBurstVisual(input: BoostBurstVisualInput): BoostBurstVisual | undefined {
+  if (input.status !== "flying" || input.lastMilestone !== "Boost Burn") {
+    return undefined;
+  }
+
+  const pulse = (Math.sin(input.tick * 0.34) + 1) / 2;
+  return {
+    color: 0x7ce1ff,
+    radius: round(22 + pulse * 22, 2),
+    alpha: round(0.16 + (1 - pulse) * 0.32, 2),
+    width: round(2 + pulse * 2.8, 2)
   };
 }
 
@@ -427,6 +454,20 @@ class PixiRenderer implements AstroPixiRenderer {
     const speed = Math.hypot(snapshot.ship.velocity.x, snapshot.ship.velocity.y);
     const fuelRatio = snapshot.ship.maxFuel > 0 ? snapshot.ship.fuel / snapshot.ship.maxFuel : 0;
     const trail = shipTrailVisual({ status: snapshot.status, speed, fuelRatio, cargoDamage: snapshot.ship.cargoDamage });
+    const boostBurst = boostBurstVisual({ status: snapshot.status, lastMilestone: snapshot.lastMilestone, tick: snapshot.tick });
+
+    if (boostBurst) {
+      this.ship.circle(center.x, center.y, boostBurst.radius).stroke({
+        color: boostBurst.color,
+        width: boostBurst.width,
+        alpha: boostBurst.alpha
+      });
+      this.ship.circle(center.x, center.y, boostBurst.radius * 0.62).stroke({
+        color: 0xffffff,
+        width: 1,
+        alpha: boostBurst.alpha * 0.42
+      });
+    }
 
     this.ship.moveTo(nose.x, nose.y).lineTo(left.x, left.y).lineTo(right.x, right.y).closePath().fill(0xfff7d6);
     this.ship.moveTo(nose.x, nose.y).lineTo(left.x, left.y).lineTo(right.x, right.y).closePath().stroke({

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  boostBurstVisual,
   hazardFieldVisual,
   hazardVignetteEffect,
   landingPadVisual,
@@ -154,5 +155,25 @@ describe("ship trail visual", () => {
       color: 0xff9f1c,
       tone: "sprint"
     });
+  });
+});
+
+describe("boost burst visual", () => {
+  it("stays hidden unless a boost burn milestone is active in flight", () => {
+    expect(boostBurstVisual({ status: "paused", lastMilestone: "Boost Burn", tick: 12 })).toBeUndefined();
+    expect(boostBurstVisual({ status: "flying", lastMilestone: "Clean Hazard Skim", tick: 12 })).toBeUndefined();
+    expect(boostBurstVisual({ status: "flying", tick: 12 })).toBeUndefined();
+  });
+
+  it("returns a bounded pulsing shockwave for boost burns", () => {
+    const early = boostBurstVisual({ status: "flying", lastMilestone: "Boost Burn", tick: 3 });
+    const later = boostBurstVisual({ status: "flying", lastMilestone: "Boost Burn", tick: 18 });
+
+    expect(early).toMatchObject({ color: 0x7ce1ff });
+    expect(early?.radius).toBeGreaterThanOrEqual(22);
+    expect(early?.radius).toBeLessThanOrEqual(44);
+    expect(early?.alpha).toBeGreaterThanOrEqual(0.16);
+    expect(early?.alpha).toBeLessThanOrEqual(0.48);
+    expect(later?.radius).not.toBe(early?.radius);
   });
 });
