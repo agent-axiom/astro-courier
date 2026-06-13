@@ -48,6 +48,7 @@ import {
   buildContractRoutePlan,
   buildDailyDispatch,
   buildDailyDispatchAction,
+  buildDailyDispatchReset,
   buildDailyDispatchStatus
 } from "./game/contracts";
 import { buildRadioMessage } from "./game/radio";
@@ -466,8 +467,10 @@ export function App() {
   const routeBoardProgress = buildRouteBoardProgress(hud.contractOptions, bestRunsByContract);
   const routeBoardTarget = buildRouteBoardTarget(hud.contractOptions, bestRunsByContract);
   const routeTargetSelectionAction = buildRouteBoardSelectionAction(routeBoardTarget, hud.contractId);
-  const dailyDispatch = buildDailyDispatch({ contracts: hud.contractOptions, now: new Date() });
+  const currentDate = new Date();
+  const dailyDispatch = buildDailyDispatch({ contracts: hud.contractOptions, now: currentDate });
   const dailyDispatchAction = buildDailyDispatchAction(dailyDispatch, hud.contractId);
+  const dailyDispatchReset = buildDailyDispatchReset(dailyDispatch, currentDate);
   const dailyDispatchStatus = buildDailyDispatchStatus(
     dailyDispatch,
     dailyDispatch ? bestRunsByContract[dailyDispatch.contractId] : undefined
@@ -966,7 +969,7 @@ export function App() {
                 <CalendarDays size={18} />
                 <span>{dailyDispatch.label}</span>
                 <strong>{dailyDispatch.value}</strong>
-                <small>{dailyDispatchStatus ? `${dailyDispatchStatus.value} / ${dailyDispatch.seed}` : dailyDispatch.seed}</small>
+                <small>{dailyDispatchStatus ? `${dailyDispatchStatus.value} / ${dailyDispatchReset?.value ?? dailyDispatch.seed}` : dailyDispatch.seed}</small>
               </button>
             ) : (
               <div
@@ -976,7 +979,7 @@ export function App() {
                 <CalendarDays size={18} />
                 <span>{dailyDispatch.label}</span>
                 <strong>{dailyDispatch.value}</strong>
-                <small>{dailyDispatchStatus ? `${dailyDispatchStatus.value} / ${dailyDispatch.seed}` : dailyDispatch.seed}</small>
+                <small>{dailyDispatchStatus ? `${dailyDispatchStatus.value} / ${dailyDispatchReset?.value ?? dailyDispatch.seed}` : dailyDispatch.seed}</small>
               </div>
             )
           ) : null}

@@ -34,6 +34,12 @@ export type DailyDispatchStatus = {
   tone: "open" | "cleared" | "comet";
 };
 
+export type DailyDispatchReset = {
+  label: "Daily reset";
+  value: string;
+  tone: "steady" | "urgent";
+};
+
 export type ContractHazardTraitInput = {
   hazardSeverityMultiplier?: number;
 };
@@ -139,8 +145,38 @@ export function buildDailyDispatchStatus(
   };
 }
 
+export function buildDailyDispatchReset(dispatch: DailyDispatch | undefined, now: Date): DailyDispatchReset | undefined {
+  if (!dispatch) {
+    return undefined;
+  }
+
+  const nextUtcMidnight = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
+  const millisecondsRemaining = Math.max(0, nextUtcMidnight - now.getTime());
+  return {
+    label: "Daily reset",
+    value: `${formatResetTime(millisecondsRemaining)} left`,
+    tone: millisecondsRemaining <= 60 * 60 * 1000 ? "urgent" : "steady"
+  };
+}
+
 function capitalize(value: string): string {
   return `${value.slice(0, 1).toUpperCase()}${value.slice(1)}`;
+}
+
+function formatResetTime(millisecondsRemaining: number): string {
+  const totalSeconds = Math.floor(millisecondsRemaining / 1000);
+  if (totalSeconds < 60) {
+    return `${totalSeconds}s`;
+  }
+
+  const totalMinutes = Math.floor(totalSeconds / 60);
+  if (totalMinutes < 60) {
+    return `${totalMinutes}m`;
+  }
+
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return `${hours}h ${minutes}m`;
 }
 
 export function buildContractHazardTrait(input: ContractHazardTraitInput): string | undefined {

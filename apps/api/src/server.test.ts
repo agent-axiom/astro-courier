@@ -92,7 +92,8 @@ describe("Astro Courier API", () => {
       systemId: "starter-route",
       date: "2026-06-13",
       contractId: "return-leg",
-      seed: "daily-2026-06-13-return-leg"
+      seed: "daily-2026-06-13-return-leg",
+      resetsAt: "2026-06-14T00:00:00.000Z"
     });
   });
 

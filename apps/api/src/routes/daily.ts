@@ -32,7 +32,8 @@ export function registerDailyRoutes(server: FastifyInstance): void {
       });
     }
 
-    const dayNumber = Math.floor(Date.parse(`${parsed.data.date}T00:00:00Z`) / 86_400_000);
+    const dayStart = Date.parse(`${parsed.data.date}T00:00:00Z`);
+    const dayNumber = Math.floor(dayStart / 86_400_000);
     const contract = system.contracts[dayNumber % system.contracts.length];
 
     return reply.send({
@@ -41,7 +42,8 @@ export function registerDailyRoutes(server: FastifyInstance): void {
       systemId: system.id,
       date: parsed.data.date,
       contractId: contract.id,
-      seed: `daily-${parsed.data.date}-${contract.id}`
+      seed: `daily-${parsed.data.date}-${contract.id}`,
+      resetsAt: new Date(dayStart + 86_400_000).toISOString()
     });
   });
 }

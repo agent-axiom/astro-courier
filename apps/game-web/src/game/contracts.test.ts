@@ -7,6 +7,7 @@ import {
   buildContractRoutePlan,
   buildDailyDispatch,
   buildDailyDispatchAction,
+  buildDailyDispatchReset,
   buildDailyDispatchStatus,
   getNextContractId
 } from "./contracts";
@@ -100,6 +101,33 @@ describe("contract rotation", () => {
       tone: "comet"
     });
     expect(buildDailyDispatchStatus(undefined, { medal: "gold" })).toBeUndefined();
+  });
+
+  it("summarizes the remaining time before the daily dispatch rotates", () => {
+    const dispatch = {
+      label: "Daily dispatch" as const,
+      value: "Asteroid Sprint",
+      contractId: "asteroid-sprint",
+      seed: "daily-2026-06-13-asteroid-sprint",
+      tone: "daily" as const
+    };
+
+    expect(buildDailyDispatchReset(dispatch, new Date("2026-06-13T18:30:00Z"))).toEqual({
+      label: "Daily reset",
+      value: "5h 30m left",
+      tone: "steady"
+    });
+    expect(buildDailyDispatchReset(dispatch, new Date("2026-06-13T23:42:20Z"))).toEqual({
+      label: "Daily reset",
+      value: "17m left",
+      tone: "urgent"
+    });
+    expect(buildDailyDispatchReset(dispatch, new Date("2026-06-13T23:59:20Z"))).toEqual({
+      label: "Daily reset",
+      value: "40s left",
+      tone: "urgent"
+    });
+    expect(buildDailyDispatchReset(undefined, new Date("2026-06-13T18:30:00Z"))).toBeUndefined();
   });
 
   it("formats elevated contract hazard load for briefing cards", () => {
