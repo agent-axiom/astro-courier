@@ -127,6 +127,7 @@ export class GameShell {
   private readonly renderer: AstroPixiRenderer;
   private readonly input: InputSource;
   private readonly system = validateSystemContent(starterRoute);
+  private readonly contractOptionList = this.system.contracts.map((contract) => this.contractOption(contract));
   private world: SimulationWorld;
   private rafId = 0;
   private accumulator = 0;
@@ -430,7 +431,7 @@ export class GameShell {
   }
 
   private contractOptions(): ContractOption[] {
-    return this.system.contracts.map((contract) => this.contractOption(contract));
+    return this.contractOptionList;
   }
 
   private contractOption(contract: ContractContent): ContractOption {

@@ -149,6 +149,7 @@ export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
 
 function buildRepeatableMilestoneTarget(lastMilestone?: string): RetryTarget | undefined {
   switch (lastMilestone) {
+    case "Comet Finish":
     case "Damage Control":
     case "Last Drop":
     case "No Brake Finesse":

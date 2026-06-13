@@ -58,6 +58,7 @@ const styleMilestones = new Set([
   "Gravity Sling",
   "Quick Pickup",
   "Launch Burst",
+  "Comet Finish",
   "Perfect Approach",
   "Eco Drift",
   "Chain Finish",

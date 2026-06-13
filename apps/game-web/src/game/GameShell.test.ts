@@ -72,6 +72,35 @@ describe("GameShell lifecycle", () => {
     expect(renderer.render).toHaveBeenCalled();
   });
 
+  it("reuses contract option references between HUD publishes", async () => {
+    const { renderer, input } = createShellDoubles();
+    const onHud = vi.fn();
+    let frame: FrameRequestCallback = () => 0;
+    vi.stubGlobal(
+      "requestAnimationFrame",
+      vi.fn((callback: FrameRequestCallback) => {
+        frame = callback;
+        return 7;
+      })
+    );
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    vi.spyOn(performance, "now").mockReturnValue(1000);
+
+    const shell = new GameShell({
+      mount: {} as HTMLElement,
+      onHud,
+      renderer,
+      input,
+      initialPaused: true
+    });
+
+    await shell.start();
+    const firstOptions = onHud.mock.calls[0]?.[0].contractOptions;
+    frame(1167);
+
+    expect(onHud.mock.calls.at(-1)?.[0].contractOptions).toBe(firstOptions);
+  });
+
   it("can launch from preflight mode into flight", async () => {
     const { renderer, input } = createShellDoubles();
     const onHud = vi.fn();

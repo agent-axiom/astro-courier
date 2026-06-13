@@ -189,6 +189,10 @@ describe("radio feedback copy", () => {
     expect(buildRadioMessage({ ...baseHud, status: "delivered", medal: "gold", lastMilestone: "Express Finish" })).toContain("Express finish");
   });
 
+  it("celebrates comet finishes before generic comet medal copy", () => {
+    expect(buildRadioMessage({ ...baseHud, status: "delivered", medal: "comet", lastMilestone: "Comet Finish" })).toContain("Comet finish");
+  });
+
   it("celebrates damage control recoveries before generic delivery copy", () => {
     expect(
       buildRadioMessage({
@@ -468,6 +472,7 @@ describe("radio feedback copy", () => {
       "No-brake finesse"
     );
     expect(buildRadioMessage({ ...baseHud, status: "delivered", medal: "gold", lastMilestone: "Chain Finish" })).toContain("Chain finish");
+    expect(buildRadioMessage({ ...baseHud, status: "delivered", medal: "comet", lastMilestone: "Comet Finish" })).toContain("Comet finish");
     expect(buildRadioMessage({ ...baseHud, status: "delivered", medal: "comet" })).toContain("Comet");
     expect(buildRadioMessage({ ...baseHud, status: "crashed", landingRating: "Insurance Event" })).toContain("Insurance");
     expect(buildRadioMessage({ ...baseHud, status: "crashed", crashReason: "Hard Landing" })).toContain("Bleed speed");

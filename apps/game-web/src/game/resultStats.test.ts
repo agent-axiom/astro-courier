@@ -36,6 +36,11 @@ describe("result stat formatting", () => {
       value: "Express Finish +405",
       tone: "style"
     });
+    expect(buildResultHighlight({ ...baseBreakdown, styleBonus: 320 }, "Comet Finish")).toEqual({
+      label: "Run highlight",
+      value: "Comet Finish +320",
+      tone: "style"
+    });
   });
 
   it("names damage control recoveries on the result highlight", () => {

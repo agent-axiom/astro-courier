@@ -10,6 +10,7 @@ import {
   GRAVITY_SLING_STYLE_BONUS,
   CHAIN_FINISH_STYLE_BONUS,
   CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS,
+  COMET_FINISH_STYLE_BONUS,
   DAMAGE_CONTROL_STYLE_BONUS,
   LAST_DROP_STYLE_BONUS,
   LANDING_ASSIST_FUEL_COST,
@@ -646,7 +647,7 @@ describe("deterministic Astro Courier simulation", () => {
     world.styleBonus = 320;
     world.styleChainCount = 2;
     world.styleChainSecondsRemaining = 2.4;
-    world.fuelUsed = ECO_DRIFT_FUEL_USED_LIMIT + 4;
+    world.fuelUsed = world.ship.maxFuel * 0.4;
     world.bestApproachStreakSeconds = 0;
     for (const pad of world.landingPads) {
       pad.active = pad.role === "destination";
@@ -663,6 +664,29 @@ describe("deterministic Astro Courier simulation", () => {
     expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(320 + Math.round(CHAIN_FINISH_STYLE_BONUS * 1.5));
   });
 
+  it("awards comet finish style when a perfect gold delivery keeps cargo and fuel reserve intact", () => {
+    const world = createWorldFromSystem(starterSystem, "comet-finish-seed");
+    world.cargoOnboard = true;
+    world.objectivePhase = "delivery";
+    world.elapsedSeconds = starterSystem.contracts[0]!.medalTimes.gold - 0.5;
+    world.fuelUsed = world.ship.maxFuel * 0.2;
+    world.bestApproachStreakSeconds = 0;
+    for (const pad of world.landingPads) {
+      pad.active = pad.role === "destination";
+    }
+    world.ship.position = { x: 260, y: -80 };
+    world.ship.velocity = { x: 4, y: 1 };
+    world.ship.rotation = 0;
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("delivered");
+    expect(summarizeRun(world).medal).toBe("comet");
+    expect(world.lastMilestone).toBe("Comet Finish");
+    expect(world.lastStyleAward).toBe(COMET_FINISH_STYLE_BONUS);
+    expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(COMET_FINISH_STYLE_BONUS);
+  });
+
   it("prioritizes chain finish over perfect approach when both finish conditions are met", () => {
     const world = createWorldFromSystem(starterSystem, "chain-perfect-finish-seed");
     world.cargoOnboard = true;
@@ -670,6 +694,7 @@ describe("deterministic Astro Courier simulation", () => {
     world.styleBonus = 320;
     world.styleChainCount = 2;
     world.styleChainSecondsRemaining = 2.4;
+    world.fuelUsed = world.ship.maxFuel * 0.4;
     world.bestApproachStreakSeconds = 1.2;
     for (const pad of world.landingPads) {
       pad.active = pad.role === "destination";
@@ -697,7 +722,7 @@ describe("deterministic Astro Courier simulation", () => {
       pad.active = pad.role === "destination";
     }
     world.ship.position = { x: 260, y: -80 };
-    world.ship.velocity = { x: 8, y: 1 };
+    world.ship.velocity = { x: 20, y: 1 };
     world.ship.rotation = 0;
 
     stepWorld(world, 1 / 60, []);
@@ -722,7 +747,7 @@ describe("deterministic Astro Courier simulation", () => {
       pad.active = pad.role === "destination";
     }
     world.ship.position = { x: 260, y: -80 };
-    world.ship.velocity = { x: 8, y: 1 };
+    world.ship.velocity = { x: 20, y: 1 };
     world.ship.rotation = 0;
 
     stepWorld(world, 1 / 60, []);
@@ -954,6 +979,7 @@ describe("deterministic Astro Courier simulation", () => {
 
     cleanApproach.elapsedSeconds = 24;
     cleanApproach.bestApproachStreakSeconds = 1.2;
+    cleanApproach.fuelUsed = cleanApproach.ship.maxFuel * 0.4;
     cleanApproach.ship.position = { x: 260, y: -80 };
     cleanApproach.ship.velocity = { x: 4, y: 1 };
     cleanApproach.ship.rotation = 0;
@@ -1145,6 +1171,7 @@ describe("deterministic Astro Courier simulation", () => {
     world.ship.velocity = { x: 1, y: 3 };
     world.ship.rotation = -Math.PI / 2;
     stepWorld(world, 1 / 60, []);
+    world.fuelUsed = world.ship.maxFuel * 0.4;
     world.ship.position = { x: 260, y: -80 };
     world.ship.velocity = { x: 4, y: 1 };
     world.ship.rotation = 0;

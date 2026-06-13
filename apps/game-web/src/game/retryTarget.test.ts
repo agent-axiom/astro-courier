@@ -267,6 +267,25 @@ describe("result retry target", () => {
     });
   });
 
+  it("turns comet finishes into a repeatable elite target", () => {
+    expect(
+      buildRetryTarget({
+        status: "delivered",
+        medal: "comet",
+        lastMilestone: "Comet Finish",
+        elapsedSeconds: 27.4,
+        goldSeconds: 30,
+        score: 3260,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Repeat Comet Finish",
+      tone: "opportunity"
+    });
+  });
+
   it("turns launch bursts into a repeatable burst-chain target", () => {
     expect(
       buildRetryTarget({

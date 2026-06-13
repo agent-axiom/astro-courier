@@ -25,6 +25,13 @@ describe("run action feed", () => {
         tone: "style"
       }
     ]);
+    expect(deriveRunFeedUpdates(baseSnapshot, { ...baseSnapshot, lastMilestone: "Comet Finish", lastStyleAward: 320 })).toEqual([
+      {
+        label: "Comet Finish",
+        value: "+320 style",
+        tone: "style"
+      }
+    ]);
     expect(deriveRunFeedUpdates(baseSnapshot, { ...baseSnapshot, lastMilestone: "No Brake Finesse", lastStyleAward: 150 })).toEqual([
       {
         label: "No Brake Finesse",

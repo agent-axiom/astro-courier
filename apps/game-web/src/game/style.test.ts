@@ -134,6 +134,24 @@ describe("live style reward HUD copy", () => {
     });
   });
 
+  it("treats comet finish as a fresh style moment", () => {
+    expect(
+      buildLiveStyleReward({
+        styleBonus: 320,
+        lastStyleAward: 320,
+        lastMilestone: "Comet Finish",
+        styleMultiplier: 1.25,
+        styleChainSecondsRemaining: 4
+      })
+    ).toEqual({
+      label: "Style hit",
+      value: "+320 hit / +320 bank / x1.25",
+      fresh: true,
+      tone: "fresh",
+      chainProgress: 1
+    });
+  });
+
   it("treats damage control as a fresh style moment", () => {
     expect(
       buildLiveStyleReward({

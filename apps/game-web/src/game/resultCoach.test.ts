@@ -304,6 +304,25 @@ describe("result coach", () => {
     });
   });
 
+  it("coaches comet finish runs toward defending the full elite line", () => {
+    expect(
+      buildResultCoach({
+        status: "delivered",
+        lastMilestone: "Comet Finish",
+        medal: "comet",
+        grade: "S",
+        cargoDamage: 0,
+        fuel: 78,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 320, landingBonus: 300 }
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Defend the comet finish",
+      tone: "success"
+    });
+  });
+
   it("coaches perfect approach runs toward repeating the soft dock", () => {
     expect(
       buildResultCoach({

@@ -96,6 +96,14 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
     };
   }
 
+  if (input.lastMilestone === "Comet Finish") {
+    return {
+      label: "Next run",
+      value: "Defend the comet finish",
+      tone: "success"
+    };
+  }
+
   if (input.lastMilestone === "Eco Drift") {
     return {
       label: "Next run",

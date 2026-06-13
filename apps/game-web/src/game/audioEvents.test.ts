@@ -22,6 +22,7 @@ describe("HUD audio events", () => {
     expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, lastMilestone: "Boost Burn" })).toEqual(["boost-burn"]);
     expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, lastMilestone: "Launch Burst" })).toEqual(["launch-burst"]);
     expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, lastMilestone: "Gravity Sling" })).toEqual(["style-hit"]);
+    expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, lastMilestone: "Comet Finish" })).toEqual(["style-hit"]);
     expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, lastMilestone: "No Brake Finesse" })).toEqual(["style-hit"]);
   });
 

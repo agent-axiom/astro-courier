@@ -30,6 +30,7 @@ export function buildRadioMessage(hud: HudState): string {
   }
 
   if (hud.status === "delivered") {
+    if (hud.lastMilestone === "Comet Finish") return "Comet finish confirmed. Gold pace, perfect dock, intact cargo, reserve intact.";
     if (hud.lastMilestone === "Perfect Approach") return "Perfect approach logged. That docking line was textbook.";
     if (hud.lastMilestone === "Eco Drift") return "Eco drift logged. Minimal burn, maximum courier finesse.";
     if (hud.lastMilestone === "Chain Finish") return "Chain finish logged. You carried the style window all the way home.";

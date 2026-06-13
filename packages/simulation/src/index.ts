@@ -226,6 +226,7 @@ export const PERFECT_APPROACH_STREAK_SECONDS = 1;
 export const PERFECT_APPROACH_STYLE_BONUS = 220;
 export const ECO_DRIFT_FUEL_USED_LIMIT = 12;
 export const ECO_DRIFT_STYLE_BONUS = 160;
+export const COMET_FINISH_STYLE_BONUS = 320;
 export const CHAIN_FINISH_STYLE_BONUS = 260;
 export const EXPRESS_FINISH_STYLE_BONUS = 180;
 export const DAMAGE_CONTROL_STYLE_BONUS = 140;
@@ -814,6 +815,15 @@ function canFinishStyleChain(world: SimulationWorld): boolean {
   return world.styleChainCount >= 2 && world.styleChainSecondsRemaining > 0 && world.ship.cargoDamage <= 0.02;
 }
 
+function canAwardCometFinish(world: SimulationWorld): boolean {
+  return (
+    world.elapsedSeconds <= world.activeContract.medalTimes.gold &&
+    world.ship.cargoDamage <= 0.02 &&
+    world.fuelUsed <= world.ship.maxFuel * 0.25 &&
+    world.landingRating === "Perfect Landing"
+  );
+}
+
 function canAwardExpressFinish(world: SimulationWorld): boolean {
   return world.elapsedSeconds <= world.activeContract.medalTimes.gold && world.ship.cargoDamage <= 0.02;
 }
@@ -873,7 +883,9 @@ function resolveLandingOrCrash(world: SimulationWorld): void {
       world.status = "delivered";
       world.objectivePhase = "complete";
       world.landingRating = rateLanding(speed, angleDiff, touchedPad, world.ship.cargoDamage);
-      if (canFinishStyleChain(world)) {
+      if (canAwardCometFinish(world)) {
+        awardStyle(world, COMET_FINISH_STYLE_BONUS, "Comet Finish");
+      } else if (canFinishStyleChain(world)) {
         awardStyle(world, CHAIN_FINISH_STYLE_BONUS, "Chain Finish");
       } else if (
         world.landingRating === "Perfect Landing" &&
