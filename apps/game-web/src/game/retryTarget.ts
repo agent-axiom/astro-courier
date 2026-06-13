@@ -82,12 +82,9 @@ export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
     }
   }
 
-  if (input.lastMilestone === "Last Drop") {
-    return {
-      label: "Retry target",
-      value: "Repeat Last Drop",
-      tone: "opportunity"
-    };
+  const milestoneTarget = buildRepeatableMilestoneTarget(input.lastMilestone);
+  if (milestoneTarget) {
+    return milestoneTarget;
   }
 
   if (input.medal !== "gold" && input.medal !== "comet") {
@@ -111,6 +108,22 @@ export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
     value: input.bestRun ? "Add one more bonus" : "Set first PB",
     tone: "opportunity"
   };
+}
+
+function buildRepeatableMilestoneTarget(lastMilestone?: string): RetryTarget | undefined {
+  switch (lastMilestone) {
+    case "Damage Control":
+    case "Last Drop":
+    case "Perfect Approach":
+    case "Chain Finish":
+      return {
+        label: "Retry target",
+        value: `Repeat ${lastMilestone}`,
+        tone: "opportunity"
+      };
+    default:
+      return undefined;
+  }
 }
 
 export function buildResultRetryAction(target: RetryTarget): ResultRetryAction {
