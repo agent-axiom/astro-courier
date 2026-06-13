@@ -77,6 +77,25 @@ describe("Astro Courier API", () => {
     });
   });
 
+  it("serves the deterministic daily dispatch for a route board date", async () => {
+    const server = buildServer({ logger: false });
+
+    const response = await server.inject({
+      method: "GET",
+      url: "/daily/dispatch?systemId=starter-route&date=2026-06-13"
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      label: "Daily dispatch",
+      value: "Asteroid Sprint",
+      systemId: "starter-route",
+      date: "2026-06-13",
+      contractId: "asteroid-sprint",
+      seed: "daily-2026-06-13-asteroid-sprint"
+    });
+  });
+
   it("rejects unknown systems before replay simulation", async () => {
     const server = buildServer({ logger: false });
 
