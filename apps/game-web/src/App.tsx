@@ -66,6 +66,7 @@ import { buildReplayCaptureReadout } from "./game/replayReadout";
 import { deriveHudAudioEvents, type HudAudioSnapshot } from "./game/audioEvents";
 import { createGameAudioController, type GameAudioController } from "./game/gameAudio";
 import { buildAudioTogglePresentation } from "./game/audioControls";
+import { buildTouchFlightPadPresentation } from "./game/touchControls";
 
 type GameStore = {
   hud: HudState;
@@ -248,6 +249,7 @@ export function App() {
   const cargoIntegrity = Math.max(0, 1 - hud.cargoDamage);
   const runFinished = hud.status === "delivered" || hud.status === "crashed";
   const overlays = getOverlayVisibility({ status: hud.status, preflightOpen });
+  const touchFlightPad = buildTouchFlightPadPresentation({ status: hud.status, preflightOpen });
   const runIntensity = buildRunIntensity({
     status: hud.status,
     preflightOpen,
@@ -508,6 +510,13 @@ export function App() {
   return (
     <main className={`app-shell app-intensity-${runIntensity}`}>
       <div ref={canvasMountRef} className="game-canvas" aria-label="Astro Courier gameplay canvas" />
+      {touchFlightPad.visible ? (
+        <div className={`touch-flight-pad touch-flight-pad-${touchFlightPad.tone}`} aria-hidden="true">
+          <span className="touch-flight-pad-ring" />
+          <span className="touch-flight-pad-stick" />
+          <span className="touch-flight-pad-vector" />
+        </div>
+      ) : null}
 
       <header className="top-hud">
         <div className="brand-lockup">

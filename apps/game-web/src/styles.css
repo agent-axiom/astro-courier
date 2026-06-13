@@ -76,6 +76,58 @@ button {
   height: 100%;
 }
 
+.touch-flight-pad {
+  position: absolute;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: max(128px, calc(env(safe-area-inset-bottom) + 96px));
+  z-index: 2;
+  display: none;
+  width: 116px;
+  height: 116px;
+  place-items: center;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.touch-flight-pad-ring,
+.touch-flight-pad-stick,
+.touch-flight-pad-vector {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.touch-flight-pad-ring {
+  inset: 0;
+  border: 1px solid rgba(124, 225, 255, 0.34);
+  background:
+    radial-gradient(circle at center, rgba(124, 225, 255, 0.12), rgba(8, 13, 28, 0.18) 44%, rgba(124, 225, 255, 0.06) 45%),
+    conic-gradient(from 45deg, rgba(124, 225, 255, 0.28), transparent 18%, rgba(124, 225, 255, 0.22) 25%, transparent 42%, rgba(124, 225, 255, 0.24) 50%, transparent 68%, rgba(124, 225, 255, 0.22) 75%, transparent 92%);
+  box-shadow:
+    0 0 0 1px rgba(8, 13, 28, 0.35) inset,
+    0 0 30px rgba(124, 225, 255, 0.13);
+}
+
+.touch-flight-pad-stick {
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  background: rgba(248, 251, 255, 0.16);
+  box-shadow: 0 0 18px rgba(124, 225, 255, 0.22);
+}
+
+.touch-flight-pad-vector {
+  width: 58px;
+  height: 58px;
+  border: 1px dashed rgba(255, 209, 102, 0.48);
+  opacity: 0.72;
+}
+
+@media (pointer: coarse) {
+  .touch-flight-pad-active {
+    display: grid;
+  }
+}
+
 .top-hud {
   position: absolute;
   top: 16px;
@@ -2316,6 +2368,23 @@ button {
     right: 10px;
     bottom: 10px;
     width: calc(100vw - 20px);
+  }
+
+  .touch-flight-pad {
+    right: max(12px, env(safe-area-inset-right));
+    bottom: max(238px, calc(env(safe-area-inset-bottom) + 224px));
+    width: 92px;
+    height: 92px;
+  }
+
+  .touch-flight-pad-stick {
+    width: 28px;
+    height: 28px;
+  }
+
+  .touch-flight-pad-vector {
+    width: 46px;
+    height: 46px;
   }
 
   .style-burst {
