@@ -265,6 +265,7 @@ export function App() {
   const dangerPayTrait = buildContractDangerPayTrait({ hazardSeverityMultiplier: hud.hazardSeverityMultiplier });
   const dangerPayAmount = dangerPayTrait?.replace("Danger pay ", "");
   const routePlan = buildContractRoutePlan({
+    contractId: hud.contractId,
     cargoKind: hud.cargoKind,
     cargoFragility: hud.cargoFragility,
     hazardSeverityMultiplier: hud.hazardSeverityMultiplier,

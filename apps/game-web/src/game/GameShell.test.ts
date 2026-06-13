@@ -171,8 +171,53 @@ describe("GameShell lifecycle", () => {
         cargoFragility: 1,
         hazardSeverityMultiplier: 1.45,
         medalTimes: { bronze: 70, silver: 42, gold: 24 }
+      },
+      {
+        id: "gravity-slingshot",
+        title: "Gravity Slingshot",
+        briefing: "Enter above Luma with lateral speed, catch the north pad, then ride the gravity arc out to Tea Station.",
+        riskLabel: "Gravity Entry",
+        rewardLabel: "Comet reserve challenge",
+        pickupLabel: "Luma North Pad",
+        destinationLabel: "Tea Station Dock A",
+        cargoName: "Bottled Starlight",
+        cargoKind: "fragile",
+        cargoFragility: 0.8,
+        hazardSeverityMultiplier: 1.2,
+        medalTimes: { bronze: 76, silver: 44, gold: 26 }
       }
     ]);
+  });
+
+  it("publishes the gravity slingshot contract start profile", async () => {
+    const { renderer, input } = createShellDoubles();
+    const onHud = vi.fn();
+    vi.stubGlobal("requestAnimationFrame", vi.fn(() => 7));
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    vi.spyOn(performance, "now").mockReturnValue(1000);
+
+    const shell = new GameShell({
+      mount: {} as HTMLElement,
+      onHud,
+      renderer,
+      input,
+      initialPaused: true
+    });
+
+    await shell.start();
+    (shell as GameShell & { selectContract: (contractId: string) => void }).selectContract("gravity-slingshot");
+
+    expect(onHud.mock.calls.at(-1)?.[0]).toMatchObject({
+      status: "paused",
+      contractId: "gravity-slingshot",
+      contractTitle: "Gravity Slingshot",
+      contractRiskLabel: "Gravity Entry",
+      contractRewardLabel: "Comet reserve challenge",
+      paceSecondsRemaining: 26,
+      hazardSeverityMultiplier: 1.2
+    });
+    expect(onHud.mock.calls.at(-1)?.[0].speed).toBeCloseTo(63.15, 2);
+    expect(onHud.mock.calls.at(-1)?.[0].targetDistance).toBeCloseTo(196.82, 2);
   });
 
   it("publishes contract-specific briefing copy for preflight selection", async () => {

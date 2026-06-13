@@ -110,6 +110,27 @@
         "silver": 42,
         "gold": 24
       }
+    },
+    {
+      "id": "gravity-slingshot",
+      "title": "Gravity Slingshot",
+      "briefing": "Enter above Luma with lateral speed, catch the north pad, then ride the gravity arc out to Tea Station.",
+      "riskLabel": "Gravity Entry",
+      "rewardLabel": "Comet reserve challenge",
+      "shipStart": {
+        "position": [120, -240],
+        "velocity": [62, 12],
+        "rotation": 0.2
+      },
+      "pickupId": "north-pad",
+      "destinationId": "dock-a",
+      "cargoId": "bottled-starlight",
+      "hazardSeverityMultiplier": 1.2,
+      "medalTimes": {
+        "bronze": 76,
+        "silver": 44,
+        "gold": 26
+      }
     }
   ],
   "cargo": [

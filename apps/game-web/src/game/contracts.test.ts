@@ -43,6 +43,25 @@ describe("contract rotation", () => {
       "Danger Contract"
     );
     expect(buildContractPreflightKicker({ contractId: "return-leg", goldSeconds: 30 })).toBe("Sprint Contract");
+    expect(buildContractPreflightKicker({ contractId: "gravity-slingshot", goldSeconds: 26, hazardSeverityMultiplier: 1.2 })).toBe(
+      "Gravity Contract"
+    );
+  });
+
+  it("calls out the gravity slingshot route plan before generic fragile handling", () => {
+    expect(
+      buildContractRoutePlan({
+        contractId: "gravity-slingshot",
+        cargoKind: "fragile",
+        cargoFragility: 0.8,
+        hazardSeverityMultiplier: 1.2,
+        goldSeconds: 26
+      })
+    ).toEqual({
+      label: "Route plan",
+      value: "Ride gravity, bleed speed",
+      tone: "speed"
+    });
   });
 
   it("prioritizes a danger route plan for high hazard contracts", () => {

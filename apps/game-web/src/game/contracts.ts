@@ -7,6 +7,7 @@ export type ContractHazardTraitInput = {
 };
 
 export type ContractRoutePlanInput = {
+  contractId?: string;
   cargoKind: string;
   cargoFragility: number;
   hazardSeverityMultiplier?: number;
@@ -57,6 +58,10 @@ export function buildContractPreflightKicker(input: ContractPreflightKickerInput
     return "Starter Contract";
   }
 
+  if (input.contractId === "gravity-slingshot") {
+    return "Gravity Contract";
+  }
+
   if ((input.hazardSeverityMultiplier ?? 1) >= 1.25) {
     return "Danger Contract";
   }
@@ -69,6 +74,14 @@ export function buildContractPreflightKicker(input: ContractPreflightKickerInput
 }
 
 export function buildContractRoutePlan(input: ContractRoutePlanInput): ContractRoutePlan {
+  if (input.contractId === "gravity-slingshot") {
+    return {
+      label: "Route plan",
+      value: "Ride gravity, bleed speed",
+      tone: "speed"
+    };
+  }
+
   if ((input.hazardSeverityMultiplier ?? 1) >= 1.25) {
     return {
       label: "Route plan",
