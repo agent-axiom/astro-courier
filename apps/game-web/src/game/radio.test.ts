@@ -493,4 +493,31 @@ describe("radio feedback copy", () => {
     expect(buildRadioMessage({ ...baseHud, status: "crashed", landingRating: "Insurance Event" })).toContain("Insurance");
     expect(buildRadioMessage({ ...baseHud, status: "crashed", crashReason: "Hard Landing" })).toContain("Bleed speed");
   });
+
+  it("calls out the missing comet condition after gold express near-misses", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        status: "delivered",
+        medal: "gold",
+        lastMilestone: "Express Finish",
+        fuel: 72,
+        maxFuel: 100,
+        cargoDamage: 0,
+        scoreBreakdown: { ...baseHud.scoreBreakdown, styleBonus: 180, landingBonus: 300 }
+      })
+    ).toContain("Bank 75% fuel");
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        status: "delivered",
+        medal: "gold",
+        lastMilestone: "Express Finish",
+        fuel: 82,
+        maxFuel: 100,
+        cargoDamage: 0,
+        scoreBreakdown: { ...baseHud.scoreBreakdown, styleBonus: 180, landingBonus: 120 }
+      })
+    ).toContain("Perfect dock");
+  });
 });

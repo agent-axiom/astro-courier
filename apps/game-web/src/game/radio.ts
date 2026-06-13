@@ -9,6 +9,10 @@ import type { HudState } from "./GameShell";
 import { COMET_RESERVE_MIN_RATIO, COMET_RESERVE_WARNING_RATIO, isLiveCometDockArmed } from "./comet";
 import { STYLE_CHAIN_URGENT_SECONDS } from "./style";
 
+const cometReserveNearMissRatio = 0.6;
+const cleanCargoDamageLimit = 0.02;
+const perfectLandingBonus = 300;
+
 export function buildRadioMessage(hud: HudState): string {
   if (hud.status === "paused") {
     if (hud.cargoKind === "time-sensitive") {
@@ -31,6 +35,8 @@ export function buildRadioMessage(hud: HudState): string {
 
   if (hud.status === "delivered") {
     if (hud.lastMilestone === "Comet Finish") return "Comet finish confirmed. Gold pace, perfect dock, intact cargo, reserve intact.";
+    const cometNearMissMessage = buildDeliveredCometNearMissMessage(hud);
+    if (cometNearMissMessage) return cometNearMissMessage;
     if (hud.lastMilestone === "Perfect Approach") return "Perfect approach logged. That docking line was textbook.";
     if (hud.lastMilestone === "Eco Drift") return "Eco drift logged. Minimal burn, maximum courier finesse.";
     if (hud.lastMilestone === "Chain Finish") return "Chain finish logged. You carried the style window all the way home.";
@@ -233,6 +239,29 @@ function isChainRelayCarryWindowOpen(hud: HudState): boolean {
 
 function formatTrajectoryEta(seconds?: number): string {
   return seconds === undefined ? " soon" : ` in ${seconds.toFixed(1)}s`;
+}
+
+function buildDeliveredCometNearMissMessage(hud: HudState): string | undefined {
+  if (
+    hud.medal !== "gold" ||
+    hud.lastMilestone !== "Express Finish" ||
+    hud.cargoDamage > cleanCargoDamageLimit ||
+    hud.scoreBreakdown.styleBonus <= 0 ||
+    hud.maxFuel <= 0
+  ) {
+    return undefined;
+  }
+
+  const reserveRatio = hud.fuel / hud.maxFuel;
+  if (reserveRatio >= cometReserveNearMissRatio && reserveRatio < COMET_RESERVE_MIN_RATIO) {
+    return "Express finish logged. Bank 75% fuel next run to convert it into a comet finish.";
+  }
+
+  if (reserveRatio >= COMET_RESERVE_MIN_RATIO && hud.scoreBreakdown.landingBonus < perfectLandingBonus) {
+    return "Express finish logged. Perfect dock next run to convert it into a comet finish.";
+  }
+
+  return undefined;
 }
 
 function isLastDropWindowOpen(hud: HudState): boolean {
