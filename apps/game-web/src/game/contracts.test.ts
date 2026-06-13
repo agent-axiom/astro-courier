@@ -127,12 +127,12 @@ describe("contract rotation", () => {
     });
     expect(buildDailyDispatchReset(dispatch, new Date("2026-06-13T23:42:20Z"))).toEqual({
       label: "Daily reset",
-      value: "17m left",
+      value: "Final 17m left",
       tone: "urgent"
     });
     expect(buildDailyDispatchReset(dispatch, new Date("2026-06-13T23:59:20Z"))).toEqual({
       label: "Daily reset",
-      value: "40s left",
+      value: "Final 40s left",
       tone: "urgent"
     });
     expect(buildDailyDispatchReset(undefined, new Date("2026-06-13T18:30:00Z"))).toBeUndefined();

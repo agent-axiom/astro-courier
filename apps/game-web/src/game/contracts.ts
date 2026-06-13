@@ -170,10 +170,12 @@ export function buildDailyDispatchReset(dispatch: DailyDispatch | undefined, now
 
   const nextUtcMidnight = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1);
   const millisecondsRemaining = Math.max(0, nextUtcMidnight - now.getTime());
+  const urgent = millisecondsRemaining <= 60 * 60 * 1000;
+  const resetPrefix = urgent ? "Final " : "";
   return {
     label: "Daily reset",
-    value: `${formatResetTime(millisecondsRemaining)} left`,
-    tone: millisecondsRemaining <= 60 * 60 * 1000 ? "urgent" : "steady"
+    value: `${resetPrefix}${formatResetTime(millisecondsRemaining)} left`,
+    tone: urgent ? "urgent" : "steady"
   };
 }
 
