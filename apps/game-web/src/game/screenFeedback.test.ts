@@ -65,6 +65,14 @@ describe("screen feedback", () => {
     });
   });
 
+  it("strengthens feedback when cargo damage and trajectory warnings stack", () => {
+    expect(buildScreenFeedback(["cargo-damage", "trajectory-warning"])).toEqual({
+      tone: "warning",
+      intensity: "heavy",
+      durationMs: 460
+    });
+  });
+
   it("maps critical style chains to light warning feedback", () => {
     expect(buildScreenFeedback(["chain-critical"])).toEqual({
       tone: "warning",

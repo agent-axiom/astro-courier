@@ -22,6 +22,9 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[]): ScreenFe
   if (events.includes("hazard-contact")) {
     return { tone: "danger", intensity: "medium", durationMs: 440 };
   }
+  if (events.includes("trajectory-warning") && events.includes("cargo-damage")) {
+    return { tone: "warning", intensity: "heavy", durationMs: 460 };
+  }
   if (events.includes("trajectory-warning")) {
     return { tone: "warning", intensity: "medium", durationMs: 380 };
   }
