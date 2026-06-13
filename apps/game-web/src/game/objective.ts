@@ -1,14 +1,18 @@
 import type { LandingGuidanceStatus, ObjectivePhase, RunStatus } from "@astro-courier/shared";
+import type { ContractPaceTier } from "./pace";
 
 export type ObjectiveDirectiveInput = {
   objectivePhase: ObjectivePhase;
   pickupLabel: string;
   destinationLabel: string;
   lastMilestone?: string;
+  paceTier?: ContractPaceTier;
+  paceSecondsRemaining?: number;
+  cargoDamage?: number;
 };
 
 export type ObjectiveDirective = {
-  label: "Pickup" | "Pickup first" | "Deliver" | "Complete";
+  label: "Pickup" | "Pickup first" | "Deliver" | "Express finish" | "Complete";
   value: string;
 };
 
@@ -34,6 +38,13 @@ export function buildObjectiveDirective(input: ObjectiveDirectiveInput): Objecti
   }
 
   if (input.objectivePhase === "delivery") {
+    if (input.paceTier === "gold" && (input.paceSecondsRemaining ?? 0) > 0 && (input.cargoDamage ?? 0) <= 0.02) {
+      return {
+        label: "Express finish",
+        value: `${input.destinationLabel} / ${(input.paceSecondsRemaining ?? 0).toFixed(1)}s`
+      };
+    }
+
     return {
       label: "Deliver",
       value: input.destinationLabel

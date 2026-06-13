@@ -28,6 +28,22 @@ describe("objective directive HUD copy", () => {
     });
   });
 
+  it("surfaces the express finish window during clean gold-pace delivery", () => {
+    expect(
+      buildObjectiveDirective({
+        objectivePhase: "delivery",
+        pickupLabel: "Luma North Pad",
+        destinationLabel: "Tea Station Dock A",
+        paceTier: "gold",
+        paceSecondsRemaining: 9.4,
+        cargoDamage: 0
+      })
+    ).toEqual({
+      label: "Express finish",
+      value: "Tea Station Dock A / 9.4s"
+    });
+  });
+
   it("keeps wrong-pad feedback focused on the required pickup", () => {
     expect(
       buildObjectiveDirective({
