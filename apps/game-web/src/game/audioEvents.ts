@@ -1,4 +1,5 @@
 import type { RunStatus } from "@astro-courier/shared";
+import type { ContractPaceTier } from "./pace";
 
 export type GameAudioEvent =
   | "delivery-complete"
@@ -7,6 +8,7 @@ export type GameAudioEvent =
   | "launch-burst"
   | "pb-lead"
   | "chain-critical"
+  | "medal-drop"
   | "assist-burn"
   | "boost-burn"
   | "fuel-critical"
@@ -18,6 +20,7 @@ export type HudAudioSnapshot = {
   lastMilestone?: string;
   score?: number;
   bestRunScore?: number;
+  paceTier?: ContractPaceTier;
   styleMultiplier?: number;
   styleChainSecondsRemaining?: number;
   fuel: number;
@@ -70,6 +73,10 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
     events.push("fuel-critical");
   }
 
+  if (hasDroppedMedalWindow(previous, current)) {
+    events.push("medal-drop");
+  }
+
   if (hasCrossedBestRunScore(previous, current)) {
     events.push("pb-lead");
   }
@@ -103,6 +110,13 @@ function hasCrossedBestRunScore(previous: HudAudioSnapshot | undefined, current:
   return (previous.score ?? 0) <= current.bestRunScore && (current.score ?? 0) > current.bestRunScore;
 }
 
+function hasDroppedMedalWindow(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {
+  if (!previous?.paceTier || !current.paceTier) {
+    return false;
+  }
+  return paceTierRank(current.paceTier) > paceTierRank(previous.paceTier);
+}
+
 function hasStyleChainReachedCriticalWindow(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {
   const currentChainActive = (current.styleMultiplier ?? 1) > 1 && (current.styleChainSecondsRemaining ?? 0) > 0;
   if (!previous || !currentChainActive) {
@@ -112,4 +126,11 @@ function hasStyleChainReachedCriticalWindow(previous: HudAudioSnapshot | undefin
     (previous.styleChainSecondsRemaining ?? 0) > criticalStyleChainSeconds &&
     (current.styleChainSecondsRemaining ?? 0) <= criticalStyleChainSeconds
   );
+}
+
+function paceTierRank(tier: ContractPaceTier): number {
+  if (tier === "gold") return 0;
+  if (tier === "silver") return 1;
+  if (tier === "bronze") return 2;
+  return 3;
 }

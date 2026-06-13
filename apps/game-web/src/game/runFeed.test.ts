@@ -121,6 +121,17 @@ describe("run action feed", () => {
     ]);
   });
 
+  it("announces when the live run loses the gold medal window", () => {
+    expect(deriveRunFeedUpdates({ ...baseSnapshot, paceTier: "gold" }, { ...baseSnapshot, paceTier: "silver" })).toEqual([
+      {
+        label: "Gold missed",
+        value: "Silver window live",
+        tone: "warning"
+      }
+    ]);
+    expect(deriveRunFeedUpdates({ ...baseSnapshot, paceTier: "silver" }, { ...baseSnapshot, paceTier: "silver" })).toEqual([]);
+  });
+
   it("announces when the live run first overtakes the saved personal best score", () => {
     expect(
       deriveRunFeedUpdates(

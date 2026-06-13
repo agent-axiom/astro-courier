@@ -22,6 +22,9 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[]): ScreenFe
   if (events.includes("trajectory-warning")) {
     return { tone: "warning", intensity: "medium", durationMs: 380 };
   }
+  if (events.includes("medal-drop")) {
+    return { tone: "warning", intensity: "medium", durationMs: 360 };
+  }
   if (events.includes("chain-critical")) {
     return { tone: "warning", intensity: "light", durationMs: 320 };
   }

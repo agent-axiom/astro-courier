@@ -49,6 +49,7 @@ const eventTones: Record<GameAudioEvent, { frequency: number; duration: number; 
   "launch-burst": { frequency: 820, duration: 0.12, gain: 0.05 },
   "pb-lead": { frequency: 960, duration: 0.12, gain: 0.05 },
   "chain-critical": { frequency: 640, duration: 0.09, gain: 0.045 },
+  "medal-drop": { frequency: 260, duration: 0.11, gain: 0.045 },
   "assist-burn": { frequency: 420, duration: 0.1, gain: 0.04 },
   "boost-burn": { frequency: 560, duration: 0.07, gain: 0.045 },
   "fuel-critical": { frequency: 220, duration: 0.14, gain: 0.05 },

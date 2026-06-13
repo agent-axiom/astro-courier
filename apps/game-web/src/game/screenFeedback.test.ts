@@ -60,6 +60,14 @@ describe("screen feedback", () => {
     });
   });
 
+  it("maps medal window drops to medium warning feedback", () => {
+    expect(buildScreenFeedback(["medal-drop"])).toEqual({
+      tone: "warning",
+      intensity: "medium",
+      durationMs: 360
+    });
+  });
+
   it("maps launch bursts to medium style feedback", () => {
     expect(buildScreenFeedback(["launch-burst"])).toEqual({
       tone: "style",

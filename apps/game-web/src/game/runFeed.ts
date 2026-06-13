@@ -1,4 +1,5 @@
 import type { RunStatus } from "@astro-courier/shared";
+import type { ContractPaceTier } from "./pace";
 
 export type RunFeedTone = "neutral" | "style" | "success" | "warning" | "danger";
 
@@ -8,6 +9,7 @@ export type RunFeedSnapshot = {
   lastStyleAward?: number;
   score?: number;
   bestRunScore?: number;
+  paceTier?: ContractPaceTier;
   fuel: number;
   maxFuel: number;
   hazardDangerLevel?: "near" | "inside";
@@ -88,6 +90,11 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
       value: "Coast and commit",
       tone: "warning"
     });
+  }
+
+  const medalDrop = buildMedalDropUpdate(previous.paceTier, current.paceTier);
+  if (medalDrop) {
+    updates.push(medalDrop);
   }
 
   if (previous.hazardDangerLevel !== "inside" && current.hazardDangerLevel === "inside") {
@@ -181,4 +188,26 @@ function hasCrossedBestRunScore(previous: RunFeedSnapshot, current: RunFeedSnaps
     return false;
   }
   return (previous.score ?? 0) <= current.bestRunScore && (current.score ?? 0) > current.bestRunScore;
+}
+
+function buildMedalDropUpdate(previous: ContractPaceTier | undefined, current: ContractPaceTier | undefined): RunFeedUpdate | undefined {
+  if (!previous || !current || paceTierRank(current) <= paceTierRank(previous)) {
+    return undefined;
+  }
+  return {
+    label: `${capitalize(previous)} missed`,
+    value: current === "overtime" ? "No medal window" : `${capitalize(current)} window live`,
+    tone: current === "overtime" ? "danger" : "warning"
+  };
+}
+
+function paceTierRank(tier: ContractPaceTier): number {
+  if (tier === "gold") return 0;
+  if (tier === "silver") return 1;
+  if (tier === "bronze") return 2;
+  return 3;
+}
+
+function capitalize(value: string): string {
+  return `${value.slice(0, 1).toUpperCase()}${value.slice(1)}`;
 }
