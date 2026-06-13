@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildLiveStyleReward } from "./style";
+import { buildLiveStyleReward, buildStyleTargetCue } from "./style";
 
 describe("live style reward HUD copy", () => {
   it("stays hidden before the player earns style", () => {
@@ -276,5 +276,70 @@ describe("live style reward HUD copy", () => {
       tone: "urgent",
       chainProgress: 0.18
     });
+  });
+});
+
+describe("style target cue", () => {
+  it("stays hidden outside active flight or when no immediate style target is available", () => {
+    expect(buildStyleTargetCue({ status: "paused", styleBonus: 0 })).toBeUndefined();
+    expect(buildStyleTargetCue({ status: "flying", styleBonus: 0 })).toBeUndefined();
+  });
+
+  it("teaches the opening quick pickup style target before the player has banked style", () => {
+    expect(
+      buildStyleTargetCue({
+        status: "flying",
+        objectivePhase: "pickup",
+        styleBonus: 0,
+        quickPickupSecondsRemaining: 4.2,
+        quickPickupBonus: 180
+      })
+    ).toEqual({
+      label: "Style target",
+      value: "Pickup rush / +180 / 4.2s",
+      tone: "opportunity"
+    });
+  });
+
+  it("prioritizes a ready gravity sling over nearby hazard style", () => {
+    expect(
+      buildStyleTargetCue({
+        status: "flying",
+        styleBonus: 180,
+        styleMultiplier: 1.25,
+        styleChainSecondsRemaining: 2.4,
+        gravitySlingReady: true,
+        gravitySlingStyleBonus: 240,
+        hazardDangerLevel: "near",
+        cargoDamage: 0
+      })
+    ).toEqual({
+      label: "Style target",
+      value: "Sling window / +240 / chain x1.25",
+      tone: "chain"
+    });
+  });
+
+  it("offers clean hazard skim style only while cargo is still clean", () => {
+    expect(
+      buildStyleTargetCue({
+        status: "flying",
+        styleBonus: 180,
+        hazardDangerLevel: "near",
+        cargoDamage: 0.01
+      })
+    ).toEqual({
+      label: "Style target",
+      value: "Clean skim / danger style",
+      tone: "risk"
+    });
+    expect(
+      buildStyleTargetCue({
+        status: "flying",
+        styleBonus: 180,
+        hazardDangerLevel: "near",
+        cargoDamage: 0.12
+      })
+    ).toBeUndefined();
   });
 });

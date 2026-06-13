@@ -51,7 +51,7 @@ import {
   buildDailyDispatchStatus
 } from "./game/contracts";
 import { buildRadioMessage } from "./game/radio";
-import { buildLiveStyleReward } from "./game/style";
+import { buildLiveStyleReward, buildStyleTargetCue } from "./game/style";
 import { buildExpressFinishReadout, buildObjectiveDirective, buildObjectiveInterceptReadout, buildTacticalCue } from "./game/objective";
 import { buildPreflightBonusObjectives, buildPreflightMasteryTargets } from "./game/mastery";
 import { buildApproachRewardReadout, buildDockingSpeedReadout } from "./game/docking";
@@ -434,6 +434,19 @@ export function App() {
     cargoDamage: hud.cargoDamage,
     hazardDangerLevel: hud.hazardDangerLevel,
     gravitySlingReady: hud.gravitySlingReady
+  });
+  const styleTargetCue = buildStyleTargetCue({
+    status: hud.status,
+    objectivePhase: hud.objectivePhase,
+    styleBonus: hud.scoreBreakdown.styleBonus,
+    styleMultiplier: hud.styleMultiplier,
+    styleChainSecondsRemaining: hud.styleChainSecondsRemaining,
+    quickPickupSecondsRemaining: hud.quickPickupSecondsRemaining,
+    quickPickupBonus: hud.quickPickupBonus,
+    cargoDamage: hud.cargoDamage,
+    hazardDangerLevel: hud.hazardDangerLevel,
+    gravitySlingReady: hud.gravitySlingReady,
+    gravitySlingStyleBonus: hud.gravitySlingStyleBonus
   });
   const styleChipStyle = { "--style-chain-progress": liveStyleReward?.chainProgress ?? 0 } as CSSProperties;
   const preflightMasteryTargets = buildPreflightMasteryTargets({ goldSeconds: hud.paceSecondsRemaining });
@@ -819,6 +832,13 @@ export function App() {
           >
             <span>{liveStyleReward.label}</span>
             <strong>{liveStyleReward.value}</strong>
+          </div>
+        ) : null}
+        {styleTargetCue ? (
+          <div className={`style-target-chip style-target-${styleTargetCue.tone}`} aria-label={`${styleTargetCue.label}: ${styleTargetCue.value}`}>
+            <Star size={16} />
+            <span>{styleTargetCue.label}</span>
+            <strong>{styleTargetCue.value}</strong>
           </div>
         ) : null}
         {hazardPressureReadout ? (

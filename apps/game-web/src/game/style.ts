@@ -1,4 +1,5 @@
 import { CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS, STYLE_CHAIN_WINDOW_SECONDS } from "@astro-courier/simulation";
+import type { ObjectivePhase, RunStatus } from "@astro-courier/shared";
 
 export const STYLE_CHAIN_URGENT_SECONDS = 1;
 
@@ -21,6 +22,26 @@ export type LiveStyleReward = {
   fresh: boolean;
   tone: "bank" | "chain" | "fresh" | "urgent";
   chainProgress: number;
+};
+
+export type StyleTargetCueInput = {
+  status: RunStatus;
+  objectivePhase?: ObjectivePhase;
+  styleBonus: number;
+  styleMultiplier?: number;
+  styleChainSecondsRemaining?: number;
+  quickPickupSecondsRemaining?: number;
+  quickPickupBonus?: number;
+  cargoDamage?: number;
+  hazardDangerLevel?: "near" | "inside";
+  gravitySlingReady?: boolean;
+  gravitySlingStyleBonus?: number;
+};
+
+export type StyleTargetCue = {
+  label: "Style target";
+  value: string;
+  tone: "chain" | "opportunity" | "risk";
 };
 
 const styleMilestones = new Set([
@@ -63,6 +84,45 @@ export function buildLiveStyleReward(input: LiveStyleRewardInput): LiveStyleRewa
     tone: freshAward ? "fresh" : urgent ? "urgent" : chainActive || fresh ? "chain" : "bank",
     chainProgress
   };
+}
+
+export function buildStyleTargetCue(input: StyleTargetCueInput): StyleTargetCue | undefined {
+  if (input.status !== "flying") {
+    return undefined;
+  }
+
+  const chainActive = (input.styleMultiplier ?? 1) > 1 && (input.styleChainSecondsRemaining ?? 0) > 0;
+  const chainSuffix = chainActive ? ` / chain x${(input.styleMultiplier ?? 1).toFixed(2)}` : "";
+
+  if (input.gravitySlingReady && (input.gravitySlingStyleBonus ?? 0) > 0) {
+    return {
+      label: "Style target",
+      value: `Sling window / +${Math.round(input.gravitySlingStyleBonus ?? 0)}${chainSuffix}`,
+      tone: chainActive ? "chain" : "opportunity"
+    };
+  }
+
+  if (
+    input.objectivePhase === "pickup" &&
+    (input.quickPickupSecondsRemaining ?? 0) > 0 &&
+    (input.quickPickupBonus ?? 0) > 0
+  ) {
+    return {
+      label: "Style target",
+      value: `Pickup rush / +${Math.round(input.quickPickupBonus ?? 0)} / ${(input.quickPickupSecondsRemaining ?? 0).toFixed(1)}s`,
+      tone: "opportunity"
+    };
+  }
+
+  if (input.hazardDangerLevel === "near" && (input.cargoDamage ?? 0) <= 0.02) {
+    return {
+      label: "Style target",
+      value: `Clean skim / danger style${chainSuffix}`,
+      tone: chainActive ? "chain" : "risk"
+    };
+  }
+
+  return undefined;
 }
 
 function buildUrgentChainAction(input: LiveStyleRewardInput): string {

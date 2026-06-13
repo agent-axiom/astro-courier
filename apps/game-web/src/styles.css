@@ -811,6 +811,49 @@ button {
   background: linear-gradient(90deg, #ff4d6d, #ffd166);
 }
 
+.style-target-chip {
+  display: grid;
+  grid-template-columns: 16px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.style-target-chip span,
+.style-target-chip strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.style-target-chip span {
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.style-target-chip strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.style-target-chain {
+  background: rgba(255, 209, 102, 0.16);
+  color: #ffe19a;
+}
+
+.style-target-opportunity {
+  background: rgba(142, 230, 184, 0.14);
+  color: #bff7d8;
+}
+
+.style-target-risk {
+  background: rgba(255, 111, 145, 0.14);
+  color: #ffadc1;
+}
+
 .style-burst {
   position: absolute;
   top: 88px;
