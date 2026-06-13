@@ -60,6 +60,9 @@ const baseHud: HudState = {
   quickPickupBonus: 180,
   approachStreakSeconds: 0,
   bestApproachStreakSeconds: 0,
+  styleChainCount: 0,
+  styleChainSecondsRemaining: 0,
+  styleMultiplier: 1,
   hazardDangerLevel: undefined,
   hazardDistance: undefined
 };

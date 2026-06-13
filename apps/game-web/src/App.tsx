@@ -102,6 +102,9 @@ const initialHud: HudState = {
   quickPickupBonus: 180,
   approachStreakSeconds: 0,
   bestApproachStreakSeconds: 0,
+  styleChainCount: 0,
+  styleChainSecondsRemaining: 0,
+  styleMultiplier: 1,
   hazardDangerLevel: undefined,
   hazardDistance: undefined,
   hazardSeverity: undefined
@@ -241,7 +244,9 @@ export function App() {
   });
   const liveStyleReward = buildLiveStyleReward({
     styleBonus: hud.scoreBreakdown.styleBonus,
-    lastMilestone: hud.lastMilestone
+    lastMilestone: hud.lastMilestone,
+    styleMultiplier: hud.styleMultiplier,
+    styleChainSecondsRemaining: hud.styleChainSecondsRemaining
   });
   const preflightMasteryTargets = buildPreflightMasteryTargets({ goldSeconds: hud.paceSecondsRemaining });
   const preflightBonusObjectives = buildPreflightBonusObjectives({ quickPickupBonus: hud.quickPickupBonus });

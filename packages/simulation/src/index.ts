@@ -161,6 +161,8 @@ export type SimulationWorld = {
   score: number;
   scoreBreakdown: ScoreBreakdown;
   styleBonus: number;
+  styleChainCount: number;
+  styleChainSecondsRemaining: number;
   skimmedHazardIds: string[];
   fuelUsed: number;
   activeContract: ContractContent;
@@ -208,6 +210,9 @@ export const PERFECT_APPROACH_STREAK_SECONDS = 1;
 export const PERFECT_APPROACH_STYLE_BONUS = 220;
 export const ECO_DRIFT_FUEL_USED_LIMIT = 12;
 export const ECO_DRIFT_STYLE_BONUS = 160;
+export const STYLE_CHAIN_WINDOW_SECONDS = 4;
+const STYLE_CHAIN_MULTIPLIER_STEP = 0.25;
+const STYLE_CHAIN_MAX_COUNT = 4;
 
 export function calculateHazardSkimStyleBonus(severity: number): number {
   return Math.round(HAZARD_SKIM_BASE_BONUS + clamp(severity, 0, 1) * HAZARD_SKIM_SEVERITY_BONUS);
@@ -248,6 +253,8 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
     score: 0,
     scoreBreakdown: createEmptyScoreBreakdown(),
     styleBonus: 0,
+    styleChainCount: 0,
+    styleChainSecondsRemaining: 0,
     skimmedHazardIds: [],
     fuelUsed: 0,
     activeContract,
@@ -303,6 +310,7 @@ export function stepWorld(world: SimulationWorld, fixedDt: number, commands: Pla
   }
   world.lastMilestone = undefined;
   tickBoostCooldown(world, fixedDt);
+  tickStyleChain(world, fixedDt);
 
   let thrust = 0;
   let brake = 0;
@@ -408,6 +416,9 @@ export function snapshotWorld(world: SimulationWorld): SimulationSnapshot {
     lastMilestone: world.lastMilestone,
     approachStreakSeconds: round(world.approachStreakSeconds, 3),
     bestApproachStreakSeconds: round(world.bestApproachStreakSeconds, 3),
+    styleChainCount: world.styleChainCount,
+    styleChainSecondsRemaining: round(world.styleChainSecondsRemaining, 3),
+    styleMultiplier: styleMultiplierForChain(world),
     elapsedSeconds: world.elapsedSeconds,
     score: world.score,
     objectiveTarget: getObjectiveTarget(world),
@@ -550,6 +561,35 @@ function tickBoostCooldown(world: SimulationWorld, fixedDt: number): void {
   world.ship.boostCooldownSeconds = round(Math.max(0, world.ship.boostCooldownSeconds - fixedDt), 6);
 }
 
+function tickStyleChain(world: SimulationWorld, fixedDt: number): void {
+  if (world.styleChainSecondsRemaining <= 0) {
+    world.styleChainCount = 0;
+    world.styleChainSecondsRemaining = 0;
+    return;
+  }
+
+  world.styleChainSecondsRemaining = round(Math.max(0, world.styleChainSecondsRemaining - fixedDt), 6);
+  if (world.styleChainSecondsRemaining === 0) {
+    world.styleChainCount = 0;
+  }
+}
+
+function awardStyle(world: SimulationWorld, baseBonus: number, milestone: string): void {
+  const award = Math.round(baseBonus * styleMultiplierForChain(world));
+  world.styleBonus += award;
+  world.styleChainCount = Math.min(STYLE_CHAIN_MAX_COUNT, world.styleChainCount + 1);
+  world.styleChainSecondsRemaining = STYLE_CHAIN_WINDOW_SECONDS;
+  world.lastMilestone = milestone;
+}
+
+function styleMultiplierForChain(world: Pick<SimulationWorld, "styleChainCount" | "styleChainSecondsRemaining">): number {
+  if (world.styleChainCount <= 0 || world.styleChainSecondsRemaining <= 0) {
+    return 1;
+  }
+
+  return round(1 + Math.min(STYLE_CHAIN_MAX_COUNT, world.styleChainCount) * STYLE_CHAIN_MULTIPLIER_STEP, 2);
+}
+
 function applyThrust(world: SimulationWorld, fixedDt: number, amount: number): void {
   if (amount <= 0 || world.ship.fuel <= 0) {
     return;
@@ -596,8 +636,7 @@ function updateHazards(world: SimulationWorld, fixedDt: number): void {
     const cleanSkim = distance <= hazard.radius * HAZARD_SKIM_OUTER_RADIUS && world.ship.cargoDamage <= 0.02;
     if (cleanSkim && !world.skimmedHazardIds.includes(hazard.id)) {
       world.skimmedHazardIds.push(hazard.id);
-      world.styleBonus += calculateHazardSkimStyleBonus(hazard.severity);
-      world.lastMilestone = "Clean Hazard Skim";
+      awardStyle(world, calculateHazardSkimStyleBonus(hazard.severity), "Clean Hazard Skim");
     }
   }
 }
@@ -670,8 +709,7 @@ function resolveLandingOrCrash(world: SimulationWorld): void {
       world.cargoOnboard = true;
       world.objectivePhase = "delivery";
       if (world.elapsedSeconds <= QUICK_PICKUP_WINDOW_SECONDS) {
-        world.styleBonus += QUICK_PICKUP_STYLE_BONUS;
-        world.lastMilestone = "Quick Pickup";
+        awardStyle(world, QUICK_PICKUP_STYLE_BONUS, "Quick Pickup");
       } else {
         world.lastMilestone = "Cargo Loaded";
       }
@@ -696,11 +734,9 @@ function resolveLandingOrCrash(world: SimulationWorld): void {
         world.landingRating === "Perfect Landing" &&
         world.bestApproachStreakSeconds >= PERFECT_APPROACH_STREAK_SECONDS
       ) {
-        world.styleBonus += PERFECT_APPROACH_STYLE_BONUS;
-        world.lastMilestone = "Perfect Approach";
+        awardStyle(world, PERFECT_APPROACH_STYLE_BONUS, "Perfect Approach");
       } else if (world.fuelUsed <= ECO_DRIFT_FUEL_USED_LIMIT && world.ship.cargoDamage <= 0.02) {
-        world.styleBonus += ECO_DRIFT_STYLE_BONUS;
-        world.lastMilestone = "Eco Drift";
+        awardStyle(world, ECO_DRIFT_STYLE_BONUS, "Eco Drift");
       } else {
         world.lastMilestone = "Delivered";
       }

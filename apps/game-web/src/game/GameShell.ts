@@ -67,6 +67,9 @@ export type HudState = {
   quickPickupBonus: number;
   approachStreakSeconds: number;
   bestApproachStreakSeconds: number;
+  styleChainCount: number;
+  styleChainSecondsRemaining: number;
+  styleMultiplier: number;
   hazardDangerLevel?: "near" | "inside";
   hazardDistance?: number;
   hazardSeverity?: number;
@@ -296,6 +299,9 @@ export class GameShell {
       quickPickupBonus: QUICK_PICKUP_STYLE_BONUS,
       approachStreakSeconds: snapshot.approachStreakSeconds,
       bestApproachStreakSeconds: snapshot.bestApproachStreakSeconds,
+      styleChainCount: snapshot.styleChainCount,
+      styleChainSecondsRemaining: snapshot.styleChainSecondsRemaining,
+      styleMultiplier: snapshot.styleMultiplier,
       hazardDangerLevel: snapshot.nearestHazard?.dangerLevel,
       hazardDistance: snapshot.nearestHazard?.distance,
       hazardSeverity: snapshot.nearestHazard?.severity

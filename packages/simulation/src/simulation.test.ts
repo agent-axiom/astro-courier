@@ -6,6 +6,7 @@ import {
   ECO_DRIFT_FUEL_USED_LIMIT,
   ECO_DRIFT_STYLE_BONUS,
   QUICK_PICKUP_STYLE_BONUS,
+  STYLE_CHAIN_WINDOW_SECONDS,
   createWorldFromSystem,
   createWorldReplay,
   predictTrajectory,
@@ -354,6 +355,77 @@ describe("deterministic Astro Courier simulation", () => {
     expect(secondBreakdown.styleBonus).toBe(firstBreakdown.styleBonus);
   });
 
+  it("chains style rewards into a short multiplier window", () => {
+    const systemWithHazard: SystemContent = {
+      ...starterSystem,
+      hazards: [
+        {
+          id: "chain-field",
+          type: "asteroid_field",
+          position: [180, -180],
+          radius: 40,
+          severity: 0.5
+        }
+      ]
+    };
+    const world = createWorldFromSystem(systemWithHazard, "style-chain-seed");
+    world.ship.position = { x: 233, y: -180 };
+    world.ship.velocity = { x: 0, y: 0 };
+
+    stepWorld(world, 1 / 60, []);
+
+    const skimBonus = calculateHazardSkimStyleBonus(0.5);
+    expect(world.lastMilestone).toBe("Clean Hazard Skim");
+    expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(skimBonus);
+    expect(snapshotWorld(world)).toMatchObject({
+      styleChainCount: 1,
+      styleMultiplier: 1.25,
+      styleChainSecondsRemaining: STYLE_CHAIN_WINDOW_SECONDS
+    });
+
+    world.ship.position = { x: 0, y: -74 };
+    world.ship.velocity = { x: 1, y: 3 };
+    world.ship.rotation = -Math.PI / 2;
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.lastMilestone).toBe("Quick Pickup");
+    expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(skimBonus + Math.round(QUICK_PICKUP_STYLE_BONUS * 1.25));
+    expect(snapshotWorld(world)).toMatchObject({
+      styleChainCount: 2,
+      styleMultiplier: 1.5,
+      styleChainSecondsRemaining: STYLE_CHAIN_WINDOW_SECONDS
+    });
+  });
+
+  it("expires the style chain when the player stops landing tricks", () => {
+    const systemWithHazard: SystemContent = {
+      ...starterSystem,
+      hazards: [
+        {
+          id: "chain-field",
+          type: "asteroid_field",
+          position: [180, -180],
+          radius: 40,
+          severity: 0.5
+        }
+      ]
+    };
+    const world = createWorldFromSystem(systemWithHazard, "style-chain-expire-seed");
+    world.ship.position = { x: 233, y: -180 };
+    world.ship.velocity = { x: 0, y: 0 };
+
+    stepWorld(world, 1 / 60, []);
+    for (let tick = 0; tick < Math.ceil(STYLE_CHAIN_WINDOW_SECONDS / (1 / 60)); tick += 1) {
+      stepWorld(world, 1 / 60, []);
+    }
+
+    expect(snapshotWorld(world)).toMatchObject({
+      styleChainCount: 0,
+      styleMultiplier: 1,
+      styleChainSecondsRemaining: 0
+    });
+  });
+
   it("awards eco drift style for clean low-burn deliveries", () => {
     const world = createWorldFromSystem(starterSystem, "eco-drift-seed");
     world.ship.position = { x: 0, y: -74 };
@@ -369,7 +441,7 @@ describe("deterministic Astro Courier simulation", () => {
     const result = summarizeRun(world);
 
     expect(world.lastMilestone).toBe("Eco Drift");
-    expect(result.scoreBreakdown.styleBonus).toBe(QUICK_PICKUP_STYLE_BONUS + ECO_DRIFT_STYLE_BONUS);
+    expect(result.scoreBreakdown.styleBonus).toBe(QUICK_PICKUP_STYLE_BONUS + Math.round(ECO_DRIFT_STYLE_BONUS * 1.25));
   });
 
   it("scales hazard contact damage by active cargo fragility", () => {
@@ -675,7 +747,7 @@ describe("deterministic Astro Courier simulation", () => {
       fuelBonus: 450,
       cargoBonus: 500,
       landingBonus: 300,
-      styleBonus: QUICK_PICKUP_STYLE_BONUS + ECO_DRIFT_STYLE_BONUS,
+      styleBonus: QUICK_PICKUP_STYLE_BONUS + Math.round(ECO_DRIFT_STYLE_BONUS * 1.25),
       dangerBonus: 0,
       incidentPenalty: 0,
       total: result.score

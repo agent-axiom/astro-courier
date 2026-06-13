@@ -1,6 +1,8 @@
 export type LiveStyleRewardInput = {
   styleBonus: number;
   lastMilestone?: string;
+  styleMultiplier?: number;
+  styleChainSecondsRemaining?: number;
 };
 
 export type LiveStyleReward = {
@@ -18,9 +20,12 @@ export function buildLiveStyleReward(input: LiveStyleRewardInput): LiveStyleRewa
   }
 
   const fresh = input.lastMilestone ? styleMilestones.has(input.lastMilestone) : false;
+  const chainActive = (input.styleMultiplier ?? 1) > 1 && (input.styleChainSecondsRemaining ?? 0) > 0;
   return {
-    label: fresh ? "Style chain" : "Style bank",
-    value: `+${roundedBonus}`,
+    label: fresh || chainActive ? "Style chain" : "Style bank",
+    value: chainActive
+      ? `+${roundedBonus} / x${(input.styleMultiplier ?? 1).toFixed(2)} / ${(input.styleChainSecondsRemaining ?? 0).toFixed(1)}s`
+      : `+${roundedBonus}`,
     fresh
   };
 }

@@ -77,6 +77,9 @@ export type SimulationSnapshot = {
   lastMilestone?: string;
   approachStreakSeconds: number;
   bestApproachStreakSeconds: number;
+  styleChainCount: number;
+  styleChainSecondsRemaining: number;
+  styleMultiplier: number;
   elapsedSeconds: number;
   score: number;
   objectiveTarget?: {
