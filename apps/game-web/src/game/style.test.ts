@@ -319,6 +319,21 @@ describe("style target cue", () => {
     });
   });
 
+  it("teaches the launch burst follow-up after a fast pickup", () => {
+    expect(
+      buildStyleTargetCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        styleBonus: 180,
+        launchBurstSecondsRemaining: 2.4
+      })
+    ).toEqual({
+      label: "Style target",
+      value: "Boost burst / +120 / 2.4s",
+      tone: "opportunity"
+    });
+  });
+
   it("prioritizes a ready gravity sling over nearby hazard style", () => {
     expect(
       buildStyleTargetCue({

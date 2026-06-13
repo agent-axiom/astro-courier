@@ -1,4 +1,9 @@
-import { CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS, NO_BRAKE_STYLE_BONUS, STYLE_CHAIN_WINDOW_SECONDS } from "@astro-courier/simulation";
+import {
+  CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS,
+  LAUNCH_BURST_STYLE_BONUS,
+  NO_BRAKE_STYLE_BONUS,
+  STYLE_CHAIN_WINDOW_SECONDS
+} from "@astro-courier/simulation";
 import type { ObjectivePhase, RunStatus } from "@astro-courier/shared";
 
 export const STYLE_CHAIN_URGENT_SECONDS = 1;
@@ -32,6 +37,7 @@ export type StyleTargetCueInput = {
   styleChainSecondsRemaining?: number;
   quickPickupSecondsRemaining?: number;
   quickPickupBonus?: number;
+  launchBurstSecondsRemaining?: number;
   cargoDamage?: number;
   hazardDangerLevel?: "near" | "inside";
   gravitySlingReady?: boolean;
@@ -101,6 +107,14 @@ export function buildStyleTargetCue(input: StyleTargetCueInput): StyleTargetCue 
       label: "Style target",
       value: `Sling window / +${Math.round(input.gravitySlingStyleBonus ?? 0)}${chainSuffix}`,
       tone: chainActive ? "chain" : "opportunity"
+    };
+  }
+
+  if ((input.launchBurstSecondsRemaining ?? 0) > 0) {
+    return {
+      label: "Style target",
+      value: `Boost burst / +${LAUNCH_BURST_STYLE_BONUS} / ${(input.launchBurstSecondsRemaining ?? 0).toFixed(1)}s`,
+      tone: "opportunity"
     };
   }
 

@@ -446,6 +446,7 @@ export function App() {
     styleChainSecondsRemaining: hud.styleChainSecondsRemaining,
     quickPickupSecondsRemaining: hud.quickPickupSecondsRemaining,
     quickPickupBonus: hud.quickPickupBonus,
+    launchBurstSecondsRemaining: hud.launchBurstSecondsRemaining,
     cargoDamage: hud.cargoDamage,
     hazardDangerLevel: hud.hazardDangerLevel,
     gravitySlingReady: hud.gravitySlingReady,
