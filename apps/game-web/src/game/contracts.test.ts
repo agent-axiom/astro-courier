@@ -3,6 +3,7 @@ import {
   buildContractDangerPayTrait,
   buildContractModifiers,
   buildContractOptionHook,
+  buildContractSelectionBadge,
   buildContractHazardTrait,
   buildContractPreflightKicker,
   buildContractRoutePlan,
@@ -87,6 +88,11 @@ describe("contract rotation", () => {
     expect(buildDailyDispatchBadge(dispatch, "asteroid-sprint")).toBe("Daily route");
     expect(buildDailyDispatchBadge(dispatch, "return-leg")).toBeUndefined();
     expect(buildDailyDispatchBadge(undefined, "asteroid-sprint")).toBeUndefined();
+  });
+
+  it("marks the currently selected contract option", () => {
+    expect(buildContractSelectionBadge("asteroid-sprint", "asteroid-sprint")).toBe("Current route");
+    expect(buildContractSelectionBadge("asteroid-sprint", "return-leg")).toBeUndefined();
   });
 
   it("summarizes daily dispatch clear status from the saved route best", () => {

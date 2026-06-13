@@ -48,6 +48,7 @@ import {
   buildContractOptionHook,
   buildContractPreflightKicker,
   buildContractRoutePlan,
+  buildContractSelectionBadge,
   buildDailyDispatch,
   buildDailyDispatchAction,
   buildDailyDispatchBadge,
@@ -1221,6 +1222,7 @@ export function App() {
                 });
                 const contractRecommendationBadge = contractRecommended ? buildRouteBoardRecommendationBadge(routeBoardTarget) : undefined;
                 const contractDailyBadge = buildDailyDispatchBadge(dailyDispatch, contract.id);
+                const contractSelectionBadge = buildContractSelectionBadge(hud.contractId, contract.id);
                 return (
                   <button
                     key={contract.id}
@@ -1266,6 +1268,7 @@ export function App() {
                       {contractRecommendationBadge ? (
                         <em className={`contract-option-next contract-option-next-${routeBoardTarget.tone}`}>{contractRecommendationBadge}</em>
                       ) : null}
+                      {contractSelectionBadge ? <em className="contract-option-current">{contractSelectionBadge}</em> : null}
                       {contractDailyBadge ? <em className="contract-option-daily">{contractDailyBadge}</em> : null}
                       <em className="contract-option-best">{buildContractBestRunLabel(contractBestRun)}</em>
                       <em className={`contract-option-cargo contract-option-cargo-${contractCargoRisk.tone}`}>

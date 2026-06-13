@@ -136,6 +136,10 @@ export function buildDailyDispatchBadge(dispatch: DailyDispatch | undefined, con
   return dispatch?.contractId === contractId ? "Daily route" : undefined;
 }
 
+export function buildContractSelectionBadge(currentContractId: string, contractId: string): string | undefined {
+  return currentContractId === contractId ? "Current route" : undefined;
+}
+
 export function buildDailyDispatchStatus(
   dispatch: DailyDispatch | undefined,
   bestRun: DailyDispatchBestRun | undefined
