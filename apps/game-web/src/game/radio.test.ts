@@ -108,6 +108,18 @@ describe("radio feedback copy", () => {
     );
   });
 
+  it("calls out fast predicted hazard edge vectors as thread opportunities", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        trajectoryRiskLevel: "near",
+        trajectoryRiskSeconds: 0.8,
+        speed: 46,
+        cargoDamage: 0
+      })
+    ).toContain("Thread vector");
+  });
+
   it("warns about damaged cargo before generic hazard proximity", () => {
     expect(
       buildRadioMessage({
