@@ -12,6 +12,8 @@ export type RunFeedSnapshot = {
   trajectoryRiskLevel?: "near" | "inside";
   trajectoryRiskSeconds?: number;
   launchBurstSecondsRemaining?: number;
+  styleMultiplier?: number;
+  styleChainSecondsRemaining?: number;
 };
 
 export type RunFeedUpdate = {
@@ -97,7 +99,7 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
   if ((previous.launchBurstSecondsRemaining ?? 0) <= 0 && (current.launchBurstSecondsRemaining ?? 0) > 0) {
     updates.push({
       label: "Burst armed",
-      value: `Boost in ${formatSeconds(current.launchBurstSecondsRemaining)}`,
+      value: `Boost in ${formatSeconds(current.launchBurstSecondsRemaining)}${formatChainSuffix(current)}`,
       tone: "style"
     });
   }
@@ -156,4 +158,10 @@ function isFuelCritical(snapshot: RunFeedSnapshot): boolean {
 
 function formatSeconds(seconds: number | undefined): string {
   return `${(seconds ?? 0).toFixed(1)}s`;
+}
+
+function formatChainSuffix(snapshot: RunFeedSnapshot): string {
+  return (snapshot.styleMultiplier ?? 1) > 1 && (snapshot.styleChainSecondsRemaining ?? 0) > 0
+    ? ` / chain x${(snapshot.styleMultiplier ?? 1).toFixed(2)}`
+    : "";
 }

@@ -104,6 +104,23 @@ describe("run action feed", () => {
     ).toEqual([]);
   });
 
+  it("announces launch bursts as chain opportunities while a multiplier is live", () => {
+    expect(
+      deriveRunFeedUpdates(baseSnapshot, {
+        ...baseSnapshot,
+        launchBurstSecondsRemaining: 2.4,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 3.2
+      })
+    ).toEqual([
+      {
+        label: "Burst armed",
+        value: "Boost in 2.4s / chain x1.50",
+        tone: "style"
+      }
+    ]);
+  });
+
   it("prepends fresh updates and caps the feed", () => {
     const result = appendRunFeedUpdates(
       [

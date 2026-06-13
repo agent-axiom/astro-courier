@@ -1308,7 +1308,9 @@ function toRunFeedSnapshot(hud: HudState): RunFeedSnapshot {
     hazardDangerLevel: hud.hazardDangerLevel,
     trajectoryRiskLevel: hud.trajectoryRiskLevel,
     trajectoryRiskSeconds: hud.trajectoryRiskSeconds,
-    launchBurstSecondsRemaining: hud.launchBurstSecondsRemaining
+    launchBurstSecondsRemaining: hud.launchBurstSecondsRemaining,
+    styleMultiplier: hud.styleMultiplier,
+    styleChainSecondsRemaining: hud.styleChainSecondsRemaining
   };
 }
 
