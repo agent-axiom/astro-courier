@@ -59,4 +59,19 @@ describe("preflight bonus objectives", () => {
       { label: "Last Drop", value: "+170 / <=5% fuel" }
     ]);
   });
+
+  it("surfaces chain finish as the return leg bonus target", () => {
+    expect(
+      buildPreflightBonusObjectives({
+        contractId: "return-leg",
+        quickPickupBonus: 180
+      })
+    ).toEqual([
+      { label: "Rush pickup", value: "+180" },
+      { label: "Express finish", value: "+180 / gold pace" },
+      { label: "Chain finish", value: "carry chain home" },
+      { label: "Perfect dock", value: "+220" },
+      { label: "Last Drop", value: "+170 / <=5% fuel" }
+    ]);
+  });
 });

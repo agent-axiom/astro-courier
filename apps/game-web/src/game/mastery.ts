@@ -97,6 +97,22 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
     ];
   }
 
+  if (input.contractId === "return-leg") {
+    return [
+      rushPickup,
+      expressFinish,
+      {
+        label: "Chain finish",
+        value: "carry chain home"
+      },
+      {
+        label: "Perfect dock",
+        value: `+${PERFECT_APPROACH_STYLE_BONUS}`
+      },
+      lastDrop
+    ];
+  }
+
   return [
     rushPickup,
     expressFinish,
