@@ -2,9 +2,11 @@ import {
   CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS,
   LAUNCH_BURST_STYLE_BONUS,
   NO_BRAKE_STYLE_BONUS,
+  PERFECT_APPROACH_STREAK_SECONDS,
+  PERFECT_APPROACH_STYLE_BONUS,
   STYLE_CHAIN_WINDOW_SECONDS
 } from "@astro-courier/simulation";
-import type { ObjectivePhase, RunStatus } from "@astro-courier/shared";
+import type { LandingGuidanceStatus, ObjectivePhase, RunStatus } from "@astro-courier/shared";
 
 export const STYLE_CHAIN_URGENT_SECONDS = 1;
 
@@ -45,6 +47,8 @@ export type StyleTargetCueInput = {
   gravitySlingReady?: boolean;
   gravitySlingStyleBonus?: number;
   manualBrakeUsed?: boolean;
+  landingStatus?: LandingGuidanceStatus;
+  approachStreakSeconds?: number;
 };
 
 export type StyleTargetCue = {
@@ -139,6 +143,19 @@ export function buildStyleTargetCue(input: StyleTargetCueInput): StyleTargetCue 
       label: "Style target",
       value: `Clean skim / danger style${chainSuffix}`,
       tone: chainActive ? "chain" : "risk"
+    };
+  }
+
+  if (
+    input.objectivePhase === "delivery" &&
+    input.landingStatus === "ready" &&
+    (input.approachStreakSeconds ?? 0) >= PERFECT_APPROACH_STREAK_SECONDS &&
+    (input.cargoDamage ?? 0) <= 0.02
+  ) {
+    return {
+      label: "Style target",
+      value: `Perfect dock / +${PERFECT_APPROACH_STYLE_BONUS}${chainSuffix}`,
+      tone: chainActive ? "chain" : "opportunity"
     };
   }
 

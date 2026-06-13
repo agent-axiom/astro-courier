@@ -411,6 +411,38 @@ describe("style target cue", () => {
     });
   });
 
+  it("teaches perfect approach as a ready soft-dock style target", () => {
+    expect(
+      buildStyleTargetCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        styleBonus: 0,
+        landingStatus: "ready",
+        approachStreakSeconds: 1.2
+      })
+    ).toEqual({
+      label: "Style target",
+      value: "Perfect dock / +220",
+      tone: "opportunity"
+    });
+
+    expect(
+      buildStyleTargetCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        styleBonus: 180,
+        landingStatus: "ready",
+        approachStreakSeconds: 1.2,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 0.8
+      })
+    ).toEqual({
+      label: "Style target",
+      value: "Perfect dock / +220 / chain x1.50",
+      tone: "chain"
+    });
+  });
+
   it("offers clean hazard skim style only while cargo is still clean", () => {
     expect(
       buildStyleTargetCue({

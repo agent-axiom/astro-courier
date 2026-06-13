@@ -526,7 +526,9 @@ export function App() {
     hazardDangerLevel: hud.hazardDangerLevel,
     gravitySlingReady: hud.gravitySlingReady,
     gravitySlingStyleBonus: hud.gravitySlingStyleBonus,
-    manualBrakeUsed: hud.manualBrakeUsed
+    manualBrakeUsed: hud.manualBrakeUsed,
+    landingStatus: hud.landingStatus,
+    approachStreakSeconds: hud.approachStreakSeconds
   });
   const styleChipStyle = { "--style-chain-progress": liveStyleReward?.chainProgress ?? 0 } as CSSProperties;
   const preflightMasteryTargets = buildPreflightMasteryTargets({ goldSeconds: hud.paceSecondsRemaining });
