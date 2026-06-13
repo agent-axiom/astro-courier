@@ -1,10 +1,11 @@
-import type { RunStatus } from "@astro-courier/shared";
+import type { RunMedal, RunStatus } from "@astro-courier/shared";
 import type { ContractPaceTier } from "./pace";
 
 export type RunFeedTone = "neutral" | "style" | "success" | "warning" | "danger";
 
 export type RunFeedSnapshot = {
   status: RunStatus;
+  medal?: RunMedal;
   lastMilestone?: string;
   lastStyleAward?: number;
   score?: number;
@@ -66,11 +67,7 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
 
   if (previous.status !== current.status) {
     if (current.status === "delivered") {
-      updates.push({
-        label: "Delivery logged",
-        value: "Route complete",
-        tone: "success"
-      });
+      updates.push(buildDeliveryUpdate(current.medal));
     } else if (current.status === "crashed") {
       updates.push({
         label: "Insurance event",
@@ -165,6 +162,30 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
   }
 
   return updates;
+}
+
+function buildDeliveryUpdate(medal: RunMedal | undefined): RunFeedUpdate {
+  if (medal === "comet") {
+    return {
+      label: "Comet secured",
+      value: "Route mastered",
+      tone: "success"
+    };
+  }
+
+  if (medal === "gold") {
+    return {
+      label: "Gold logged",
+      value: "Medal pace locked",
+      tone: "success"
+    };
+  }
+
+  return {
+    label: "Delivery logged",
+    value: "Route complete",
+    tone: "success"
+  };
 }
 
 export function appendRunFeedUpdates(

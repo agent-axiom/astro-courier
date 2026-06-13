@@ -65,6 +65,23 @@ describe("run action feed", () => {
     ]);
   });
 
+  it("derives medal-aware terminal updates for strong deliveries", () => {
+    expect(deriveRunFeedUpdates(baseSnapshot, { ...baseSnapshot, status: "delivered", medal: "comet" })).toEqual([
+      {
+        label: "Comet secured",
+        value: "Route mastered",
+        tone: "success"
+      }
+    ]);
+    expect(deriveRunFeedUpdates(baseSnapshot, { ...baseSnapshot, status: "delivered", medal: "gold" })).toEqual([
+      {
+        label: "Gold logged",
+        value: "Medal pace locked",
+        tone: "success"
+      }
+    ]);
+  });
+
   it("warns when the projected trajectory enters hazard space", () => {
     expect(deriveRunFeedUpdates(baseSnapshot, { ...baseSnapshot, trajectoryRiskLevel: "inside", trajectoryRiskSeconds: 1.8 })).toEqual([
       {

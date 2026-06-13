@@ -313,6 +313,7 @@ export function App() {
     hud.lastMilestone,
     hud.lastStyleAward,
     hud.maxFuel,
+    hud.medal,
     hud.paceTier,
     hud.score,
     hud.status,
@@ -1430,6 +1431,7 @@ function toHudAudioSnapshot(hud: HudState, bestRun: BestRun | undefined): HudAud
 function toRunFeedSnapshot(hud: HudState, bestRun: BestRun | undefined): RunFeedSnapshot {
   return {
     status: hud.status,
+    medal: hud.medal,
     lastMilestone: hud.lastMilestone,
     lastStyleAward: hud.lastStyleAward,
     score: hud.score,
