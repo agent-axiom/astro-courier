@@ -17,7 +17,9 @@ const baseHud: HudState = {
   landingStatus: "approach",
   targetDistance: 220,
   paceTier: "gold",
-  paceSecondsRemaining: 35
+  paceSecondsRemaining: 35,
+  approachStreakSeconds: 0,
+  bestApproachStreakSeconds: 0
 };
 
 describe("radio feedback copy", () => {
@@ -29,6 +31,10 @@ describe("radio feedback copy", () => {
   it("surfaces landing assist before generic speed warnings", () => {
     expect(buildRadioMessage({ ...baseHud, landingStatus: "too-fast", assistAvailable: true })).toContain("Assist");
     expect(buildRadioMessage({ ...baseHud, landingStatus: "too-fast", assistAvailable: false })).toContain("Slow");
+  });
+
+  it("praises a held stable approach before generic landing guidance", () => {
+    expect(buildRadioMessage({ ...baseHud, landingStatus: "ready", approachStreakSeconds: 1.4 })).toContain("steady");
   });
 
   it("keeps preflight copy distinct from active pickup guidance", () => {

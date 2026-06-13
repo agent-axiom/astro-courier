@@ -22,7 +22,9 @@ const initialHud: HudState = {
   speed: 0,
   medal: "none",
   paceTier: "gold",
-  paceSecondsRemaining: 35
+  paceSecondsRemaining: 35,
+  approachStreakSeconds: 0,
+  bestApproachStreakSeconds: 0
 };
 
 const useGameStore = create<GameStore>((set) => ({
@@ -149,6 +151,12 @@ export function App() {
         {hud.landingStatus ? (
           <div className={`guidance-chip guidance-${hud.assistAvailable ? "assist" : hud.landingStatus}`}>
             {guidanceLabel(hud.landingStatus, Boolean(hud.assistAvailable))}
+          </div>
+        ) : null}
+        {hud.approachStreakSeconds >= 0.25 ? (
+          <div className="streak-chip">
+            <span>Stable approach</span>
+            <strong>{hud.approachStreakSeconds.toFixed(1)}s</strong>
           </div>
         ) : null}
         <div className="status-row">

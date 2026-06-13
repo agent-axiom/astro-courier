@@ -220,6 +220,27 @@ describe("deterministic Astro Courier simulation", () => {
     expect(snapshotWorld(world).objectiveTarget?.landingStatus).toBe("ready");
   });
 
+  it("builds and preserves a stable approach streak near the active pad", () => {
+    const world = createWorldFromSystem(starterSystem, "streak-seed");
+    world.ship.position = { x: 40, y: -74 };
+    world.ship.velocity = { x: 0, y: 0 };
+    world.ship.rotation = -Math.PI / 2;
+    world.ship.targetRotation = -Math.PI / 2;
+
+    for (let i = 0; i < 30; i += 1) {
+      stepWorld(world, 1 / 60, []);
+    }
+
+    expect(snapshotWorld(world).approachStreakSeconds).toBeGreaterThan(0.45);
+    expect(snapshotWorld(world).bestApproachStreakSeconds).toBeGreaterThan(0.45);
+
+    world.ship.velocity = { x: 80, y: 0 };
+    stepWorld(world, 1 / 60, []);
+
+    expect(snapshotWorld(world).approachStreakSeconds).toBe(0);
+    expect(snapshotWorld(world).bestApproachStreakSeconds).toBeGreaterThan(0.45);
+  });
+
   it("gently assists near-pad landings without saving reckless impacts", () => {
     const assisted = createWorldFromSystem(starterSystem, "assist-seed");
     assisted.ship.position = { x: 0, y: -74 };

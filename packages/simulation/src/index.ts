@@ -141,6 +141,8 @@ export type SimulationWorld = {
   objectivePhase: ObjectivePhase;
   cargoOnboard: boolean;
   lastMilestone?: string;
+  approachStreakSeconds: number;
+  bestApproachStreakSeconds: number;
   landingRating?: LandingRating;
   score: number;
   fuelUsed: number;
@@ -190,6 +192,8 @@ export function createWorldFromSystem(system: SystemContent, seed: string): Simu
     status: "flying",
     objectivePhase: "pickup",
     cargoOnboard: false,
+    approachStreakSeconds: 0,
+    bestApproachStreakSeconds: 0,
     score: 0,
     fuelUsed: 0,
     activeContract,
@@ -269,6 +273,7 @@ export function stepWorld(world: SimulationWorld, fixedDt: number, commands: Pla
   applyBrake(world, fixedDt, brake);
   integrate(world, fixedDt);
   applyLandingAssist(world);
+  updateApproachStreak(world, fixedDt);
   updateHazards(world, fixedDt);
   resolveLandingOrCrash(world);
   updateScore(world);
@@ -339,6 +344,8 @@ export function snapshotWorld(world: SimulationWorld): SimulationSnapshot {
     objectivePhase: world.objectivePhase,
     cargoOnboard: world.cargoOnboard,
     lastMilestone: world.lastMilestone,
+    approachStreakSeconds: round(world.approachStreakSeconds, 3),
+    bestApproachStreakSeconds: round(world.bestApproachStreakSeconds, 3),
     elapsedSeconds: world.elapsedSeconds,
     score: world.score,
     objectiveTarget: getObjectiveTarget(world),
@@ -495,6 +502,28 @@ function applyLandingAssist(world: SimulationWorld): void {
 
   const assistedSpeed = pad.allowedApproachSpeed * 0.92;
   world.ship.velocity = scale(world.ship.velocity, assistedSpeed / speed);
+}
+
+function updateApproachStreak(world: SimulationWorld, fixedDt: number): void {
+  const pad = world.landingPads.find((candidate) => candidate.active);
+  if (!pad) {
+    world.approachStreakSeconds = 0;
+    return;
+  }
+
+  const distance = distanceBetween(world.ship.position, pad.position);
+  const speed = magnitude(world.ship.velocity);
+  const angleError = Math.abs(shortestAngleDelta(world.ship.rotation, pad.normalAngle));
+  const stableApproach =
+    distance <= pad.radius * 3 && speed <= pad.allowedApproachSpeed && angleError <= pad.requiredAngleTolerance;
+
+  if (!stableApproach) {
+    world.approachStreakSeconds = 0;
+    return;
+  }
+
+  world.approachStreakSeconds = round(world.approachStreakSeconds + fixedDt, 6);
+  world.bestApproachStreakSeconds = Math.max(world.bestApproachStreakSeconds, world.approachStreakSeconds);
 }
 
 function canLandingAssist(distance: number, speed: number, angleError: number, pad: LandingPadState): boolean {

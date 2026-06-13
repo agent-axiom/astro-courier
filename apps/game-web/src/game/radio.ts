@@ -29,6 +29,10 @@ export function buildRadioMessage(hud: HudState): string {
     return "Align ship attitude before contact. Landing pads are picky.";
   }
 
+  if (hud.approachStreakSeconds >= 1) {
+    return "Keep that steady approach. Courier telemetry likes this line.";
+  }
+
   if (hud.landingStatus === "ready") {
     return "Docking window is green. Set it down softly.";
   }

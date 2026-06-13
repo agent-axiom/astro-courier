@@ -269,6 +269,28 @@ button {
   color: #c6f6ff;
 }
 
+.streak-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 34px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  background: rgba(142, 230, 184, 0.16);
+  color: #bff7d8;
+  font-size: 0.84rem;
+  font-weight: 850;
+}
+
+.streak-chip span {
+  color: rgba(234, 255, 243, 0.76);
+}
+
+.streak-chip strong {
+  color: #ffffff;
+}
+
 .milestone {
   min-height: 32px;
   padding: 8px 10px;

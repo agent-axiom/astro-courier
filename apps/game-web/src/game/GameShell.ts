@@ -32,6 +32,8 @@ export type HudState = {
   landingRating?: string;
   paceTier: ContractPaceTier;
   paceSecondsRemaining: number;
+  approachStreakSeconds: number;
+  bestApproachStreakSeconds: number;
 };
 
 export type GameShellOptions = {
@@ -170,7 +172,9 @@ export class GameShell {
       medal: result.medal,
       landingRating: result.landingRating,
       paceTier: pace.tier,
-      paceSecondsRemaining: pace.secondsRemaining
+      paceSecondsRemaining: pace.secondsRemaining,
+      approachStreakSeconds: snapshot.approachStreakSeconds,
+      bestApproachStreakSeconds: snapshot.bestApproachStreakSeconds
     });
   }
 }
