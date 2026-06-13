@@ -44,6 +44,19 @@ describe("screen feedback", () => {
     });
   });
 
+  it("maps cargo damage to a medium warning flash", () => {
+    expect(buildScreenFeedback(["cargo-damage"])).toEqual({
+      tone: "warning",
+      intensity: "medium",
+      durationMs: 400
+    });
+    expect(buildScreenFeedback(["cargo-damage", "hazard-contact"])).toEqual({
+      tone: "danger",
+      intensity: "medium",
+      durationMs: 440
+    });
+  });
+
   it("maps trajectory warnings to medium warning feedback", () => {
     expect(buildScreenFeedback(["trajectory-warning"])).toEqual({
       tone: "warning",

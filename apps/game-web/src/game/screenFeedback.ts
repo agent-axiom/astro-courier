@@ -31,6 +31,9 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[]): ScreenFe
   if (events.includes("fuel-critical")) {
     return { tone: "warning", intensity: "medium", durationMs: 440 };
   }
+  if (events.includes("cargo-damage")) {
+    return { tone: "warning", intensity: "medium", durationMs: 400 };
+  }
   if (events.includes("launch-burst")) {
     return { tone: "style", intensity: "medium", durationMs: 420 };
   }
