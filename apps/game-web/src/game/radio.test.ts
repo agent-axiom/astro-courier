@@ -136,6 +136,18 @@ describe("radio feedback copy", () => {
     ).toContain("Cargo integrity 78%");
   });
 
+  it("prioritizes clearing predicted vectors when damaged cargo is onboard", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        cargoOnboard: true,
+        cargoDamage: 0.22,
+        trajectoryRiskLevel: "near",
+        trajectoryRiskSeconds: 2.6
+      })
+    ).toBe("Damaged cargo on hazard vector. Clear it in 2.6s.");
+  });
+
   it("celebrates clean hazard skims before generic hazard warnings", () => {
     expect(buildRadioMessage({ ...baseHud, lastMilestone: "Clean Hazard Skim", hazardDangerLevel: "near", hazardDistance: 44 })).toContain("Style");
     expect(buildRadioMessage({ ...baseHud, lastMilestone: "Needle Thread", hazardDangerLevel: "near", hazardDistance: 44 })).toContain(
