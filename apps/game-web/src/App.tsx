@@ -29,6 +29,7 @@ import {
   buildContractMasteryBadge,
   buildContractBestRunLabel,
   buildLiveBestPace,
+  buildRouteBoardMastery,
   buildRouteBoardRecommendationBadge,
   buildRouteBoardProgress,
   buildRouteBoardSelectionAction,
@@ -487,6 +488,7 @@ export function App() {
   const replayReceipt = buildReplayReceipt(hud.replayChecksum);
   const bestRunChase = buildBestRunChase(bestRun);
   const routeBoardProgress = buildRouteBoardProgress(hud.contractOptions, bestRunsByContract);
+  const routeBoardMastery = buildRouteBoardMastery(hud.contractOptions, bestRunsByContract);
   const routeBoardTarget = buildRouteBoardTarget(hud.contractOptions, bestRunsByContract);
   const routeTargetSelectionAction = buildRouteBoardSelectionAction(routeBoardTarget, hud.contractId);
   const currentDate = new Date();
@@ -1011,15 +1013,22 @@ export function App() {
             <strong>{bestRunChase.value}</strong>
           </div>
           {hud.contractOptions.length > 0 ? (
-            <div className="route-board" aria-label="Route board progress">
-              {routeBoardProgress.map((item) => (
-                <span key={item.label} className={`route-board-item route-board-${item.tone}`}>
-                  {item.label === "Comet clears" ? <Star size={17} /> : <Trophy size={17} />}
-                  <small>{item.label}</small>
-                  <strong>{item.value}</strong>
-                </span>
-              ))}
-            </div>
+            <>
+              <div className="route-board" aria-label="Route board progress">
+                {routeBoardProgress.map((item) => (
+                  <span key={item.label} className={`route-board-item route-board-${item.tone}`}>
+                    {item.label === "Comet clears" ? <Star size={17} /> : <Trophy size={17} />}
+                    <small>{item.label}</small>
+                    <strong>{item.value}</strong>
+                  </span>
+                ))}
+              </div>
+              <div className={`route-mastery-briefing route-mastery-${routeBoardMastery.tone}`} aria-label={`${routeBoardMastery.label}: ${routeBoardMastery.value}`}>
+                {routeBoardMastery.tone === "complete" ? <Trophy size={18} /> : <Route size={18} />}
+                <span>{routeBoardMastery.label}</span>
+                <strong>{routeBoardMastery.value}</strong>
+              </div>
+            </>
           ) : null}
           {hud.contractOptions.length > 0 ? (
             routeTargetSelectionAction ? (

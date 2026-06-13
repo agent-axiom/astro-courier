@@ -5,6 +5,7 @@ import {
   buildContractMasteryBadge,
   buildContractBestRunLabel,
   buildLiveBestPace,
+  buildRouteBoardMastery,
   buildRouteBoardRecommendationBadge,
   buildRouteBoardProgress,
   buildRouteBoardSelectionAction,
@@ -152,6 +153,55 @@ describe("route board progress copy", () => {
       { label: "Routes cleared", value: "4/4", tone: "complete" },
       { label: "Comet clears", value: "4/4", tone: "complete" }
     ]);
+  });
+});
+
+describe("route board mastery copy", () => {
+  const contracts = [{ id: "first-light-delivery" }, { id: "return-leg" }, { id: "asteroid-sprint" }, { id: "gravity-slingshot" }];
+
+  it("frames unopened boards as a route-clearing campaign", () => {
+    expect(
+      buildRouteBoardMastery(contracts, {
+        "first-light-delivery": { score: 1800, elapsedSeconds: 34.2, medal: "silver" },
+        "return-leg": undefined,
+        "asteroid-sprint": undefined,
+        "gravity-slingshot": undefined
+      })
+    ).toEqual({
+      label: "Board mastery",
+      value: "3 routes to clear",
+      tone: "progress"
+    });
+  });
+
+  it("switches to comet mastery once every route has a clear", () => {
+    expect(
+      buildRouteBoardMastery(contracts, {
+        "first-light-delivery": { score: 1800, elapsedSeconds: 34.2, medal: "silver" },
+        "return-leg": { score: 2600, elapsedSeconds: 27.1, medal: "comet" },
+        "asteroid-sprint": { score: 2400, elapsedSeconds: 35.5, medal: "gold" },
+        "gravity-slingshot": { score: 2100, elapsedSeconds: 48.6, medal: "bronze" }
+      })
+    ).toEqual({
+      label: "Board mastery",
+      value: "3 comets to master",
+      tone: "mastery"
+    });
+  });
+
+  it("celebrates full comet sweeps", () => {
+    expect(
+      buildRouteBoardMastery(contracts, {
+        "first-light-delivery": { score: 3200, elapsedSeconds: 22.4, medal: "comet" },
+        "return-leg": { score: 3100, elapsedSeconds: 23.1, medal: "comet" },
+        "asteroid-sprint": { score: 3500, elapsedSeconds: 21.8, medal: "comet" },
+        "gravity-slingshot": { score: 3300, elapsedSeconds: 20.9, medal: "comet" }
+      })
+    ).toEqual({
+      label: "Board mastery",
+      value: "Full comet sweep",
+      tone: "complete"
+    });
   });
 });
 

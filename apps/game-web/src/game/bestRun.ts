@@ -66,6 +66,12 @@ export type RouteBoardTarget = {
   contractId?: string;
 };
 
+export type RouteBoardMastery = {
+  label: "Board mastery";
+  value: string;
+  tone: "open" | "progress" | "mastery" | "complete";
+};
+
 export type RouteBoardSelectionAction = {
   label: "Select target";
   contractId: string;
@@ -200,6 +206,40 @@ export function buildRouteBoardTarget(
   return { label: "Board status", value: "Board mastered", tone: "complete" };
 }
 
+export function buildRouteBoardMastery(
+  contracts: readonly RouteBoardContract[],
+  bestRunsByContract: Readonly<Record<string, BestRun | undefined>>
+): RouteBoardMastery {
+  const total = contracts.length;
+  const bestRuns = contracts.map((contract) => bestRunsByContract[contract.id]);
+  const cleared = bestRuns.filter(Boolean).length;
+  const comets = bestRuns.filter((bestRun) => bestRun?.medal === "comet").length;
+
+  if (cleared < total) {
+    const remaining = total - cleared;
+    return {
+      label: "Board mastery",
+      value: `${remaining} ${pluralize(remaining, "route")} to clear`,
+      tone: cleared > 0 ? "progress" : "open"
+    };
+  }
+
+  if (comets < total) {
+    const remaining = total - comets;
+    return {
+      label: "Board mastery",
+      value: `${remaining} ${pluralize(remaining, "comet")} to master`,
+      tone: "mastery"
+    };
+  }
+
+  return {
+    label: "Board mastery",
+    value: "Full comet sweep",
+    tone: "complete"
+  };
+}
+
 export function buildRouteBoardSelectionAction(
   routeBoardTarget: RouteBoardTarget,
   currentContractId: string
@@ -319,6 +359,10 @@ function progressTone(count: number, total: number): RouteBoardProgress["tone"] 
     return "complete";
   }
   return count > 0 ? "progress" : "open";
+}
+
+function pluralize(count: number, word: string): string {
+  return count === 1 ? word : `${word}s`;
 }
 
 function medalRank(medal: RunMedal | undefined): number {
