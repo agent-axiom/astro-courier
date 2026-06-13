@@ -22,7 +22,7 @@ export type RetryTarget = {
 };
 
 export type ResultRetryAction = {
-  label: "Retry Route" | "Defend PB" | "Chase PB" | "Run Again";
+  label: "Retry Route" | "Defend PB" | "Chase PB" | "Repeat Line" | "Run Again";
 };
 
 export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
@@ -135,6 +135,9 @@ export function buildResultRetryAction(target: RetryTarget): ResultRetryAction {
   }
   if (target.tone === "chase") {
     return { label: "Chase PB" };
+  }
+  if (target.value.startsWith("Repeat ")) {
+    return { label: "Repeat Line" };
   }
   return { label: "Run Again" };
 }

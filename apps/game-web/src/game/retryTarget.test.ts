@@ -286,6 +286,12 @@ describe("result retry action copy", () => {
     });
   });
 
+  it("turns repeatable style targets into a repeat-line call to action", () => {
+    expect(buildResultRetryAction({ label: "Retry target", value: "Repeat Chain Finish", tone: "opportunity" })).toEqual({
+      label: "Repeat Line"
+    });
+  });
+
   it("keeps route improvement opportunities readable", () => {
     expect(buildResultRetryAction({ label: "Retry target", value: "Chase Express Finish", tone: "opportunity" })).toEqual({
       label: "Run Again"
