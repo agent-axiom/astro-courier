@@ -190,6 +190,8 @@ const BRAKE_BURN_PER_SECOND = 3;
 const HAZARD_SKIM_OUTER_RADIUS = 1.35;
 const HAZARD_SKIM_BASE_BONUS = 140;
 const HAZARD_SKIM_SEVERITY_BONUS = 120;
+const QUICK_PICKUP_SECONDS = 12;
+const QUICK_PICKUP_BONUS = 180;
 
 export function createWorldFromSystem(system: SystemContent, seed: string, options: WorldCreationOptions = {}): SimulationWorld {
   const activeContract = options.contractId
@@ -623,7 +625,12 @@ function resolveLandingOrCrash(world: SimulationWorld): void {
     if (touchedPad.role === "pickup" && world.objectivePhase === "pickup") {
       world.cargoOnboard = true;
       world.objectivePhase = "delivery";
-      world.lastMilestone = "Cargo Loaded";
+      if (world.elapsedSeconds <= QUICK_PICKUP_SECONDS) {
+        world.styleBonus += QUICK_PICKUP_BONUS;
+        world.lastMilestone = "Quick Pickup";
+      } else {
+        world.lastMilestone = "Cargo Loaded";
+      }
       world.ship.velocity = scale(world.ship.velocity, 0.25);
       for (const pad of world.landingPads) {
         pad.active = pad.role === "destination";

@@ -196,7 +196,7 @@ describe("deterministic Astro Courier simulation", () => {
     expect(soft.status).toBe("flying");
     expect(soft.objectivePhase).toBe("delivery");
     expect(soft.cargoOnboard).toBe(true);
-    expect(soft.lastMilestone).toBe("Cargo Loaded");
+    expect(soft.lastMilestone).toBe("Quick Pickup");
 
     soft.ship.position = { x: 260, y: -80 };
     soft.ship.velocity = { x: 4, y: 1 };
@@ -305,6 +305,34 @@ describe("deterministic Astro Courier simulation", () => {
     expect(secondBreakdown.styleBonus).toBe(firstBreakdown.styleBonus);
   });
 
+  it("awards a one-time style bonus for quick cargo pickup", () => {
+    const quick = createWorldFromSystem(starterSystem, "quick-pickup-seed");
+    quick.elapsedSeconds = 8;
+    quick.ship.position = { x: 0, y: -74 };
+    quick.ship.velocity = { x: 1, y: 3 };
+    quick.ship.rotation = -Math.PI / 2;
+
+    stepWorld(quick, 1 / 60, []);
+    const quickBreakdown = summarizeRun(quick).scoreBreakdown;
+
+    expect(quick.lastMilestone).toBe("Quick Pickup");
+    expect(quickBreakdown.styleBonus).toBe(180);
+
+    stepWorld(quick, 1 / 60, []);
+    expect(summarizeRun(quick).scoreBreakdown.styleBonus).toBe(quickBreakdown.styleBonus);
+
+    const late = createWorldFromSystem(starterSystem, "late-pickup-seed");
+    late.elapsedSeconds = 18;
+    late.ship.position = { x: 0, y: -74 };
+    late.ship.velocity = { x: 1, y: 3 };
+    late.ship.rotation = -Math.PI / 2;
+
+    stepWorld(late, 1 / 60, []);
+
+    expect(late.lastMilestone).toBe("Cargo Loaded");
+    expect(summarizeRun(late).scoreBreakdown.styleBonus).toBe(0);
+  });
+
   it("classifies landing guidance as too-fast, misaligned, or ready", () => {
     const world = createWorldFromSystem(starterSystem, "guide-seed");
     world.ship.position = { x: 0, y: -74 };
@@ -362,7 +390,7 @@ describe("deterministic Astro Courier simulation", () => {
 
     expect(assisted.status).toBe("flying");
     expect(assisted.cargoOnboard).toBe(true);
-    expect(assisted.lastMilestone).toBe("Cargo Loaded");
+    expect(assisted.lastMilestone).toBe("Quick Pickup");
     expect(reckless.status).toBe("crashed");
     expect(reckless.landingRating).toBe("Insurance Event");
   });
@@ -463,7 +491,7 @@ describe("deterministic Astro Courier simulation", () => {
       fuelBonus: 450,
       cargoBonus: 500,
       landingBonus: 300,
-      styleBonus: 0,
+      styleBonus: 180,
       incidentPenalty: 0,
       total: result.score
     });

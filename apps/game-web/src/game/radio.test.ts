@@ -69,6 +69,12 @@ describe("radio feedback copy", () => {
     expect(buildRadioMessage({ ...baseHud, lastMilestone: "Clean Hazard Skim", hazardDangerLevel: "near", hazardDistance: 44 })).toContain("Style");
   });
 
+  it("celebrates quick cargo pickups before generic objective guidance", () => {
+    expect(buildRadioMessage({ ...baseHud, lastMilestone: "Quick Pickup", objectivePhase: "delivery", cargoOnboard: true })).toContain(
+      "Fast pickup"
+    );
+  });
+
   it("praises a held stable approach before generic landing guidance", () => {
     expect(buildRadioMessage({ ...baseHud, landingStatus: "ready", approachStreakSeconds: 1.4 })).toContain("steady");
   });

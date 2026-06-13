@@ -23,6 +23,10 @@ export function buildRadioMessage(hud: HudState): string {
     return "Style bonus logged. Clean skim, no scratches.";
   }
 
+  if (hud.lastMilestone === "Quick Pickup") {
+    return "Fast pickup logged. Keep that momentum to the destination.";
+  }
+
   if (hud.hazardDangerLevel === "inside") {
     return `Hazard contact. Exit the field${hud.hazardDistance === undefined ? "" : `, ${Math.round(hud.hazardDistance)}m from center`}.`;
   }
