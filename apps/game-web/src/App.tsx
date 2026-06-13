@@ -54,6 +54,7 @@ import { getOverlayVisibility } from "./game/overlays";
 import { buildCometRunReadout } from "./game/comet";
 import { buildResultRetryAction, buildRetryTarget } from "./game/retryTarget";
 import { buildRunIntensity } from "./game/intensity";
+import { buildCrashReasonLabel } from "./game/crash";
 
 type GameStore = {
   hud: HudState;
@@ -844,7 +845,7 @@ export function App() {
         <section className={`result-overlay result-${hud.status}`} aria-label="Run result">
           <Trophy aria-hidden="true" size={28} />
           <h2>{hud.status === "delivered" ? "Delivery Complete" : "Delivery Failed"}</h2>
-          <p>{hud.status === "crashed" ? crashReasonLabel(hud) : hud.landingRating ?? statusLabel(hud.status)}</p>
+          <p>{hud.status === "crashed" ? buildCrashReasonLabel(hud) : hud.landingRating ?? statusLabel(hud.status)}</p>
           <div className={`grade-badge grade-${hud.grade.toLowerCase()}`} aria-label={`Run grade ${hud.grade}`}>
             <span>Rank</span>
             <strong>{hud.grade}</strong>
@@ -982,12 +983,6 @@ function paceLabel(tier: HudState["paceTier"]): string {
   if (tier === "silver") return "Silver pace";
   if (tier === "bronze") return "Bronze pace";
   return "Overtime";
-}
-
-function crashReasonLabel(hud: HudState): string {
-  if (hud.crashReason === "Hard Landing") return "Hard landing: slow and align before contact";
-  if (hud.crashReason === "Hull Collision") return "Hull collision: keep clear of gravity wells";
-  return hud.landingRating ?? "Insurance Event";
 }
 
 type ScoreRow = {
