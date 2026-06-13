@@ -114,6 +114,33 @@ export function hazardFieldVisual(hazard: HazardFieldVisualInput): HazardFieldVi
   };
 }
 
+export type ShipTrailVisualInput = {
+  status: SimulationSnapshot["status"];
+  speed: number;
+  fuelRatio: number;
+};
+
+export type ShipTrailVisual = {
+  color: number;
+  length: number;
+  radius: number;
+  alpha: number;
+};
+
+export function shipTrailVisual(input: ShipTrailVisualInput): ShipTrailVisual | undefined {
+  if (input.status !== "flying" || input.speed <= 8) {
+    return undefined;
+  }
+
+  const pressure = clamp((input.speed - 8) / 42, 0, 1);
+  return {
+    color: input.fuelRatio <= 0.15 ? 0xff4d6d : 0xff9f1c,
+    length: round(18 + pressure * 28, 2),
+    radius: round(4 + pressure * 8, 2),
+    alpha: round(clamp(0.34 + pressure * 0.38, 0.34, 0.72), 2)
+  };
+}
+
 class PixiRenderer implements AstroPixiRenderer {
   private app?: Application;
   private mountElement?: HTMLElement;
@@ -351,11 +378,9 @@ class PixiRenderer implements AstroPixiRenderer {
       x: center.x + Math.cos(angle - 2.45) * 12,
       y: center.y + Math.sin(angle - 2.45) * 12
     };
-    const flame = {
-      x: center.x - Math.cos(angle) * 18,
-      y: center.y - Math.sin(angle) * 18
-    };
     const speed = Math.hypot(snapshot.ship.velocity.x, snapshot.ship.velocity.y);
+    const fuelRatio = snapshot.ship.maxFuel > 0 ? snapshot.ship.fuel / snapshot.ship.maxFuel : 0;
+    const trail = shipTrailVisual({ status: snapshot.status, speed, fuelRatio });
 
     this.ship.moveTo(nose.x, nose.y).lineTo(left.x, left.y).lineTo(right.x, right.y).closePath().fill(0xfff7d6);
     this.ship.moveTo(nose.x, nose.y).lineTo(left.x, left.y).lineTo(right.x, right.y).closePath().stroke({
@@ -364,8 +389,27 @@ class PixiRenderer implements AstroPixiRenderer {
       alpha: 1
     });
 
-    if (speed > 8 && snapshot.status === "flying") {
-      this.ship.circle(flame.x, flame.y, Math.min(12, 4 + speed * 0.08)).fill({ color: 0xff9f1c, alpha: 0.55 });
+    if (trail) {
+      const tail = {
+        x: center.x - Math.cos(angle) * (16 + trail.length),
+        y: center.y - Math.sin(angle) * (16 + trail.length)
+      };
+      const leftJet = {
+        x: center.x + Math.cos(angle + Math.PI / 2) * trail.radius,
+        y: center.y + Math.sin(angle + Math.PI / 2) * trail.radius
+      };
+      const rightJet = {
+        x: center.x + Math.cos(angle - Math.PI / 2) * trail.radius,
+        y: center.y + Math.sin(angle - Math.PI / 2) * trail.radius
+      };
+      this.ship.moveTo(leftJet.x, leftJet.y).lineTo(rightJet.x, rightJet.y).lineTo(tail.x, tail.y).closePath().fill({
+        color: trail.color,
+        alpha: trail.alpha * 0.42
+      });
+      this.ship.circle(center.x - Math.cos(angle) * 18, center.y - Math.sin(angle) * 18, trail.radius).fill({
+        color: trail.color,
+        alpha: trail.alpha
+      });
     }
   }
 

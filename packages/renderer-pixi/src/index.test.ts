@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hazardFieldVisual, hazardVignetteEffect, landingPadVisual, objectiveBeaconPulse } from "./index";
+import { hazardFieldVisual, hazardVignetteEffect, landingPadVisual, objectiveBeaconPulse, shipTrailVisual } from "./index";
 
 describe("objective beacon pulse", () => {
   it("returns bounded radius and alpha values across the pulse cycle", () => {
@@ -89,5 +89,29 @@ describe("hazard field visual", () => {
     expect(high.fillAlpha).toBeGreaterThan(low.fillAlpha);
     expect(high.strokeWidth).toBeGreaterThan(low.strokeWidth);
     expect(high.rockCount).toBeGreaterThan(low.rockCount);
+  });
+});
+
+describe("ship trail visual", () => {
+  it("stays hidden when the ship is not actively moving in flight", () => {
+    expect(shipTrailVisual({ status: "paused", speed: 32, fuelRatio: 0.8 })).toBeUndefined();
+    expect(shipTrailVisual({ status: "flying", speed: 7.5, fuelRatio: 0.8 })).toBeUndefined();
+  });
+
+  it("scales trail length and radius with courier speed", () => {
+    const cruise = shipTrailVisual({ status: "flying", speed: 14, fuelRatio: 0.8 });
+    const sprint = shipTrailVisual({ status: "flying", speed: 46, fuelRatio: 0.8 });
+
+    expect(cruise).toBeDefined();
+    expect(sprint).toBeDefined();
+    expect(sprint?.length).toBeGreaterThan(cruise?.length ?? 0);
+    expect(sprint?.radius).toBeGreaterThan(cruise?.radius ?? 0);
+    expect(sprint?.alpha).toBeLessThanOrEqual(0.72);
+  });
+
+  it("uses a warning trail when fuel is nearly gone", () => {
+    expect(shipTrailVisual({ status: "flying", speed: 28, fuelRatio: 0.12 })).toMatchObject({
+      color: 0xff4d6d
+    });
   });
 });
