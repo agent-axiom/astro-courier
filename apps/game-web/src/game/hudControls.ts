@@ -1,4 +1,5 @@
 import type { RunStatus } from "@astro-courier/shared";
+import { BOOST_COOLDOWN_SECONDS } from "@astro-courier/simulation";
 
 export type ImpulseControlAction = "boost" | "brake";
 
@@ -9,6 +10,17 @@ export type ImpulseControlState = {
   paused: boolean;
   preflightOpen: boolean;
   status: RunStatus;
+};
+
+export type BoostControlPresentationInput = {
+  canBoost: boolean;
+  boostCooldownSeconds: number;
+};
+
+export type BoostControlPresentation = {
+  label: string;
+  tone: "ready" | "cooldown" | "disabled";
+  cooldownProgress: number;
 };
 
 export function canUseImpulseControl(state: ImpulseControlState): boolean {
@@ -22,4 +34,29 @@ export function canUseImpulseControl(state: ImpulseControlState): boolean {
   }
 
   return state.fuel > minimumFuel;
+}
+
+export function buildBoostControlPresentation(input: BoostControlPresentationInput): BoostControlPresentation {
+  if (input.boostCooldownSeconds > 0) {
+    return {
+      label: `Boost ${input.boostCooldownSeconds.toFixed(1)}s`,
+      tone: "cooldown",
+      cooldownProgress: round(clamp(input.boostCooldownSeconds / BOOST_COOLDOWN_SECONDS, 0, 1), 2)
+    };
+  }
+
+  return {
+    label: "Boost",
+    tone: input.canBoost ? "ready" : "disabled",
+    cooldownProgress: 0
+  };
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+function round(value: number, digits: number): number {
+  const scale = 10 ** digits;
+  return Math.round(value * scale) / scale;
 }

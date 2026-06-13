@@ -17,7 +17,7 @@ import {
   Trophy,
   Zap
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { create } from "zustand";
 import {
   buildBestRunChase,
@@ -34,7 +34,7 @@ import {
 } from "./game/bestRun";
 import { GameShell, type HudState } from "./game/GameShell";
 import { formatBearingGuidance } from "./game/bearing";
-import { canUseImpulseControl } from "./game/hudControls";
+import { buildBoostControlPresentation, canUseImpulseControl } from "./game/hudControls";
 import {
   buildContractDangerPayTrait,
   buildContractHazardTrait,
@@ -217,7 +217,8 @@ export function App() {
     status: hud.status
   });
   const canBrake = canUseImpulseControl({ action: "brake", fuel: hud.fuel, paused, preflightOpen, status: hud.status });
-  const boostActionLabel = hud.boostCooldownSeconds > 0 ? `Boost ${hud.boostCooldownSeconds.toFixed(1)}s` : "Boost";
+  const boostPresentation = buildBoostControlPresentation({ canBoost, boostCooldownSeconds: hud.boostCooldownSeconds });
+  const boostButtonStyle = { "--boost-cooldown": boostPresentation.cooldownProgress } as CSSProperties;
   const objectiveDirective = buildObjectiveDirective(hud);
   const objectiveInterceptReadout = buildObjectiveInterceptReadout({
     status: hud.status,
@@ -371,9 +372,10 @@ export function App() {
         <div className="hud-actions">
           <button
             type="button"
-            className="icon-button"
-            aria-label={boostActionLabel}
-            title={boostActionLabel}
+            className={`icon-button boost-button boost-button-${boostPresentation.tone}`}
+            aria-label={boostPresentation.label}
+            title={boostPresentation.label}
+            style={boostButtonStyle}
             disabled={!canBoost}
             onClick={() => {
               shellRef.current?.queueCommand({ type: "BOOST" });

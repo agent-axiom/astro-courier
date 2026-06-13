@@ -156,6 +156,41 @@ button {
   cursor: not-allowed;
 }
 
+.boost-button {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.boost-button svg {
+  position: relative;
+  z-index: 1;
+}
+
+.boost-button::before {
+  position: absolute;
+  inset: 3px;
+  border-radius: 6px;
+  background: conic-gradient(#ffd166 calc(var(--boost-cooldown, 0) * 1turn), rgba(255, 209, 102, 0.08) 0);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 0);
+  opacity: 0;
+  content: "";
+}
+
+.boost-button-ready {
+  border-color: rgba(124, 225, 255, 0.52);
+  color: #f8fbff;
+}
+
+.boost-button-cooldown:disabled {
+  border-color: rgba(255, 209, 102, 0.42);
+  color: rgba(255, 209, 102, 0.68);
+}
+
+.boost-button-cooldown::before {
+  opacity: 0.95;
+}
+
 .run-panel {
   position: absolute;
   right: 16px;

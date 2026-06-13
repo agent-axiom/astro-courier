@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canUseImpulseControl, type ImpulseControlState } from "./hudControls";
+import { buildBoostControlPresentation, canUseImpulseControl, type ImpulseControlState } from "./hudControls";
 
 describe("HUD impulse controls", () => {
   it("allows boost and brake only during active runs with enough fuel", () => {
@@ -17,5 +17,31 @@ describe("HUD impulse controls", () => {
     for (const [state, expected] of cases) {
       expect(canUseImpulseControl(state)).toBe(expected);
     }
+  });
+});
+
+describe("boost control presentation", () => {
+  it("formats ready, cooldown, and disabled button states", () => {
+    expect(buildBoostControlPresentation({ canBoost: true, boostCooldownSeconds: 0 })).toEqual({
+      label: "Boost",
+      tone: "ready",
+      cooldownProgress: 0
+    });
+    expect(buildBoostControlPresentation({ canBoost: false, boostCooldownSeconds: 0.4 })).toMatchObject({
+      label: "Boost 0.4s",
+      tone: "cooldown"
+    });
+    expect(buildBoostControlPresentation({ canBoost: false, boostCooldownSeconds: 0 })).toEqual({
+      label: "Boost",
+      tone: "disabled",
+      cooldownProgress: 0
+    });
+  });
+
+  it("normalizes cooldown progress for a radial button treatment", () => {
+    const presentation = buildBoostControlPresentation({ canBoost: false, boostCooldownSeconds: 0.58 });
+
+    expect(presentation.cooldownProgress).toBeGreaterThan(0);
+    expect(presentation.cooldownProgress).toBeLessThan(1);
   });
 });
