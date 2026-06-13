@@ -46,6 +46,9 @@ describe("contract rotation", () => {
     expect(buildContractPreflightKicker({ contractId: "gravity-slingshot", goldSeconds: 26, hazardSeverityMultiplier: 1.2 })).toBe(
       "Gravity Contract"
     );
+    expect(buildContractPreflightKicker({ contractId: "chain-relay", goldSeconds: 22, hazardSeverityMultiplier: 1.3 })).toBe(
+      "Chain Contract"
+    );
   });
 
   it("calls out the gravity slingshot route plan before generic fragile handling", () => {
@@ -107,6 +110,22 @@ describe("contract rotation", () => {
       label: "Route plan",
       value: "Reverse line, brake planet-side",
       tone: "speed"
+    });
+  });
+
+  it("calls out chain relay before generic danger handling", () => {
+    expect(
+      buildContractRoutePlan({
+        contractId: "chain-relay",
+        cargoKind: "unstable",
+        cargoFragility: 1,
+        hazardSeverityMultiplier: 1.3,
+        goldSeconds: 22
+      })
+    ).toEqual({
+      label: "Route plan",
+      value: "Skim, chain, fast dock",
+      tone: "danger"
     });
   });
 

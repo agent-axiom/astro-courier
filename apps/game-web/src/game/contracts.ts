@@ -70,6 +70,10 @@ export function buildContractPreflightKicker(input: ContractPreflightKickerInput
     return "Asteroid Contract";
   }
 
+  if (input.contractId === "chain-relay") {
+    return "Chain Contract";
+  }
+
   if ((input.hazardSeverityMultiplier ?? 1) >= 1.25) {
     return "Danger Contract";
   }
@@ -102,6 +106,14 @@ export function buildContractRoutePlan(input: ContractRoutePlanInput): ContractR
     return {
       label: "Route plan",
       value: "Thread field, cash danger",
+      tone: "danger"
+    };
+  }
+
+  if (input.contractId === "chain-relay") {
+    return {
+      label: "Route plan",
+      value: "Skim, chain, fast dock",
       tone: "danger"
     };
   }
