@@ -6,6 +6,8 @@ export type RunFeedSnapshot = {
   status: RunStatus;
   lastMilestone?: string;
   lastStyleAward?: number;
+  score?: number;
+  bestRunScore?: number;
   fuel: number;
   maxFuel: number;
   hazardDangerLevel?: "near" | "inside";
@@ -104,6 +106,14 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
     });
   }
 
+  if (hasCrossedBestRunScore(previous, current)) {
+    updates.push({
+      label: "PB lead",
+      value: `+${Math.round((current.score ?? 0) - (current.bestRunScore ?? 0))} score`,
+      tone: "success"
+    });
+  }
+
   if (previous.trajectoryRiskLevel !== current.trajectoryRiskLevel && current.trajectoryRiskLevel === "inside") {
     updates.push({
       label: "Collision forecast",
@@ -164,4 +174,11 @@ function formatChainSuffix(snapshot: RunFeedSnapshot): string {
   return (snapshot.styleMultiplier ?? 1) > 1 && (snapshot.styleChainSecondsRemaining ?? 0) > 0
     ? ` / chain x${(snapshot.styleMultiplier ?? 1).toFixed(2)}`
     : "";
+}
+
+function hasCrossedBestRunScore(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
+  if (current.bestRunScore === undefined || previous.bestRunScore !== current.bestRunScore) {
+    return false;
+  }
+  return (previous.score ?? 0) <= current.bestRunScore && (current.score ?? 0) > current.bestRunScore;
 }

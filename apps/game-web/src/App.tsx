@@ -272,7 +272,7 @@ export function App() {
   }, [hud.fuel, hud.hazardDangerLevel, hud.lastMilestone, hud.maxFuel, hud.status, hud.trajectoryRiskLevel]);
 
   useEffect(() => {
-    const currentSnapshot = toRunFeedSnapshot(hud);
+    const currentSnapshot = toRunFeedSnapshot(hud, bestRun);
     const updates = deriveRunFeedUpdates(previousRunFeedSnapshotRef.current, currentSnapshot);
     previousRunFeedSnapshotRef.current = currentSnapshot;
     if (updates.length === 0) {
@@ -290,9 +290,11 @@ export function App() {
     hud.lastMilestone,
     hud.lastStyleAward,
     hud.maxFuel,
+    hud.score,
     hud.status,
     hud.trajectoryRiskLevel,
-    hud.trajectoryRiskSeconds
+    hud.trajectoryRiskSeconds,
+    bestRun?.score
   ]);
 
   useEffect(() => {
@@ -1298,11 +1300,13 @@ function toHudAudioSnapshot(hud: HudState): HudAudioSnapshot {
   };
 }
 
-function toRunFeedSnapshot(hud: HudState): RunFeedSnapshot {
+function toRunFeedSnapshot(hud: HudState, bestRun: BestRun | undefined): RunFeedSnapshot {
   return {
     status: hud.status,
     lastMilestone: hud.lastMilestone,
     lastStyleAward: hud.lastStyleAward,
+    score: hud.score,
+    bestRunScore: bestRun?.score,
     fuel: hud.fuel,
     maxFuel: hud.maxFuel,
     hazardDangerLevel: hud.hazardDangerLevel,

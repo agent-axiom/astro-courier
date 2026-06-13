@@ -121,6 +121,27 @@ describe("run action feed", () => {
     ]);
   });
 
+  it("announces when the live run first overtakes the saved personal best score", () => {
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, score: 3280, bestRunScore: 3290 },
+        { ...baseSnapshot, score: 3440, bestRunScore: 3290 }
+      )
+    ).toEqual([
+      {
+        label: "PB lead",
+        value: "+150 score",
+        tone: "success"
+      }
+    ]);
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, score: 3440, bestRunScore: 3290 },
+        { ...baseSnapshot, score: 3510, bestRunScore: 3290 }
+      )
+    ).toEqual([]);
+  });
+
   it("prepends fresh updates and caps the feed", () => {
     const result = appendRunFeedUpdates(
       [
