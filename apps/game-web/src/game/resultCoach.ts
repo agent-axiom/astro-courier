@@ -84,7 +84,12 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
   if (input.scoreBreakdown.styleBonus <= 0) {
     return {
       label: "Next run",
-      value: input.contractId === "gravity-slingshot" ? "Catch one gravity sling" : "Add a skim or quick pickup",
+      value:
+        input.contractId === "gravity-slingshot"
+          ? "Catch one gravity sling"
+          : input.contractId === "asteroid-sprint"
+          ? "Thread one asteroid gap"
+          : "Add a skim or quick pickup",
       tone: "opportunity"
     };
   }

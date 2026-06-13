@@ -108,6 +108,25 @@ describe("result coach", () => {
     });
   });
 
+  it("nudges asteroid sprint clears without style toward needle threading", () => {
+    expect(
+      buildResultCoach({
+        status: "delivered",
+        contractId: "asteroid-sprint",
+        medal: "gold",
+        grade: "A",
+        cargoDamage: 0,
+        fuel: 48,
+        maxFuel: 100,
+        scoreBreakdown: baseBreakdown
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Thread one asteroid gap",
+      tone: "opportunity"
+    });
+  });
+
   it("celebrates comet-grade runs with a mastery target", () => {
     expect(
       buildResultCoach({
