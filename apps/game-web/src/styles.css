@@ -671,6 +671,7 @@ button {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 12px;
   min-height: 36px;
   padding: 8px 10px;
@@ -888,13 +889,33 @@ button {
 .style-chip span {
   position: relative;
   z-index: 1;
+  min-width: 7ch;
   color: rgba(255, 241, 199, 0.78);
 }
 
 .style-chip strong {
   position: relative;
   z-index: 1;
+  flex: 1 1 12ch;
   color: #ffffff;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.style-chip small {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  padding: 3px 7px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.22);
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
 }
 
 .style-chip-hot {
@@ -917,6 +938,12 @@ button {
 
 .style-chip-urgent span {
   color: rgba(255, 226, 232, 0.82);
+}
+
+.style-chip-urgent small {
+  border-color: rgba(255, 209, 102, 0.42);
+  background: rgba(255, 209, 102, 0.18);
+  color: #fff4c7;
 }
 
 .style-chip-urgent::after {

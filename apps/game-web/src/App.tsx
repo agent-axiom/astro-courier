@@ -948,10 +948,15 @@ export function App() {
               liveStyleReward.chainProgress > 0 ? "style-chip-chain-active" : ""
             }`}
             style={styleChipStyle}
-            aria-label={liveStyleReward.label}
+            aria-label={
+              liveStyleReward.action
+                ? `${liveStyleReward.label}: ${liveStyleReward.value}. Action: ${liveStyleReward.action}`
+                : `${liveStyleReward.label}: ${liveStyleReward.value}`
+            }
           >
             <span>{liveStyleReward.label}</span>
             <strong>{liveStyleReward.value}</strong>
+            {liveStyleReward.action ? <small>{liveStyleReward.action}</small> : null}
           </div>
         ) : null}
         {styleTargetCue ? (

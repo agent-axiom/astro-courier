@@ -25,6 +25,7 @@ export type LiveStyleRewardInput = {
 export type LiveStyleReward = {
   label: "Style bank" | "Style chain" | "Style hit";
   value: string;
+  action?: string;
   fresh: boolean;
   tone: "bank" | "chain" | "fresh" | "urgent";
   chainProgress: number;
@@ -90,6 +91,7 @@ export function buildLiveStyleReward(input: LiveStyleRewardInput): LiveStyleRewa
       : chainActive
       ? `+${roundedBonus} / x${(input.styleMultiplier ?? 1).toFixed(2)} / ${styleChainSecondsRemaining.toFixed(1)}s`
       : `+${roundedBonus}`,
+    action: urgent ? urgentAction : undefined,
     fresh,
     tone: freshAward ? "fresh" : urgent ? "urgent" : chainActive || fresh ? "chain" : "bank",
     chainProgress

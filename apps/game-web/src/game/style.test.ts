@@ -237,6 +237,7 @@ describe("live style reward HUD copy", () => {
     expect(buildLiveStyleReward({ styleBonus: 440, styleMultiplier: 1.5, styleChainSecondsRemaining: 0.8 })).toEqual({
       label: "Style chain",
       value: "Save chain / x1.50 / 0.8s",
+      action: "Save chain",
       fresh: false,
       tone: "urgent",
       chainProgress: 0.2
@@ -254,6 +255,7 @@ describe("live style reward HUD copy", () => {
     ).toEqual({
       label: "Style chain",
       value: "Dock chain / x1.50 / 0.8s",
+      action: "Dock chain",
       fresh: false,
       tone: "urgent",
       chainProgress: 0.15
@@ -272,6 +274,7 @@ describe("live style reward HUD copy", () => {
     ).toEqual({
       label: "Style chain",
       value: "Skim now / x1.50 / 0.8s",
+      action: "Skim now",
       fresh: false,
       tone: "urgent",
       chainProgress: 0.2
@@ -291,6 +294,7 @@ describe("live style reward HUD copy", () => {
     ).toEqual({
       label: "Style chain",
       value: "Sling now / x1.50 / 0.8s",
+      action: "Sling now",
       fresh: false,
       tone: "urgent",
       chainProgress: 0.2
@@ -308,6 +312,7 @@ describe("live style reward HUD copy", () => {
     ).toEqual({
       label: "Style chain",
       value: "Pickup now / x1.25 / 0.7s",
+      action: "Pickup now",
       fresh: false,
       tone: "urgent",
       chainProgress: 0.18
@@ -325,6 +330,7 @@ describe("live style reward HUD copy", () => {
     ).toEqual({
       label: "Style chain",
       value: "Boost now / x1.50 / 0.8s",
+      action: "Boost now",
       fresh: false,
       tone: "urgent",
       chainProgress: 0.2
