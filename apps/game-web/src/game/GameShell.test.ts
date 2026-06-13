@@ -132,6 +132,7 @@ describe("GameShell lifecycle", () => {
       {
         id: "first-light-delivery",
         title: "First Light Delivery",
+        briefing: "Run the standard Luma courier line. Load cleanly, protect the bottle, and dock with fuel to spare.",
         pickupLabel: "Luma North Pad",
         destinationLabel: "Tea Station Dock A",
         cargoName: "Bottled Starlight",
@@ -140,6 +141,7 @@ describe("GameShell lifecycle", () => {
       {
         id: "return-leg",
         title: "Return Leg",
+        briefing: "Reverse the route under tighter timing. The station handoff is easy; the planet-side return is the test.",
         pickupLabel: "Tea Station Dock A",
         destinationLabel: "Luma North Pad",
         cargoName: "Bottled Starlight",
@@ -148,12 +150,44 @@ describe("GameShell lifecycle", () => {
       {
         id: "asteroid-sprint",
         title: "Asteroid Sprint",
+        briefing: "Thread the asteroid field, load fast, and bring the cargo home before the sprint window closes.",
         pickupLabel: "Luma North Pad",
         destinationLabel: "Tea Station Dock A",
         cargoName: "Bottled Starlight",
         medalTimes: { bronze: 70, silver: 42, gold: 24 }
       }
     ]);
+  });
+
+  it("publishes contract-specific briefing copy for preflight selection", async () => {
+    const { renderer, input } = createShellDoubles();
+    const onHud = vi.fn();
+    vi.stubGlobal("requestAnimationFrame", vi.fn(() => 7));
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    vi.spyOn(performance, "now").mockReturnValue(1000);
+
+    const shell = new GameShell({
+      mount: {} as HTMLElement,
+      onHud,
+      renderer,
+      input,
+      initialPaused: true
+    });
+
+    await shell.start();
+    (shell as GameShell & { selectContract: (contractId: string) => void }).selectContract("asteroid-sprint");
+
+    expect(onHud.mock.calls.at(-1)?.[0]).toMatchObject({
+      contractId: "asteroid-sprint",
+      contractTitle: "Asteroid Sprint",
+      contractBriefing: "Thread the asteroid field, load fast, and bring the cargo home before the sprint window closes."
+    });
+    expect(onHud.mock.calls.at(-1)?.[0].contractOptions).toContainEqual(
+      expect.objectContaining({
+        id: "asteroid-sprint",
+        briefing: "Thread the asteroid field, load fast, and bring the cargo home before the sprint window closes."
+      })
+    );
   });
 
   it("keeps transient simulation milestones visible for the HUD publish frame", async () => {

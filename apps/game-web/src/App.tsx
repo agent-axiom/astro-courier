@@ -32,6 +32,7 @@ const initialHud: HudState = {
   objectivePhase: "pickup",
   contractId: "first-light-delivery",
   contractTitle: "First Light Delivery",
+  contractBriefing: "Run the standard Luma courier line. Load cleanly, protect the bottle, and dock with fuel to spare.",
   pickupLabel: "Luma North Pad",
   destinationLabel: "Tea Station Dock A",
   cargoName: "Bottled Starlight",
@@ -315,9 +316,7 @@ export function App() {
         <section className="preflight-overlay" aria-label="Launch briefing">
           <div className="preflight-kicker">Starter Contract</div>
           <h2>{hud.contractTitle}</h2>
-          <p>
-            Move {hud.cargoName} from {hud.pickupLabel} to {hud.destinationLabel}. Fast, intact cargo pays best.
-          </p>
+          <p>{hud.contractBriefing}</p>
           {pickupRushActive ? (
             <div className="rush-briefing">
               <TimerReset size={18} />

@@ -13,6 +13,7 @@ describe("content schemas", () => {
       "return-leg",
       "asteroid-sprint"
     ]);
+    expect(parsed.contracts.find((contract) => contract.id === "asteroid-sprint")?.briefing ?? "").toContain("asteroid");
     expect(parsed.planets[0]?.landingPads[0]?.allowedApproachSpeed).toBeGreaterThan(0);
   });
 

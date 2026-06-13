@@ -31,6 +31,7 @@ export type HudState = {
   objectivePhase: ObjectivePhase;
   contractId: string;
   contractTitle: string;
+  contractBriefing: string;
   pickupLabel: string;
   destinationLabel: string;
   cargoName: string;
@@ -62,7 +63,7 @@ export type HudState = {
   hazardDistance?: number;
 };
 
-export type ContractOption = Pick<ContractContent, "id" | "title" | "medalTimes"> & {
+export type ContractOption = Pick<ContractContent, "id" | "title" | "briefing" | "medalTimes"> & {
   pickupLabel: string;
   destinationLabel: string;
   cargoName: string;
@@ -247,6 +248,7 @@ export class GameShell {
       objectivePhase: this.world.objectivePhase,
       contractId: this.world.contractId,
       contractTitle: activeContract.title,
+      contractBriefing: activeContract.briefing,
       pickupLabel: activeContract.pickupLabel,
       destinationLabel: activeContract.destinationLabel,
       cargoName: activeContract.cargoName,
@@ -288,6 +290,7 @@ export class GameShell {
     return {
       id: contract.id,
       title: contract.title,
+      briefing: contract.briefing,
       pickupLabel: this.padLabel(contract.pickupId),
       destinationLabel: this.padLabel(contract.destinationId),
       cargoName: this.cargoName(contract.cargoId),

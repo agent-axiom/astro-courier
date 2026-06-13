@@ -63,6 +63,7 @@
     {
       "id": "first-light-delivery",
       "title": "First Light Delivery",
+      "briefing": "Run the standard Luma courier line. Load cleanly, protect the bottle, and dock with fuel to spare.",
       "pickupId": "north-pad",
       "destinationId": "dock-a",
       "cargoId": "bottled-starlight",
@@ -75,6 +76,7 @@
     {
       "id": "return-leg",
       "title": "Return Leg",
+      "briefing": "Reverse the route under tighter timing. The station handoff is easy; the planet-side return is the test.",
       "pickupId": "dock-a",
       "destinationId": "north-pad",
       "cargoId": "bottled-starlight",
@@ -87,6 +89,7 @@
     {
       "id": "asteroid-sprint",
       "title": "Asteroid Sprint",
+      "briefing": "Thread the asteroid field, load fast, and bring the cargo home before the sprint window closes.",
       "pickupId": "north-pad",
       "destinationId": "dock-a",
       "cargoId": "bottled-starlight",

@@ -54,6 +54,7 @@ export type HazardContent = {
 export type ContractContent = {
   id: string;
   title: string;
+  briefing: string;
   pickupId: string;
   destinationId: string;
   cargoId: string;

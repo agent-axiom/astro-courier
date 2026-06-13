@@ -7,6 +7,7 @@ const baseHud: HudState = {
   objectivePhase: "pickup",
   contractId: "first-light-delivery",
   contractTitle: "First Light Delivery",
+  contractBriefing: "Run the standard Luma courier line.",
   pickupLabel: "Luma North Pad",
   destinationLabel: "Tea Station Dock A",
   cargoName: "Bottled Starlight",
@@ -14,6 +15,7 @@ const baseHud: HudState = {
     {
       id: "first-light-delivery",
       title: "First Light Delivery",
+      briefing: "Run the standard Luma courier line.",
       pickupLabel: "Luma North Pad",
       destinationLabel: "Tea Station Dock A",
       cargoName: "Bottled Starlight",

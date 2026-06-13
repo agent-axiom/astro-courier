@@ -67,6 +67,7 @@ const starterSystem: SystemContent = {
     {
       id: "first-light",
       title: "First Light Delivery",
+      briefing: "Run the standard Luma courier line.",
       pickupId: "north-pad",
       destinationId: "dock-a",
       cargoId: "bottled-starlight",
@@ -151,6 +152,7 @@ describe("deterministic Astro Courier simulation", () => {
         {
           id: "return-leg",
           title: "Return Leg",
+          briefing: "Reverse the route under tighter timing.",
           pickupId: "dock-a",
           destinationId: "north-pad",
           cargoId: "bottled-starlight",

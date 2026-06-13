@@ -47,6 +47,7 @@ export const cargoSchema = z.object({
 export const contractSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
+  briefing: z.string().min(1),
   pickupId: z.string().min(1),
   destinationId: z.string().min(1),
   cargoId: z.string().min(1),
@@ -127,4 +128,3 @@ export type SystemContent = z.infer<typeof systemSchema>;
 export function validateSystemContent(content: unknown): SystemContent {
   return systemSchema.parse(content);
 }
-
