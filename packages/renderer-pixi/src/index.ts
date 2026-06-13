@@ -195,6 +195,46 @@ export function hazardFieldVisual(hazard: HazardFieldVisualInput): HazardFieldVi
   };
 }
 
+export type GravitySlingCueVisualInput = Pick<SimulationSnapshot, "status" | "gravitySlingOpportunity"> & {
+  tick?: number;
+};
+
+export type GravitySlingCueVisual = {
+  color: number;
+  tone: "setup" | "ready";
+  radiusOffset: number;
+  dashRadius: number;
+  alpha: number;
+  width: number;
+};
+
+export function gravitySlingCueVisual(input: GravitySlingCueVisualInput): GravitySlingCueVisual | undefined {
+  if (input.status !== "flying" || !input.gravitySlingOpportunity) {
+    return undefined;
+  }
+
+  const pulse = (Math.sin((input.tick ?? 0) * 0.18) + 1) / 2;
+  if (input.gravitySlingOpportunity.ready) {
+    return {
+      color: 0xf8e59a,
+      tone: "ready",
+      radiusOffset: round(30 + pulse * 9, 2),
+      dashRadius: round(3.6 + pulse * 1.2, 2),
+      alpha: round(0.34 + pulse * 0.18, 2),
+      width: round(2.2 + pulse * 0.8, 2)
+    };
+  }
+
+  return {
+    color: 0x7ce1ff,
+    tone: "setup",
+    radiusOffset: round(24 + pulse * 7, 2),
+    dashRadius: round(2.6 + pulse * 0.8, 2),
+    alpha: round(0.2 + pulse * 0.12, 2),
+    width: round(1.4 + pulse * 0.5, 2)
+  };
+}
+
 export type ShipTrailVisualInput = {
   status: SimulationSnapshot["status"];
   speed: number;
@@ -464,12 +504,36 @@ class PixiRenderer implements AstroPixiRenderer {
 
   private drawGravity(snapshot: SimulationSnapshot, project: (point: Vec2) => Vec2): void {
     this.gravity.clear();
+    const slingCue = gravitySlingCueVisual({
+      status: snapshot.status,
+      gravitySlingOpportunity: snapshot.gravitySlingOpportunity,
+      tick: snapshot.tick
+    });
     for (const source of snapshot.gravitySources) {
       const center = project(source.position);
       this.gravity
         .circle(center.x, center.y, source.influenceRadius)
         .stroke({ color: 0x6fb4ff, width: 1, alpha: 0.08 });
       this.gravity.circle(center.x, center.y, source.radius + 18).stroke({ color: 0x9ce8ff, width: 1, alpha: 0.2 });
+      if (slingCue && snapshot.gravitySlingOpportunity?.id === source.id) {
+        const radius = source.radius + slingCue.radiusOffset;
+        this.gravity.circle(center.x, center.y, radius).stroke({
+          color: slingCue.color,
+          width: slingCue.width,
+          alpha: slingCue.alpha
+        });
+        for (let index = 0; index < 4; index += 1) {
+          const angle = snapshot.tick * 0.025 + index * (Math.PI / 2);
+          const marker = {
+            x: center.x + Math.cos(angle) * radius,
+            y: center.y + Math.sin(angle) * radius
+          };
+          this.gravity.circle(marker.x, marker.y, slingCue.dashRadius).fill({
+            color: slingCue.color,
+            alpha: Math.min(0.88, slingCue.alpha + 0.2)
+          });
+        }
+      }
     }
   }
 

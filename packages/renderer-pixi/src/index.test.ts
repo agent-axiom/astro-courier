@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   boostBurstVisual,
+  gravitySlingCueVisual,
   hazardFieldVisual,
   hazardVignetteEffect,
   landingPadVisual,
@@ -166,6 +167,46 @@ describe("hazard field visual", () => {
     expect(high.fillAlpha).toBeGreaterThan(low.fillAlpha);
     expect(high.strokeWidth).toBeGreaterThan(low.strokeWidth);
     expect(high.rockCount).toBeGreaterThan(low.rockCount);
+  });
+});
+
+describe("gravity sling cue visual", () => {
+  it("stays hidden outside active flight or without a sling opportunity", () => {
+    expect(gravitySlingCueVisual({ status: "paused" })).toBeUndefined();
+    expect(gravitySlingCueVisual({ status: "flying" })).toBeUndefined();
+  });
+
+  it("makes ready sling windows more assertive than setup windows", () => {
+    const setup = gravitySlingCueVisual({
+      status: "flying",
+      gravitySlingOpportunity: {
+        id: "luma",
+        name: "Luma",
+        distance: 160,
+        ready: false,
+        speedThreshold: 54,
+        styleBonus: 240
+      },
+      tick: 12
+    });
+    const ready = gravitySlingCueVisual({
+      status: "flying",
+      gravitySlingOpportunity: {
+        id: "luma",
+        name: "Luma",
+        distance: 160,
+        ready: true,
+        speedThreshold: 54,
+        styleBonus: 240
+      },
+      tick: 12
+    });
+
+    expect(setup).toMatchObject({ color: 0x7ce1ff, tone: "setup" });
+    expect(ready).toMatchObject({ color: 0xf8e59a, tone: "ready" });
+    expect(ready?.width).toBeGreaterThan(setup?.width ?? 0);
+    expect(ready?.alpha).toBeGreaterThan(setup?.alpha ?? 0);
+    expect(ready?.dashRadius).toBeGreaterThan(setup?.dashRadius ?? 0);
   });
 });
 
