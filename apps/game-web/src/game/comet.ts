@@ -30,8 +30,14 @@ export type CometRunReadoutInput = {
 export type CometRunReadout = {
   label: "Comet run";
   value: string;
+  detail?: string;
   tone: "live" | "warning" | "lost";
 };
+
+function formatCometReserveDetail(fuelReserve: number): string {
+  const reservePercent = Math.max(0, Math.round(fuelReserve * 100));
+  return `Reserve ${reservePercent}% / need ${Math.round(COMET_RESERVE_MIN_RATIO * 100)}%`;
+}
 
 export function isLiveCometDockArmed(input: LiveCometDockInput): boolean {
   const fuelReserve = input.maxFuel > 0 ? input.fuel / input.maxFuel : 0;
@@ -67,10 +73,12 @@ export function buildCometRunReadout(input: CometRunReadoutInput): CometRunReado
   }
 
   const fuelReserve = input.maxFuel > 0 ? input.fuel / input.maxFuel : 0;
+  const reserveDetail = formatCometReserveDetail(fuelReserve);
   if (fuelReserve < COMET_RESERVE_MIN_RATIO) {
     return {
       label: "Comet run",
       value: "Reserve low",
+      detail: reserveDetail,
       tone: "lost"
     };
   }
@@ -79,6 +87,7 @@ export function buildCometRunReadout(input: CometRunReadoutInput): CometRunReado
     return {
       label: "Comet run",
       value: "Perfect dock armed",
+      detail: reserveDetail,
       tone: "live"
     };
   }
@@ -87,6 +96,7 @@ export function buildCometRunReadout(input: CometRunReadoutInput): CometRunReado
     return {
       label: "Comet run",
       value: "Coast for comet",
+      detail: reserveDetail,
       tone: "warning"
     };
   }
@@ -96,6 +106,7 @@ export function buildCometRunReadout(input: CometRunReadoutInput): CometRunReado
       return {
         label: "Comet run",
         value: "Slow for perfect dock",
+        detail: reserveDetail,
         tone: "warning"
       };
     }
@@ -103,6 +114,7 @@ export function buildCometRunReadout(input: CometRunReadoutInput): CometRunReado
       return {
         label: "Comet run",
         value: "Line up perfect dock",
+        detail: reserveDetail,
         tone: "warning"
       };
     }
@@ -110,6 +122,7 @@ export function buildCometRunReadout(input: CometRunReadoutInput): CometRunReado
       return {
         label: "Comet run",
         value: "Feather for perfect dock",
+        detail: reserveDetail,
         tone: "warning"
       };
     }
@@ -118,6 +131,7 @@ export function buildCometRunReadout(input: CometRunReadoutInput): CometRunReado
   return {
     label: "Comet run",
     value: "Clean + reserve",
+    detail: reserveDetail,
     tone: "live"
   };
 }

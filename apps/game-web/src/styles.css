@@ -624,7 +624,8 @@ button {
 }
 
 .comet-chip span,
-.comet-chip strong {
+.comet-chip strong,
+.comet-chip small {
   min-width: 0;
   overflow-wrap: anywhere;
   line-height: 1.15;
@@ -637,6 +638,14 @@ button {
 .comet-chip strong {
   color: #ffffff;
   text-align: right;
+}
+
+.comet-chip small {
+  grid-column: 2 / 4;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.71rem;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .comet-live {

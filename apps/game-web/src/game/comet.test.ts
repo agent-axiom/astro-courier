@@ -39,6 +39,7 @@ describe("live comet run readout", () => {
     ).toEqual({
       label: "Comet run",
       value: "Clean + reserve",
+      detail: "Reserve 82% / need 75%",
       tone: "live"
     });
   });
@@ -59,6 +60,7 @@ describe("live comet run readout", () => {
     ).toEqual({
       label: "Comet run",
       value: "Perfect dock armed",
+      detail: "Reserve 84% / need 75%",
       tone: "live"
     });
   });
@@ -79,6 +81,7 @@ describe("live comet run readout", () => {
     ).toEqual({
       label: "Comet run",
       value: "Slow for perfect dock",
+      detail: "Reserve 84% / need 75%",
       tone: "warning"
     });
     expect(
@@ -96,6 +99,7 @@ describe("live comet run readout", () => {
     ).toEqual({
       label: "Comet run",
       value: "Line up perfect dock",
+      detail: "Reserve 84% / need 75%",
       tone: "warning"
     });
     expect(
@@ -113,6 +117,7 @@ describe("live comet run readout", () => {
     ).toEqual({
       label: "Comet run",
       value: "Feather for perfect dock",
+      detail: "Reserve 84% / need 75%",
       tone: "warning"
     });
   });
@@ -130,6 +135,7 @@ describe("live comet run readout", () => {
     ).toEqual({
       label: "Comet run",
       value: "Coast for comet",
+      detail: "Reserve 78% / need 75%",
       tone: "warning"
     });
   });
@@ -181,6 +187,7 @@ describe("live comet run readout", () => {
     ).toEqual({
       label: "Comet run",
       value: "Reserve low",
+      detail: "Reserve 74% / need 75%",
       tone: "lost"
     });
   });

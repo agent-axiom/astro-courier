@@ -885,6 +885,7 @@ export function App() {
             <Star size={16} />
             <span>{cometRunReadout.label}</span>
             <strong>{cometRunReadout.value}</strong>
+            {cometRunReadout.detail ? <small>{cometRunReadout.detail}</small> : null}
           </div>
         ) : null}
         {liveBestPace ? (
