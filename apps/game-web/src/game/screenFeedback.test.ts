@@ -53,11 +53,15 @@ describe("screen feedback", () => {
 
   it("maps hazard and fuel warnings to warning feedback", () => {
     expect(buildScreenFeedback(["fuel-critical"])).toEqual({
+      label: "Fuel critical",
+      value: "Coast now",
       tone: "warning",
       intensity: "medium",
       durationMs: 440
     });
     expect(buildScreenFeedback(["hazard-contact"])).toEqual({
+      label: "Hazard contact",
+      value: "Burn out",
       tone: "danger",
       intensity: "medium",
       durationMs: 440
@@ -66,11 +70,15 @@ describe("screen feedback", () => {
 
   it("maps cargo damage to a medium warning flash", () => {
     expect(buildScreenFeedback(["cargo-damage"])).toEqual({
+      label: "Cargo hit",
+      value: "Keep control",
       tone: "warning",
       intensity: "medium",
       durationMs: 400
     });
     expect(buildScreenFeedback(["cargo-damage", "hazard-contact"])).toEqual({
+      label: "Hazard contact",
+      value: "Burn out",
       tone: "danger",
       intensity: "medium",
       durationMs: 440
@@ -79,6 +87,8 @@ describe("screen feedback", () => {
 
   it("maps trajectory warnings to medium warning feedback", () => {
     expect(buildScreenFeedback(["trajectory-warning"])).toEqual({
+      label: "Vector warning",
+      value: "Change line",
       tone: "warning",
       intensity: "medium",
       durationMs: 380
@@ -87,6 +97,8 @@ describe("screen feedback", () => {
 
   it("strengthens feedback when cargo damage and trajectory warnings stack", () => {
     expect(buildScreenFeedback(["cargo-damage", "trajectory-warning"])).toEqual({
+      label: "Cargo vector",
+      value: "Clear hazard",
       tone: "warning",
       intensity: "heavy",
       durationMs: 460

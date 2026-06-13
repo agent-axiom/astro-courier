@@ -47,13 +47,13 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[]): ScreenFe
     return { label: "Comet dock", value: "Perfect line armed", tone: "style", intensity: "medium", durationMs: 460 };
   }
   if (events.includes("hazard-contact")) {
-    return { tone: "danger", intensity: "medium", durationMs: 440 };
+    return { label: "Hazard contact", value: "Burn out", tone: "danger", intensity: "medium", durationMs: 440 };
   }
   if (events.includes("trajectory-warning") && events.includes("cargo-damage")) {
-    return { tone: "warning", intensity: "heavy", durationMs: 460 };
+    return { label: "Cargo vector", value: "Clear hazard", tone: "warning", intensity: "heavy", durationMs: 460 };
   }
   if (events.includes("trajectory-warning")) {
-    return { tone: "warning", intensity: "medium", durationMs: 380 };
+    return { label: "Vector warning", value: "Change line", tone: "warning", intensity: "medium", durationMs: 380 };
   }
   if (events.includes("medal-drop")) {
     return { tone: "warning", intensity: "medium", durationMs: 360 };
@@ -65,10 +65,10 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[]): ScreenFe
     return { label: "Chain saved", value: "Combo restored", accent: "chain", tone: "style", intensity: "medium", durationMs: 440 };
   }
   if (events.includes("fuel-critical")) {
-    return { tone: "warning", intensity: "medium", durationMs: 440 };
+    return { label: "Fuel critical", value: "Coast now", tone: "warning", intensity: "medium", durationMs: 440 };
   }
   if (events.includes("cargo-damage")) {
-    return { tone: "warning", intensity: "medium", durationMs: 400 };
+    return { label: "Cargo hit", value: "Keep control", tone: "warning", intensity: "medium", durationMs: 400 };
   }
   if (events.includes("launch-burst")) {
     return { label: "Launch burst", value: "+120 style", tone: "style", intensity: "medium", durationMs: 420 };
