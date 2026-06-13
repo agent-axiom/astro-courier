@@ -57,6 +57,43 @@ describe("flight director", () => {
     });
   });
 
+  it("surfaces no-brake finesse when a clean dock is ready without manual braking", () => {
+    expect(
+      buildFlightDirector({
+        status: "flying",
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        landingStatus: "ready",
+        cargoDamage: 0,
+        manualBrakeUsed: false,
+        targetDistance: 18
+      })
+    ).toEqual({
+      label: "Flight director",
+      action: "Coast dock",
+      detail: "+150 no brake",
+      tone: "opportunity",
+      progress: 1
+    });
+    expect(
+      buildFlightDirector({
+        status: "flying",
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        landingStatus: "ready",
+        cargoDamage: 0,
+        manualBrakeUsed: true,
+        targetDistance: 18
+      })
+    ).toEqual({
+      label: "Flight director",
+      action: "Dock now",
+      detail: "Clean cargo",
+      tone: "approach",
+      progress: 1
+    });
+  });
+
   it("cashouts a fading style chain before ordinary delivery guidance", () => {
     expect(
       buildFlightDirector({

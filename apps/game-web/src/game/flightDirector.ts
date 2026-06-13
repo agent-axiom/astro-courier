@@ -1,4 +1,4 @@
-import { HAZARD_THREAD_SPEED_THRESHOLD } from "@astro-courier/simulation";
+import { HAZARD_THREAD_SPEED_THRESHOLD, NO_BRAKE_STYLE_BONUS } from "@astro-courier/simulation";
 import type { LandingGuidanceStatus, ObjectivePhase, RunStatus } from "@astro-courier/shared";
 
 export type FlightDirectorInput = {
@@ -18,6 +18,7 @@ export type FlightDirectorInput = {
   cargoDamage?: number;
   styleMultiplier?: number;
   styleChainSecondsRemaining?: number;
+  manualBrakeUsed?: boolean;
 };
 
 export type FlightDirector = {
@@ -82,6 +83,15 @@ export function buildFlightDirector(input: FlightDirectorInput): FlightDirector 
   if (input.gravitySlingReady === true && (input.gravitySlingStyleBonus ?? 0) > 0 && (input.cargoDamage ?? 0) <= 0.02) {
     const payout = Math.round((input.gravitySlingStyleBonus ?? 0) * Math.max(1, input.styleMultiplier ?? 1));
     return director("Hold sling", `+${payout} ready`, "opportunity", 1);
+  }
+
+  if (
+    input.landingStatus === "ready" &&
+    input.objectivePhase === "delivery" &&
+    input.manualBrakeUsed === false &&
+    (input.cargoDamage ?? 0) <= 0.02
+  ) {
+    return director("Coast dock", `+${NO_BRAKE_STYLE_BONUS} no brake`, "opportunity", 1);
   }
 
   if (input.landingStatus === "ready" && input.objectivePhase === "delivery") {

@@ -485,7 +485,8 @@ export function App() {
     gravitySlingStyleBonus: hud.gravitySlingStyleBonus,
     cargoDamage: hud.cargoDamage,
     styleMultiplier: hud.styleMultiplier,
-    styleChainSecondsRemaining: hud.styleChainSecondsRemaining
+    styleChainSecondsRemaining: hud.styleChainSecondsRemaining,
+    manualBrakeUsed: hud.manualBrakeUsed
   });
   const flightDirectorStyle = { "--flight-director-progress": flightDirector?.progress ?? 0 } as CSSProperties;
   const routeFocusReadout = buildRouteFocusReadout({
