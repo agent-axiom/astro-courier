@@ -2,6 +2,8 @@ import starterRoute from "@astro-courier/content/data/systems/starter-route.json
 import { validateSystemContent } from "@astro-courier/content";
 import { createAstroPixiRenderer, type AstroPixiRenderer } from "@astro-courier/renderer-pixi";
 import {
+  QUICK_PICKUP_STYLE_BONUS,
+  QUICK_PICKUP_WINDOW_SECONDS,
   createWorldFromSystem,
   predictTrajectory,
   snapshotWorld,
@@ -52,6 +54,8 @@ export type HudState = {
   scoreBreakdown: ScoreBreakdown;
   paceTier: ContractPaceTier;
   paceSecondsRemaining: number;
+  quickPickupSecondsRemaining: number;
+  quickPickupBonus: number;
   approachStreakSeconds: number;
   bestApproachStreakSeconds: number;
   hazardDangerLevel?: "near" | "inside";
@@ -267,6 +271,8 @@ export class GameShell {
       scoreBreakdown: result.scoreBreakdown,
       paceTier: pace.tier,
       paceSecondsRemaining: pace.secondsRemaining,
+      quickPickupSecondsRemaining: this.quickPickupSecondsRemaining(result.elapsedSeconds),
+      quickPickupBonus: QUICK_PICKUP_STYLE_BONUS,
       approachStreakSeconds: snapshot.approachStreakSeconds,
       bestApproachStreakSeconds: snapshot.bestApproachStreakSeconds,
       hazardDangerLevel: snapshot.nearestHazard?.dangerLevel,
@@ -305,6 +311,13 @@ export class GameShell {
 
   private cargoName(cargoId: string): string {
     return this.system.cargo.find((cargo) => cargo.id === cargoId)?.name ?? titleFromId(cargoId);
+  }
+
+  private quickPickupSecondsRemaining(elapsedSeconds: number): number {
+    if (this.world.objectivePhase !== "pickup") {
+      return 0;
+    }
+    return Math.max(0, QUICK_PICKUP_WINDOW_SECONDS - elapsedSeconds);
   }
 }
 

@@ -62,6 +62,8 @@ describe("GameShell lifecycle", () => {
     expect(onHud.mock.calls[0]?.[0].status).toBe("paused");
     expect(onHud.mock.calls[0]?.[0].paceTier).toBe("gold");
     expect(onHud.mock.calls[0]?.[0].paceSecondsRemaining).toBe(35);
+    expect(onHud.mock.calls[0]?.[0].quickPickupSecondsRemaining).toBe(12);
+    expect(onHud.mock.calls[0]?.[0].quickPickupBonus).toBe(180);
     expect(input.commands).not.toHaveBeenCalled();
     expect(renderer.render).toHaveBeenCalled();
   });
@@ -95,6 +97,7 @@ describe("GameShell lifecycle", () => {
     expect(onHud.mock.calls.at(-1)?.[0].status).toBe("flying");
     expect(onHud.mock.calls.at(-1)?.[0].elapsedSeconds).toBeGreaterThan(0);
     expect(onHud.mock.calls.at(-1)?.[0].paceSecondsRemaining).toBeLessThan(35);
+    expect(onHud.mock.calls.at(-1)?.[0].quickPickupSecondsRemaining).toBeLessThan(12);
     expect(input.commands).toHaveBeenCalled();
   });
 

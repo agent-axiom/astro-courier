@@ -233,6 +233,28 @@ button {
   color: #ffadc1;
 }
 
+.rush-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 36px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  background: rgba(124, 225, 255, 0.16);
+  color: #c6f6ff;
+  font-size: 0.84rem;
+  font-weight: 850;
+}
+
+.rush-chip span {
+  color: rgba(226, 250, 255, 0.76);
+}
+
+.rush-chip strong {
+  color: #ffffff;
+}
+
 .bearing-chip {
   display: flex;
   align-items: center;
@@ -413,6 +435,36 @@ button {
   color: #c9d8f2;
   font-size: 0.93rem;
   line-height: 1.45;
+}
+
+.rush-briefing {
+  display: grid;
+  grid-template-columns: 18px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 9px 10px;
+  border-radius: 7px;
+  background: rgba(124, 225, 255, 0.13);
+  color: #d9fbff;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.rush-briefing span,
+.rush-briefing strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.rush-briefing span {
+  color: rgba(226, 250, 255, 0.76);
+}
+
+.rush-briefing strong {
+  color: #ffffff;
+  text-align: right;
 }
 
 .contract-selector {
@@ -791,6 +843,15 @@ button {
 
   .preflight-overlay h2 {
     font-size: 1.25rem;
+  }
+
+  .rush-briefing {
+    grid-template-columns: 18px 1fr;
+  }
+
+  .rush-briefing strong {
+    grid-column: 1 / -1;
+    text-align: left;
   }
 
   .preflight-stats span {

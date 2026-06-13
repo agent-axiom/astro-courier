@@ -43,6 +43,8 @@ const baseHud: HudState = {
   targetDistance: 220,
   paceTier: "gold",
   paceSecondsRemaining: 35,
+  quickPickupSecondsRemaining: 12,
+  quickPickupBonus: 180,
   approachStreakSeconds: 0,
   bestApproachStreakSeconds: 0,
   hazardDangerLevel: undefined,

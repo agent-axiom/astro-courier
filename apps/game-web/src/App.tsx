@@ -1,4 +1,17 @@
-import { Flag, Gauge, MapPin, OctagonMinus, PackageCheck, Pause, Play, RotateCcw, Satellite, Trophy, Zap } from "lucide-react";
+import {
+  Flag,
+  Gauge,
+  MapPin,
+  OctagonMinus,
+  PackageCheck,
+  Pause,
+  Play,
+  RotateCcw,
+  Satellite,
+  TimerReset,
+  Trophy,
+  Zap
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { create } from "zustand";
 import { getBestRun, recordBestRun, type BestRun } from "./game/bestRun";
@@ -42,6 +55,8 @@ const initialHud: HudState = {
   },
   paceTier: "gold",
   paceSecondsRemaining: 35,
+  quickPickupSecondsRemaining: 12,
+  quickPickupBonus: 180,
   approachStreakSeconds: 0,
   bestApproachStreakSeconds: 0,
   hazardDangerLevel: undefined,
@@ -122,6 +137,7 @@ export function App() {
   const fuelRatio = hud.maxFuel > 0 ? hud.fuel / hud.maxFuel : 0;
   const cargoIntegrity = Math.max(0, 1 - hud.cargoDamage);
   const runFinished = hud.status === "delivered" || hud.status === "crashed";
+  const pickupRushActive = hud.objectivePhase === "pickup" && hud.quickPickupSecondsRemaining > 0 && !runFinished;
   const radioMessage = buildRadioMessage(hud);
   const targetDistanceLabel = hud.targetDistance === undefined ? "-" : `${Math.round(hud.targetDistance)}m`;
   const bearingGuidance = hud.targetRelativeBearing === undefined ? undefined : formatBearingGuidance(hud.targetRelativeBearing);
@@ -243,6 +259,14 @@ export function App() {
           <span>{paceLabel(hud.paceTier)}</span>
           <strong>{hud.paceTier === "overtime" ? "Expired" : `${hud.paceSecondsRemaining.toFixed(1)}s`}</strong>
         </div>
+        {pickupRushActive ? (
+          <div className="rush-chip">
+            <span>Pickup rush</span>
+            <strong>
+              +{hud.quickPickupBonus} / {hud.quickPickupSecondsRemaining.toFixed(1)}s
+            </strong>
+          </div>
+        ) : null}
         {hud.hazardDangerLevel ? (
           <div className={`hazard-chip hazard-${hud.hazardDangerLevel}`}>
             <span>{hud.hazardDangerLevel === "inside" ? "Hazard contact" : "Hazard near"}</span>
@@ -279,6 +303,15 @@ export function App() {
           <p>
             Move {hud.cargoName} from {hud.pickupLabel} to {hud.destinationLabel}. Fast, intact cargo pays best.
           </p>
+          {pickupRushActive ? (
+            <div className="rush-briefing">
+              <TimerReset size={18} />
+              <span>Pickup rush</span>
+              <strong>
+                +{hud.quickPickupBonus} style before {hud.quickPickupSecondsRemaining.toFixed(0)}s
+              </strong>
+            </div>
+          ) : null}
           {hud.contractOptions.length > 1 ? (
             <div className="contract-selector" aria-label="Contract selection">
               {hud.contractOptions.map((contract) => (
