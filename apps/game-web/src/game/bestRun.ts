@@ -179,7 +179,9 @@ export function buildRouteBoardTarget(
     };
   }
 
-  const unmasteredContract = contracts.find((contract) => bestRunsByContract[contract.id]?.medal !== "comet");
+  const unmasteredContract = contracts
+    .filter((contract) => bestRunsByContract[contract.id]?.medal !== "comet")
+    .sort((left, right) => medalRank(bestRunsByContract[right.id]?.medal) - medalRank(bestRunsByContract[left.id]?.medal))[0];
   if (unmasteredContract) {
     return {
       label: "Next target",
@@ -283,6 +285,21 @@ function progressTone(count: number, total: number): RouteBoardProgress["tone"] 
     return "complete";
   }
   return count > 0 ? "progress" : "open";
+}
+
+function medalRank(medal: RunMedal | undefined): number {
+  switch (medal) {
+    case "comet":
+      return 4;
+    case "gold":
+      return 3;
+    case "silver":
+      return 2;
+    case "bronze":
+      return 1;
+    default:
+      return 0;
+  }
 }
 
 function storageKey(contractKey: string): string {

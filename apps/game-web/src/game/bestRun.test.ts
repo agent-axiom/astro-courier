@@ -155,6 +155,17 @@ describe("route board next target copy", () => {
         "asteroid-sprint": { score: 2400, elapsedSeconds: 35.5, medal: "gold" },
         "gravity-slingshot": { score: 2100, elapsedSeconds: 48.6, medal: "bronze" }
       })
+    ).toEqual({ label: "Next target", value: "Comet Asteroid Sprint", tone: "comet", contractId: "asteroid-sprint" });
+  });
+
+  it("keeps board order as the tie-breaker among equal comet chases", () => {
+    expect(
+      buildRouteBoardTarget(contracts, {
+        "first-light-delivery": { score: 1800, elapsedSeconds: 34.2, medal: "gold" },
+        "return-leg": { score: 2600, elapsedSeconds: 27.1, medal: "gold" },
+        "asteroid-sprint": { score: 2400, elapsedSeconds: 35.5, medal: "silver" },
+        "gravity-slingshot": { score: 2100, elapsedSeconds: 48.6, medal: "bronze" }
+      })
     ).toEqual({ label: "Next target", value: "Comet First Light", tone: "comet", contractId: "first-light-delivery" });
   });
 
