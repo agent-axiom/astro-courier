@@ -5,6 +5,7 @@ import {
   EXPRESS_FINISH_STYLE_BONUS,
   HAZARD_SKIM_BASE_BONUS,
   HAZARD_THREAD_SPEED_THRESHOLD,
+  LAUNCH_BURST_STYLE_BONUS,
   LAST_DROP_FUEL_RATIO,
   LAST_DROP_STYLE_BONUS,
   NO_BRAKE_STYLE_BONUS,
@@ -29,6 +30,7 @@ export type PreflightBonusObjectiveInput = {
 export type PreflightBonusObjective = {
   label:
     | "Rush pickup"
+    | "Launch burst"
     | "Express finish"
     | "Clean skim"
     | "Perfect dock"
@@ -63,6 +65,10 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
     label: "Express finish",
     value: `+${EXPRESS_FINISH_STYLE_BONUS} / gold pace`
   } satisfies PreflightBonusObjective;
+  const launchBurst = {
+    label: "Launch burst",
+    value: `+${LAUNCH_BURST_STYLE_BONUS} / boost after pickup`
+  } satisfies PreflightBonusObjective;
   const lastDrop = {
     label: "Last Drop",
     value: `+${LAST_DROP_STYLE_BONUS} / <=${Math.round(LAST_DROP_FUEL_RATIO * 100)}% fuel`
@@ -75,6 +81,7 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
   if (input.contractId === "chain-relay") {
     return [
       rushPickup,
+      launchBurst,
       expressFinish,
       {
         label: "Chain finish",
@@ -92,6 +99,7 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
   if ((input.hazardSeverityMultiplier ?? 1) >= 1.25) {
     return [
       rushPickup,
+      launchBurst,
       expressFinish,
       {
         label: "Needle thread",
@@ -109,6 +117,7 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
   if (input.contractId === "gravity-slingshot") {
     return [
       rushPickup,
+      launchBurst,
       expressFinish,
       {
         label: "Gravity sling",
@@ -126,6 +135,7 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
   if (input.contractId === "return-leg") {
     return [
       rushPickup,
+      launchBurst,
       expressFinish,
       {
         label: "Chain finish",
@@ -142,6 +152,7 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
 
   return [
     rushPickup,
+    launchBurst,
     expressFinish,
     {
       label: "Clean skim",

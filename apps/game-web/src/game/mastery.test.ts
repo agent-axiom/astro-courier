@@ -21,6 +21,7 @@ describe("preflight bonus objectives", () => {
   it("summarizes active style objectives before launch", () => {
     expect(buildPreflightBonusObjectives({ quickPickupBonus: 180 })).toEqual([
       { label: "Rush pickup", value: "+180" },
+      { label: "Launch burst", value: "+120 / boost after pickup" },
       { label: "Express finish", value: "+180 / gold pace" },
       { label: "Clean skim", value: "from +140" },
       { label: "Perfect dock", value: "+220" },
@@ -38,6 +39,7 @@ describe("preflight bonus objectives", () => {
       })
     ).toEqual([
       { label: "Rush pickup", value: "+180" },
+      { label: "Launch burst", value: "+120 / boost after pickup" },
       { label: "Express finish", value: "+180 / gold pace" },
       { label: "Needle thread", value: "42+ speed" },
       { label: "Danger pay", value: "+180" },
@@ -55,6 +57,7 @@ describe("preflight bonus objectives", () => {
       })
     ).toEqual([
       { label: "Rush pickup", value: "+180" },
+      { label: "Launch burst", value: "+120 / boost after pickup" },
       { label: "Express finish", value: "+180 / gold pace" },
       { label: "Gravity sling", value: "+240 / 54+ speed" },
       { label: "Perfect dock", value: "+220" },
@@ -71,6 +74,7 @@ describe("preflight bonus objectives", () => {
       })
     ).toEqual([
       { label: "Rush pickup", value: "+180" },
+      { label: "Launch burst", value: "+120 / boost after pickup" },
       { label: "Express finish", value: "+180 / gold pace" },
       { label: "Chain finish", value: "carry chain home" },
       { label: "Perfect dock", value: "+220" },
@@ -88,6 +92,7 @@ describe("preflight bonus objectives", () => {
       })
     ).toEqual([
       { label: "Rush pickup", value: "+180" },
+      { label: "Launch burst", value: "+120 / boost after pickup" },
       { label: "Express finish", value: "+180 / gold pace" },
       { label: "Chain finish", value: "5.5s chain window" },
       { label: "Needle thread", value: "42+ speed" },

@@ -1059,6 +1059,8 @@ export function App() {
               <span key={objective.label}>
                 {objective.label === "Rush pickup" ? (
                   <TimerReset size={17} />
+                ) : objective.label === "Launch burst" ? (
+                  <Zap size={17} />
                 ) : objective.label === "Clean skim" || objective.label === "Needle thread" || objective.label === "Danger pay" ? (
                   <ShieldAlert size={17} />
                 ) : objective.label === "Chain finish" ? (
