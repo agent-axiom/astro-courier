@@ -201,6 +201,17 @@ describe("radio feedback copy", () => {
     ).toContain("Last drop");
   });
 
+  it("celebrates no-brake finesse finishes before generic medal copy", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        status: "delivered",
+        medal: "silver",
+        lastMilestone: "No Brake Finesse"
+      })
+    ).toContain("No-brake finesse");
+  });
+
   it("praises a held stable approach before generic landing guidance", () => {
     expect(buildRadioMessage({ ...baseHud, landingStatus: "ready", approachStreakSeconds: 1.4 })).toContain("Perfect setup");
     expect(buildRadioMessage({ ...baseHud, landingStatus: "ready", approachStreakSeconds: 1.4 })).toContain("+220");
@@ -411,6 +422,9 @@ describe("radio feedback copy", () => {
       "Perfect approach"
     );
     expect(buildRadioMessage({ ...baseHud, status: "delivered", medal: "gold", lastMilestone: "Eco Drift" })).toContain("Eco drift");
+    expect(buildRadioMessage({ ...baseHud, status: "delivered", medal: "gold", lastMilestone: "No Brake Finesse" })).toContain(
+      "No-brake finesse"
+    );
     expect(buildRadioMessage({ ...baseHud, status: "delivered", medal: "gold", lastMilestone: "Chain Finish" })).toContain("Chain finish");
     expect(buildRadioMessage({ ...baseHud, status: "delivered", medal: "comet" })).toContain("Comet");
     expect(buildRadioMessage({ ...baseHud, status: "crashed", landingRating: "Insurance Event" })).toContain("Insurance");
