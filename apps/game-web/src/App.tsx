@@ -136,6 +136,7 @@ const initialHud: HudState = {
   hazardSeverity: undefined,
   trajectoryRiskLevel: undefined,
   trajectoryRiskSeconds: undefined,
+  runTrail: [],
   replayFrameCount: 0,
   replayChecksum: undefined
 };
@@ -208,6 +209,10 @@ export function App() {
   useEffect(() => {
     audioRef.current?.setMuted(audioMuted);
   }, [audioMuted]);
+
+  useEffect(() => {
+    shellRef.current?.setGhostTrail(bestRun?.ghostTrail ?? []);
+  }, [bestRun?.ghostTrail]);
 
   useEffect(() => {
     return () => {
@@ -300,7 +305,8 @@ export function App() {
     const result = recordBestRun(storage, hud.contractId, {
       score: hud.score,
       elapsedSeconds: hud.elapsedSeconds,
-      medal: hud.medal
+      medal: hud.medal,
+      ghostTrail: hud.runTrail
     });
     setBestRun(result.best);
     setBestRunsByContract((current) => ({

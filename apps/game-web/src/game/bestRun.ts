@@ -1,9 +1,10 @@
-import type { RunMedal, RunStatus } from "@astro-courier/shared";
+import type { RunMedal, RunStatus, Vec2 } from "@astro-courier/shared";
 
 export type BestRun = {
   score: number;
   elapsedSeconds: number;
   medal: RunMedal;
+  ghostTrail?: Vec2[];
 };
 
 export type BestRunChase = {
@@ -84,10 +85,12 @@ export function getBestRun(storage: BestRunStorage, contractKey: string): BestRu
     if (typeof parsed.score !== "number" || typeof parsed.elapsedSeconds !== "number" || !parsed.medal) {
       return undefined;
     }
+    const ghostTrail = parseGhostTrail(parsed.ghostTrail);
     return {
       score: parsed.score,
       elapsedSeconds: parsed.elapsedSeconds,
-      medal: parsed.medal
+      medal: parsed.medal,
+      ...(ghostTrail ? { ghostTrail } : {})
     };
   } catch {
     return undefined;
@@ -319,4 +322,26 @@ function medalRank(medal: RunMedal | undefined): number {
 
 function storageKey(contractKey: string): string {
   return `astro-courier:best-run:${contractKey}`;
+}
+
+function parseGhostTrail(value: unknown): Vec2[] | undefined {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+
+  const trail = value.flatMap((point) => {
+    if (
+      point &&
+      typeof point === "object" &&
+      typeof (point as Partial<Vec2>).x === "number" &&
+      typeof (point as Partial<Vec2>).y === "number" &&
+      Number.isFinite((point as Partial<Vec2>).x) &&
+      Number.isFinite((point as Partial<Vec2>).y)
+    ) {
+      return [{ x: (point as Vec2).x, y: (point as Vec2).y }];
+    }
+    return [];
+  });
+
+  return trail.length >= 2 ? trail : undefined;
 }

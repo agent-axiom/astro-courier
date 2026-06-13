@@ -24,7 +24,8 @@ import type {
   RunMedal,
   RunResultSummary,
   RunStatus,
-  ScoreBreakdown
+  ScoreBreakdown,
+  Vec2
 } from "@astro-courier/shared";
 import { KeyboardInput, type InputSource } from "./input";
 import { calculateContractPace, type ContractPaceTier } from "./pace";
@@ -82,6 +83,7 @@ export type HudState = {
   hazardSeverity?: number;
   trajectoryRiskLevel?: TrajectoryRiskLevel;
   trajectoryRiskSeconds?: number;
+  runTrail: Vec2[];
   gravitySlingDistance?: number;
   gravitySlingReady?: boolean;
   gravitySlingSpeedThreshold?: number;
@@ -113,6 +115,8 @@ const milestoneHoldSeconds = 1.2;
 const trajectoryPreviewSeconds = 3;
 const trajectorySampleEvery = 6;
 const trajectorySampleIntervalSeconds = fixedDt * trajectorySampleEvery;
+const minRunTrailSampleDistance = 0.5;
+const maxRunTrailSamples = 140;
 const gameVersion = "0.1.0";
 const localReplaySeed = "local-starter-seed";
 
@@ -134,6 +138,8 @@ export class GameShell {
   private latestTrajectoryRisk?: TrajectoryRiskForecast;
   private readonly queuedCommands: PlayerCommand[] = [];
   private readonly inputFrames: InputFrame[] = [];
+  private runTrail: Vec2[] = [];
+  private ghostTrail: Vec2[] = [];
   private selectedContractId?: string;
   private destroyed = false;
 
@@ -144,6 +150,7 @@ export class GameShell {
     this.input = options.input ?? new KeyboardInput(window);
     this.paused = Boolean(options.initialPaused);
     this.world = this.createFreshWorld();
+    this.resetRunTrail();
   }
 
   async start(): Promise<void> {
@@ -172,6 +179,7 @@ export class GameShell {
     this.inputFrames.length = 0;
     this.lastTime = performance.now();
     this.world = this.createFreshWorld();
+    this.resetRunTrail();
     this.publishHud();
   }
 
@@ -195,6 +203,7 @@ export class GameShell {
     this.inputFrames.length = 0;
     this.lastTime = performance.now();
     this.world = this.createFreshWorld();
+    this.resetRunTrail();
     this.publishHud();
   }
 
@@ -211,6 +220,10 @@ export class GameShell {
       return;
     }
     this.queuedCommands.push(command);
+  }
+
+  setGhostTrail(trail: readonly Vec2[]): void {
+    this.ghostTrail = trail.map((point) => ({ x: point.x, y: point.y }));
   }
 
   destroy(): void {
@@ -270,7 +283,7 @@ export class GameShell {
       hazards: snapshot.hazards,
       sampleIntervalSeconds: trajectorySampleIntervalSeconds
     });
-    this.renderer.render(snapshot, trajectory);
+    this.renderer.render(snapshot, trajectory, this.ghostTrail);
 
     this.hudTimer += rawDelta;
     if (this.hudTimer >= 0.1 || this.world.status !== "flying") {
@@ -297,6 +310,25 @@ export class GameShell {
     }
   }
 
+  private resetRunTrail(): void {
+    this.runTrail = [{ ...this.world.ship.position }];
+  }
+
+  private sampleRunTrail(): void {
+    if (this.world.status === "paused") {
+      return;
+    }
+
+    const current = this.world.ship.position;
+    const last = this.runTrail.at(-1);
+    if (!last || distanceBetween(last, current) >= minRunTrailSampleDistance || this.world.status !== "flying") {
+      this.runTrail.push({ ...current });
+      if (this.runTrail.length > maxRunTrailSamples) {
+        this.runTrail = this.runTrail.slice(this.runTrail.length - maxRunTrailSamples);
+      }
+    }
+  }
+
   private createFreshWorld(): SimulationWorld {
     const world = createWorldFromSystem(this.system, localReplaySeed, { contractId: this.selectedContractId });
     if (this.paused) {
@@ -306,6 +338,7 @@ export class GameShell {
   }
 
   private publishHud(): void {
+    this.sampleRunTrail();
     const result = summarizeRun(this.world);
     const snapshot = snapshotWorld(this.world);
     const pace = calculateContractPace(result.elapsedSeconds, this.world.activeContract.medalTimes);
@@ -369,6 +402,7 @@ export class GameShell {
       gravitySlingStyleBonus: snapshot.gravitySlingOpportunity?.styleBonus,
       trajectoryRiskLevel: trajectoryRisk?.level,
       trajectoryRiskSeconds: trajectoryRisk?.seconds,
+      runTrail: this.runTrail.map((point) => ({ ...point })),
       replayFrameCount: this.inputFrames.length,
       replayChecksum
     });
@@ -453,6 +487,10 @@ function titleFromId(id: string): string {
 
 function replayFingerprint(replay: ReplayEnvelope): string {
   return `rc-${fnv1a64(canonicalJson(replay)).slice(0, 12)}`;
+}
+
+function distanceBetween(left: Vec2, right: Vec2): number {
+  return Math.hypot(left.x - right.x, left.y - right.y);
 }
 
 function canonicalJson(value: unknown): string {

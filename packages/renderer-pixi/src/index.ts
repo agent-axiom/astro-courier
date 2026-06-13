@@ -3,7 +3,7 @@ import { Application, Container, Graphics } from "pixi.js";
 
 export type AstroPixiRenderer = {
   mount(element: HTMLElement): Promise<void>;
-  render(snapshot: SimulationSnapshot, trajectory: Vec2[]): void;
+  render(snapshot: SimulationSnapshot, trajectory: Vec2[], ghostTrail?: Vec2[]): void;
   destroy(): void;
 };
 
@@ -120,6 +120,18 @@ export type TrajectoryPointVisual = {
   alpha: number;
 };
 
+export type GhostTrailPointVisualInput = {
+  status: SimulationSnapshot["status"];
+  index: number;
+  total: number;
+};
+
+export type GhostTrailPointVisual = {
+  color: number;
+  radius: number;
+  alpha: number;
+};
+
 export type TrajectoryHazardDanger = "near" | "inside";
 export type TrajectoryGravitySlingSignal = "setup" | "ready";
 
@@ -149,6 +161,20 @@ export function trajectoryPointVisual(input: TrajectoryPointVisualInput): Trajec
     color: isEndpoint ? 0x7ce1ff : 0xf8e59a,
     radius: round(isEndpoint ? 4.2 : 2.2 + progress * 0.8, 2),
     alpha: round(isEndpoint ? 0.78 : 0.18 + progress * 0.42, 2)
+  };
+}
+
+export function ghostTrailPointVisual(input: GhostTrailPointVisualInput): GhostTrailPointVisual | undefined {
+  if ((input.status !== "flying" && input.status !== "paused") || input.total < 2) {
+    return undefined;
+  }
+
+  const progress = clamp(input.index / Math.max(1, input.total - 1), 0, 1);
+  const isEndpoint = input.index >= input.total - 1;
+  return {
+    color: isEndpoint ? 0xf8e59a : 0x8ee6b8,
+    radius: round(isEndpoint ? 3.8 : 2.4 + progress * 0.5, 2),
+    alpha: round(isEndpoint ? 0.72 : 0.24 + progress * 0.28, 2)
   };
 }
 
@@ -588,6 +614,7 @@ class PixiRenderer implements AstroPixiRenderer {
   private readonly stageRoot = new Container();
   private readonly background = new Graphics();
   private readonly gravity = new Graphics();
+  private readonly ghost = new Graphics();
   private readonly trajectory = new Graphics();
   private readonly guidance = new Graphics();
   private readonly world = new Graphics();
@@ -619,6 +646,7 @@ class PixiRenderer implements AstroPixiRenderer {
     this.stageRoot.addChild(
       this.background,
       this.gravity,
+      this.ghost,
       this.trajectory,
       this.guidance,
       this.world,
@@ -628,7 +656,7 @@ class PixiRenderer implements AstroPixiRenderer {
     );
   }
 
-  render(snapshot: SimulationSnapshot, trajectory: Vec2[]): void {
+  render(snapshot: SimulationSnapshot, trajectory: Vec2[], ghostTrail: Vec2[] = []): void {
     if (!this.app) return;
 
     const viewport = {
@@ -644,6 +672,7 @@ class PixiRenderer implements AstroPixiRenderer {
 
     this.drawBackground(viewport, snapshot.tick);
     this.drawGravity(snapshot, project);
+    this.drawGhostTrail(ghostTrail, project, snapshot);
     this.drawTrajectory(trajectory, project, snapshot);
     this.drawGuidance(snapshot, project, viewport);
     this.drawWorld(snapshot, project);
@@ -703,6 +732,28 @@ class PixiRenderer implements AstroPixiRenderer {
           });
         }
       }
+    }
+  }
+
+  private drawGhostTrail(ghostTrail: Vec2[], project: (point: Vec2) => Vec2, snapshot: SimulationSnapshot): void {
+    this.ghost.clear();
+
+    for (let index = 0; index < ghostTrail.length; index += 1) {
+      const visual = ghostTrailPointVisual({ status: snapshot.status, index, total: ghostTrail.length });
+      if (!visual) {
+        continue;
+      }
+
+      const point = project(ghostTrail[index]);
+      if (index > 0) {
+        const previous = project(ghostTrail[index - 1]);
+        this.ghost.moveTo(previous.x, previous.y).lineTo(point.x, point.y).stroke({
+          color: visual.color,
+          width: 1.4,
+          alpha: visual.alpha * 0.32
+        });
+      }
+      this.ghost.circle(point.x, point.y, visual.radius).fill({ color: visual.color, alpha: visual.alpha });
     }
   }
 

@@ -67,6 +67,7 @@ const baseHud: HudState = {
   launchBurstSecondsRemaining: 0,
   hazardDangerLevel: undefined,
   hazardDistance: undefined,
+  runTrail: [],
   replayFrameCount: 0
 };
 

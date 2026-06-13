@@ -507,6 +507,73 @@ describe("GameShell lifecycle", () => {
     expect(onHud.mock.calls.at(-1)?.[0].replayFrameCount).toBe(1);
   });
 
+  it("passes a saved personal-best ghost trail to the renderer", async () => {
+    const { renderer, input } = createShellDoubles();
+    const onHud = vi.fn();
+    let frame: FrameRequestCallback = () => 0;
+    vi.stubGlobal(
+      "requestAnimationFrame",
+      vi.fn((callback: FrameRequestCallback) => {
+        frame = callback;
+        return 7;
+      })
+    );
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    vi.spyOn(performance, "now").mockReturnValue(1000);
+    const ghostTrail = [
+      { x: 180, y: 20 },
+      { x: 240, y: -20 },
+      { x: 420, y: -140 }
+    ];
+
+    const shell = new GameShell({
+      mount: {} as HTMLElement,
+      onHud,
+      renderer,
+      input,
+      initialPaused: true
+    });
+
+    await shell.start();
+    (shell as unknown as { setGhostTrail: (trail: typeof ghostTrail) => void }).setGhostTrail(ghostTrail);
+    frame(1017);
+
+    expect(renderer.render).toHaveBeenCalled();
+    expect((renderer.render as ReturnType<typeof vi.fn>).mock.calls.at(-1)?.[2]).toEqual(ghostTrail);
+  });
+
+  it("publishes a sampled live route trail in the HUD", async () => {
+    const { renderer, input } = createShellDoubles({
+      commands: () => [{ type: "THRUST", amount: 1 }]
+    });
+    const onHud = vi.fn();
+    let frame: FrameRequestCallback = () => 0;
+    vi.stubGlobal(
+      "requestAnimationFrame",
+      vi.fn((callback: FrameRequestCallback) => {
+        frame = callback;
+        return 7;
+      })
+    );
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    vi.spyOn(performance, "now").mockReturnValue(1000);
+
+    const shell = new GameShell({
+      mount: {} as HTMLElement,
+      onHud,
+      renderer,
+      input
+    });
+
+    await shell.start();
+    frame(1367);
+
+    const trail = onHud.mock.calls.at(-1)?.[0].runTrail;
+    expect(trail?.length).toBeGreaterThan(1);
+    expect(trail?.[0]).toEqual({ x: 180, y: 20 });
+    expect(trail?.at(-1)?.x).not.toBe(180);
+  });
+
   it("publishes a deterministic replay fingerprint for terminal runs", async () => {
     const { renderer, input } = createShellDoubles();
     const onHud = vi.fn();

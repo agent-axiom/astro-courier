@@ -3,6 +3,7 @@ import {
   boostBurstVisual,
   cameraFocus,
   cargoAuraVisual,
+  ghostTrailPointVisual,
   gravitySlingCueVisual,
   hazardFieldVisual,
   hazardVignetteEffect,
@@ -217,6 +218,24 @@ describe("trajectory gravity sling signal", () => {
   it("ignores near-surface and outside-influence forecast points", () => {
     expect(trajectoryGravitySlingSignal({ x: 0, y: -74 }, gravitySources)).toBeUndefined();
     expect(trajectoryGravitySlingSignal({ x: 0, y: -260 }, gravitySources)).toBeUndefined();
+  });
+});
+
+describe("ghost trail point visual", () => {
+  it("stays hidden without enough samples or after terminal results own the screen", () => {
+    expect(ghostTrailPointVisual({ status: "flying", index: 0, total: 1 })).toBeUndefined();
+    expect(ghostTrailPointVisual({ status: "delivered", index: 0, total: 4 })).toBeUndefined();
+    expect(ghostTrailPointVisual({ status: "crashed", index: 0, total: 4 })).toBeUndefined();
+  });
+
+  it("renders saved route ghosts during preflight and active flight", () => {
+    const first = ghostTrailPointVisual({ status: "paused", index: 0, total: 5 });
+    const last = ghostTrailPointVisual({ status: "flying", index: 4, total: 5 });
+
+    expect(first).toMatchObject({ color: 0x8ee6b8, radius: 2.4 });
+    expect(last).toMatchObject({ color: 0xf8e59a });
+    expect(last?.radius).toBeGreaterThan(first?.radius ?? 0);
+    expect(last?.alpha).toBeGreaterThan(first?.alpha ?? 0);
   });
 });
 

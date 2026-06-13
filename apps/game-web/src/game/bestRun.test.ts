@@ -45,6 +45,32 @@ describe("personal best run storage", () => {
     expect(recordBestRun(storage, "starter", { score: 1400, elapsedSeconds: 37, medal: "gold" }).isNewBest).toBe(true);
     expect(getBestRun(storage, "starter")?.elapsedSeconds).toBe(37);
   });
+
+  it("stores a sampled ghost trail with the personal best", () => {
+    const storage = new MemoryStorage();
+
+    recordBestRun(storage, "starter", {
+      score: 1200,
+      elapsedSeconds: 42.4,
+      medal: "silver",
+      ghostTrail: [
+        { x: 180, y: 20 },
+        { x: 220.25, y: -12.5 },
+        { x: 420, y: -140 }
+      ]
+    });
+
+    expect(getBestRun(storage, "starter")).toEqual({
+      score: 1200,
+      elapsedSeconds: 42.4,
+      medal: "silver",
+      ghostTrail: [
+        { x: 180, y: 20 },
+        { x: 220.25, y: -12.5 },
+        { x: 420, y: -140 }
+      ]
+    });
+  });
 });
 
 describe("personal best chase copy", () => {
