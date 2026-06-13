@@ -69,6 +69,8 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
         input.crashReason === "Hull Collision"
           ? gravityHullCollision
             ? "Stay in the outer sling ring"
+            : input.contractId === "chain-relay"
+            ? "Give relay lanes wider clearance"
             : input.contractId === "asteroid-sprint"
             ? "Give asteroid fields wider clearance"
             : "Keep orbit outside gravity wells"

@@ -393,6 +393,17 @@ describe("radio feedback copy", () => {
     ).toContain("Asteroid impact");
   });
 
+  it("reports chain relay hull collisions as relay lane impacts", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        status: "crashed",
+        contractId: "chain-relay",
+        crashReason: "Hull Collision"
+      })
+    ).toContain("Relay lane impact");
+  });
+
   it("celebrates strong deliveries and reports crashes", () => {
     expect(buildRadioMessage({ ...baseHud, status: "delivered", medal: "gold", lastMilestone: "Perfect Approach" })).toContain(
       "Perfect approach"

@@ -115,6 +115,26 @@ describe("result coach", () => {
     });
   });
 
+  it("coaches chain relay hull collisions toward wider relay clearance", () => {
+    expect(
+      buildResultCoach({
+        status: "crashed",
+        contractId: "chain-relay",
+        crashReason: "Hull Collision",
+        medal: "none",
+        grade: "F",
+        cargoDamage: 1,
+        fuel: 40,
+        maxFuel: 100,
+        scoreBreakdown: baseBreakdown
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Give relay lanes wider clearance",
+      tone: "danger"
+    });
+  });
+
   it("coaches damaged deliveries toward safer hazard lines", () => {
     expect(
       buildResultCoach({

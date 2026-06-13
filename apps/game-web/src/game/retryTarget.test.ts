@@ -99,6 +99,26 @@ describe("result retry target", () => {
     });
   });
 
+  it("turns chain relay hull collisions into a relay-lane target", () => {
+    expect(
+      buildRetryTarget({
+        status: "crashed",
+        contractId: "chain-relay",
+        crashReason: "Hull Collision",
+        medal: "none",
+        elapsedSeconds: 14.2,
+        goldSeconds: 22,
+        score: 0,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Clear relay lane",
+      tone: "danger"
+    });
+  });
+
   it("turns a saved personal best score gap into a concrete score target", () => {
     expect(
       buildRetryTarget({

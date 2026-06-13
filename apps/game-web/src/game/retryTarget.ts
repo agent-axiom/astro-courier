@@ -41,6 +41,8 @@ export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
         value:
           input.contractId === "gravity-slingshot"
             ? "Hold outer sling lane"
+            : input.contractId === "chain-relay"
+            ? "Clear relay lane"
             : input.contractId === "asteroid-sprint"
             ? "Clear asteroid field"
             : "Clear gravity well",

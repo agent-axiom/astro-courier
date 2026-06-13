@@ -12,6 +12,12 @@ describe("crash reason labels", () => {
     );
   });
 
+  it("points chain relay hull collisions at relay clearance", () => {
+    expect(buildCrashReasonLabel({ contractId: "chain-relay", crashReason: "Hull Collision" })).toBe(
+      "Hull collision: widen relay clearance"
+    );
+  });
+
   it("points gravity route hull collisions at gravity wells", () => {
     expect(buildCrashReasonLabel({ contractId: "gravity-slingshot", crashReason: "Hull Collision" })).toBe(
       "Hull collision: stay outside gravity wells"
