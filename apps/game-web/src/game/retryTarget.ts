@@ -11,6 +11,9 @@ export type RetryTargetInput = {
   goldSeconds: number;
   targetAllowedSpeed?: number;
   cargoDamage?: number;
+  fuel?: number;
+  maxFuel?: number;
+  landingBonus?: number;
   score: number;
   isNewBest: boolean;
   bestRun: BestRun | undefined;
@@ -30,6 +33,7 @@ export type ResultRetryAction = {
     | "Repeat Line"
     | "Clean Run"
     | "Chase Gold"
+    | "Chase Comet"
     | "Express Run"
     | "Set PB"
     | "Run Again";
@@ -43,6 +47,9 @@ export type RetryActionBriefing = {
 };
 
 const cleanCargoDamageLimit = 0.02;
+const cometReserveMinRatio = 0.75;
+const cometReserveNearMissRatio = 0.6;
+const perfectLandingBonus = 300;
 
 export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
   if (input.status === "crashed") {
@@ -101,6 +108,11 @@ export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
         tone: "chase"
       };
     }
+  }
+
+  const cometNearMissTarget = buildCometNearMissTarget(input);
+  if (cometNearMissTarget) {
+    return cometNearMissTarget;
   }
 
   const milestoneTarget = buildRepeatableMilestoneTarget(input.lastMilestone);
@@ -179,6 +191,9 @@ export function buildResultRetryAction(target: RetryTarget): ResultRetryAction {
   if (target.value.startsWith("Repeat ")) {
     return { label: "Repeat Line", mode: "restart-run" };
   }
+  if (target.value === "Bank 75% fuel for comet" || target.value === "Perfect dock for comet") {
+    return { label: "Chase Comet", mode: "restart-run" };
+  }
   if (target.value === "Restore clean cargo") {
     return { label: "Clean Run", mode: "restart-run" };
   }
@@ -213,6 +228,13 @@ export function buildRetryActionBriefing(action: ResultRetryAction, target: Retr
     return {
       label: "Next run",
       value: "Lock the style route",
+      tone: "opportunity"
+    };
+  }
+  if (action.label === "Chase Comet") {
+    return {
+      label: "Next run",
+      value: "One condition from comet",
       tone: "opportunity"
     };
   }
@@ -256,4 +278,37 @@ export function buildRetryActionBriefing(action: ResultRetryAction, target: Retr
     value: target.value,
     tone: target.tone
   };
+}
+
+function buildCometNearMissTarget(input: RetryTargetInput): RetryTarget | undefined {
+  if (
+    input.status !== "delivered" ||
+    input.medal !== "gold" ||
+    input.lastMilestone !== "Express Finish" ||
+    (input.cargoDamage ?? 0) > cleanCargoDamageLimit ||
+    input.maxFuel === undefined ||
+    input.maxFuel <= 0 ||
+    input.fuel === undefined
+  ) {
+    return undefined;
+  }
+
+  const fuelRatio = input.fuel / input.maxFuel;
+  if (fuelRatio >= cometReserveNearMissRatio && fuelRatio < cometReserveMinRatio) {
+    return {
+      label: "Retry target",
+      value: "Bank 75% fuel for comet",
+      tone: "opportunity"
+    };
+  }
+
+  if (fuelRatio >= cometReserveMinRatio && (input.landingBonus ?? 0) < perfectLandingBonus) {
+    return {
+      label: "Retry target",
+      value: "Perfect dock for comet",
+      tone: "opportunity"
+    };
+  }
+
+  return undefined;
 }

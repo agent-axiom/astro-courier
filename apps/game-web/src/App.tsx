@@ -551,6 +551,9 @@ export function App() {
     goldSeconds: hud.paceSecondsRemaining,
     targetAllowedSpeed: hud.targetAllowedSpeed,
     cargoDamage: hud.cargoDamage,
+    fuel: hud.fuel,
+    maxFuel: hud.maxFuel,
+    landingBonus: hud.scoreBreakdown.landingBonus,
     score: hud.score,
     isNewBest: newBest,
     bestRun

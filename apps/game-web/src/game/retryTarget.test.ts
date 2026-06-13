@@ -286,6 +286,49 @@ describe("result retry target", () => {
     });
   });
 
+  it("turns gold comet near-misses into concrete comet chase targets", () => {
+    expect(
+      buildRetryTarget({
+        status: "delivered",
+        medal: "gold",
+        lastMilestone: "Express Finish",
+        elapsedSeconds: 27.4,
+        goldSeconds: 30,
+        cargoDamage: 0,
+        fuel: 72,
+        maxFuel: 100,
+        landingBonus: 300,
+        score: 3260,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Bank 75% fuel for comet",
+      tone: "opportunity"
+    });
+    expect(
+      buildRetryTarget({
+        status: "delivered",
+        medal: "gold",
+        lastMilestone: "Express Finish",
+        elapsedSeconds: 27.4,
+        goldSeconds: 30,
+        cargoDamage: 0,
+        fuel: 82,
+        maxFuel: 100,
+        landingBonus: 120,
+        score: 3260,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Perfect dock for comet",
+      tone: "opportunity"
+    });
+  });
+
   it("turns launch bursts into a repeatable burst-chain target", () => {
     expect(
       buildRetryTarget({
@@ -471,6 +514,17 @@ describe("result retry action copy", () => {
       mode: "restart-run"
     });
   });
+
+  it("turns comet near-miss targets into a comet chase call to action", () => {
+    expect(buildResultRetryAction({ label: "Retry target", value: "Bank 75% fuel for comet", tone: "opportunity" })).toEqual({
+      label: "Chase Comet",
+      mode: "restart-run"
+    });
+    expect(buildResultRetryAction({ label: "Retry target", value: "Perfect dock for comet", tone: "opportunity" })).toEqual({
+      label: "Chase Comet",
+      mode: "restart-run"
+    });
+  });
 });
 
 describe("result retry action briefing", () => {
@@ -565,6 +619,19 @@ describe("result retry action briefing", () => {
     ).toEqual({
       label: "Next run",
       value: "Bank the first line",
+      tone: "opportunity"
+    });
+  });
+
+  it("turns comet chase actions into elite rematch hooks", () => {
+    expect(
+      buildRetryActionBriefing(
+        { label: "Chase Comet", mode: "restart-run" },
+        { label: "Retry target", value: "Bank 75% fuel for comet", tone: "opportunity" }
+      )
+    ).toEqual({
+      label: "Next run",
+      value: "One condition from comet",
       tone: "opportunity"
     });
   });
