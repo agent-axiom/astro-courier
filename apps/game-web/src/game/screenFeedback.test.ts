@@ -103,6 +103,7 @@ describe("screen feedback", () => {
     expect(buildScreenFeedback(["chain-save"])).toEqual({
       label: "Chain saved",
       value: "Combo restored",
+      accent: "chain",
       tone: "style",
       intensity: "medium",
       durationMs: 440

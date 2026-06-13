@@ -774,7 +774,9 @@ export function App() {
       {screenFeedback ? (
         <div
           key={screenFeedback.key}
-          className={`screen-feedback screen-feedback-${screenFeedback.feedback.tone} screen-feedback-${screenFeedback.feedback.intensity}`}
+          className={`screen-feedback screen-feedback-${screenFeedback.feedback.tone} screen-feedback-${screenFeedback.feedback.intensity} ${
+            screenFeedback.feedback.accent ? `screen-feedback-accent-${screenFeedback.feedback.accent}` : ""
+          }`}
           style={{ "--screen-feedback-duration": `${screenFeedback.feedback.durationMs}ms` } as CSSProperties}
           aria-hidden="true"
         >

@@ -3,6 +3,7 @@ import type { GameAudioEvent } from "./audioEvents";
 export type ScreenFeedback = {
   label?: string;
   value?: string;
+  accent?: "chain";
   tone: "style" | "success" | "warning" | "danger";
   intensity: "light" | "medium" | "heavy";
   durationMs: number;
@@ -49,7 +50,7 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[]): ScreenFe
     return { tone: "warning", intensity: "light", durationMs: 320 };
   }
   if (events.includes("chain-save")) {
-    return { label: "Chain saved", value: "Combo restored", tone: "style", intensity: "medium", durationMs: 440 };
+    return { label: "Chain saved", value: "Combo restored", accent: "chain", tone: "style", intensity: "medium", durationMs: 440 };
   }
   if (events.includes("fuel-critical")) {
     return { tone: "warning", intensity: "medium", durationMs: 440 };
