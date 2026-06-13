@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { commandsFromPointer } from "./input";
+import { commandsFromKeyboardState, commandsFromPointer } from "./input";
 
 describe("pointer input mapping", () => {
   it("maps an active pointer to aim and thrust commands", () => {
@@ -37,5 +37,11 @@ describe("pointer input mapping", () => {
       { type: "AIM", angle: 0 },
       { type: "THRUST", amount: 0.3 }
     ]);
+  });
+});
+
+describe("keyboard input mapping", () => {
+  it("maps the boost key to a boost command", () => {
+    expect(commandsFromKeyboardState(new Set(["KeyE"]), Math.PI / 2)).toEqual([{ type: "BOOST" }]);
   });
 });

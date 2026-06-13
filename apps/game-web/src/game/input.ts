@@ -39,6 +39,28 @@ export function commandsFromPointer(input: PointerCommandInput): PlayerCommand[]
   ];
 }
 
+export function commandsFromKeyboardState(pressed: ReadonlySet<string>, currentRotation: number): PlayerCommand[] {
+  const commands: PlayerCommand[] = [];
+
+  if (isDown(pressed, "ArrowLeft") || isDown(pressed, "KeyA")) {
+    commands.push({ type: "AIM", angle: currentRotation - turnStep });
+  }
+  if (isDown(pressed, "ArrowRight") || isDown(pressed, "KeyD")) {
+    commands.push({ type: "AIM", angle: currentRotation + turnStep });
+  }
+  if (isDown(pressed, "ArrowUp") || isDown(pressed, "KeyW") || isDown(pressed, "Space")) {
+    commands.push({ type: "THRUST", amount: 1 });
+  }
+  if (isDown(pressed, "ArrowDown") || isDown(pressed, "KeyS") || isDown(pressed, "ShiftLeft") || isDown(pressed, "ShiftRight")) {
+    commands.push({ type: "BRAKE", amount: 0.65 });
+  }
+  if (isDown(pressed, "KeyE")) {
+    commands.push({ type: "BOOST" });
+  }
+
+  return commands;
+}
+
 export class KeyboardInput {
   private readonly target: Window;
   private readonly pressed = new Set<string>();
@@ -74,26 +96,7 @@ export class KeyboardInput {
   }
 
   commands(currentRotation: number): PlayerCommand[] {
-    const commands: PlayerCommand[] = [];
-
-    if (this.isDown("ArrowLeft") || this.isDown("KeyA")) {
-      commands.push({ type: "AIM", angle: currentRotation - turnStep });
-    }
-    if (this.isDown("ArrowRight") || this.isDown("KeyD")) {
-      commands.push({ type: "AIM", angle: currentRotation + turnStep });
-    }
-    if (this.isDown("ArrowUp") || this.isDown("KeyW") || this.isDown("Space")) {
-      commands.push({ type: "THRUST", amount: 1 });
-    }
-    if (this.isDown("ArrowDown") || this.isDown("KeyS") || this.isDown("ShiftLeft") || this.isDown("ShiftRight")) {
-      commands.push({ type: "BRAKE", amount: 0.65 });
-    }
-
-    return [...commands, ...this.pointerCommands()];
-  }
-
-  private isDown(code: string): boolean {
-    return this.pressed.has(code);
+    return [...commandsFromKeyboardState(this.pressed, currentRotation), ...this.pointerCommands()];
   }
 
   private readonly handleKeyDown = (event: KeyboardEvent) => {
@@ -158,9 +161,14 @@ function isGameKey(code: string): boolean {
     code === "KeyW" ||
     code === "KeyS" ||
     code === "Space" ||
+    code === "KeyE" ||
     code === "ShiftLeft" ||
     code === "ShiftRight"
   );
+}
+
+function isDown(pressed: ReadonlySet<string>, code: string): boolean {
+  return pressed.has(code);
 }
 
 function round(value: number, digits: number): number {
