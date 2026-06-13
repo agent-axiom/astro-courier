@@ -14,6 +14,7 @@ import {
   screenShakeOffset,
   shipTrailVisual,
   trajectoryHazardDanger,
+  trajectoryHazardMarkerVisual,
   trajectoryGravitySlingSignal,
   trajectoryPointVisual,
   velocityVectorVisual
@@ -184,6 +185,64 @@ describe("trajectory hazard danger", () => {
     expect(trajectoryHazardDanger({ x: 12, y: 0 }, hazards)).toBe("inside");
     expect(trajectoryHazardDanger({ x: 40, y: 0 }, hazards)).toBe("near");
     expect(trajectoryHazardDanger({ x: 80, y: 0 }, hazards)).toBeUndefined();
+  });
+});
+
+describe("trajectory hazard marker visual", () => {
+  const hazards = [
+    {
+      id: "training-asteroids",
+      type: "asteroid_field",
+      position: { x: 50, y: 0 },
+      radius: 20,
+      severity: 0.7
+    }
+  ];
+
+  it("stays hidden outside active flight or without projected hazard pressure", () => {
+    expect(
+      trajectoryHazardMarkerVisual({
+        status: "paused",
+        trajectory: [
+          { x: 0, y: 0 },
+          { x: 48, y: 0 }
+        ],
+        hazards
+      })
+    ).toBeUndefined();
+    expect(
+      trajectoryHazardMarkerVisual({
+        status: "flying",
+        trajectory: [{ x: 0, y: 0 }],
+        hazards
+      })
+    ).toBeUndefined();
+  });
+
+  it("marks the first projected danger point with severity-weighted warning rings", () => {
+    const near = trajectoryHazardMarkerVisual({
+      status: "flying",
+      trajectory: [
+        { x: 0, y: 0 },
+        { x: 78, y: 0 },
+        { x: 51, y: 0 }
+      ],
+      hazards
+    });
+    const inside = trajectoryHazardMarkerVisual({
+      status: "flying",
+      trajectory: [
+        { x: 0, y: 0 },
+        { x: 51, y: 0 }
+      ],
+      hazards
+    });
+
+    expect(near).toMatchObject({ index: 1, tone: "near", color: 0xffd166 });
+    expect(inside).toMatchObject({ index: 1, tone: "inside", color: 0xff4d6d });
+    expect(inside?.radius).toBeGreaterThan(near?.radius ?? 0);
+    expect(inside?.alpha).toBeGreaterThan(near?.alpha ?? 0);
+    expect(near?.width).toBeGreaterThan(1);
   });
 });
 

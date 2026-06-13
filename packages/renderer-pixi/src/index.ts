@@ -135,6 +135,21 @@ export type GhostTrailPointVisual = {
 export type TrajectoryHazardDanger = "near" | "inside";
 export type TrajectoryGravitySlingSignal = "setup" | "ready";
 
+export type TrajectoryHazardMarkerVisualInput = {
+  status: SimulationSnapshot["status"];
+  trajectory: Vec2[];
+  hazards: SimulationSnapshot["hazards"];
+};
+
+export type TrajectoryHazardMarkerVisual = {
+  index: number;
+  tone: TrajectoryHazardDanger;
+  color: number;
+  radius: number;
+  alpha: number;
+  width: number;
+};
+
 export function trajectoryPointVisual(input: TrajectoryPointVisualInput): TrajectoryPointVisual | undefined {
   if (input.status !== "flying" || input.total <= 0) {
     return undefined;
@@ -195,6 +210,50 @@ export function trajectoryHazardDanger(
   }
 
   return nearestDanger;
+}
+
+export function trajectoryHazardMarkerVisual(
+  input: TrajectoryHazardMarkerVisualInput
+): TrajectoryHazardMarkerVisual | undefined {
+  if (input.status !== "flying" || input.trajectory.length === 0 || input.hazards.length === 0) {
+    return undefined;
+  }
+
+  for (let index = 0; index < input.trajectory.length; index += 1) {
+    const point = input.trajectory[index];
+    let nearSeverity = 0;
+    for (const hazard of input.hazards) {
+      const distance = Math.hypot(point.x - hazard.position.x, point.y - hazard.position.y);
+      if (distance <= hazard.radius) {
+        return trajectoryHazardMarker(index, "inside", hazard.severity);
+      }
+      if (distance <= hazard.radius * 1.6) {
+        nearSeverity = Math.max(nearSeverity, hazard.severity);
+      }
+    }
+    if (nearSeverity > 0) {
+      return trajectoryHazardMarker(index, "near", nearSeverity);
+    }
+  }
+
+  return undefined;
+}
+
+function trajectoryHazardMarker(
+  index: number,
+  tone: TrajectoryHazardDanger,
+  severity: number
+): TrajectoryHazardMarkerVisual {
+  const pressure = clamp(severity, 0, 1);
+  const inside = tone === "inside";
+  return {
+    index,
+    tone,
+    color: inside ? 0xff4d6d : 0xffd166,
+    radius: round(8 + pressure * 3 + (inside ? 3 : 0), 2),
+    alpha: round(clamp((inside ? 0.62 : 0.46) + pressure * (inside ? 0.16 : 0.1), 0.38, 0.82), 2),
+    width: round(1.4 + pressure * 1.2 + (inside ? 0.6 : 0), 2)
+  };
 }
 
 const TRAJECTORY_SLING_OUTER_RADIUS = 3;
@@ -811,6 +870,11 @@ class PixiRenderer implements AstroPixiRenderer {
     snapshot: SimulationSnapshot
   ): void {
     this.trajectory.clear();
+    const hazardMarker = trajectoryHazardMarkerVisual({
+      status: snapshot.status,
+      trajectory,
+      hazards: snapshot.hazards
+    });
 
     for (let index = 0; index < trajectory.length; index += 1) {
       const worldPoint = trajectory[index];
@@ -832,6 +896,20 @@ class PixiRenderer implements AstroPixiRenderer {
           alpha: visual.alpha * 0.42
         });
       }
+    }
+
+    if (hazardMarker) {
+      const point = project(trajectory[hazardMarker.index]);
+      this.trajectory.circle(point.x, point.y, hazardMarker.radius).stroke({
+        color: hazardMarker.color,
+        width: hazardMarker.width,
+        alpha: hazardMarker.alpha
+      });
+      this.trajectory.circle(point.x, point.y, hazardMarker.radius + 5).stroke({
+        color: hazardMarker.color,
+        width: 1,
+        alpha: hazardMarker.alpha * 0.32
+      });
     }
   }
 
