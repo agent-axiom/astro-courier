@@ -25,6 +25,7 @@ export type HudState = {
   speed: number;
   targetDistance?: number;
   landingStatus?: LandingGuidanceStatus;
+  assistAvailable?: boolean;
   lastMilestone?: string;
   landingRating?: string;
 };
@@ -153,6 +154,7 @@ export class GameShell {
       speed: Math.hypot(this.world.ship.velocity.x, this.world.ship.velocity.y),
       targetDistance: snapshot.objectiveTarget?.distance,
       landingStatus: snapshot.objectiveTarget?.landingStatus,
+      assistAvailable: snapshot.objectiveTarget?.assistAvailable,
       lastMilestone: this.world.lastMilestone,
       landingRating: result.landingRating
     });

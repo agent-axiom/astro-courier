@@ -267,6 +267,7 @@ export function stepWorld(world: SimulationWorld, fixedDt: number, commands: Pla
   applyThrust(world, fixedDt, thrust);
   applyBrake(world, fixedDt, brake);
   integrate(world, fixedDt);
+  applyLandingAssist(world);
   updateHazards(world, fixedDt);
   resolveLandingOrCrash(world);
   updateScore(world);
@@ -383,6 +384,7 @@ function getObjectiveTarget(world: SimulationWorld): SimulationSnapshot["objecti
   const distance = magnitude(offset);
   const speed = magnitude(world.ship.velocity);
   const angleError = Math.abs(shortestAngleDelta(world.ship.rotation, pad.normalAngle));
+  const assistAvailable = canLandingAssist(distance, speed, angleError, pad);
 
   return {
     id: pad.id,
@@ -394,6 +396,7 @@ function getObjectiveTarget(world: SimulationWorld): SimulationSnapshot["objecti
     allowedApproachSpeed: pad.allowedApproachSpeed,
     angleError: round(angleError, 3),
     requiredAngleTolerance: pad.requiredAngleTolerance,
+    assistAvailable,
     landingStatus: classifyLandingGuidance(distance, speed, angleError, pad)
   };
 }
@@ -472,6 +475,31 @@ function updateHazards(world: SimulationWorld, fixedDt: number): void {
       world.ship.cargoDamage = clamp(world.ship.cargoDamage + hazard.severity * fixedDt * 0.08, 0, 1);
     }
   }
+}
+
+function applyLandingAssist(world: SimulationWorld): void {
+  const pad = world.landingPads.find((candidate) => candidate.active);
+  if (!pad) {
+    return;
+  }
+
+  const distance = distanceBetween(world.ship.position, pad.position);
+  const speed = magnitude(world.ship.velocity);
+  const angleError = Math.abs(shortestAngleDelta(world.ship.rotation, pad.normalAngle));
+
+  if (!canLandingAssist(distance, speed, angleError, pad)) {
+    return;
+  }
+
+  const assistedSpeed = pad.allowedApproachSpeed * 0.92;
+  world.ship.velocity = scale(world.ship.velocity, assistedSpeed / speed);
+}
+
+function canLandingAssist(distance: number, speed: number, angleError: number, pad: LandingPadState): boolean {
+  const closeEnough = distance <= pad.radius * 1.35;
+  const moderatelyFast = speed > pad.allowedApproachSpeed && speed <= pad.allowedApproachSpeed * 1.3;
+  const nearlyAligned = angleError <= pad.requiredAngleTolerance * 1.25;
+  return closeEnough && moderatelyFast && nearlyAligned;
 }
 
 function resolveLandingOrCrash(world: SimulationWorld): void {

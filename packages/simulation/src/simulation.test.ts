@@ -206,6 +206,11 @@ describe("deterministic Astro Courier simulation", () => {
 
     world.ship.velocity = { x: 60, y: 0 };
     expect(snapshotWorld(world).objectiveTarget?.landingStatus).toBe("too-fast");
+    expect(snapshotWorld(world).objectiveTarget?.assistAvailable).toBe(false);
+
+    world.ship.velocity = { x: 43, y: 0 };
+    expect(snapshotWorld(world).objectiveTarget?.landingStatus).toBe("too-fast");
+    expect(snapshotWorld(world).objectiveTarget?.assistAvailable).toBe(true);
 
     world.ship.velocity = { x: 2, y: 1 };
     world.ship.rotation = Math.PI;
@@ -213,6 +218,26 @@ describe("deterministic Astro Courier simulation", () => {
 
     world.ship.rotation = -Math.PI / 2;
     expect(snapshotWorld(world).objectiveTarget?.landingStatus).toBe("ready");
+  });
+
+  it("gently assists near-pad landings without saving reckless impacts", () => {
+    const assisted = createWorldFromSystem(starterSystem, "assist-seed");
+    assisted.ship.position = { x: 0, y: -74 };
+    assisted.ship.velocity = { x: 43, y: 0 };
+    assisted.ship.rotation = -Math.PI / 2;
+    stepWorld(assisted, 1 / 60, []);
+
+    const reckless = createWorldFromSystem(starterSystem, "assist-seed");
+    reckless.ship.position = { x: 0, y: -74 };
+    reckless.ship.velocity = { x: 82, y: 0 };
+    reckless.ship.rotation = -Math.PI / 2;
+    stepWorld(reckless, 1 / 60, []);
+
+    expect(assisted.status).toBe("flying");
+    expect(assisted.cargoOnboard).toBe(true);
+    expect(assisted.lastMilestone).toBe("Cargo Loaded");
+    expect(reckless.status).toBe("crashed");
+    expect(reckless.landingRating).toBe("Insurance Event");
   });
 
   it("predicts a finite trajectory without mutating the live world", () => {

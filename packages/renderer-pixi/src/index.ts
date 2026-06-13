@@ -139,7 +139,7 @@ class PixiRenderer implements AstroPixiRenderer {
 
     const ship = project(snapshot.ship.position);
     const targetPoint = project(target.position);
-    const color = guidanceColor(target.landingStatus);
+    const color = guidanceColor(target.landingStatus, target.assistAvailable);
     const targetOnScreen =
       targetPoint.x >= 0 && targetPoint.x <= viewport.width && targetPoint.y >= 0 && targetPoint.y <= viewport.height;
 
@@ -283,7 +283,8 @@ function positiveModulo(value: number, modulus: number): number {
   return ((value % modulus) + modulus) % modulus;
 }
 
-function guidanceColor(status: LandingGuidanceStatus): number {
+function guidanceColor(status: LandingGuidanceStatus, assistAvailable: boolean): number {
+  if (assistAvailable) return 0x7ce1ff;
   if (status === "ready") return 0x8ee6b8;
   if (status === "too-fast") return 0xff6f91;
   if (status === "misaligned") return 0xffd166;

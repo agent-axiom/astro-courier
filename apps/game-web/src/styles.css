@@ -214,6 +214,11 @@ button {
   color: #bff7d8;
 }
 
+.guidance-assist {
+  background: rgba(124, 225, 255, 0.18);
+  color: #c6f6ff;
+}
+
 .milestone {
   min-height: 32px;
   padding: 8px 10px;

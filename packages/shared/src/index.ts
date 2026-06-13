@@ -68,6 +68,7 @@ export type SimulationSnapshot = {
     allowedApproachSpeed: number;
     angleError: number;
     requiredAngleTolerance: number;
+    assistAvailable: boolean;
     landingStatus: LandingGuidanceStatus;
   };
   ship: {
