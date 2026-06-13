@@ -276,11 +276,21 @@ export function velocityVectorVisual(input: VelocityVectorVisualInput): Velocity
 }
 
 export function boostBurstVisual(input: BoostBurstVisualInput): BoostBurstVisual | undefined {
+  const pulse = (Math.sin(input.tick * 0.34) + 1) / 2;
+  const styleShockwave = styleShockwaveSpec(input.lastMilestone);
+  if (styleShockwave && (input.status === "flying" || input.status === "delivered")) {
+    return {
+      color: styleShockwave.color,
+      radius: round(styleShockwave.baseRadius + pulse * styleShockwave.radiusPulse, 2),
+      alpha: round(styleShockwave.baseAlpha + (1 - pulse) * styleShockwave.alphaPulse, 2),
+      width: round(styleShockwave.baseWidth + pulse * styleShockwave.widthPulse, 2)
+    };
+  }
+
   if (input.status !== "flying") {
     return undefined;
   }
 
-  const pulse = (Math.sin(input.tick * 0.34) + 1) / 2;
   if (input.lastMilestone === "Assist Burn") {
     return {
       color: 0x8ee6b8,
@@ -300,6 +310,56 @@ export function boostBurstVisual(input: BoostBurstVisualInput): BoostBurstVisual
     alpha: round(0.16 + (1 - pulse) * 0.32, 2),
     width: round(2 + pulse * 2.8, 2)
   };
+}
+
+function styleShockwaveSpec(milestone?: string):
+  | {
+      color: number;
+      baseRadius: number;
+      radiusPulse: number;
+      baseAlpha: number;
+      alphaPulse: number;
+      baseWidth: number;
+      widthPulse: number;
+    }
+  | undefined {
+  if (milestone === "Clean Hazard Skim") {
+    return {
+      color: 0xffd166,
+      baseRadius: 18,
+      radiusPulse: 24,
+      baseAlpha: 0.14,
+      alphaPulse: 0.26,
+      baseWidth: 1.6,
+      widthPulse: 2.2
+    };
+  }
+
+  if (milestone === "Needle Thread") {
+    return {
+      color: 0xf8e59a,
+      baseRadius: 24,
+      radiusPulse: 32,
+      baseAlpha: 0.18,
+      alphaPulse: 0.3,
+      baseWidth: 2,
+      widthPulse: 2.8
+    };
+  }
+
+  if (milestone === "Chain Finish") {
+    return {
+      color: 0x8ee6b8,
+      baseRadius: 32,
+      radiusPulse: 42,
+      baseAlpha: 0.2,
+      alphaPulse: 0.34,
+      baseWidth: 2.4,
+      widthPulse: 3.2
+    };
+  }
+
+  return undefined;
 }
 
 class PixiRenderer implements AstroPixiRenderer {

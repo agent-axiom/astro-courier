@@ -226,9 +226,9 @@ describe("velocity vector visual", () => {
 });
 
 describe("boost burst visual", () => {
-  it("stays hidden unless a boost burn milestone is active in flight", () => {
+  it("stays hidden unless a shockwave milestone is active", () => {
     expect(boostBurstVisual({ status: "paused", lastMilestone: "Boost Burn", tick: 12 })).toBeUndefined();
-    expect(boostBurstVisual({ status: "flying", lastMilestone: "Clean Hazard Skim", tick: 12 })).toBeUndefined();
+    expect(boostBurstVisual({ status: "flying", lastMilestone: "Cargo Loaded", tick: 12 })).toBeUndefined();
     expect(boostBurstVisual({ status: "flying", tick: 12 })).toBeUndefined();
   });
 
@@ -252,5 +252,18 @@ describe("boost burst visual", () => {
     expect(assist?.radius).toBeLessThanOrEqual(34);
     expect(assist?.width).toBeLessThan(4);
     expect(assist?.alpha).toBeGreaterThanOrEqual(0.2);
+  });
+
+  it("returns stronger shockwaves for fresh style hits", () => {
+    const skim = boostBurstVisual({ status: "flying", lastMilestone: "Clean Hazard Skim", tick: 6 });
+    const thread = boostBurstVisual({ status: "flying", lastMilestone: "Needle Thread", tick: 6 });
+    const finish = boostBurstVisual({ status: "delivered", lastMilestone: "Chain Finish", tick: 6 });
+
+    expect(skim).toMatchObject({ color: 0xffd166 });
+    expect(thread).toMatchObject({ color: 0xf8e59a });
+    expect(finish).toMatchObject({ color: 0x8ee6b8 });
+    expect(thread?.radius).toBeGreaterThan(skim?.radius ?? 0);
+    expect(finish?.radius).toBeGreaterThan(thread?.radius ?? 0);
+    expect(thread?.alpha).toBeGreaterThanOrEqual(skim?.alpha ?? 0);
   });
 });
