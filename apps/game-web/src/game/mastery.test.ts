@@ -23,7 +23,8 @@ describe("preflight bonus objectives", () => {
       { label: "Rush pickup", value: "+180" },
       { label: "Express finish", value: "+180 / gold pace" },
       { label: "Clean skim", value: "from +140" },
-      { label: "Perfect dock", value: "+220" }
+      { label: "Perfect dock", value: "+220" },
+      { label: "Last Drop", value: "+170 / <=5% fuel" }
     ]);
   });
 
@@ -38,7 +39,8 @@ describe("preflight bonus objectives", () => {
       { label: "Rush pickup", value: "+180" },
       { label: "Express finish", value: "+180 / gold pace" },
       { label: "Needle thread", value: "42+ speed" },
-      { label: "Danger pay", value: "+180" }
+      { label: "Danger pay", value: "+180" },
+      { label: "Last Drop", value: "+170 / <=5% fuel" }
     ]);
   });
 
@@ -53,7 +55,8 @@ describe("preflight bonus objectives", () => {
       { label: "Rush pickup", value: "+180" },
       { label: "Express finish", value: "+180 / gold pace" },
       { label: "Gravity sling", value: "+240 / 54+ speed" },
-      { label: "Perfect dock", value: "+220" }
+      { label: "Perfect dock", value: "+220" },
+      { label: "Last Drop", value: "+170 / <=5% fuel" }
     ]);
   });
 });

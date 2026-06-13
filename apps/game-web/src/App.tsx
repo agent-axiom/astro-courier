@@ -750,6 +750,8 @@ export function App() {
                   <ShieldAlert size={17} />
                 ) : objective.label === "Chain finish" ? (
                   <Star size={17} />
+                ) : objective.label === "Last Drop" ? (
+                  <Zap size={17} />
                 ) : (
                   <Flag size={17} />
                 )}

@@ -4,6 +4,8 @@ import {
   EXPRESS_FINISH_STYLE_BONUS,
   HAZARD_SKIM_BASE_BONUS,
   HAZARD_THREAD_SPEED_THRESHOLD,
+  LAST_DROP_FUEL_RATIO,
+  LAST_DROP_STYLE_BONUS,
   PERFECT_APPROACH_STYLE_BONUS
 } from "@astro-courier/simulation";
 
@@ -30,6 +32,7 @@ export type PreflightBonusObjective = {
     | "Perfect dock"
     | "Needle thread"
     | "Danger pay"
+    | "Last Drop"
     | "Chain finish"
     | "Gravity sling";
   value: string;
@@ -57,6 +60,10 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
     label: "Express finish",
     value: `+${EXPRESS_FINISH_STYLE_BONUS} / gold pace`
   } satisfies PreflightBonusObjective;
+  const lastDrop = {
+    label: "Last Drop",
+    value: `+${LAST_DROP_STYLE_BONUS} / <=${Math.round(LAST_DROP_FUEL_RATIO * 100)}% fuel`
+  } satisfies PreflightBonusObjective;
 
   if ((input.hazardSeverityMultiplier ?? 1) >= 1.25) {
     return [
@@ -69,7 +76,8 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
       {
         label: "Danger pay",
         value: `+${Math.round(((input.hazardSeverityMultiplier ?? 1) - 1) * 400)}`
-      }
+      },
+      lastDrop
     ];
   }
 
@@ -84,7 +92,8 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
       {
         label: "Perfect dock",
         value: `+${PERFECT_APPROACH_STYLE_BONUS}`
-      }
+      },
+      lastDrop
     ];
   }
 
@@ -98,6 +107,7 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
     {
       label: "Perfect dock",
       value: `+${PERFECT_APPROACH_STYLE_BONUS}`
-    }
+    },
+    lastDrop
   ];
 }
