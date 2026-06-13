@@ -12,6 +12,7 @@ export type GameAudioEvent =
   | "assist-burn"
   | "boost-burn"
   | "fuel-critical"
+  | "cargo-damage"
   | "hazard-contact"
   | "trajectory-warning";
 
@@ -25,11 +26,13 @@ export type HudAudioSnapshot = {
   styleChainSecondsRemaining?: number;
   fuel: number;
   maxFuel: number;
+  cargoDamage?: number;
   hazardDangerLevel?: "near" | "inside";
   trajectoryRiskLevel?: "near" | "inside";
 };
 
 const criticalFuelRatio = 0.15;
+const cleanCargoDamageLimit = 0.02;
 const criticalStyleChainSeconds = 1;
 const styleMilestones = new Set([
   "Clean Hazard Skim",
@@ -73,6 +76,10 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
     events.push("fuel-critical");
   }
 
+  if (hasCargoDamageCrossedCleanLimit(previous, current)) {
+    events.push("cargo-damage");
+  }
+
   if (hasDroppedMedalWindow(previous, current)) {
     events.push("medal-drop");
   }
@@ -101,6 +108,13 @@ function isFuelCritical(snapshot: HudAudioSnapshot | undefined): boolean {
     return false;
   }
   return snapshot.fuel / snapshot.maxFuel <= criticalFuelRatio;
+}
+
+function hasCargoDamageCrossedCleanLimit(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {
+  if (!previous) {
+    return false;
+  }
+  return (previous.cargoDamage ?? 0) <= cleanCargoDamageLimit && (current.cargoDamage ?? 0) > cleanCargoDamageLimit;
 }
 
 function hasCrossedBestRunScore(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {

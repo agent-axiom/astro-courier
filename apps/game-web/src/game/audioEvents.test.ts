@@ -35,6 +35,13 @@ describe("HUD audio events", () => {
     expect(deriveHudAudioEvents({ ...baseSnapshot, fuel: 14 }, { ...baseSnapshot, fuel: 13 })).toEqual([]);
   });
 
+  it("warns when clean cargo first takes damage", () => {
+    expect(deriveHudAudioEvents({ ...baseSnapshot, cargoDamage: 0.01 }, { ...baseSnapshot, cargoDamage: 0.05 })).toEqual([
+      "cargo-damage"
+    ]);
+    expect(deriveHudAudioEvents({ ...baseSnapshot, cargoDamage: 0.05 }, { ...baseSnapshot, cargoDamage: 0.12 })).toEqual([]);
+  });
+
   it("warns once when the current medal window drops", () => {
     expect(deriveHudAudioEvents({ ...baseSnapshot, paceTier: "gold" }, { ...baseSnapshot, paceTier: "silver" })).toEqual(["medal-drop"]);
     expect(deriveHudAudioEvents({ ...baseSnapshot, paceTier: "silver" }, { ...baseSnapshot, paceTier: "silver" })).toEqual([]);

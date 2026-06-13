@@ -1389,6 +1389,7 @@ function toHudAudioSnapshot(hud: HudState, bestRun: BestRun | undefined): HudAud
     styleChainSecondsRemaining: hud.styleChainSecondsRemaining,
     fuel: hud.fuel,
     maxFuel: hud.maxFuel,
+    cargoDamage: hud.cargoDamage,
     hazardDangerLevel: hud.hazardDangerLevel,
     trajectoryRiskLevel: hud.trajectoryRiskLevel
   };
