@@ -22,6 +22,7 @@ import { canUseImpulseControl } from "./game/hudControls";
 import { getNextContractId } from "./game/contracts";
 import { buildRadioMessage } from "./game/radio";
 import { buildLiveStyleReward } from "./game/style";
+import { buildObjectiveDirective } from "./game/objective";
 
 type GameStore = {
   hud: HudState;
@@ -152,6 +153,7 @@ export function App() {
   const canBrake = canUseImpulseControl({ action: "brake", fuel: hud.fuel, paused, preflightOpen, status: hud.status });
   const nextContractId = getNextContractId(hud.contractOptions, hud.contractId);
   const canAdvanceContract = hud.status === "delivered" && nextContractId !== hud.contractId;
+  const objectiveDirective = buildObjectiveDirective(hud);
   const liveStyleReward = buildLiveStyleReward({
     styleBonus: hud.scoreBreakdown.styleBonus,
     lastMilestone: hud.lastMilestone
@@ -265,8 +267,8 @@ export function App() {
           <strong>{statusLabel(hud.status)}</strong>
         </div>
         <div className="status-row">
-          <span>Objective</span>
-          <strong>{objectiveLabel(hud)}</strong>
+          <span>{objectiveDirective.label}</span>
+          <strong>{objectiveDirective.value}</strong>
         </div>
         <div className="status-row">
           <span>Target</span>
@@ -471,12 +473,6 @@ function statusLabel(status: HudState["status"]): string {
   if (status === "crashed") return "Crashed";
   if (status === "paused") return "Paused";
   return "In flight";
-}
-
-function objectiveLabel(hud: HudState): string {
-  if (hud.objectivePhase === "complete") return "Complete";
-  if (hud.objectivePhase === "delivery") return "Deliver";
-  return hud.lastMilestone === "Pickup Required" ? "Pickup first" : "Pickup";
 }
 
 function guidanceLabel(status: NonNullable<HudState["landingStatus"]>, assistAvailable: boolean): string {

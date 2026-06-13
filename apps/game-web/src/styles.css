@@ -188,9 +188,16 @@ button {
   font-size: 0.84rem;
 }
 
+.status-row span,
+.status-row strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .status-row strong {
   color: #ffffff;
   font-weight: 700;
+  text-align: right;
 }
 
 .pace-chip {
