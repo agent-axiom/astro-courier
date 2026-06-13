@@ -471,4 +471,19 @@ describe("boost burst visual", () => {
     expect(finish?.radius).toBeGreaterThan(sling?.radius ?? 0);
     expect(thread?.alpha).toBeGreaterThanOrEqual(skim?.alpha ?? 0);
   });
+
+  it("returns distinct shockwaves for rare finish and recovery style hits", () => {
+    const eco = boostBurstVisual({ status: "delivered", lastMilestone: "Eco Drift", tick: 6 });
+    const perfect = boostBurstVisual({ status: "delivered", lastMilestone: "Perfect Approach", tick: 6 });
+    const express = boostBurstVisual({ status: "delivered", lastMilestone: "Express Finish", tick: 6 });
+    const damageControl = boostBurstVisual({ status: "delivered", lastMilestone: "Damage Control", tick: 6 });
+
+    expect(eco).toMatchObject({ color: 0x8ee6b8 });
+    expect(perfect).toMatchObject({ color: 0xf8e59a });
+    expect(express).toMatchObject({ color: 0xffd166 });
+    expect(damageControl).toMatchObject({ color: 0xff9f1c });
+    expect(perfect?.radius).toBeGreaterThan(eco?.radius ?? 0);
+    expect(express?.radius).toBeGreaterThan(perfect?.radius ?? 0);
+    expect(damageControl?.alpha).toBeGreaterThanOrEqual(eco?.alpha ?? 0);
+  });
 });

@@ -489,6 +489,54 @@ function styleShockwaveSpec(milestone?: string):
     };
   }
 
+  if (milestone === "Eco Drift") {
+    return {
+      color: 0x8ee6b8,
+      baseRadius: 26,
+      radiusPulse: 30,
+      baseAlpha: 0.16,
+      alphaPulse: 0.3,
+      baseWidth: 1.8,
+      widthPulse: 2.6
+    };
+  }
+
+  if (milestone === "Perfect Approach") {
+    return {
+      color: 0xf8e59a,
+      baseRadius: 28,
+      radiusPulse: 34,
+      baseAlpha: 0.18,
+      alphaPulse: 0.32,
+      baseWidth: 2,
+      widthPulse: 2.8
+    };
+  }
+
+  if (milestone === "Express Finish") {
+    return {
+      color: 0xffd166,
+      baseRadius: 31,
+      radiusPulse: 40,
+      baseAlpha: 0.2,
+      alphaPulse: 0.34,
+      baseWidth: 2.4,
+      widthPulse: 3.2
+    };
+  }
+
+  if (milestone === "Damage Control") {
+    return {
+      color: 0xff9f1c,
+      baseRadius: 29,
+      radiusPulse: 34,
+      baseAlpha: 0.18,
+      alphaPulse: 0.32,
+      baseWidth: 2.1,
+      widthPulse: 2.8
+    };
+  }
+
   if (milestone === "Chain Finish") {
     return {
       color: 0x8ee6b8,
