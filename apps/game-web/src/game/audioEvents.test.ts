@@ -43,6 +43,41 @@ describe("HUD audio events", () => {
     expect(deriveHudAudioEvents({ ...baseSnapshot, cargoDamage: 0.05 }, { ...baseSnapshot, cargoDamage: 0.12 })).toEqual([]);
   });
 
+  it("celebrates arming the final comet dock once while comet conditions are live", () => {
+    const cometDockSnapshot = {
+      ...baseSnapshot,
+      objectivePhase: "delivery" as const,
+      paceTier: "gold" as const,
+      fuel: 84,
+      maxFuel: 100,
+      cargoDamage: 0
+    };
+    expect(
+      deriveHudAudioEvents(
+        { ...cometDockSnapshot, perfectDockReady: false },
+        { ...cometDockSnapshot, perfectDockReady: true }
+      )
+    ).toEqual(["comet-armed"]);
+    expect(
+      deriveHudAudioEvents(
+        { ...cometDockSnapshot, perfectDockReady: true },
+        { ...cometDockSnapshot, perfectDockReady: true }
+      )
+    ).toEqual([]);
+    expect(
+      deriveHudAudioEvents(
+        { ...cometDockSnapshot, perfectDockReady: false },
+        { ...cometDockSnapshot, objectivePhase: "pickup", perfectDockReady: true }
+      )
+    ).toEqual([]);
+    expect(
+      deriveHudAudioEvents(
+        { ...cometDockSnapshot, perfectDockReady: false },
+        { ...cometDockSnapshot, cargoDamage: 0.05, perfectDockReady: true }
+      )
+    ).toEqual(["cargo-damage"]);
+  });
+
   it("warns once when the current medal window drops", () => {
     expect(deriveHudAudioEvents({ ...baseSnapshot, paceTier: "gold" }, { ...baseSnapshot, paceTier: "silver" })).toEqual(["medal-drop"]);
     expect(deriveHudAudioEvents({ ...baseSnapshot, paceTier: "silver" }, { ...baseSnapshot, paceTier: "silver" })).toEqual([]);

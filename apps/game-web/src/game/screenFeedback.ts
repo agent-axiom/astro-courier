@@ -19,6 +19,9 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[]): ScreenFe
   if (events.includes("pb-pressure")) {
     return { tone: "style", intensity: "medium", durationMs: 360 };
   }
+  if (events.includes("comet-armed")) {
+    return { tone: "style", intensity: "medium", durationMs: 460 };
+  }
   if (events.includes("hazard-contact")) {
     return { tone: "danger", intensity: "medium", durationMs: 440 };
   }

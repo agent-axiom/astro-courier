@@ -1,4 +1,5 @@
-import type { RunStatus } from "@astro-courier/shared";
+import type { ObjectivePhase, RunStatus } from "@astro-courier/shared";
+import { COMET_RESERVE_MIN_RATIO } from "./comet";
 import type { ContractPaceTier } from "./pace";
 
 export type GameAudioEvent =
@@ -8,6 +9,7 @@ export type GameAudioEvent =
   | "launch-burst"
   | "pb-pressure"
   | "pb-lead"
+  | "comet-armed"
   | "chain-critical"
   | "medal-drop"
   | "assist-burn"
@@ -19,10 +21,12 @@ export type GameAudioEvent =
 
 export type HudAudioSnapshot = {
   status: RunStatus;
+  objectivePhase?: ObjectivePhase;
   lastMilestone?: string;
   score?: number;
   bestRunScore?: number;
   paceTier?: ContractPaceTier;
+  perfectDockReady?: boolean;
   styleMultiplier?: number;
   styleChainSecondsRemaining?: number;
   fuel: number;
@@ -95,6 +99,10 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
     events.push("pb-pressure");
   }
 
+  if (hasArmedCometDock(previous, current)) {
+    events.push("comet-armed");
+  }
+
   if (hasStyleChainReachedCriticalWindow(previous, current)) {
     events.push("chain-critical");
   }
@@ -145,6 +153,20 @@ function hasEnteredBestRunPressure(previous: HudAudioSnapshot | undefined, curre
   const previousGap = current.bestRunScore - (previous.score ?? 0);
   const currentGap = current.bestRunScore - (current.score ?? 0);
   return previousGap > bestRunPressureGap && currentGap > 0 && currentGap <= bestRunPressureGap;
+}
+
+function hasArmedCometDock(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {
+  if (!previous || previous.perfectDockReady || !current.perfectDockReady) {
+    return false;
+  }
+  const fuelReserve = current.maxFuel > 0 ? current.fuel / current.maxFuel : 0;
+  return (
+    current.status === "flying" &&
+    current.objectivePhase === "delivery" &&
+    current.paceTier === "gold" &&
+    fuelReserve >= COMET_RESERVE_MIN_RATIO &&
+    (current.cargoDamage ?? 0) <= cleanCargoDamageLimit
+  );
 }
 
 function hasDroppedMedalWindow(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {

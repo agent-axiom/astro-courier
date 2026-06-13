@@ -21,6 +21,11 @@ describe("screen feedback", () => {
       intensity: "light",
       durationMs: 360
     });
+    expect(buildScreenFeedback(["comet-armed"])).toEqual({
+      tone: "style",
+      intensity: "medium",
+      durationMs: 460
+    });
   });
 
   it("maps boost burns to light style feedback", () => {

@@ -35,6 +35,9 @@ export function hapticPatternForEvents(events: readonly GameAudioEvent[]): Hapti
   if (events.includes("pb-lead")) {
     return [16, 20, 16];
   }
+  if (events.includes("comet-armed")) {
+    return [12, 16, 12];
+  }
   if (events.includes("pb-pressure")) {
     return [12, 18, 12];
   }

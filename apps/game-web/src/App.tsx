@@ -1417,10 +1417,12 @@ function statusLabel(status: HudState["status"]): string {
 function toHudAudioSnapshot(hud: HudState, bestRun: BestRun | undefined): HudAudioSnapshot {
   return {
     status: hud.status,
+    objectivePhase: hud.objectivePhase,
     lastMilestone: hud.lastMilestone,
     score: hud.score,
     bestRunScore: bestRun?.score,
     paceTier: hud.paceTier,
+    perfectDockReady: hud.perfectDockReady,
     styleMultiplier: hud.styleMultiplier,
     styleChainSecondsRemaining: hud.styleChainSecondsRemaining,
     fuel: hud.fuel,
