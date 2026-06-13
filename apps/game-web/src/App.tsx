@@ -1,4 +1,5 @@
 import {
+  Activity,
   ArrowRight,
   CalendarDays,
   Flag,
@@ -69,6 +70,7 @@ import { createGameHapticsController, type GameHapticsController } from "./game/
 import { buildAudioTogglePresentation } from "./game/audioControls";
 import { buildTouchFlightPadPresentation } from "./game/touchControls";
 import { buildScreenFeedback, type ScreenFeedback } from "./game/screenFeedback";
+import { appendRunFeedUpdates, deriveRunFeedUpdates, type RunFeedEntry, type RunFeedSnapshot } from "./game/runFeed";
 
 type GameStore = {
   hud: HudState;
@@ -150,6 +152,8 @@ export function App() {
   const audioRef = useRef<GameAudioController | null>(null);
   const hapticsRef = useRef<GameHapticsController | null>(null);
   const previousAudioSnapshotRef = useRef<HudAudioSnapshot | undefined>(undefined);
+  const previousRunFeedSnapshotRef = useRef<RunFeedSnapshot | undefined>(undefined);
+  const nextRunFeedIdRef = useRef(1);
   const screenFeedbackTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const hud = useGameStore((state) => state.hud);
   const setHud = useGameStore((state) => state.setHud);
@@ -157,6 +161,7 @@ export function App() {
   const [preflightOpen, setPreflightOpen] = useState(true);
   const [audioMuted, setAudioMuted] = useState(false);
   const [screenFeedback, setScreenFeedback] = useState<ActiveScreenFeedback | undefined>(undefined);
+  const [runFeed, setRunFeed] = useState<RunFeedEntry[]>([]);
   const [bestRun, setBestRun] = useState<BestRun | undefined>(() => {
     const storage = getBestRunStorage();
     return storage ? getBestRun(storage, initialHud.contractId) : undefined;
@@ -217,6 +222,9 @@ export function App() {
     setBestRun(storage ? getBestRun(storage, hud.contractId) : undefined);
     setNewBest(false);
     recordedRunRef.current = null;
+    previousRunFeedSnapshotRef.current = undefined;
+    nextRunFeedIdRef.current = 1;
+    setRunFeed([]);
   }, [hud.contractId]);
 
   useEffect(() => {
@@ -254,6 +262,21 @@ export function App() {
       }, feedback.durationMs);
     }
   }, [hud.fuel, hud.hazardDangerLevel, hud.lastMilestone, hud.maxFuel, hud.status]);
+
+  useEffect(() => {
+    const currentSnapshot = toRunFeedSnapshot(hud);
+    const updates = deriveRunFeedUpdates(previousRunFeedSnapshotRef.current, currentSnapshot);
+    previousRunFeedSnapshotRef.current = currentSnapshot;
+    if (updates.length === 0) {
+      return;
+    }
+
+    setRunFeed((currentEntries) => {
+      const result = appendRunFeedUpdates(currentEntries, updates, nextRunFeedIdRef.current, 4);
+      nextRunFeedIdRef.current = result.nextId;
+      return result.entries;
+    });
+  }, [hud.fuel, hud.hazardDangerLevel, hud.lastMilestone, hud.lastStyleAward, hud.maxFuel, hud.status]);
 
   useEffect(() => {
     if (hud.status !== "delivered") {
@@ -666,6 +689,17 @@ export function App() {
 
       <aside className="run-panel" aria-label="Delivery status">
         <div className="radio-message">{radioMessage}</div>
+        {runFeed.length > 0 && !preflightOpen ? (
+          <div className="action-feed" aria-label="Recent run events">
+            {runFeed.map((entry) => (
+              <div key={entry.id} className={`action-feed-entry action-feed-${entry.tone}`}>
+                <Activity size={15} />
+                <span>{entry.label}</span>
+                <strong>{entry.value}</strong>
+              </div>
+            ))}
+          </div>
+        ) : null}
         {tacticalCue ? (
           <div className={`tactical-cue tactical-cue-${tacticalCue.tone}`} aria-label={`${tacticalCue.label}: ${tacticalCue.value}`}>
             <Target size={16} />
@@ -1154,6 +1188,17 @@ function toHudAudioSnapshot(hud: HudState): HudAudioSnapshot {
   return {
     status: hud.status,
     lastMilestone: hud.lastMilestone,
+    fuel: hud.fuel,
+    maxFuel: hud.maxFuel,
+    hazardDangerLevel: hud.hazardDangerLevel
+  };
+}
+
+function toRunFeedSnapshot(hud: HudState): RunFeedSnapshot {
+  return {
+    status: hud.status,
+    lastMilestone: hud.lastMilestone,
+    lastStyleAward: hud.lastStyleAward,
     fuel: hud.fuel,
     maxFuel: hud.maxFuel,
     hazardDangerLevel: hud.hazardDangerLevel
