@@ -300,6 +300,7 @@ export function App() {
     cargoDamage: hud.cargoDamage
   });
   const liveStyleReward = buildLiveStyleReward({
+    contractId: hud.contractId,
     styleBonus: hud.scoreBreakdown.styleBonus,
     lastStyleAward: hud.lastStyleAward,
     lastMilestone: hud.lastMilestone,

@@ -190,6 +190,23 @@ describe("live style reward HUD copy", () => {
     });
   });
 
+  it("points chain relay urgent chains at docking the chain", () => {
+    expect(
+      buildLiveStyleReward({
+        contractId: "chain-relay",
+        styleBonus: 440,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 0.8
+      })
+    ).toEqual({
+      label: "Style chain",
+      value: "Dock chain / x1.50 / 0.8s",
+      fresh: false,
+      tone: "urgent",
+      chainProgress: 0.2
+    });
+  });
+
   it("points urgent chains at an immediate clean hazard skim", () => {
     expect(
       buildLiveStyleReward({

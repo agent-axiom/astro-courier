@@ -3,6 +3,7 @@ import { STYLE_CHAIN_WINDOW_SECONDS } from "@astro-courier/simulation";
 export const STYLE_CHAIN_URGENT_SECONDS = 1;
 
 export type LiveStyleRewardInput = {
+  contractId?: string;
   styleBonus: number;
   lastStyleAward?: number;
   lastMilestone?: string;
@@ -73,6 +74,9 @@ function buildUrgentChainAction(input: LiveStyleRewardInput): string {
   }
   if ((input.quickPickupSecondsRemaining ?? 0) > 0) {
     return "Pickup now";
+  }
+  if (input.contractId === "chain-relay") {
+    return "Dock chain";
   }
   return "Save chain";
 }
