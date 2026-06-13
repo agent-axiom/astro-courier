@@ -18,7 +18,15 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { create } from "zustand";
-import { buildBestRunChase, buildBestRunDelta, buildLiveBestPace, getBestRun, recordBestRun, type BestRun } from "./game/bestRun";
+import {
+  buildBestRunChase,
+  buildBestRunDelta,
+  buildContractBestRunLabel,
+  buildLiveBestPace,
+  getBestRun,
+  recordBestRun,
+  type BestRun
+} from "./game/bestRun";
 import { GameShell, type HudState } from "./game/GameShell";
 import { formatBearingGuidance } from "./game/bearing";
 import { canUseImpulseControl } from "./game/hudControls";
@@ -110,6 +118,7 @@ export function App() {
     const storage = getBestRunStorage();
     return storage ? getBestRun(storage, initialHud.contractId) : undefined;
   });
+  const [bestRunsByContract, setBestRunsByContract] = useState<Record<string, BestRun | undefined>>({});
   const [newBest, setNewBest] = useState(false);
 
   useEffect(() => {
@@ -137,6 +146,20 @@ export function App() {
   }, [hud.contractId]);
 
   useEffect(() => {
+    const storage = getBestRunStorage();
+    if (!storage) {
+      setBestRunsByContract({});
+      return;
+    }
+
+    const nextBestRuns: Record<string, BestRun | undefined> = {};
+    for (const contract of hud.contractOptions) {
+      nextBestRuns[contract.id] = getBestRun(storage, contract.id);
+    }
+    setBestRunsByContract(nextBestRuns);
+  }, [hud.contractOptions]);
+
+  useEffect(() => {
     if (hud.status !== "delivered") {
       if (hud.status === "flying" || hud.status === "paused") {
         recordedRunRef.current = null;
@@ -161,6 +184,10 @@ export function App() {
       medal: hud.medal
     });
     setBestRun(result.best);
+    setBestRunsByContract((current) => ({
+      ...current,
+      [hud.contractId]: result.best
+    }));
     setNewBest(result.isNewBest);
   }, [hud.contractId, hud.elapsedSeconds, hud.medal, hud.score, hud.status]);
 
@@ -565,6 +592,7 @@ export function App() {
                     <div className="contract-option-traits">
                       <em>{contract.riskLabel}</em>
                       <em>{contract.rewardLabel}</em>
+                      <em className="contract-option-best">{buildContractBestRunLabel(bestRunsByContract[contract.id])}</em>
                       <em className={`contract-option-cargo contract-option-cargo-${contractCargoRisk.tone}`}>
                         {buildContractCargoTrait(contract)}
                       </em>

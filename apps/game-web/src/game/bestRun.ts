@@ -89,6 +89,14 @@ export function buildBestRunChase(bestRun: BestRun | undefined): BestRunChase {
   };
 }
 
+export function buildContractBestRunLabel(bestRun: BestRun | undefined): string {
+  if (!bestRun) {
+    return "PB open";
+  }
+
+  return `PB ${bestRun.score} / ${bestRun.elapsedSeconds.toFixed(1)}s`;
+}
+
 export function buildBestRunDelta(input: BestRunDeltaInput): BestRunDelta | undefined {
   if (!input.bestRun) {
     return undefined;

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildBestRunChase, buildBestRunDelta, buildLiveBestPace, getBestRun, recordBestRun } from "./bestRun";
+import { buildBestRunChase, buildBestRunDelta, buildContractBestRunLabel, buildLiveBestPace, getBestRun, recordBestRun } from "./bestRun";
 
 describe("personal best run storage", () => {
   it("stores a first delivered run as the personal best", () => {
@@ -50,6 +50,16 @@ describe("personal best chase copy", () => {
       value: "3290 / 24.7s",
       tone: "target"
     });
+  });
+});
+
+describe("contract option personal best copy", () => {
+  it("marks unplayed contracts as open personal best slots", () => {
+    expect(buildContractBestRunLabel(undefined)).toBe("PB open");
+  });
+
+  it("formats saved contract personal bests compactly", () => {
+    expect(buildContractBestRunLabel({ score: 3290, elapsedSeconds: 24.667, medal: "gold" })).toBe("PB 3290 / 24.7s");
   });
 });
 

@@ -642,7 +642,7 @@ button {
 
 .preflight-overlay {
   position: absolute;
-  top: 52%;
+  top: 50%;
   left: 50%;
   display: grid;
   width: min(390px, calc(100vw - 32px));
@@ -1067,6 +1067,11 @@ button {
   font-size: 0.62rem;
   font-style: normal;
   font-weight: 850;
+}
+
+.contract-option-best {
+  background: rgba(142, 230, 184, 0.12);
+  color: #bff7d8;
 }
 
 .contract-option-cargo {
