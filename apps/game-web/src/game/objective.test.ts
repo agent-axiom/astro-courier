@@ -390,6 +390,23 @@ describe("tactical cue", () => {
     });
   });
 
+  it("points a fading chain-relay delivery chain at the dock", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        contractId: "chain-relay",
+        objectivePhase: "delivery",
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 0.8,
+        cargoDamage: 0
+      })
+    ).toEqual({
+      label: "Tactical cue",
+      value: "Dock chain / 0.8s",
+      tone: "urgent"
+    });
+  });
+
   it("surfaces a ready gravity sling payout as an immediate opportunity", () => {
     expect(
       buildTacticalCue({

@@ -58,6 +58,7 @@ export type ExpressFinishReadout = {
 
 export type TacticalCueInput = {
   status: RunStatus;
+  contractId?: string;
   objectivePhase: ObjectivePhase;
   hazardDangerLevel?: "near" | "inside";
   trajectoryRiskLevel?: "near" | "inside";
@@ -398,6 +399,10 @@ function buildUrgentChainAction(input: TacticalCueInput): string {
 
   if ((input.launchBurstSecondsRemaining ?? 0) > 0) {
     return `Boost now / +${LAUNCH_BURST_STYLE_BONUS}`;
+  }
+
+  if (input.contractId === "chain-relay" && input.objectivePhase === "delivery") {
+    return "Dock chain";
   }
 
   return "Save chain";

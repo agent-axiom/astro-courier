@@ -428,6 +428,7 @@ export function App() {
   });
   const tacticalCue = buildTacticalCue({
     status: hud.status,
+    contractId: hud.contractId,
     objectivePhase: hud.objectivePhase,
     hazardDangerLevel: hud.hazardDangerLevel,
     trajectoryRiskLevel: hud.trajectoryRiskLevel,
