@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { buildContractDangerPayTrait, buildContractHazardTrait, buildContractRoutePlan, getNextContractId } from "./contracts";
+import {
+  buildContractDangerPayTrait,
+  buildContractHazardTrait,
+  buildContractPreflightKicker,
+  buildContractRoutePlan,
+  getNextContractId
+} from "./contracts";
 
 describe("contract rotation", () => {
   it("returns the next contract id and wraps at the end", () => {
@@ -29,6 +35,14 @@ describe("contract rotation", () => {
     expect(buildContractDangerPayTrait({ hazardSeverityMultiplier: 1.45 })).toBe("Danger pay +180");
     expect(buildContractDangerPayTrait({})).toBeUndefined();
     expect(buildContractDangerPayTrait({ hazardSeverityMultiplier: 1 })).toBeUndefined();
+  });
+
+  it("labels the active preflight contract by route personality", () => {
+    expect(buildContractPreflightKicker({ contractId: "first-light-delivery", goldSeconds: 35 })).toBe("Starter Contract");
+    expect(buildContractPreflightKicker({ contractId: "asteroid-sprint", goldSeconds: 24, hazardSeverityMultiplier: 1.45 })).toBe(
+      "Danger Contract"
+    );
+    expect(buildContractPreflightKicker({ contractId: "return-leg", goldSeconds: 30 })).toBe("Sprint Contract");
   });
 
   it("prioritizes a danger route plan for high hazard contracts", () => {

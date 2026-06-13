@@ -13,6 +13,12 @@ export type ContractRoutePlanInput = {
   goldSeconds: number;
 };
 
+export type ContractPreflightKickerInput = {
+  contractId: string;
+  hazardSeverityMultiplier?: number;
+  goldSeconds: number;
+};
+
 export type ContractRoutePlan = {
   label: "Route plan";
   value: string;
@@ -44,6 +50,22 @@ export function buildContractDangerPayTrait(input: ContractHazardTraitInput): st
     return undefined;
   }
   return `Danger pay +${Math.round((input.hazardSeverityMultiplier - 1) * 400)}`;
+}
+
+export function buildContractPreflightKicker(input: ContractPreflightKickerInput): string {
+  if (input.contractId === "first-light-delivery") {
+    return "Starter Contract";
+  }
+
+  if ((input.hazardSeverityMultiplier ?? 1) >= 1.25) {
+    return "Danger Contract";
+  }
+
+  if (input.goldSeconds <= 30) {
+    return "Sprint Contract";
+  }
+
+  return "Courier Contract";
 }
 
 export function buildContractRoutePlan(input: ContractRoutePlanInput): ContractRoutePlan {

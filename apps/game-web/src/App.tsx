@@ -22,7 +22,13 @@ import { buildBestRunChase, buildBestRunDelta, buildLiveBestPace, getBestRun, re
 import { GameShell, type HudState } from "./game/GameShell";
 import { formatBearingGuidance } from "./game/bearing";
 import { canUseImpulseControl } from "./game/hudControls";
-import { buildContractDangerPayTrait, buildContractHazardTrait, buildContractRoutePlan, getNextContractId } from "./game/contracts";
+import {
+  buildContractDangerPayTrait,
+  buildContractHazardTrait,
+  buildContractPreflightKicker,
+  buildContractRoutePlan,
+  getNextContractId
+} from "./game/contracts";
 import { buildRadioMessage } from "./game/radio";
 import { buildLiveStyleReward } from "./game/style";
 import { buildObjectiveDirective, buildObjectiveInterceptReadout } from "./game/objective";
@@ -222,6 +228,11 @@ export function App() {
   const routePlan = buildContractRoutePlan({
     cargoKind: hud.cargoKind,
     cargoFragility: hud.cargoFragility,
+    hazardSeverityMultiplier: hud.hazardSeverityMultiplier,
+    goldSeconds: hud.paceSecondsRemaining
+  });
+  const preflightKicker = buildContractPreflightKicker({
+    contractId: hud.contractId,
     hazardSeverityMultiplier: hud.hazardSeverityMultiplier,
     goldSeconds: hud.paceSecondsRemaining
   });
@@ -449,7 +460,7 @@ export function App() {
 
       {overlays.preflight ? (
         <section className="preflight-overlay" aria-label="Launch briefing">
-          <div className="preflight-kicker">Starter Contract</div>
+          <div className="preflight-kicker">{preflightKicker}</div>
           <h2>{hud.contractTitle}</h2>
           <p>{hud.contractBriefing}</p>
           <div className="cargo-manifest" aria-label="Cargo manifest">
