@@ -27,7 +27,7 @@ import { buildLiveStyleReward } from "./game/style";
 import { buildObjectiveDirective } from "./game/objective";
 import { buildPreflightMasteryTargets } from "./game/mastery";
 import { buildDockingSpeedReadout } from "./game/docking";
-import { buildCargoManifest, buildCargoRiskReadout } from "./game/cargo";
+import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./game/cargo";
 
 type GameStore = {
   hud: HudState;
@@ -393,27 +393,38 @@ export function App() {
           ) : null}
           {hud.contractOptions.length > 1 ? (
             <div className="contract-selector" aria-label="Contract selection">
-              {hud.contractOptions.map((contract) => (
-                <button
-                  key={contract.id}
-                  type="button"
-                  className={`contract-option ${contract.id === hud.contractId ? "contract-option-active" : ""}`}
-                  aria-pressed={contract.id === hud.contractId}
-                  onClick={() => {
-                    shellRef.current?.selectContract(contract.id);
-                  }}
-                >
-                  <span>{contract.title}</span>
-                  <small>
-                    {contract.pickupLabel} -&gt; {contract.destinationLabel}
-                  </small>
-                  <div className="contract-option-traits">
-                    <em>{contract.riskLabel}</em>
-                    <em>{contract.rewardLabel}</em>
-                  </div>
-                  <strong>Gold {contract.medalTimes.gold}s</strong>
-                </button>
-              ))}
+              {hud.contractOptions.map((contract) => {
+                const contractCargoRisk = buildCargoRiskReadout({
+                  cargoKind: contract.cargoKind,
+                  cargoFragility: contract.cargoFragility,
+                  cargoDamage: 0,
+                  cargoOnboard: false
+                });
+                return (
+                  <button
+                    key={contract.id}
+                    type="button"
+                    className={`contract-option ${contract.id === hud.contractId ? "contract-option-active" : ""}`}
+                    aria-pressed={contract.id === hud.contractId}
+                    onClick={() => {
+                      shellRef.current?.selectContract(contract.id);
+                    }}
+                  >
+                    <span>{contract.title}</span>
+                    <small>
+                      {contract.pickupLabel} -&gt; {contract.destinationLabel}
+                    </small>
+                    <div className="contract-option-traits">
+                      <em>{contract.riskLabel}</em>
+                      <em>{contract.rewardLabel}</em>
+                      <em className={`contract-option-cargo contract-option-cargo-${contractCargoRisk.tone}`}>
+                        {buildContractCargoTrait(contract)}
+                      </em>
+                    </div>
+                    <strong>Gold {contract.medalTimes.gold}s</strong>
+                  </button>
+                );
+              })}
             </div>
           ) : null}
           <div className="preflight-stats" aria-label="Contract briefing">

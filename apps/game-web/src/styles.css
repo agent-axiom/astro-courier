@@ -734,6 +734,25 @@ button {
   font-weight: 850;
 }
 
+.contract-option-cargo {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.contract-option-cargo-normal {
+  background: rgba(142, 230, 184, 0.12);
+  color: #bff7d8;
+}
+
+.contract-option-cargo-warning {
+  background: rgba(255, 209, 102, 0.16);
+  color: #ffe19a;
+}
+
+.contract-option-cargo-danger {
+  background: rgba(255, 111, 145, 0.16);
+  color: #ffadc1;
+}
+
 .contract-option strong {
   color: #ffe19a;
   font-size: 0.74rem;

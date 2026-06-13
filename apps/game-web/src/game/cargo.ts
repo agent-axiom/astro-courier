@@ -62,6 +62,14 @@ export function buildCargoRiskReadout(input: CargoRiskReadoutInput): CargoRiskRe
   };
 }
 
+export function buildContractCargoTrait(input: Pick<CargoRiskReadoutInput, "cargoKind" | "cargoFragility">): string {
+  return buildCargoRiskReadout({
+    ...input,
+    cargoDamage: 0,
+    cargoOnboard: false
+  }).value;
+}
+
 function titleCase(value: string): string {
   return value
     .split(/[-_\s]+/)

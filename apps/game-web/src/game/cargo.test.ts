@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCargoManifest, buildCargoRiskReadout } from "./cargo";
+import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./cargo";
 
 describe("cargo manifest HUD copy", () => {
   it("shows the assigned cargo before pickup", () => {
@@ -45,5 +45,9 @@ describe("cargo manifest HUD copy", () => {
       value: "82% / contact",
       tone: "danger"
     });
+  });
+
+  it("formats cargo risk for compact contract cards", () => {
+    expect(buildContractCargoTrait({ cargoKind: "fragile", cargoFragility: 0.8 })).toBe("Fragile 0.80x");
   });
 });
