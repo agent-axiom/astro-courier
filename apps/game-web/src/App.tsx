@@ -40,7 +40,7 @@ import {
 } from "./game/bestRun";
 import { GameShell, type HudState } from "./game/GameShell";
 import { formatBearingGuidance } from "./game/bearing";
-import { buildBoostControlPresentation, buildPrimaryRunControlPresentation, canUseImpulseControl } from "./game/hudControls";
+import { buildBoostControlPresentation, buildBrakeControlPresentation, buildPrimaryRunControlPresentation, canUseImpulseControl } from "./game/hudControls";
 import {
   buildContractDangerPayTrait,
   buildContractHazardTrait,
@@ -399,6 +399,12 @@ export function App() {
     canBoost,
     boostCooldownSeconds: hud.boostCooldownSeconds,
     launchBurstSecondsRemaining: hud.launchBurstSecondsRemaining
+  });
+  const brakePresentation = buildBrakeControlPresentation({
+    canBrake,
+    manualBrakeUsed: hud.manualBrakeUsed,
+    objectivePhase: hud.objectivePhase,
+    cargoDamage: hud.cargoDamage
   });
   const boostButtonStyle = { "--boost-cooldown": boostPresentation.cooldownProgress } as CSSProperties;
   const objectiveDirective = buildObjectiveDirective(hud);
@@ -770,9 +776,10 @@ export function App() {
           </button>
           <button
             type="button"
-            className="icon-button"
-            aria-label="Brake"
-            title="Brake"
+            className={`icon-button brake-button brake-button-${brakePresentation.tone}`}
+            aria-label={brakePresentation.label}
+            title={brakePresentation.label}
+            data-brake-badge={brakePresentation.badge}
             disabled={!canBrake}
             onClick={() => {
               audioRef.current?.unlock();

@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { buildBoostControlPresentation, buildPrimaryRunControlPresentation, canUseImpulseControl, type ImpulseControlState } from "./hudControls";
+import {
+  buildBoostControlPresentation,
+  buildBrakeControlPresentation,
+  buildPrimaryRunControlPresentation,
+  canUseImpulseControl,
+  type ImpulseControlState
+} from "./hudControls";
 
 describe("HUD impulse controls", () => {
   it("allows boost and brake only during active runs with enough fuel", () => {
@@ -55,6 +61,35 @@ describe("boost control presentation", () => {
     expect(buildBoostControlPresentation({ canBoost: false, boostCooldownSeconds: 0.4, launchBurstSecondsRemaining: 2.4 })).toMatchObject({
       label: "Boost 0.4s",
       tone: "cooldown"
+    });
+  });
+});
+
+describe("brake control presentation", () => {
+  it("formats ordinary, disabled, and no-brake bonus button states", () => {
+    expect(buildBrakeControlPresentation({ canBrake: true, manualBrakeUsed: true, objectivePhase: "delivery", cargoDamage: 0 })).toEqual({
+      label: "Brake",
+      tone: "ready"
+    });
+    expect(buildBrakeControlPresentation({ canBrake: false, manualBrakeUsed: false, objectivePhase: "delivery", cargoDamage: 0 })).toEqual({
+      label: "Brake",
+      tone: "disabled"
+    });
+    expect(buildBrakeControlPresentation({ canBrake: true, manualBrakeUsed: false, objectivePhase: "delivery", cargoDamage: 0.01 })).toEqual({
+      label: "Hold brake for No Brake +150",
+      badge: "+150",
+      tone: "finesse"
+    });
+  });
+
+  it("keeps pickup and damaged-cargo braking clear of no-brake finesse copy", () => {
+    expect(buildBrakeControlPresentation({ canBrake: true, manualBrakeUsed: false, objectivePhase: "pickup", cargoDamage: 0 })).toEqual({
+      label: "Brake",
+      tone: "ready"
+    });
+    expect(buildBrakeControlPresentation({ canBrake: true, manualBrakeUsed: false, objectivePhase: "delivery", cargoDamage: 0.05 })).toEqual({
+      label: "Brake",
+      tone: "ready"
     });
   });
 });

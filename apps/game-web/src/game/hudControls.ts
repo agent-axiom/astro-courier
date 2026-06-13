@@ -1,5 +1,5 @@
-import type { RunStatus } from "@astro-courier/shared";
-import { BOOST_COOLDOWN_SECONDS } from "@astro-courier/simulation";
+import type { ObjectivePhase, RunStatus } from "@astro-courier/shared";
+import { BOOST_COOLDOWN_SECONDS, NO_BRAKE_STYLE_BONUS } from "@astro-courier/simulation";
 
 export type ImpulseControlAction = "boost" | "brake";
 
@@ -23,6 +23,19 @@ export type BoostControlPresentation = {
   badge?: string;
   tone: "ready" | "burst" | "cooldown" | "disabled";
   cooldownProgress: number;
+};
+
+export type BrakeControlPresentationInput = {
+  canBrake: boolean;
+  manualBrakeUsed: boolean;
+  objectivePhase?: ObjectivePhase;
+  cargoDamage?: number;
+};
+
+export type BrakeControlPresentation = {
+  label: string;
+  badge?: string;
+  tone: "ready" | "finesse" | "disabled";
 };
 
 export type PrimaryRunControlPresentationInput = {
@@ -75,6 +88,30 @@ export function buildBoostControlPresentation(input: BoostControlPresentationInp
     label: "Boost",
     tone: input.canBoost ? "ready" : "disabled",
     cooldownProgress: 0
+  };
+}
+
+export function buildBrakeControlPresentation(input: BrakeControlPresentationInput): BrakeControlPresentation {
+  if (!input.canBrake) {
+    return {
+      label: "Brake",
+      tone: "disabled"
+    };
+  }
+
+  const noBrakeFinesseLive =
+    input.objectivePhase === "delivery" && !input.manualBrakeUsed && (input.cargoDamage ?? 0) <= 0.02;
+  if (noBrakeFinesseLive) {
+    return {
+      label: `Hold brake for No Brake +${NO_BRAKE_STYLE_BONUS}`,
+      badge: `+${NO_BRAKE_STYLE_BONUS}`,
+      tone: "finesse"
+    };
+  }
+
+  return {
+    label: "Brake",
+    tone: "ready"
   };
 }
 
