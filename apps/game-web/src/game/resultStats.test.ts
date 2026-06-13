@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildGhostTrailReceipt,
   buildReplayReceipt,
   buildResultHighlight,
   buildResultOutcomePresentation,
@@ -103,6 +104,17 @@ describe("result stat formatting", () => {
       tone: "verified"
     });
     expect(buildReplayReceipt()).toBeUndefined();
+  });
+
+  it("marks new delivered personal bests as saved ghost trails", () => {
+    expect(buildGhostTrailReceipt({ status: "delivered", isNewBest: true, runTrailSampleCount: 24 })).toEqual({
+      label: "Ghost trail",
+      value: "Saved for next chase",
+      tone: "saved"
+    });
+    expect(buildGhostTrailReceipt({ status: "delivered", isNewBest: true, runTrailSampleCount: 1 })).toBeUndefined();
+    expect(buildGhostTrailReceipt({ status: "delivered", isNewBest: false, runTrailSampleCount: 24 })).toBeUndefined();
+    expect(buildGhostTrailReceipt({ status: "crashed", isNewBest: true, runTrailSampleCount: 24 })).toBeUndefined();
   });
 
   it("summarizes the run identity for modern result scanning", () => {

@@ -70,6 +70,7 @@ import { buildPreflightBonusObjectives, buildPreflightMasteryTargets } from "./g
 import { buildApproachRewardReadout, buildDockingSpeedReadout } from "./game/docking";
 import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./game/cargo";
 import {
+  buildGhostTrailReceipt,
   buildReplayReceipt,
   buildResultHighlight,
   buildResultOutcomePresentation,
@@ -559,6 +560,14 @@ export function App() {
         })
       : undefined;
   const replayReceipt = buildReplayReceipt(hud.replayChecksum);
+  const ghostTrailReceipt =
+    hud.status === "delivered" || hud.status === "crashed"
+      ? buildGhostTrailReceipt({
+          status: hud.status,
+          isNewBest: newBest,
+          runTrailSampleCount: hud.runTrail.length
+        })
+      : undefined;
   const bestRunChase = buildBestRunChase(bestRun);
   const routeBoardProgress = buildRouteBoardProgress(hud.contractOptions, bestRunsByContract);
   const routeBoardMastery = buildRouteBoardMastery(hud.contractOptions, bestRunsByContract);
@@ -1399,6 +1408,16 @@ export function App() {
             <div className={`best-delta best-delta-${bestRunDelta.tone}`} aria-label={`${bestRunDelta.label}: ${bestRunDelta.value}`}>
               <span>{bestRunDelta.label}</span>
               <strong>{bestRunDelta.value}</strong>
+            </div>
+          ) : null}
+          {ghostTrailReceipt ? (
+            <div
+              className={`ghost-trail-receipt ghost-trail-${ghostTrailReceipt.tone}`}
+              aria-label={`${ghostTrailReceipt.label}: ${ghostTrailReceipt.value}`}
+            >
+              <Route size={18} />
+              <span>{ghostTrailReceipt.label}</span>
+              <strong>{ghostTrailReceipt.value}</strong>
             </div>
           ) : null}
           <div className="result-stats">

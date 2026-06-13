@@ -23,6 +23,18 @@ export type ReplayReceipt = {
   tone: "verified";
 };
 
+export type GhostTrailReceiptInput = {
+  status: Extract<RunStatus, "crashed" | "delivered">;
+  isNewBest: boolean;
+  runTrailSampleCount: number;
+};
+
+export type GhostTrailReceipt = {
+  label: "Ghost trail";
+  value: "Saved for next chase";
+  tone: "saved";
+};
+
 export type ResultOutcomePresentation = {
   icon: "alert" | "trophy";
   tone: "danger" | "success";
@@ -177,5 +189,17 @@ export function buildReplayReceipt(replayChecksum?: string): ReplayReceipt | und
     label: "Replay ID",
     value: replayChecksum.replace(/^rc-/, "RC-").toUpperCase(),
     tone: "verified"
+  };
+}
+
+export function buildGhostTrailReceipt(input: GhostTrailReceiptInput): GhostTrailReceipt | undefined {
+  if (input.status !== "delivered" || !input.isNewBest || input.runTrailSampleCount < 2) {
+    return undefined;
+  }
+
+  return {
+    label: "Ghost trail",
+    value: "Saved for next chase",
+    tone: "saved"
   };
 }
