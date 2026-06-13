@@ -374,10 +374,12 @@ button {
 }
 
 .style-chip {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  overflow: hidden;
   min-height: 36px;
   padding: 8px 10px;
   border-radius: 7px;
@@ -387,17 +389,38 @@ button {
   font-weight: 850;
 }
 
+.style-chip::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  transform: scaleX(var(--style-chain-progress, 0));
+  transform-origin: left center;
+  background: linear-gradient(90deg, #8ee6b8, #ffd166);
+  opacity: 0;
+  content: "";
+}
+
 .style-chip span {
+  position: relative;
+  z-index: 1;
   color: rgba(255, 241, 199, 0.78);
 }
 
 .style-chip strong {
+  position: relative;
+  z-index: 1;
   color: #ffffff;
 }
 
 .style-chip-hot {
   background: rgba(142, 230, 184, 0.17);
   color: #bff7d8;
+}
+
+.style-chip-chain-active::after {
+  opacity: 1;
 }
 
 .style-chip-hot span {

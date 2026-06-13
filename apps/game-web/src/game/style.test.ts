@@ -10,7 +10,8 @@ describe("live style reward HUD copy", () => {
     expect(buildLiveStyleReward({ styleBonus: 180 })).toEqual({
       label: "Style bank",
       value: "+180",
-      fresh: false
+      fresh: false,
+      chainProgress: 0
     });
   });
 
@@ -18,7 +19,8 @@ describe("live style reward HUD copy", () => {
     expect(buildLiveStyleReward({ styleBonus: 320, lastMilestone: "Clean Hazard Skim", styleMultiplier: 1.25, styleChainSecondsRemaining: 3.8 })).toEqual({
       label: "Style chain",
       value: "+320 / x1.25 / 3.8s",
-      fresh: true
+      fresh: true,
+      chainProgress: 0.95
     });
   });
 
@@ -26,7 +28,8 @@ describe("live style reward HUD copy", () => {
     expect(buildLiveStyleReward({ styleBonus: 340, lastMilestone: "Eco Drift", styleMultiplier: 1.5, styleChainSecondsRemaining: 4 })).toEqual({
       label: "Style chain",
       value: "+340 / x1.50 / 4.0s",
-      fresh: true
+      fresh: true,
+      chainProgress: 1
     });
   });
 
@@ -34,7 +37,8 @@ describe("live style reward HUD copy", () => {
     expect(buildLiveStyleReward({ styleBonus: 180, styleMultiplier: 1.25, styleChainSecondsRemaining: 2.4 })).toEqual({
       label: "Style chain",
       value: "+180 / x1.25 / 2.4s",
-      fresh: false
+      fresh: false,
+      chainProgress: 0.6
     });
   });
 });

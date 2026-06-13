@@ -248,6 +248,7 @@ export function App() {
     styleMultiplier: hud.styleMultiplier,
     styleChainSecondsRemaining: hud.styleChainSecondsRemaining
   });
+  const styleChipStyle = { "--style-chain-progress": liveStyleReward?.chainProgress ?? 0 } as CSSProperties;
   const preflightMasteryTargets = buildPreflightMasteryTargets({ goldSeconds: hud.paceSecondsRemaining });
   const preflightBonusObjectives = buildPreflightBonusObjectives({ quickPickupBonus: hud.quickPickupBonus });
   const cargoManifest = buildCargoManifest({ cargoName: hud.cargoName, cargoOnboard: hud.cargoOnboard });
@@ -491,7 +492,13 @@ export function App() {
           </div>
         ) : null}
         {liveStyleReward ? (
-          <div className={`style-chip ${liveStyleReward.fresh ? "style-chip-hot" : ""}`} aria-label={liveStyleReward.label}>
+          <div
+            className={`style-chip ${liveStyleReward.fresh ? "style-chip-hot" : ""} ${
+              liveStyleReward.chainProgress > 0 ? "style-chip-chain-active" : ""
+            }`}
+            style={styleChipStyle}
+            aria-label={liveStyleReward.label}
+          >
             <span>{liveStyleReward.label}</span>
             <strong>{liveStyleReward.value}</strong>
           </div>
