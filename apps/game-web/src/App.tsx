@@ -1074,7 +1074,9 @@ export function App() {
             dailyDispatchAction ? (
               <button
                 type="button"
-                className={`daily-dispatch-briefing daily-dispatch-${dailyDispatchStatus?.tone ?? "open"} daily-dispatch-action`}
+                className={`daily-dispatch-briefing daily-dispatch-${dailyDispatchStatus?.tone ?? "open"} daily-reset-${
+                  dailyDispatchReset?.tone ?? "steady"
+                } daily-dispatch-action`}
                 aria-label={`${dailyDispatch.label}: ${dailyDispatch.value}. ${dailyDispatchAction.label}`}
                 onClick={selectDailyDispatch}
               >
@@ -1085,7 +1087,9 @@ export function App() {
               </button>
             ) : (
               <div
-                className={`daily-dispatch-briefing daily-dispatch-${dailyDispatchStatus?.tone ?? "open"}`}
+                className={`daily-dispatch-briefing daily-dispatch-${dailyDispatchStatus?.tone ?? "open"} daily-reset-${
+                  dailyDispatchReset?.tone ?? "steady"
+                }`}
                 aria-label={`${dailyDispatch.label}: ${dailyDispatch.value}`}
               >
                 <CalendarDays size={18} />

@@ -233,6 +233,10 @@ button {
   .screen-feedback {
     animation-name: screen-feedback-light;
   }
+
+  .daily-reset-urgent {
+    animation: none;
+  }
 }
 
 .top-hud {
@@ -1772,6 +1776,18 @@ button {
   color: #ffe19a;
 }
 
+.daily-reset-urgent {
+  border: 1px solid rgba(255, 209, 102, 0.32);
+  box-shadow:
+    0 0 0 1px rgba(255, 209, 102, 0.05) inset,
+    0 0 20px rgba(255, 209, 102, 0.1);
+  animation: daily-dispatch-urgent 1.8s ease-in-out infinite;
+}
+
+.daily-reset-urgent small {
+  color: rgba(255, 225, 154, 0.9);
+}
+
 .daily-dispatch-action {
   cursor: pointer;
 }
@@ -1781,6 +1797,21 @@ button {
   outline: 1px solid rgba(191, 247, 216, 0.34);
   outline-offset: 2px;
   filter: brightness(1.08);
+}
+
+@keyframes daily-dispatch-urgent {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(255, 209, 102, 0.05) inset,
+      0 0 18px rgba(255, 209, 102, 0.08);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(255, 209, 102, 0.14) inset,
+      0 0 28px rgba(255, 209, 102, 0.2);
+  }
 }
 
 .cargo-risk-briefing {
