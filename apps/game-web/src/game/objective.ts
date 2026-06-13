@@ -3,6 +3,8 @@ import {
   ECO_DRIFT_FUEL_USED_LIMIT,
   ECO_DRIFT_STYLE_BONUS,
   EXPRESS_FINISH_STYLE_BONUS,
+  LAST_DROP_FUEL_RATIO,
+  LAST_DROP_STYLE_BONUS,
   PERFECT_APPROACH_STREAK_SECONDS,
   PERFECT_APPROACH_STYLE_BONUS
 } from "@astro-courier/simulation";
@@ -212,6 +214,14 @@ export function buildTacticalCue(input: TacticalCueInput): TacticalCue | undefin
     };
   }
 
+  if (isLastDropReady(input)) {
+    return {
+      label: "Tactical cue",
+      value: `Last Drop / +${LAST_DROP_STYLE_BONUS}`,
+      tone: "urgent"
+    };
+  }
+
   if (isFuelCritical(input)) {
     return {
       label: "Tactical cue",
@@ -345,6 +355,18 @@ function fuelReserve(input: TacticalCueInput): number {
 
 function isFuelCritical(input: TacticalCueInput): boolean {
   return input.maxFuel !== undefined && input.maxFuel > 0 && input.fuel !== undefined && input.fuel / input.maxFuel <= FUEL_CRITICAL_RATIO;
+}
+
+function isLastDropReady(input: TacticalCueInput): boolean {
+  return (
+    input.objectivePhase === "delivery" &&
+    input.landingStatus === "ready" &&
+    (input.cargoDamage ?? 0) <= 0.02 &&
+    input.maxFuel !== undefined &&
+    input.maxFuel > 0 &&
+    input.fuel !== undefined &&
+    input.fuel / input.maxFuel <= LAST_DROP_FUEL_RATIO
+  );
 }
 
 function buildUrgentChainAction(input: TacticalCueInput): string {

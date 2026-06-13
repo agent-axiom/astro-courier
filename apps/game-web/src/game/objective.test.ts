@@ -250,6 +250,42 @@ describe("tactical cue", () => {
     });
   });
 
+  it("surfaces a ready last-drop dock before generic critical fuel", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        landingStatus: "ready",
+        cargoDamage: 0,
+        fuel: 4,
+        maxFuel: 100,
+        fuelUsed: 96
+      })
+    ).toEqual({
+      label: "Tactical cue",
+      value: "Last Drop / +170",
+      tone: "urgent"
+    });
+  });
+
+  it("keeps last-drop fuel as a survival cue until the dock is ready", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        landingStatus: "misaligned",
+        cargoDamage: 0,
+        fuel: 4,
+        maxFuel: 100,
+        fuelUsed: 96
+      })
+    ).toEqual({
+      label: "Tactical cue",
+      value: "Fuel critical / coast",
+      tone: "urgent"
+    });
+  });
+
   it("does not warn about fuel after the reserve leaves the critical band", () => {
     expect(
       buildTacticalCue({

@@ -228,6 +228,7 @@ export const CHAIN_FINISH_STYLE_BONUS = 260;
 export const EXPRESS_FINISH_STYLE_BONUS = 180;
 export const DAMAGE_CONTROL_STYLE_BONUS = 140;
 export const LAST_DROP_STYLE_BONUS = 170;
+export const LAST_DROP_FUEL_RATIO = 0.05;
 export const STYLE_CHAIN_WINDOW_SECONDS = 4;
 const STYLE_CHAIN_MULTIPLIER_STEP = 0.25;
 const STYLE_CHAIN_MAX_COUNT = 4;
@@ -807,7 +808,7 @@ function canAwardDamageControl(world: SimulationWorld): boolean {
 }
 
 function canAwardLastDrop(world: SimulationWorld): boolean {
-  return world.ship.maxFuel > 0 && world.ship.fuel / world.ship.maxFuel <= 0.05 && world.ship.cargoDamage <= 0.02;
+  return world.ship.maxFuel > 0 && world.ship.fuel / world.ship.maxFuel <= LAST_DROP_FUEL_RATIO && world.ship.cargoDamage <= 0.02;
 }
 
 function resolveLandingOrCrash(world: SimulationWorld): void {
