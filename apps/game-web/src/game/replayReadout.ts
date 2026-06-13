@@ -18,7 +18,7 @@ export function buildReplayCaptureReadout(input: ReplayCaptureReadoutInput): Rep
 
   return {
     label: "Replay REC",
-    value: `${input.replayFrameCount} inputs`,
+    value: `${input.replayFrameCount} ${input.replayFrameCount === 1 ? "input" : "inputs"}`,
     tone: "live"
   };
 }
