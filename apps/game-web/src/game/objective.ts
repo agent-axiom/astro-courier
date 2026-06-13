@@ -1,4 +1,4 @@
-import type { ObjectivePhase, RunStatus } from "@astro-courier/shared";
+import type { LandingGuidanceStatus, ObjectivePhase, RunStatus } from "@astro-courier/shared";
 
 export type ObjectiveDirectiveInput = {
   objectivePhase: ObjectivePhase;
@@ -16,6 +16,7 @@ export type ObjectiveInterceptReadoutInput = {
   status: RunStatus;
   targetDistance?: number;
   speed: number;
+  landingStatus?: LandingGuidanceStatus;
 };
 
 export type ObjectiveInterceptReadout = {
@@ -50,6 +51,30 @@ export function buildObjectiveInterceptReadout(
 ): ObjectiveInterceptReadout | undefined {
   if (input.targetDistance === undefined || input.status === "delivered" || input.status === "crashed") {
     return undefined;
+  }
+
+  if (input.landingStatus === "ready") {
+    return {
+      label: "Intercept",
+      value: "Dock now",
+      tone: "fast"
+    };
+  }
+
+  if (input.landingStatus === "too-fast") {
+    return {
+      label: "Intercept",
+      value: "Brake",
+      tone: "hold"
+    };
+  }
+
+  if (input.landingStatus === "misaligned") {
+    return {
+      label: "Intercept",
+      value: "Align nose",
+      tone: "steady"
+    };
   }
 
   if (input.speed < 1) {

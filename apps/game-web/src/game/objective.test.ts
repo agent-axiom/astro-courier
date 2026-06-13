@@ -66,6 +66,28 @@ describe("objective intercept readout", () => {
     });
   });
 
+  it("prioritizes the active dock window over ETA", () => {
+    expect(buildObjectiveInterceptReadout({ status: "flying", targetDistance: 18, speed: 8, landingStatus: "ready" })).toEqual({
+      label: "Intercept",
+      value: "Dock now",
+      tone: "fast"
+    });
+  });
+
+  it("turns failed approach states into short correction calls", () => {
+    expect(buildObjectiveInterceptReadout({ status: "flying", targetDistance: 18, speed: 48, landingStatus: "too-fast" })).toEqual({
+      label: "Intercept",
+      value: "Brake",
+      tone: "hold"
+    });
+
+    expect(buildObjectiveInterceptReadout({ status: "flying", targetDistance: 18, speed: 12, landingStatus: "misaligned" })).toEqual({
+      label: "Intercept",
+      value: "Align nose",
+      tone: "steady"
+    });
+  });
+
   it("marks long intercept lines as slow", () => {
     expect(buildObjectiveInterceptReadout({ status: "paused", targetDistance: 420, speed: 14 })).toEqual({
       label: "Intercept",

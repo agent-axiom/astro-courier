@@ -212,7 +212,8 @@ export function App() {
   const objectiveInterceptReadout = buildObjectiveInterceptReadout({
     status: hud.status,
     targetDistance: hud.targetDistance,
-    speed: hud.speed
+    speed: hud.speed,
+    landingStatus: hud.landingStatus
   });
   const liveBestPace = buildLiveBestPace({
     bestRun,
