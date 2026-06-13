@@ -56,10 +56,10 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[]): ScreenFe
     return { label: "Vector warning", value: "Change line", tone: "warning", intensity: "medium", durationMs: 380 };
   }
   if (events.includes("medal-drop")) {
-    return { tone: "warning", intensity: "medium", durationMs: 360 };
+    return { label: "Pace slipping", value: "Recover medal", tone: "warning", intensity: "medium", durationMs: 360 };
   }
   if (events.includes("chain-critical")) {
-    return { tone: "warning", intensity: "light", durationMs: 320 };
+    return { label: "Chain critical", value: "Save it", tone: "warning", intensity: "light", durationMs: 320 };
   }
   if (events.includes("chain-save")) {
     return { label: "Chain saved", value: "Combo restored", accent: "chain", tone: "style", intensity: "medium", durationMs: 440 };

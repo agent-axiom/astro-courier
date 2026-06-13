@@ -107,6 +107,8 @@ describe("screen feedback", () => {
 
   it("maps critical style chains to light warning feedback", () => {
     expect(buildScreenFeedback(["chain-critical"])).toEqual({
+      label: "Chain critical",
+      value: "Save it",
       tone: "warning",
       intensity: "light",
       durationMs: 320
@@ -126,6 +128,8 @@ describe("screen feedback", () => {
 
   it("maps medal window drops to medium warning feedback", () => {
     expect(buildScreenFeedback(["medal-drop"])).toEqual({
+      label: "Pace slipping",
+      value: "Recover medal",
       tone: "warning",
       intensity: "medium",
       durationMs: 360
