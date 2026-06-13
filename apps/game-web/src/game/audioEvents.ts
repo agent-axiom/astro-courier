@@ -4,6 +4,7 @@ export type GameAudioEvent =
   | "delivery-complete"
   | "ship-crash"
   | "style-hit"
+  | "launch-burst"
   | "assist-burn"
   | "boost-burn"
   | "fuel-critical"
@@ -51,6 +52,8 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
       events.push("assist-burn");
     } else if (current.lastMilestone === "Boost Burn") {
       events.push("boost-burn");
+    } else if (current.lastMilestone === "Launch Burst") {
+      events.push("launch-burst");
     } else if (styleMilestones.has(current.lastMilestone)) {
       events.push("style-hit");
     }

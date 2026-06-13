@@ -52,6 +52,14 @@ describe("screen feedback", () => {
     });
   });
 
+  it("maps launch bursts to medium style feedback", () => {
+    expect(buildScreenFeedback(["launch-burst"])).toEqual({
+      tone: "style",
+      intensity: "medium",
+      durationMs: 420
+    });
+  });
+
   it("stays hidden when no gameplay event needs screen feedback", () => {
     expect(buildScreenFeedback([])).toBeUndefined();
   });
