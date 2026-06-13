@@ -120,6 +120,21 @@ export type TrajectoryPointVisual = {
   alpha: number;
 };
 
+export type TrajectorySegmentVisualInput = {
+  status: SimulationSnapshot["status"];
+  index: number;
+  total: number;
+  danger?: TrajectoryHazardDanger;
+  sling?: TrajectoryGravitySlingSignal;
+};
+
+export type TrajectorySegmentVisual = {
+  color: number;
+  width: number;
+  alpha: number;
+  tone: "inside" | "near" | "safe" | "sling-ready" | "sling-setup";
+};
+
 export type GhostTrailPointVisualInput = {
   status: SimulationSnapshot["status"];
   index: number;
@@ -189,6 +204,38 @@ export function trajectoryPointVisual(input: TrajectoryPointVisualInput): Trajec
     color: isEndpoint ? 0x7ce1ff : 0xf8e59a,
     radius: round(isEndpoint ? 4.2 : 2.2 + progress * 0.8, 2),
     alpha: round(isEndpoint ? 0.78 : 0.18 + progress * 0.42, 2)
+  };
+}
+
+export function trajectorySegmentVisual(input: TrajectorySegmentVisualInput): TrajectorySegmentVisual | undefined {
+  if (input.status !== "flying" || input.total < 2 || input.index <= 0) {
+    return undefined;
+  }
+
+  const progress = clamp(input.index / Math.max(1, input.total - 1), 0, 1);
+  if (input.danger) {
+    return {
+      color: input.danger === "inside" ? 0xff4d6d : 0xffd166,
+      width: input.danger === "inside" ? 2.8 : 2.2,
+      alpha: input.danger === "inside" ? 0.7 : 0.54,
+      tone: input.danger
+    };
+  }
+
+  if (input.sling) {
+    return {
+      color: input.sling === "ready" ? 0xf8e59a : 0x7ce1ff,
+      width: input.sling === "ready" ? 2.5 : 2.1,
+      alpha: input.sling === "ready" ? 0.62 : 0.48,
+      tone: input.sling === "ready" ? "sling-ready" : "sling-setup"
+    };
+  }
+
+  return {
+    color: progress >= 0.82 ? 0x7ce1ff : 0xf8e59a,
+    width: round(1 + progress * 0.35, 2),
+    alpha: round(0.12 + progress * 0.2, 2),
+    tone: "safe"
   };
 }
 
@@ -918,12 +965,31 @@ class PixiRenderer implements AstroPixiRenderer {
     for (let index = 0; index < trajectory.length; index += 1) {
       const worldPoint = trajectory[index];
       const point = project(worldPoint);
+      const danger = trajectoryHazardDanger(worldPoint, snapshot.hazards);
+      const sling = trajectoryGravitySlingSignal(worldPoint, snapshot.gravitySources, snapshot.gravitySlingOpportunity);
+      if (index > 0) {
+        const segment = trajectorySegmentVisual({
+          status: snapshot.status,
+          index,
+          total: trajectory.length,
+          danger,
+          sling
+        });
+        if (segment) {
+          const previous = project(trajectory[index - 1]);
+          this.trajectory.moveTo(previous.x, previous.y).lineTo(point.x, point.y).stroke({
+            color: segment.color,
+            width: segment.width,
+            alpha: segment.alpha
+          });
+        }
+      }
       const visual = trajectoryPointVisual({
         status: snapshot.status,
         index,
         total: trajectory.length,
-        danger: trajectoryHazardDanger(worldPoint, snapshot.hazards),
-        sling: trajectoryGravitySlingSignal(worldPoint, snapshot.gravitySources, snapshot.gravitySlingOpportunity)
+        danger,
+        sling
       });
       if (!visual) continue;
 

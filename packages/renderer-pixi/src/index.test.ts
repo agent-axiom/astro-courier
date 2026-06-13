@@ -18,6 +18,7 @@ import {
   trajectoryHazardMarkerVisual,
   trajectoryGravitySlingSignal,
   trajectoryPointVisual,
+  trajectorySegmentVisual,
   velocityVectorVisual
 } from "./index";
 
@@ -167,6 +168,45 @@ describe("trajectory point visual", () => {
     expect(ready).toMatchObject({ color: 0xf8e59a });
     expect(setup?.radius).toBeGreaterThan(safe?.radius ?? 0);
     expect(ready?.radius).toBeGreaterThan(setup?.radius ?? 0);
+    expect(ready?.alpha).toBeGreaterThan(setup?.alpha ?? 0);
+  });
+});
+
+describe("trajectory segment visual", () => {
+  it("stays hidden outside active flight or without enough points", () => {
+    expect(trajectorySegmentVisual({ status: "paused", index: 1, total: 5 })).toBeUndefined();
+    expect(trajectorySegmentVisual({ status: "flying", index: 0, total: 1 })).toBeUndefined();
+  });
+
+  it("renders safe prediction segments as subtle guide lines", () => {
+    const early = trajectorySegmentVisual({ status: "flying", index: 1, total: 6 });
+    const late = trajectorySegmentVisual({ status: "flying", index: 5, total: 6 });
+
+    expect(early).toMatchObject({ color: 0xf8e59a, tone: "safe" });
+    expect(late).toMatchObject({ color: 0x7ce1ff, tone: "safe" });
+    expect(late?.alpha).toBeGreaterThan(early?.alpha ?? 0);
+    expect(late?.width).toBeGreaterThanOrEqual(early?.width ?? 0);
+  });
+
+  it("escalates trajectory segments through hazard pressure", () => {
+    const safe = trajectorySegmentVisual({ status: "flying", index: 3, total: 6 });
+    const near = trajectorySegmentVisual({ status: "flying", index: 3, total: 6, danger: "near" });
+    const inside = trajectorySegmentVisual({ status: "flying", index: 3, total: 6, danger: "inside" });
+
+    expect(near).toMatchObject({ color: 0xffd166, tone: "near" });
+    expect(inside).toMatchObject({ color: 0xff4d6d, tone: "inside" });
+    expect(near?.width).toBeGreaterThan(safe?.width ?? 0);
+    expect(inside?.alpha).toBeGreaterThan(near?.alpha ?? 0);
+  });
+
+  it("highlights gravity sling forecast segments", () => {
+    const safe = trajectorySegmentVisual({ status: "flying", index: 3, total: 6 });
+    const setup = trajectorySegmentVisual({ status: "flying", index: 3, total: 6, sling: "setup" });
+    const ready = trajectorySegmentVisual({ status: "flying", index: 3, total: 6, sling: "ready" });
+
+    expect(setup).toMatchObject({ color: 0x7ce1ff, tone: "sling-setup" });
+    expect(ready).toMatchObject({ color: 0xf8e59a, tone: "sling-ready" });
+    expect(setup?.width).toBeGreaterThan(safe?.width ?? 0);
     expect(ready?.alpha).toBeGreaterThan(setup?.alpha ?? 0);
   });
 });
