@@ -1436,6 +1436,7 @@ function toHudAudioSnapshot(hud: HudState, bestRun: BestRun | undefined): HudAud
 function toRunFeedSnapshot(hud: HudState, bestRun: BestRun | undefined): RunFeedSnapshot {
   return {
     status: hud.status,
+    objectivePhase: hud.objectivePhase,
     medal: hud.medal,
     lastMilestone: hud.lastMilestone,
     lastStyleAward: hud.lastStyleAward,
@@ -1449,6 +1450,7 @@ function toRunFeedSnapshot(hud: HudState, bestRun: BestRun | undefined): RunFeed
     trajectoryRiskLevel: hud.trajectoryRiskLevel,
     trajectoryRiskSeconds: hud.trajectoryRiskSeconds,
     launchBurstSecondsRemaining: hud.launchBurstSecondsRemaining,
+    perfectDockReady: hud.perfectDockReady,
     styleMultiplier: hud.styleMultiplier,
     styleChainSecondsRemaining: hud.styleChainSecondsRemaining
   };

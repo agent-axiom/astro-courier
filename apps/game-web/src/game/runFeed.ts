@@ -1,10 +1,12 @@
-import type { RunMedal, RunStatus } from "@astro-courier/shared";
+import type { ObjectivePhase, RunMedal, RunStatus } from "@astro-courier/shared";
+import { COMET_RESERVE_MIN_RATIO } from "./comet";
 import type { ContractPaceTier } from "./pace";
 
 export type RunFeedTone = "neutral" | "style" | "success" | "warning" | "danger";
 
 export type RunFeedSnapshot = {
   status: RunStatus;
+  objectivePhase?: ObjectivePhase;
   medal?: RunMedal;
   lastMilestone?: string;
   lastStyleAward?: number;
@@ -18,6 +20,7 @@ export type RunFeedSnapshot = {
   trajectoryRiskLevel?: "near" | "inside";
   trajectoryRiskSeconds?: number;
   launchBurstSecondsRemaining?: number;
+  perfectDockReady?: boolean;
   styleMultiplier?: number;
   styleChainSecondsRemaining?: number;
 };
@@ -147,6 +150,14 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
     });
   }
 
+  if (hasArmedCometDock(previous, current)) {
+    updates.push({
+      label: "Comet armed",
+      value: "Perfect dock lined",
+      tone: "style"
+    });
+  }
+
   if (previous.trajectoryRiskLevel !== current.trajectoryRiskLevel && current.trajectoryRiskLevel === "inside") {
     updates.push({
       label: "Collision forecast",
@@ -253,6 +264,20 @@ function hasEnteredBestRunPressure(previous: RunFeedSnapshot, current: RunFeedSn
   const previousGap = current.bestRunScore - (previous.score ?? 0);
   const currentGap = current.bestRunScore - (current.score ?? 0);
   return previousGap > bestRunPressureGap && currentGap > 0 && currentGap <= bestRunPressureGap;
+}
+
+function hasArmedCometDock(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
+  if (previous.perfectDockReady || !current.perfectDockReady) {
+    return false;
+  }
+  const fuelReserve = current.maxFuel > 0 ? current.fuel / current.maxFuel : 0;
+  return (
+    current.status === "flying" &&
+    current.objectivePhase === "delivery" &&
+    current.paceTier === "gold" &&
+    fuelReserve >= COMET_RESERVE_MIN_RATIO &&
+    (current.cargoDamage ?? 0) <= cleanCargoDamageLimit
+  );
 }
 
 function hasStyleChainReachedCriticalWindow(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {

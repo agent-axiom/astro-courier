@@ -233,6 +233,41 @@ describe("run action feed", () => {
     ).toEqual([]);
   });
 
+  it("announces when the final comet dock becomes armed", () => {
+    const cometDockSnapshot = {
+      ...baseSnapshot,
+      objectivePhase: "delivery" as const,
+      paceTier: "gold" as const,
+      fuel: 84,
+      maxFuel: 100,
+      cargoDamage: 0
+    };
+    expect(
+      deriveRunFeedUpdates(
+        { ...cometDockSnapshot, perfectDockReady: false },
+        { ...cometDockSnapshot, perfectDockReady: true }
+      )
+    ).toEqual([
+      {
+        label: "Comet armed",
+        value: "Perfect dock lined",
+        tone: "style"
+      }
+    ]);
+    expect(
+      deriveRunFeedUpdates(
+        { ...cometDockSnapshot, perfectDockReady: true },
+        { ...cometDockSnapshot, perfectDockReady: true }
+      )
+    ).toEqual([]);
+    expect(
+      deriveRunFeedUpdates(
+        { ...cometDockSnapshot, perfectDockReady: false },
+        { ...cometDockSnapshot, objectivePhase: "pickup", perfectDockReady: true }
+      )
+    ).toEqual([]);
+  });
+
   it("warns when clean cargo first takes damage", () => {
     expect(deriveRunFeedUpdates({ ...baseSnapshot, cargoDamage: 0.01 }, { ...baseSnapshot, cargoDamage: 0.05 })).toEqual([
       {
