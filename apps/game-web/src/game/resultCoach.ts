@@ -88,6 +88,8 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
             ? "Give relay lanes wider clearance"
             : input.contractId === "asteroid-sprint"
             ? "Give asteroid fields wider clearance"
+            : input.contractId === "return-leg"
+            ? "Widen the reverse arc"
             : "Keep orbit outside gravity wells"
           : "Brake earlier before pad contact",
       tone: "danger"

@@ -135,6 +135,26 @@ describe("result coach", () => {
     });
   });
 
+  it("coaches return-leg hull collisions toward a wider reverse arc", () => {
+    expect(
+      buildResultCoach({
+        status: "crashed",
+        contractId: "return-leg",
+        crashReason: "Hull Collision",
+        medal: "none",
+        grade: "F",
+        cargoDamage: 1,
+        fuel: 40,
+        maxFuel: 100,
+        scoreBreakdown: baseBreakdown
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Widen the reverse arc",
+      tone: "danger"
+    });
+  });
+
   it("coaches damaged deliveries toward safer hazard lines", () => {
     expect(
       buildResultCoach({
