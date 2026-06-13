@@ -30,6 +30,14 @@ describe("result stat formatting", () => {
     });
   });
 
+  it("names fresh style milestones on the result highlight", () => {
+    expect(buildResultHighlight({ ...baseBreakdown, styleBonus: 405 }, "Express Finish")).toEqual({
+      label: "Run highlight",
+      value: "Express Finish +405",
+      tone: "style"
+    });
+  });
+
   it("surfaces danger pay when it beats other bonus sources", () => {
     expect(buildResultHighlight({ ...baseBreakdown, fuelBonus: 180, styleBonus: 260, dangerBonus: 480 })).toEqual({
       label: "Run highlight",

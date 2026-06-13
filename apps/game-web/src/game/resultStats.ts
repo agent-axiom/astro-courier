@@ -25,7 +25,7 @@ export function buildResultStats(input: ResultStatsInput): ResultStat[] {
   ];
 }
 
-export function buildResultHighlight(breakdown: ScoreBreakdown): ResultHighlight | undefined {
+export function buildResultHighlight(breakdown: ScoreBreakdown, lastMilestone?: string): ResultHighlight | undefined {
   const candidates = [
     { label: "Style", value: breakdown.styleBonus, tone: "style" },
     { label: "Danger", value: breakdown.dangerBonus, tone: "danger" },
@@ -42,7 +42,7 @@ export function buildResultHighlight(breakdown: ScoreBreakdown): ResultHighlight
 
   return {
     label: "Run highlight",
-    value: `${winner.label} +${Math.round(winner.value)}`,
+    value: `${winner.tone === "style" && lastMilestone ? lastMilestone : winner.label} +${Math.round(winner.value)}`,
     tone: winner.tone
   };
 }

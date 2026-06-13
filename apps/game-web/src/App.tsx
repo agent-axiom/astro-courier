@@ -270,7 +270,7 @@ export function App() {
   });
   const cargoManifest = buildCargoManifest({ cargoName: hud.cargoName, cargoOnboard: hud.cargoOnboard });
   const resultStats = buildResultStats({ score: hud.score, elapsedSeconds: hud.elapsedSeconds, cargoIntegrity });
-  const resultHighlight = buildResultHighlight(hud.scoreBreakdown);
+  const resultHighlight = buildResultHighlight(hud.scoreBreakdown, hud.lastMilestone);
   const bestRunChase = buildBestRunChase(bestRun);
   const routeBoardProgress = buildRouteBoardProgress(hud.contractOptions, bestRunsByContract);
   const routeBoardTarget = buildRouteBoardTarget(hud.contractOptions, bestRunsByContract);
