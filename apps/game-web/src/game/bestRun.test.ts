@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { buildBestRunChase, buildBestRunDelta, buildContractBestRunLabel, buildLiveBestPace, getBestRun, recordBestRun } from "./bestRun";
+import {
+  buildBestRunChase,
+  buildBestRunDelta,
+  buildContractBestRunLabel,
+  buildLiveBestPace,
+  buildRouteBoardProgress,
+  getBestRun,
+  recordBestRun
+} from "./bestRun";
 
 describe("personal best run storage", () => {
   it("stores a first delivered run as the personal best", () => {
@@ -60,6 +68,38 @@ describe("contract option personal best copy", () => {
 
   it("formats saved contract personal bests compactly", () => {
     expect(buildContractBestRunLabel({ score: 3290, elapsedSeconds: 24.667, medal: "gold" })).toBe("PB 3290 / 24.7s");
+  });
+});
+
+describe("route board progress copy", () => {
+  const contracts = [{ id: "first-light-delivery" }, { id: "return-leg" }, { id: "asteroid-sprint" }, { id: "gravity-slingshot" }];
+
+  it("counts cleared routes and comet clears across the contract board", () => {
+    expect(
+      buildRouteBoardProgress(contracts, {
+        "first-light-delivery": { score: 1800, elapsedSeconds: 34.2, medal: "silver" },
+        "return-leg": { score: 2600, elapsedSeconds: 27.1, medal: "comet" },
+        "asteroid-sprint": undefined,
+        "gravity-slingshot": undefined
+      })
+    ).toEqual([
+      { label: "Routes cleared", value: "2/4", tone: "progress" },
+      { label: "Comet clears", value: "1/4", tone: "mastery" }
+    ]);
+  });
+
+  it("marks a fully mastered board distinctly", () => {
+    expect(
+      buildRouteBoardProgress(contracts, {
+        "first-light-delivery": { score: 3200, elapsedSeconds: 22.4, medal: "comet" },
+        "return-leg": { score: 3100, elapsedSeconds: 23.1, medal: "comet" },
+        "asteroid-sprint": { score: 3500, elapsedSeconds: 21.8, medal: "comet" },
+        "gravity-slingshot": { score: 3300, elapsedSeconds: 20.9, medal: "comet" }
+      })
+    ).toEqual([
+      { label: "Routes cleared", value: "4/4", tone: "complete" },
+      { label: "Comet clears", value: "4/4", tone: "complete" }
+    ]);
   });
 });
 

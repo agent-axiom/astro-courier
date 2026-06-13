@@ -36,6 +36,16 @@ export type LiveBestPace = {
   tone: "ahead" | "behind";
 };
 
+export type RouteBoardContract = {
+  id: string;
+};
+
+export type RouteBoardProgress = {
+  label: "Routes cleared" | "Comet clears";
+  value: string;
+  tone: "open" | "progress" | "mastery" | "complete";
+};
+
 type BestRunStorage = Pick<Storage, "getItem" | "setItem">;
 
 export function getBestRun(storage: BestRunStorage, contractKey: string): BestRun | undefined {
@@ -95,6 +105,29 @@ export function buildContractBestRunLabel(bestRun: BestRun | undefined): string 
   }
 
   return `PB ${bestRun.score} / ${bestRun.elapsedSeconds.toFixed(1)}s`;
+}
+
+export function buildRouteBoardProgress(
+  contracts: readonly RouteBoardContract[],
+  bestRunsByContract: Readonly<Record<string, BestRun | undefined>>
+): RouteBoardProgress[] {
+  const total = contracts.length;
+  const bestRuns = contracts.map((contract) => bestRunsByContract[contract.id]);
+  const cleared = bestRuns.filter(Boolean).length;
+  const comets = bestRuns.filter((bestRun) => bestRun?.medal === "comet").length;
+
+  return [
+    {
+      label: "Routes cleared",
+      value: `${cleared}/${total}`,
+      tone: progressTone(cleared, total)
+    },
+    {
+      label: "Comet clears",
+      value: `${comets}/${total}`,
+      tone: comets === total && total > 0 ? "complete" : comets > 0 ? "mastery" : "open"
+    }
+  ];
 }
 
 export function buildBestRunDelta(input: BestRunDeltaInput): BestRunDelta | undefined {
@@ -161,6 +194,13 @@ function isBetterRun(candidate: BestRun, current: BestRun): boolean {
     return candidate.score > current.score;
   }
   return candidate.elapsedSeconds < current.elapsedSeconds;
+}
+
+function progressTone(count: number, total: number): RouteBoardProgress["tone"] {
+  if (total > 0 && count === total) {
+    return "complete";
+  }
+  return count > 0 ? "progress" : "open";
 }
 
 function storageKey(contractKey: string): string {
