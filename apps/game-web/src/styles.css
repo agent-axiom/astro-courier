@@ -187,6 +187,16 @@ button {
   cursor: not-allowed;
 }
 
+.audio-toggle-button {
+  border-color: rgba(124, 225, 255, 0.36);
+  color: #c6f6ff;
+}
+
+.audio-toggle-muted {
+  border-color: rgba(255, 209, 102, 0.42);
+  color: #ffe19a;
+}
+
 .boost-button {
   position: relative;
   isolation: isolate;

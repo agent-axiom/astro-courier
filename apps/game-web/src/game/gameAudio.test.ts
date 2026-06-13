@@ -29,6 +29,24 @@ describe("game audio controller", () => {
 
     expect(createContext).not.toHaveBeenCalled();
   });
+
+  it("suppresses playback while muted", () => {
+    const context = new FakeAudioContext();
+    const createContext = vi.fn(() => context);
+    const controller = createGameAudioController({ createContext });
+
+    controller.setMuted(true);
+    controller.play(["style-hit"]);
+
+    expect(createContext).not.toHaveBeenCalled();
+    expect(controller.isMuted()).toBe(true);
+
+    controller.setMuted(false);
+    controller.play(["style-hit"]);
+
+    expect(createContext).toHaveBeenCalledTimes(1);
+    expect(context.oscillators).toHaveLength(1);
+  });
 });
 
 class FakeAudioContext implements GameAudioContextLike {

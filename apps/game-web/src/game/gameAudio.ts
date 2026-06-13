@@ -33,6 +33,8 @@ export type GameAudioContextLike = {
 export type GameAudioController = {
   unlock: () => void;
   play: (events: GameAudioEvent[]) => void;
+  setMuted: (muted: boolean) => void;
+  isMuted: () => boolean;
   destroy: () => void;
 };
 
@@ -52,6 +54,7 @@ const eventTones: Record<GameAudioEvent, { frequency: number; duration: number; 
 export function createGameAudioController(options: GameAudioControllerOptions = {}): GameAudioController {
   const createContext = options.createContext ?? createBrowserAudioContext;
   let context: GameAudioContextLike | undefined;
+  let muted = false;
 
   const getContext = (): GameAudioContextLike | undefined => {
     context ??= createContext();
@@ -63,7 +66,7 @@ export function createGameAudioController(options: GameAudioControllerOptions = 
       void getContext()?.resume();
     },
     play(events) {
-      if (events.length === 0) {
+      if (muted || events.length === 0) {
         return;
       }
       const activeContext = getContext();
@@ -76,6 +79,12 @@ export function createGameAudioController(options: GameAudioControllerOptions = 
       for (const event of events) {
         playTone(activeContext, eventTones[event]);
       }
+    },
+    setMuted(nextMuted) {
+      muted = nextMuted;
+    },
+    isMuted() {
+      return muted;
     },
     destroy() {
       void context?.close?.();

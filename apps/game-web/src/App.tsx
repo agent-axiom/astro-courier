@@ -16,6 +16,8 @@ import {
   Target,
   TimerReset,
   Trophy,
+  Volume2,
+  VolumeX,
   Zap
 } from "lucide-react";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
@@ -63,6 +65,7 @@ import { buildCrashReasonLabel } from "./game/crash";
 import { buildReplayCaptureReadout } from "./game/replayReadout";
 import { deriveHudAudioEvents, type HudAudioSnapshot } from "./game/audioEvents";
 import { createGameAudioController, type GameAudioController } from "./game/gameAudio";
+import { buildAudioTogglePresentation } from "./game/audioControls";
 
 type GameStore = {
   hud: HudState;
@@ -142,6 +145,7 @@ export function App() {
   const setHud = useGameStore((state) => state.setHud);
   const [paused, setPaused] = useState(true);
   const [preflightOpen, setPreflightOpen] = useState(true);
+  const [audioMuted, setAudioMuted] = useState(false);
   const [bestRun, setBestRun] = useState<BestRun | undefined>(() => {
     const storage = getBestRunStorage();
     return storage ? getBestRun(storage, initialHud.contractId) : undefined;
@@ -175,6 +179,10 @@ export function App() {
       audioRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    audioRef.current?.setMuted(audioMuted);
+  }, [audioMuted]);
 
   useEffect(() => {
     const storage = getBestRunStorage();
@@ -323,6 +331,7 @@ export function App() {
     status: hud.status,
     replayFrameCount: hud.replayFrameCount
   });
+  const audioTogglePresentation = buildAudioTogglePresentation(audioMuted);
   const cometRunReadout = buildCometRunReadout({
     status: hud.status,
     preflightOpen,
@@ -487,6 +496,15 @@ export function App() {
     shellRef.current?.selectContract(dailyDispatchAction.contractId);
   };
 
+  const toggleAudioMuted = () => {
+    const nextMuted = !audioMuted;
+    setAudioMuted(nextMuted);
+    audioRef.current?.setMuted(nextMuted);
+    if (!nextMuted) {
+      audioRef.current?.unlock();
+    }
+  };
+
   return (
     <main className={`app-shell app-intensity-${runIntensity}`}>
       <div ref={canvasMountRef} className="game-canvas" aria-label="Astro Courier gameplay canvas" />
@@ -512,6 +530,16 @@ export function App() {
         </div>
 
         <div className="hud-actions">
+          <button
+            type="button"
+            className={`icon-button audio-toggle-button ${audioMuted ? "audio-toggle-muted" : ""}`}
+            aria-label={audioTogglePresentation.label}
+            aria-pressed={audioMuted}
+            title={audioTogglePresentation.title}
+            onClick={toggleAudioMuted}
+          >
+            {audioTogglePresentation.icon === "muted" ? <VolumeX size={20} /> : <Volume2 size={20} />}
+          </button>
           <button
             type="button"
             className={`icon-button boost-button boost-button-${boostPresentation.tone}`}
