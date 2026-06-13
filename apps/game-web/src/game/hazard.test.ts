@@ -112,6 +112,21 @@ describe("hazard pressure readout", () => {
     });
   });
 
+  it("turns a fast clean near-field forecast into a thread vector", () => {
+    expect(
+      buildHazardPressureReadout({
+        trajectoryRiskLevel: "near",
+        trajectoryRiskSeconds: 0.8,
+        speed: 46,
+        cargoDamage: 0
+      })
+    ).toEqual({
+      label: "Risk pulse",
+      value: "Thread vector 0.8s",
+      tone: "opportunity"
+    });
+  });
+
   it("turns a gravity pocket into a sling setup readout", () => {
     expect(
       buildHazardPressureReadout({

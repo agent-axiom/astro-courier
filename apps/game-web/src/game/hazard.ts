@@ -111,9 +111,10 @@ function buildTrajectoryRiskPressureReadout(input: HazardPressureInput): HazardP
   }
 
   const cargoDamage = input.cargoDamage ?? 0;
+  const fastThread = (input.speed ?? 0) >= HAZARD_THREAD_SPEED_THRESHOLD;
   return {
     label: "Risk pulse",
-    value: cargoDamage <= 0.02 ? `Skim vector ${eta}` : `Hazard vector ${eta}`,
+    value: cargoDamage <= 0.02 ? `${fastThread ? "Thread" : "Skim"} vector ${eta}` : `Hazard vector ${eta}`,
     tone: cargoDamage <= 0.02 ? "opportunity" : "warning"
   };
 }
