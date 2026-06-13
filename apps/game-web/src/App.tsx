@@ -31,6 +31,7 @@ import { buildDockingSpeedReadout } from "./game/docking";
 import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./game/cargo";
 import { buildResultStats } from "./game/resultStats";
 import { buildHazardPressureReadout } from "./game/hazard";
+import { buildResultCoach } from "./game/resultCoach";
 
 type GameStore = {
   hud: HudState;
@@ -180,6 +181,16 @@ export function App() {
   const preflightMasteryTargets = buildPreflightMasteryTargets({ goldSeconds: hud.paceSecondsRemaining });
   const cargoManifest = buildCargoManifest({ cargoName: hud.cargoName, cargoOnboard: hud.cargoOnboard });
   const resultStats = buildResultStats({ score: hud.score, elapsedSeconds: hud.elapsedSeconds, cargoIntegrity });
+  const resultCoach = buildResultCoach({
+    status: hud.status,
+    crashReason: hud.crashReason,
+    medal: hud.medal,
+    grade: hud.grade,
+    cargoDamage: hud.cargoDamage,
+    fuel: hud.fuel,
+    maxFuel: hud.maxFuel,
+    scoreBreakdown: hud.scoreBreakdown
+  });
   const hazardLoadTrait = buildContractHazardTrait({ hazardSeverityMultiplier: hud.hazardSeverityMultiplier });
   const dangerPayTrait = buildContractDangerPayTrait({ hazardSeverityMultiplier: hud.hazardSeverityMultiplier });
   const dangerPayAmount = dangerPayTrait?.replace("Danger pay ", "");
@@ -552,6 +563,11 @@ export function App() {
                 <strong>{formatScoreValue(row.value, row.tone)}</strong>
               </div>
             ))}
+          </div>
+          <div className={`result-coach result-coach-${resultCoach.tone}`} aria-label={`${resultCoach.label}: ${resultCoach.value}`}>
+            <Flag size={18} />
+            <span>{resultCoach.label}</span>
+            <strong>{resultCoach.value}</strong>
           </div>
           <div className="result-actions">
             <button type="button" className="result-button" onClick={restartToBriefing}>
