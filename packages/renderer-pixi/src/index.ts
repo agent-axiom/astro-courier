@@ -56,6 +56,7 @@ export type TrajectoryPointVisualInput = {
   index: number;
   total: number;
   danger?: TrajectoryHazardDanger;
+  sling?: TrajectoryGravitySlingSignal;
 };
 
 export type TrajectoryPointVisual = {
@@ -65,6 +66,7 @@ export type TrajectoryPointVisual = {
 };
 
 export type TrajectoryHazardDanger = "near" | "inside";
+export type TrajectoryGravitySlingSignal = "setup" | "ready";
 
 export function trajectoryPointVisual(input: TrajectoryPointVisualInput): TrajectoryPointVisual | undefined {
   if (input.status !== "flying" || input.total <= 0) {
@@ -78,6 +80,13 @@ export function trajectoryPointVisual(input: TrajectoryPointVisualInput): Trajec
       color: input.danger === "inside" ? 0xff4d6d : 0xffd166,
       radius: input.danger === "inside" ? 5 : 4.1,
       alpha: input.danger === "inside" ? 0.88 : 0.72
+    };
+  }
+  if (input.sling) {
+    return {
+      color: input.sling === "ready" ? 0xf8e59a : 0x7ce1ff,
+      radius: input.sling === "ready" ? 4.6 : 4,
+      alpha: input.sling === "ready" ? 0.78 : 0.64
     };
   }
 
@@ -105,6 +114,26 @@ export function trajectoryHazardDanger(
   }
 
   return nearestDanger;
+}
+
+const TRAJECTORY_SLING_OUTER_RADIUS = 3;
+const TRAJECTORY_SLING_SAFE_SURFACE_RADIUS = 1.3;
+
+export function trajectoryGravitySlingSignal(
+  point: Vec2,
+  gravitySources: SimulationSnapshot["gravitySources"],
+  opportunity?: SimulationSnapshot["gravitySlingOpportunity"]
+): TrajectoryGravitySlingSignal | undefined {
+  for (const source of gravitySources) {
+    const distance = Math.hypot(point.x - source.position.x, point.y - source.position.y);
+    const outerRadius = Math.min(source.influenceRadius, source.radius * TRAJECTORY_SLING_OUTER_RADIUS);
+    if (distance <= source.radius * TRAJECTORY_SLING_SAFE_SURFACE_RADIUS || distance > outerRadius) {
+      continue;
+    }
+    return opportunity?.id === source.id && opportunity.ready ? "ready" : "setup";
+  }
+
+  return undefined;
 }
 
 type LandingPadVisualInput = Pick<SimulationSnapshot["landingPads"][number], "role" | "active" | "destination">;
@@ -551,7 +580,8 @@ class PixiRenderer implements AstroPixiRenderer {
         status: snapshot.status,
         index,
         total: trajectory.length,
-        danger: trajectoryHazardDanger(worldPoint, snapshot.hazards)
+        danger: trajectoryHazardDanger(worldPoint, snapshot.hazards),
+        sling: trajectoryGravitySlingSignal(worldPoint, snapshot.gravitySources, snapshot.gravitySlingOpportunity)
       });
       if (!visual) continue;
 

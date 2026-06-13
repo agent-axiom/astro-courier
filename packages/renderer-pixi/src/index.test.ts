@@ -9,6 +9,7 @@ import {
   objectiveGuidanceVisual,
   shipTrailVisual,
   trajectoryHazardDanger,
+  trajectoryGravitySlingSignal,
   trajectoryPointVisual,
   velocityVectorVisual
 } from "./index";
@@ -69,6 +70,18 @@ describe("trajectory point visual", () => {
     expect(near?.radius).toBeGreaterThan(safe?.radius ?? 0);
     expect(inside?.alpha).toBeGreaterThan(near?.alpha ?? 0);
   });
+
+  it("highlights forecast dots that cross the gravity sling pocket", () => {
+    const safe = trajectoryPointVisual({ status: "flying", index: 3, total: 8 });
+    const setup = trajectoryPointVisual({ status: "flying", index: 3, total: 8, sling: "setup" });
+    const ready = trajectoryPointVisual({ status: "flying", index: 3, total: 8, sling: "ready" });
+
+    expect(setup).toMatchObject({ color: 0x7ce1ff });
+    expect(ready).toMatchObject({ color: 0xf8e59a });
+    expect(setup?.radius).toBeGreaterThan(safe?.radius ?? 0);
+    expect(ready?.radius).toBeGreaterThan(setup?.radius ?? 0);
+    expect(ready?.alpha).toBeGreaterThan(setup?.alpha ?? 0);
+  });
 });
 
 describe("trajectory hazard danger", () => {
@@ -86,6 +99,41 @@ describe("trajectory hazard danger", () => {
     expect(trajectoryHazardDanger({ x: 12, y: 0 }, hazards)).toBe("inside");
     expect(trajectoryHazardDanger({ x: 40, y: 0 }, hazards)).toBe("near");
     expect(trajectoryHazardDanger({ x: 80, y: 0 }, hazards)).toBeUndefined();
+  });
+});
+
+describe("trajectory gravity sling signal", () => {
+  const gravitySources = [
+    {
+      id: "luma",
+      name: "Luma",
+      position: { x: 0, y: 0 },
+      radius: 64,
+      influenceRadius: 360
+    }
+  ];
+
+  it("classifies forecast points inside the sling pocket but away from the surface", () => {
+    expect(trajectoryGravitySlingSignal({ x: 0, y: -160 }, gravitySources)).toBe("setup");
+    expect(
+      trajectoryGravitySlingSignal(
+        { x: 0, y: -160 },
+        gravitySources,
+        {
+          id: "luma",
+          name: "Luma",
+          distance: 160,
+          ready: true,
+          speedThreshold: 54,
+          styleBonus: 240
+        }
+      )
+    ).toBe("ready");
+  });
+
+  it("ignores near-surface and outside-influence forecast points", () => {
+    expect(trajectoryGravitySlingSignal({ x: 0, y: -74 }, gravitySources)).toBeUndefined();
+    expect(trajectoryGravitySlingSignal({ x: 0, y: -260 }, gravitySources)).toBeUndefined();
   });
 });
 
