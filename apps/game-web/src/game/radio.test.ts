@@ -396,6 +396,20 @@ describe("radio feedback copy", () => {
     expect(buildRadioMessage({ ...baseHud, status: "paused" })).toContain("Contract loaded");
   });
 
+  it("calls out rush cargo in preflight radio copy", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        status: "paused",
+        contractId: "last-drop-run",
+        cargoName: "Midnight Medicine",
+        cargoKind: "time-sensitive",
+        cargoFragility: 0.9,
+        paceSecondsRemaining: 27
+      })
+    ).toBe("Rush cargo loaded: Midnight Medicine. Gold window is 27.0s; launch clean.");
+  });
+
   it("reports asteroid sprint hull collisions as asteroid impacts", () => {
     expect(
       buildRadioMessage({
