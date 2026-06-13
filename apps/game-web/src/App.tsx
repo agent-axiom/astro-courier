@@ -304,6 +304,7 @@ export function App() {
     status: hud.status,
     contractId: hud.contractId,
     crashReason: hud.crashReason,
+    lastMilestone: hud.lastMilestone,
     medal: hud.medal,
     elapsedSeconds: hud.elapsedSeconds,
     goldSeconds: hud.paceSecondsRemaining,

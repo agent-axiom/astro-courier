@@ -5,6 +5,7 @@ export type RetryTargetInput = {
   status: RunStatus;
   contractId?: string;
   crashReason?: CrashReason;
+  lastMilestone?: string;
   medal: RunMedal;
   elapsedSeconds: number;
   goldSeconds: number;
@@ -76,6 +77,14 @@ export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
     return {
       label: "Retry target",
       value: `Gold under ${input.goldSeconds.toFixed(1)}s`,
+      tone: "opportunity"
+    };
+  }
+
+  if (input.lastMilestone !== "Express Finish") {
+    return {
+      label: "Retry target",
+      value: "Chase Express Finish",
       tone: "opportunity"
     };
   }

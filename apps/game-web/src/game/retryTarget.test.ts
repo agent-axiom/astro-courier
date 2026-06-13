@@ -150,4 +150,23 @@ describe("result retry target", () => {
       tone: "opportunity"
     });
   });
+
+  it("nudges gold clears without express finish toward the express target", () => {
+    expect(
+      buildRetryTarget({
+        status: "delivered",
+        medal: "gold",
+        lastMilestone: "Eco Drift",
+        elapsedSeconds: 28.4,
+        goldSeconds: 30,
+        score: 2520,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Chase Express Finish",
+      tone: "opportunity"
+    });
+  });
 });
