@@ -175,6 +175,14 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
     };
   }
 
+  if (input.lastMilestone === "Launch Burst") {
+    return {
+      label: "Next run",
+      value: "Repeat the pickup-burst chain",
+      tone: "success"
+    };
+  }
+
   return {
     label: "Next run",
     value: "Tighten landing angle",

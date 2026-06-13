@@ -322,6 +322,25 @@ describe("result coach", () => {
     });
   });
 
+  it("coaches launch burst runs toward repeating the pickup burst chain", () => {
+    expect(
+      buildResultCoach({
+        status: "delivered",
+        lastMilestone: "Launch Burst",
+        medal: "gold",
+        grade: "A",
+        cargoDamage: 0,
+        fuel: 46,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 330 }
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Repeat the pickup-burst chain",
+      tone: "success"
+    });
+  });
+
   it("coaches eco drift runs toward repeating the low-burn line", () => {
     expect(
       buildResultCoach({
