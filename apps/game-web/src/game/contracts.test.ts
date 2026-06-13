@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildContractHazardTrait, getNextContractId } from "./contracts";
+import { buildContractDangerPayTrait, buildContractHazardTrait, getNextContractId } from "./contracts";
 
 describe("contract rotation", () => {
   it("returns the next contract id and wraps at the end", () => {
@@ -23,5 +23,11 @@ describe("contract rotation", () => {
     expect(buildContractHazardTrait({ hazardSeverityMultiplier: 1.45 })).toBe("Hazard 1.45x");
     expect(buildContractHazardTrait({})).toBeUndefined();
     expect(buildContractHazardTrait({ hazardSeverityMultiplier: 1 })).toBeUndefined();
+  });
+
+  it("formats danger pay from elevated contract hazard load", () => {
+    expect(buildContractDangerPayTrait({ hazardSeverityMultiplier: 1.45 })).toBe("Danger pay +180");
+    expect(buildContractDangerPayTrait({})).toBeUndefined();
+    expect(buildContractDangerPayTrait({ hazardSeverityMultiplier: 1 })).toBeUndefined();
   });
 });

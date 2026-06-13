@@ -25,3 +25,10 @@ export function buildContractHazardTrait(input: ContractHazardTraitInput): strin
   }
   return `Hazard ${input.hazardSeverityMultiplier.toFixed(2)}x`;
 }
+
+export function buildContractDangerPayTrait(input: ContractHazardTraitInput): string | undefined {
+  if (input.hazardSeverityMultiplier === undefined || input.hazardSeverityMultiplier <= 1) {
+    return undefined;
+  }
+  return `Danger pay +${Math.round((input.hazardSeverityMultiplier - 1) * 400)}`;
+}

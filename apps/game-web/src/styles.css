@@ -632,6 +632,37 @@ button {
   text-align: right;
 }
 
+.danger-pay-briefing {
+  display: grid;
+  grid-template-columns: 18px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 9px 10px;
+  border-radius: 7px;
+  background: rgba(255, 209, 102, 0.15);
+  color: #ffe19a;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.danger-pay-briefing span,
+.danger-pay-briefing strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.danger-pay-briefing span {
+  color: rgba(255, 241, 199, 0.78);
+  text-transform: uppercase;
+}
+
+.danger-pay-briefing strong {
+  color: #ffffff;
+  text-align: right;
+}
+
 .contract-traits {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -787,6 +818,11 @@ button {
 .contract-option-hazard {
   background: rgba(255, 111, 145, 0.16);
   color: #ffadc1;
+}
+
+.contract-option-danger-pay {
+  background: rgba(255, 209, 102, 0.16);
+  color: #ffe19a;
 }
 
 .contract-option strong {

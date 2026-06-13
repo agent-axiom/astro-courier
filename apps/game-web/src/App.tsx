@@ -21,7 +21,7 @@ import { getBestRun, recordBestRun, type BestRun } from "./game/bestRun";
 import { GameShell, type HudState } from "./game/GameShell";
 import { formatBearingGuidance } from "./game/bearing";
 import { canUseImpulseControl } from "./game/hudControls";
-import { buildContractHazardTrait, getNextContractId } from "./game/contracts";
+import { buildContractDangerPayTrait, buildContractHazardTrait, getNextContractId } from "./game/contracts";
 import { buildRadioMessage } from "./game/radio";
 import { buildLiveStyleReward } from "./game/style";
 import { buildObjectiveDirective } from "./game/objective";
@@ -174,6 +174,8 @@ export function App() {
   const cargoManifest = buildCargoManifest({ cargoName: hud.cargoName, cargoOnboard: hud.cargoOnboard });
   const resultStats = buildResultStats({ score: hud.score, elapsedSeconds: hud.elapsedSeconds, cargoIntegrity });
   const hazardLoadTrait = buildContractHazardTrait({ hazardSeverityMultiplier: hud.hazardSeverityMultiplier });
+  const dangerPayTrait = buildContractDangerPayTrait({ hazardSeverityMultiplier: hud.hazardSeverityMultiplier });
+  const dangerPayAmount = dangerPayTrait?.replace("Danger pay ", "");
   const cargoRiskReadout = buildCargoRiskReadout({
     cargoKind: hud.cargoKind,
     cargoFragility: hud.cargoFragility,
@@ -382,6 +384,13 @@ export function App() {
               <strong>{hazardLoadTrait}</strong>
             </div>
           ) : null}
+          {dangerPayTrait ? (
+            <div className="danger-pay-briefing" aria-label={dangerPayTrait}>
+              <Trophy size={18} />
+              <span>Danger pay</span>
+              <strong>{dangerPayAmount}</strong>
+            </div>
+          ) : null}
           <div className="contract-traits" aria-label="Contract risk and reward">
             <span>
               <Gauge size={17} />
@@ -415,6 +424,9 @@ export function App() {
                 const contractHazardTrait = buildContractHazardTrait({
                   hazardSeverityMultiplier: contract.hazardSeverityMultiplier
                 });
+                const contractDangerPayTrait = buildContractDangerPayTrait({
+                  hazardSeverityMultiplier: contract.hazardSeverityMultiplier
+                });
                 return (
                   <button
                     key={contract.id}
@@ -436,6 +448,7 @@ export function App() {
                         {buildContractCargoTrait(contract)}
                       </em>
                       {contractHazardTrait ? <em className="contract-option-hazard">{contractHazardTrait}</em> : null}
+                      {contractDangerPayTrait ? <em className="contract-option-danger-pay">{contractDangerPayTrait}</em> : null}
                     </div>
                     <strong>Gold {contract.medalTimes.gold}s</strong>
                   </button>
