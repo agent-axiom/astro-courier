@@ -63,6 +63,11 @@ export type RouteBoardTarget = {
   contractId?: string;
 };
 
+export type RouteBoardSelectionAction = {
+  label: "Select target";
+  contractId: string;
+};
+
 type BestRunStorage = Pick<Storage, "getItem" | "setItem">;
 
 export function getBestRun(storage: BestRunStorage, contractKey: string): BestRun | undefined {
@@ -184,6 +189,17 @@ export function buildRouteBoardTarget(
   }
 
   return { label: "Next target", value: "Board mastered", tone: "complete" };
+}
+
+export function buildRouteBoardSelectionAction(
+  routeBoardTarget: RouteBoardTarget,
+  currentContractId: string
+): RouteBoardSelectionAction | undefined {
+  if (!routeBoardTarget.contractId || routeBoardTarget.contractId === currentContractId) {
+    return undefined;
+  }
+
+  return { label: "Select target", contractId: routeBoardTarget.contractId };
 }
 
 export function buildBestRunDelta(input: BestRunDeltaInput): BestRunDelta | undefined {

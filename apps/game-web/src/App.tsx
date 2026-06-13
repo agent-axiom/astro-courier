@@ -26,6 +26,7 @@ import {
   buildContractBestRunLabel,
   buildLiveBestPace,
   buildRouteBoardProgress,
+  buildRouteBoardSelectionAction,
   buildRouteBoardTarget,
   getBestRun,
   recordBestRun,
@@ -239,6 +240,7 @@ export function App() {
   const bestRunChase = buildBestRunChase(bestRun);
   const routeBoardProgress = buildRouteBoardProgress(hud.contractOptions, bestRunsByContract);
   const routeBoardTarget = buildRouteBoardTarget(hud.contractOptions, bestRunsByContract);
+  const routeTargetSelectionAction = buildRouteBoardSelectionAction(routeBoardTarget, hud.contractId);
   const bestRunDelta = buildBestRunDelta({
     bestRun,
     run: { score: hud.score, elapsedSeconds: hud.elapsedSeconds, medal: hud.medal },
@@ -324,6 +326,13 @@ export function App() {
       return;
     }
     openContractBriefing(resultBoardAction.targetContractId);
+  };
+
+  const selectRouteBoardTarget = () => {
+    if (!routeTargetSelectionAction) {
+      return;
+    }
+    shellRef.current?.selectContract(routeTargetSelectionAction.contractId);
   };
 
   return (
@@ -543,11 +552,24 @@ export function App() {
             </div>
           ) : null}
           {hud.contractOptions.length > 0 ? (
-            <div className={`route-target-briefing route-target-${routeBoardTarget.tone}`} aria-label={`${routeBoardTarget.label}: ${routeBoardTarget.value}`}>
-              {routeBoardTarget.tone === "complete" ? <Trophy size={18} /> : routeBoardTarget.tone === "comet" ? <Star size={18} /> : <Target size={18} />}
-              <span>{routeBoardTarget.label}</span>
-              <strong>{routeBoardTarget.value}</strong>
-            </div>
+            routeTargetSelectionAction ? (
+              <button
+                type="button"
+                className={`route-target-briefing route-target-${routeBoardTarget.tone} route-target-action`}
+                aria-label={`${routeBoardTarget.label}: ${routeBoardTarget.value}. ${routeTargetSelectionAction.label}`}
+                onClick={selectRouteBoardTarget}
+              >
+                {routeBoardTarget.tone === "complete" ? <Trophy size={18} /> : routeBoardTarget.tone === "comet" ? <Star size={18} /> : <Target size={18} />}
+                <span>{routeBoardTarget.label}</span>
+                <strong>{routeBoardTarget.value}</strong>
+              </button>
+            ) : (
+              <div className={`route-target-briefing route-target-${routeBoardTarget.tone}`} aria-label={`${routeBoardTarget.label}: ${routeBoardTarget.value}`}>
+                {routeBoardTarget.tone === "complete" ? <Trophy size={18} /> : routeBoardTarget.tone === "comet" ? <Star size={18} /> : <Target size={18} />}
+                <span>{routeBoardTarget.label}</span>
+                <strong>{routeBoardTarget.value}</strong>
+              </div>
+            )
           ) : null}
           <div className={`cargo-risk-briefing cargo-risk-${cargoRiskReadout.tone}`} aria-label={`${cargoRiskReadout.label}: ${cargoRiskReadout.value}`}>
             <ShieldAlert size={18} />

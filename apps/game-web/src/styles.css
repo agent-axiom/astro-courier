@@ -867,11 +867,14 @@ button {
   grid-template-columns: 18px auto 1fr;
   align-items: center;
   gap: 8px;
+  width: 100%;
   min-height: 40px;
   padding: 9px 10px;
+  border: 0;
   border-radius: 7px;
   font-size: 0.82rem;
   font-weight: 850;
+  text-align: left;
 }
 
 .route-target-briefing span,
@@ -904,6 +907,17 @@ button {
 .route-target-complete {
   background: rgba(142, 230, 184, 0.17);
   color: #bff7d8;
+}
+
+.route-target-action {
+  cursor: pointer;
+}
+
+.route-target-action:hover,
+.route-target-action:focus-visible {
+  outline: 1px solid rgba(255, 255, 255, 0.22);
+  outline-offset: 2px;
+  filter: brightness(1.08);
 }
 
 .cargo-risk-briefing {

@@ -6,6 +6,7 @@ import {
   buildContractBestRunLabel,
   buildLiveBestPace,
   buildRouteBoardProgress,
+  buildRouteBoardSelectionAction,
   buildRouteBoardTarget,
   getBestRun,
   recordBestRun
@@ -166,6 +167,30 @@ describe("route board next target copy", () => {
         "gravity-slingshot": { score: 3300, elapsedSeconds: 20.9, medal: "comet" }
       })
     ).toEqual({ label: "Next target", value: "Board mastered", tone: "complete" });
+  });
+});
+
+describe("route board target selection action", () => {
+  it("selects the recommended target when it differs from the current route", () => {
+    expect(
+      buildRouteBoardSelectionAction(
+        { label: "Next target", value: "Clear Return Leg", tone: "clear", contractId: "return-leg" },
+        "first-light-delivery"
+      )
+    ).toEqual({ label: "Select target", contractId: "return-leg" });
+  });
+
+  it("stays passive when the current route is already the target", () => {
+    expect(
+      buildRouteBoardSelectionAction(
+        { label: "Next target", value: "Comet Asteroid Sprint", tone: "comet", contractId: "asteroid-sprint" },
+        "asteroid-sprint"
+      )
+    ).toBeUndefined();
+  });
+
+  it("stays passive after the full route board is mastered", () => {
+    expect(buildRouteBoardSelectionAction({ label: "Next target", value: "Board mastered", tone: "complete" }, "gravity-slingshot")).toBeUndefined();
   });
 });
 
