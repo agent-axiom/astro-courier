@@ -38,6 +38,14 @@ describe("result stat formatting", () => {
     });
   });
 
+  it("names damage control recoveries on the result highlight", () => {
+    expect(buildResultHighlight({ ...baseBreakdown, styleBonus: 140 }, "Damage Control")).toEqual({
+      label: "Run highlight",
+      value: "Damage Control +140",
+      tone: "style"
+    });
+  });
+
   it("keeps generic style highlights for non-style milestones", () => {
     expect(buildResultHighlight({ ...baseBreakdown, styleBonus: 405 }, "Delivered")).toEqual({
       label: "Run highlight",

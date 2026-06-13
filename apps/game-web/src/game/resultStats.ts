@@ -26,7 +26,8 @@ const styleMilestones = new Set([
   "Perfect Approach",
   "Eco Drift",
   "Chain Finish",
-  "Express Finish"
+  "Express Finish",
+  "Damage Control"
 ]);
 
 export function buildResultStats(input: ResultStatsInput): ResultStat[] {

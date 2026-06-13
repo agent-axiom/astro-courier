@@ -9,6 +9,7 @@ import {
   EXPRESS_FINISH_STYLE_BONUS,
   GRAVITY_SLING_STYLE_BONUS,
   CHAIN_FINISH_STYLE_BONUS,
+  DAMAGE_CONTROL_STYLE_BONUS,
   LANDING_ASSIST_FUEL_COST,
   QUICK_PICKUP_STYLE_BONUS,
   STYLE_CHAIN_WINDOW_SECONDS,
@@ -635,6 +636,30 @@ describe("deterministic Astro Courier simulation", () => {
     expect(world.lastMilestone).toBe("Express Finish");
     expect(world.lastStyleAward).toBe(225);
     expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(QUICK_PICKUP_STYLE_BONUS + 225);
+  });
+
+  it("awards damage control style for salvaging a damaged cargo delivery", () => {
+    const world = createWorldFromSystem(starterSystem, "damage-control-seed");
+    world.cargoOnboard = true;
+    world.objectivePhase = "delivery";
+    world.ship.cargoDamage = 0.18;
+    world.elapsedSeconds = starterSystem.contracts[0]!.medalTimes.gold + 1;
+    world.fuelUsed = ECO_DRIFT_FUEL_USED_LIMIT + 4;
+    world.bestApproachStreakSeconds = 0;
+    for (const pad of world.landingPads) {
+      pad.active = pad.role === "destination";
+    }
+    world.ship.position = { x: 260, y: -80 };
+    world.ship.velocity = { x: 4, y: 1 };
+    world.ship.rotation = 0;
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("delivered");
+    expect(world.landingRating).toBe("Spicy Landing");
+    expect(world.lastMilestone).toBe("Damage Control");
+    expect(world.lastStyleAward).toBe(DAMAGE_CONTROL_STYLE_BONUS);
+    expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(DAMAGE_CONTROL_STYLE_BONUS);
   });
 
   it("scales hazard contact damage by active cargo fragility", () => {

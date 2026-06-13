@@ -226,6 +226,7 @@ export const ECO_DRIFT_FUEL_USED_LIMIT = 12;
 export const ECO_DRIFT_STYLE_BONUS = 160;
 export const CHAIN_FINISH_STYLE_BONUS = 260;
 export const EXPRESS_FINISH_STYLE_BONUS = 180;
+export const DAMAGE_CONTROL_STYLE_BONUS = 140;
 export const STYLE_CHAIN_WINDOW_SECONDS = 4;
 const STYLE_CHAIN_MULTIPLIER_STEP = 0.25;
 const STYLE_CHAIN_MAX_COUNT = 4;
@@ -800,6 +801,10 @@ function canAwardExpressFinish(world: SimulationWorld): boolean {
   return world.elapsedSeconds <= world.activeContract.medalTimes.gold && world.ship.cargoDamage <= 0.02;
 }
 
+function canAwardDamageControl(world: SimulationWorld): boolean {
+  return world.ship.cargoDamage > 0.02 && world.ship.cargoDamage <= 0.35;
+}
+
 function resolveLandingOrCrash(world: SimulationWorld): void {
   const touchedPad = world.landingPads.find((pad) => distanceBetween(world.ship.position, pad.position) <= pad.radius);
   if (touchedPad) {
@@ -854,6 +859,8 @@ function resolveLandingOrCrash(world: SimulationWorld): void {
         awardStyle(world, EXPRESS_FINISH_STYLE_BONUS, "Express Finish");
       } else if (world.fuelUsed <= ECO_DRIFT_FUEL_USED_LIMIT && world.ship.cargoDamage <= 0.02) {
         awardStyle(world, ECO_DRIFT_STYLE_BONUS, "Eco Drift");
+      } else if (canAwardDamageControl(world)) {
+        awardStyle(world, DAMAGE_CONTROL_STYLE_BONUS, "Damage Control");
       } else {
         world.lastMilestone = "Delivered";
       }
