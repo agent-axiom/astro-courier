@@ -168,6 +168,7 @@ describe("GameShell lifecycle", () => {
         cargoName: "Volatile Comet Ice",
         cargoKind: "unstable",
         cargoFragility: 1,
+        hazardSeverityMultiplier: 1.45,
         medalTimes: { bronze: 70, silver: 42, gold: 24 }
       }
     ]);
@@ -197,14 +198,16 @@ describe("GameShell lifecycle", () => {
       contractBriefing: "Thread the asteroid field with volatile comet ice, load fast, and bring the cargo home before the sprint window closes.",
       cargoName: "Volatile Comet Ice",
       cargoKind: "unstable",
-      cargoFragility: 1
+      cargoFragility: 1,
+      hazardSeverityMultiplier: 1.45
     });
     expect(onHud.mock.calls.at(-1)?.[0].contractOptions).toContainEqual(
       expect.objectContaining({
         id: "asteroid-sprint",
         briefing: "Thread the asteroid field with volatile comet ice, load fast, and bring the cargo home before the sprint window closes.",
         cargoKind: "unstable",
-        cargoFragility: 1
+        cargoFragility: 1,
+        hazardSeverityMultiplier: 1.45
       })
     );
   });

@@ -40,6 +40,7 @@ export type HudState = {
   cargoName: string;
   cargoKind: string;
   cargoFragility: number;
+  hazardSeverityMultiplier?: number;
   contractOptions: ContractOption[];
   elapsedSeconds: number;
   score: number;
@@ -75,6 +76,7 @@ export type ContractOption = Pick<ContractContent, "id" | "title" | "briefing" |
   cargoName: string;
   cargoKind: string;
   cargoFragility: number;
+  hazardSeverityMultiplier?: number;
 };
 
 export type GameShellOptions = {
@@ -264,6 +266,7 @@ export class GameShell {
       cargoName: activeContract.cargoName,
       cargoKind: activeContract.cargoKind,
       cargoFragility: activeContract.cargoFragility,
+      hazardSeverityMultiplier: activeContract.hazardSeverityMultiplier,
       contractOptions: this.contractOptions(),
       elapsedSeconds: result.elapsedSeconds,
       score: result.score,
@@ -312,6 +315,7 @@ export class GameShell {
       cargoName: cargo?.name ?? titleFromId(contract.cargoId),
       cargoKind: cargo?.kind ?? "unknown",
       cargoFragility: cargo?.fragility ?? 1,
+      ...(contract.hazardSeverityMultiplier === undefined ? {} : { hazardSeverityMultiplier: contract.hazardSeverityMultiplier }),
       medalTimes: contract.medalTimes
     };
   }

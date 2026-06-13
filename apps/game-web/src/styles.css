@@ -601,6 +601,37 @@ button {
   text-align: right;
 }
 
+.hazard-load-briefing {
+  display: grid;
+  grid-template-columns: 18px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 9px 10px;
+  border-radius: 7px;
+  background: rgba(255, 111, 145, 0.13);
+  color: #ffadc1;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.hazard-load-briefing span,
+.hazard-load-briefing strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.hazard-load-briefing span {
+  color: rgba(255, 220, 229, 0.78);
+  text-transform: uppercase;
+}
+
+.hazard-load-briefing strong {
+  color: #ffffff;
+  text-align: right;
+}
+
 .contract-traits {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -749,6 +780,11 @@ button {
 }
 
 .contract-option-cargo-danger {
+  background: rgba(255, 111, 145, 0.16);
+  color: #ffadc1;
+}
+
+.contract-option-hazard {
   background: rgba(255, 111, 145, 0.16);
   color: #ffadc1;
 }

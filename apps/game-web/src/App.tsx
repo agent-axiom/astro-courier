@@ -21,7 +21,7 @@ import { getBestRun, recordBestRun, type BestRun } from "./game/bestRun";
 import { GameShell, type HudState } from "./game/GameShell";
 import { formatBearingGuidance } from "./game/bearing";
 import { canUseImpulseControl } from "./game/hudControls";
-import { getNextContractId } from "./game/contracts";
+import { buildContractHazardTrait, getNextContractId } from "./game/contracts";
 import { buildRadioMessage } from "./game/radio";
 import { buildLiveStyleReward } from "./game/style";
 import { buildObjectiveDirective } from "./game/objective";
@@ -48,6 +48,7 @@ const initialHud: HudState = {
   cargoName: "Bottled Starlight",
   cargoKind: "fragile",
   cargoFragility: 0.8,
+  hazardSeverityMultiplier: undefined,
   contractOptions: [],
   elapsedSeconds: 0,
   score: 0,
@@ -171,6 +172,7 @@ export function App() {
   const preflightMasteryTargets = buildPreflightMasteryTargets({ goldSeconds: hud.paceSecondsRemaining });
   const cargoManifest = buildCargoManifest({ cargoName: hud.cargoName, cargoOnboard: hud.cargoOnboard });
   const resultStats = buildResultStats({ score: hud.score, elapsedSeconds: hud.elapsedSeconds, cargoIntegrity });
+  const hazardLoadTrait = buildContractHazardTrait({ hazardSeverityMultiplier: hud.hazardSeverityMultiplier });
   const cargoRiskReadout = buildCargoRiskReadout({
     cargoKind: hud.cargoKind,
     cargoFragility: hud.cargoFragility,
@@ -372,6 +374,13 @@ export function App() {
             <span>{cargoRiskReadout.label}</span>
             <strong>{cargoRiskReadout.value}</strong>
           </div>
+          {hazardLoadTrait ? (
+            <div className="hazard-load-briefing" aria-label={`Hazard load: ${hazardLoadTrait}`}>
+              <OctagonMinus size={18} />
+              <span>Hazard load</span>
+              <strong>{hazardLoadTrait}</strong>
+            </div>
+          ) : null}
           <div className="contract-traits" aria-label="Contract risk and reward">
             <span>
               <Gauge size={17} />
@@ -402,6 +411,9 @@ export function App() {
                   cargoDamage: 0,
                   cargoOnboard: false
                 });
+                const contractHazardTrait = buildContractHazardTrait({
+                  hazardSeverityMultiplier: contract.hazardSeverityMultiplier
+                });
                 return (
                   <button
                     key={contract.id}
@@ -422,6 +434,7 @@ export function App() {
                       <em className={`contract-option-cargo contract-option-cargo-${contractCargoRisk.tone}`}>
                         {buildContractCargoTrait(contract)}
                       </em>
+                      {contractHazardTrait ? <em className="contract-option-hazard">{contractHazardTrait}</em> : null}
                     </div>
                     <strong>Gold {contract.medalTimes.gold}s</strong>
                   </button>
