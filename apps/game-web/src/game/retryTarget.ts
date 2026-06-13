@@ -10,6 +10,7 @@ export type RetryTargetInput = {
   elapsedSeconds: number;
   goldSeconds: number;
   targetAllowedSpeed?: number;
+  cargoDamage?: number;
   score: number;
   isNewBest: boolean;
   bestRun: BestRun | undefined;
@@ -31,6 +32,8 @@ export type RetryActionBriefing = {
   value: string;
   tone: RetryTarget["tone"];
 };
+
+const cleanCargoDamageLimit = 0.02;
 
 export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
   if (input.status === "crashed") {
@@ -94,6 +97,14 @@ export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
   const milestoneTarget = buildRepeatableMilestoneTarget(input.lastMilestone);
   if (milestoneTarget) {
     return milestoneTarget;
+  }
+
+  if ((input.cargoDamage ?? 0) > cleanCargoDamageLimit) {
+    return {
+      label: "Retry target",
+      value: "Restore clean cargo",
+      tone: "opportunity"
+    };
   }
 
   if (input.medal !== "gold" && input.medal !== "comet") {

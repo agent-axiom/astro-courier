@@ -305,6 +305,43 @@ describe("result retry target", () => {
     });
   });
 
+  it("turns scratched deliveries into a clean-cargo recovery target", () => {
+    expect(
+      buildRetryTarget({
+        status: "delivered",
+        medal: "gold",
+        lastMilestone: "Express Finish",
+        elapsedSeconds: 28.4,
+        goldSeconds: 30,
+        cargoDamage: 0.05,
+        score: 2520,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Restore clean cargo",
+      tone: "opportunity"
+    });
+    expect(
+      buildRetryTarget({
+        status: "delivered",
+        medal: "gold",
+        lastMilestone: "Express Finish",
+        elapsedSeconds: 28.4,
+        goldSeconds: 30,
+        cargoDamage: 0.01,
+        score: 2520,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).not.toEqual({
+      label: "Retry target",
+      value: "Restore clean cargo",
+      tone: "opportunity"
+    });
+  });
+
   it("nudges return-leg gold clears without chain finish toward a chain target", () => {
     expect(
       buildRetryTarget({

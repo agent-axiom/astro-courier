@@ -533,6 +533,7 @@ export function App() {
     elapsedSeconds: hud.elapsedSeconds,
     goldSeconds: hud.paceSecondsRemaining,
     targetAllowedSpeed: hud.targetAllowedSpeed,
+    cargoDamage: hud.cargoDamage,
     score: hud.score,
     isNewBest: newBest,
     bestRun
