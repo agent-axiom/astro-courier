@@ -12,6 +12,7 @@ import {
   Satellite,
   ShieldAlert,
   Star,
+  Target,
   TimerReset,
   Trophy,
   Zap
@@ -48,6 +49,7 @@ import { buildHazardPressureReadout } from "./game/hazard";
 import { buildResultCoach } from "./game/resultCoach";
 import { getOverlayVisibility } from "./game/overlays";
 import { buildCometRunReadout } from "./game/comet";
+import { buildRetryTarget } from "./game/retryTarget";
 
 type GameStore = {
   hud: HudState;
@@ -248,6 +250,15 @@ export function App() {
     fuel: hud.fuel,
     maxFuel: hud.maxFuel,
     scoreBreakdown: hud.scoreBreakdown
+  });
+  const retryTarget = buildRetryTarget({
+    status: hud.status,
+    medal: hud.medal,
+    elapsedSeconds: hud.elapsedSeconds,
+    goldSeconds: hud.paceSecondsRemaining,
+    score: hud.score,
+    isNewBest: newBest,
+    bestRun
   });
   const hazardLoadTrait = buildContractHazardTrait({ hazardSeverityMultiplier: hud.hazardSeverityMultiplier });
   const dangerPayTrait = buildContractDangerPayTrait({ hazardSeverityMultiplier: hud.hazardSeverityMultiplier });
@@ -675,6 +686,11 @@ export function App() {
             <Flag size={18} />
             <span>{resultCoach.label}</span>
             <strong>{resultCoach.value}</strong>
+          </div>
+          <div className={`retry-target retry-target-${retryTarget.tone}`} aria-label={`${retryTarget.label}: ${retryTarget.value}`}>
+            <Target size={18} />
+            <span>{retryTarget.label}</span>
+            <strong>{retryTarget.value}</strong>
           </div>
           <div className="result-actions">
             <button type="button" className="result-button" onClick={restartToBriefing}>
