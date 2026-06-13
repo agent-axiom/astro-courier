@@ -33,6 +33,7 @@ import { buildResultStats } from "./game/resultStats";
 import { buildHazardPressureReadout } from "./game/hazard";
 import { buildResultCoach } from "./game/resultCoach";
 import { getOverlayVisibility } from "./game/overlays";
+import { buildCometRunReadout } from "./game/comet";
 
 type GameStore = {
   hud: HudState;
@@ -182,6 +183,14 @@ export function App() {
     bestRun,
     elapsedSeconds: hud.elapsedSeconds,
     status: hud.status
+  });
+  const cometRunReadout = buildCometRunReadout({
+    status: hud.status,
+    preflightOpen,
+    paceTier: hud.paceTier,
+    fuel: hud.fuel,
+    maxFuel: hud.maxFuel,
+    cargoDamage: hud.cargoDamage
   });
   const liveStyleReward = buildLiveStyleReward({
     styleBonus: hud.scoreBreakdown.styleBonus,
@@ -371,6 +380,13 @@ export function App() {
           <span>{paceLabel(hud.paceTier)}</span>
           <strong>{hud.paceTier === "overtime" ? "Expired" : `${hud.paceSecondsRemaining.toFixed(1)}s`}</strong>
         </div>
+        {cometRunReadout ? (
+          <div className={`comet-chip comet-${cometRunReadout.tone}`} aria-label={`${cometRunReadout.label}: ${cometRunReadout.value}`}>
+            <Star size={16} />
+            <span>{cometRunReadout.label}</span>
+            <strong>{cometRunReadout.value}</strong>
+          </div>
+        ) : null}
         {liveBestPace ? (
           <div className={`best-pace-chip best-pace-${liveBestPace.tone}`} aria-label={`${liveBestPace.label}: ${liveBestPace.value}`}>
             <span>{liveBestPace.label}</span>
