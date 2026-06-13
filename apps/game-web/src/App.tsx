@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { create } from "zustand";
 import { getBestRun, recordBestRun, type BestRun } from "./game/bestRun";
 import { GameShell, type HudState } from "./game/GameShell";
+import { formatBearingGuidance } from "./game/bearing";
 import { canUseImpulseControl } from "./game/hudControls";
 import { buildRadioMessage } from "./game/radio";
 
@@ -113,6 +114,7 @@ export function App() {
   const runFinished = hud.status === "delivered" || hud.status === "crashed";
   const radioMessage = buildRadioMessage(hud);
   const targetDistanceLabel = hud.targetDistance === undefined ? "-" : `${Math.round(hud.targetDistance)}m`;
+  const bearingGuidance = hud.targetRelativeBearing === undefined ? undefined : formatBearingGuidance(hud.targetRelativeBearing);
   const primaryActionLabel = preflightOpen ? "Launch" : paused ? "Resume" : "Pause";
   const canBoost = canUseImpulseControl({ action: "boost", fuel: hud.fuel, paused, preflightOpen, status: hud.status });
   const canBrake = canUseImpulseControl({ action: "brake", fuel: hud.fuel, paused, preflightOpen, status: hud.status });
@@ -221,6 +223,12 @@ export function App() {
           <span>Target</span>
           <strong>{targetDistanceLabel}</strong>
         </div>
+        {bearingGuidance ? (
+          <div className={`bearing-chip bearing-${bearingGuidance.tone}`}>
+            <span>{bearingGuidance.label}</span>
+            <strong>{bearingGuidance.value}</strong>
+          </div>
+        ) : null}
         <div className={`pace-chip pace-${hud.paceTier}`}>
           <span>{paceLabel(hud.paceTier)}</span>
           <strong>{hud.paceTier === "overtime" ? "Expired" : `${hud.paceSecondsRemaining.toFixed(1)}s`}</strong>

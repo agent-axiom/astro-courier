@@ -21,6 +21,7 @@ import type {
 } from "@astro-courier/shared";
 import { KeyboardInput, type InputSource } from "./input";
 import { calculateContractPace, type ContractPaceTier } from "./pace";
+import { normalizeAngle } from "./bearing";
 
 export type HudState = {
   status: RunStatus;
@@ -34,6 +35,7 @@ export type HudState = {
   cargoOnboard: boolean;
   speed: number;
   targetDistance?: number;
+  targetRelativeBearing?: number;
   landingStatus?: LandingGuidanceStatus;
   assistAvailable?: boolean;
   lastMilestone?: string;
@@ -214,6 +216,8 @@ export class GameShell {
       cargoOnboard: this.world.cargoOnboard,
       speed: Math.hypot(this.world.ship.velocity.x, this.world.ship.velocity.y),
       targetDistance: snapshot.objectiveTarget?.distance,
+      targetRelativeBearing:
+        snapshot.objectiveTarget === undefined ? undefined : normalizeAngle(snapshot.objectiveTarget.bearing - this.world.ship.rotation),
       landingStatus: snapshot.objectiveTarget?.landingStatus,
       assistAvailable: snapshot.objectiveTarget?.assistAvailable,
       lastMilestone: this.world.lastMilestone ?? this.retainedMilestone,

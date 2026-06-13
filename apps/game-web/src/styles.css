@@ -233,6 +233,41 @@ button {
   color: #ffadc1;
 }
 
+.bearing-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 34px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: 0.84rem;
+  font-weight: 850;
+}
+
+.bearing-chip span {
+  color: rgba(255, 255, 255, 0.74);
+}
+
+.bearing-chip strong {
+  color: #ffffff;
+}
+
+.bearing-ahead {
+  background: rgba(142, 230, 184, 0.16);
+  color: #bff7d8;
+}
+
+.bearing-side {
+  background: rgba(124, 225, 255, 0.14);
+  color: #c6f6ff;
+}
+
+.bearing-reverse {
+  background: rgba(255, 209, 102, 0.16);
+  color: #ffe19a;
+}
+
 .hazard-chip {
   display: flex;
   align-items: center;
