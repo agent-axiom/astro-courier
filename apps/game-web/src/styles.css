@@ -1744,6 +1744,24 @@ button {
   color: #eafff3;
 }
 
+.result-button-board-clear {
+  border-color: rgba(124, 225, 255, 0.68);
+  background: rgba(124, 225, 255, 0.16);
+  color: #d9fbff;
+}
+
+.result-button-board-comet {
+  border-color: rgba(255, 209, 102, 0.7);
+  background: rgba(255, 209, 102, 0.18);
+  color: #fff5d0;
+}
+
+.result-button-board-complete {
+  border-color: rgba(142, 230, 184, 0.72);
+  background: rgba(142, 230, 184, 0.18);
+  color: #eafff3;
+}
+
 .result-button:hover {
   background: rgba(255, 209, 102, 0.24);
 }

@@ -38,8 +38,7 @@ import {
   buildContractDangerPayTrait,
   buildContractHazardTrait,
   buildContractPreflightKicker,
-  buildContractRoutePlan,
-  getNextContractId
+  buildContractRoutePlan
 } from "./game/contracts";
 import { buildRadioMessage } from "./game/radio";
 import { buildLiveStyleReward } from "./game/style";
@@ -49,7 +48,7 @@ import { buildApproachRewardReadout, buildDockingSpeedReadout } from "./game/doc
 import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./game/cargo";
 import { buildResultStats } from "./game/resultStats";
 import { buildHazardPressureReadout } from "./game/hazard";
-import { buildResultBoardPrompt, buildResultCoach } from "./game/resultCoach";
+import { buildResultBoardAction, buildResultBoardPrompt, buildResultCoach } from "./game/resultCoach";
 import { getOverlayVisibility } from "./game/overlays";
 import { buildCometRunReadout } from "./game/comet";
 import { buildRetryTarget } from "./game/retryTarget";
@@ -209,8 +208,6 @@ export function App() {
   const primaryActionLabel = preflightOpen ? "Launch" : paused ? "Resume" : "Pause";
   const canBoost = canUseImpulseControl({ action: "boost", fuel: hud.fuel, paused, preflightOpen, status: hud.status });
   const canBrake = canUseImpulseControl({ action: "brake", fuel: hud.fuel, paused, preflightOpen, status: hud.status });
-  const nextContractId = getNextContractId(hud.contractOptions, hud.contractId);
-  const canAdvanceContract = hud.status === "delivered" && nextContractId !== hud.contractId;
   const objectiveDirective = buildObjectiveDirective(hud);
   const objectiveInterceptReadout = buildObjectiveInterceptReadout({
     status: hud.status,
@@ -260,6 +257,10 @@ export function App() {
   const resultBoardPrompt =
     hud.status === "delivered" || hud.status === "crashed"
       ? buildResultBoardPrompt({ status: hud.status, routeBoardTarget })
+      : undefined;
+  const resultBoardAction =
+    hud.status === "delivered" || hud.status === "crashed"
+      ? buildResultBoardAction({ status: hud.status, currentContractId: hud.contractId, routeBoardTarget })
       : undefined;
   const retryTarget = buildRetryTarget({
     status: hud.status,
@@ -318,8 +319,11 @@ export function App() {
     openContractBriefing();
   };
 
-  const advanceToNextContract = () => {
-    openContractBriefing(nextContractId);
+  const openResultBoardTarget = () => {
+    if (!resultBoardAction) {
+      return;
+    }
+    openContractBriefing(resultBoardAction.targetContractId);
   };
 
   return (
@@ -750,10 +754,14 @@ export function App() {
               <RotateCcw size={18} />
               Restart
             </button>
-            {canAdvanceContract ? (
-              <button type="button" className="result-button result-button-primary" onClick={advanceToNextContract}>
+            {hud.status === "delivered" && resultBoardAction ? (
+              <button
+                type="button"
+                className={`result-button result-button-primary result-button-board result-button-board-${resultBoardAction.tone}`}
+                onClick={openResultBoardTarget}
+              >
                 <ArrowRight size={18} />
-                Next Contract
+                {resultBoardAction.label}
               </button>
             ) : null}
           </div>

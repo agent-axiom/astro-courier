@@ -22,12 +22,29 @@ export type ResultBoardPromptInput = {
   routeBoardTarget: {
     value: string;
     tone: "clear" | "comet" | "complete";
+    contractId?: string;
   };
 };
 
 export type ResultBoardPrompt = {
   label: "Board target";
   value: string;
+  tone: "retry" | "clear" | "comet" | "complete";
+};
+
+export type ResultBoardActionInput = {
+  status: Extract<RunStatus, "delivered" | "crashed">;
+  currentContractId: string;
+  routeBoardTarget: {
+    value: string;
+    tone: "clear" | "comet" | "complete";
+    contractId?: string;
+  };
+};
+
+export type ResultBoardAction = {
+  label: "Open Target" | "Chase Comet" | "Defend Board" | "Retry Route";
+  targetContractId: string;
   tone: "retry" | "clear" | "comet" | "complete";
 };
 
@@ -93,6 +110,30 @@ export function buildResultBoardPrompt(input: ResultBoardPromptInput): ResultBoa
   return {
     label: "Board target",
     value: input.routeBoardTarget.value,
+    tone: input.routeBoardTarget.tone
+  };
+}
+
+export function buildResultBoardAction(input: ResultBoardActionInput): ResultBoardAction {
+  if (input.status === "crashed") {
+    return {
+      label: "Retry Route",
+      targetContractId: input.currentContractId,
+      tone: "retry"
+    };
+  }
+
+  if (input.routeBoardTarget.tone === "complete") {
+    return {
+      label: "Defend Board",
+      targetContractId: input.currentContractId,
+      tone: "complete"
+    };
+  }
+
+  return {
+    label: input.routeBoardTarget.tone === "comet" ? "Chase Comet" : "Open Target",
+    targetContractId: input.routeBoardTarget.contractId ?? input.currentContractId,
     tone: input.routeBoardTarget.tone
   };
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildResultBoardPrompt, buildResultCoach } from "./resultCoach";
+import { buildResultBoardAction, buildResultBoardPrompt, buildResultCoach } from "./resultCoach";
 
 const baseBreakdown = {
   base: 1000,
@@ -102,6 +102,61 @@ describe("result board prompt", () => {
       label: "Board target",
       value: "Comet Asteroid Sprint",
       tone: "comet"
+    });
+  });
+});
+
+describe("result board action", () => {
+  it("opens the recommended board target after a successful delivery", () => {
+    expect(
+      buildResultBoardAction({
+        status: "delivered",
+        currentContractId: "first-light-delivery",
+        routeBoardTarget: {
+          value: "Clear Return Leg",
+          tone: "clear",
+          contractId: "return-leg"
+        }
+      })
+    ).toEqual({
+      label: "Open Target",
+      targetContractId: "return-leg",
+      tone: "clear"
+    });
+  });
+
+  it("keeps comet chases on the current route when that is the board target", () => {
+    expect(
+      buildResultBoardAction({
+        status: "delivered",
+        currentContractId: "asteroid-sprint",
+        routeBoardTarget: {
+          value: "Comet Asteroid Sprint",
+          tone: "comet",
+          contractId: "asteroid-sprint"
+        }
+      })
+    ).toEqual({
+      label: "Chase Comet",
+      targetContractId: "asteroid-sprint",
+      tone: "comet"
+    });
+  });
+
+  it("keeps a mastered board in defend mode", () => {
+    expect(
+      buildResultBoardAction({
+        status: "delivered",
+        currentContractId: "gravity-slingshot",
+        routeBoardTarget: {
+          value: "Board mastered",
+          tone: "complete"
+        }
+      })
+    ).toEqual({
+      label: "Defend Board",
+      targetContractId: "gravity-slingshot",
+      tone: "complete"
     });
   });
 });
