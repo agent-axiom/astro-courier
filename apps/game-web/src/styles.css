@@ -3033,6 +3033,11 @@ button {
   gap: 8px;
 }
 
+.result-actions-solo {
+  grid-template-columns: minmax(0, min(100%, 240px));
+  justify-content: center;
+}
+
 .result-button {
   display: inline-flex;
   align-items: center;

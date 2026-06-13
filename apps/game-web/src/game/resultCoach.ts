@@ -67,6 +67,13 @@ export type ResultBoardAction = {
   tone: "retry" | "clear" | "comet" | "complete";
 };
 
+export type ResultActionsLayoutInput = {
+  status: Extract<RunStatus, "delivered" | "crashed">;
+  hasBoardAction: boolean;
+};
+
+export type ResultActionsLayout = "solo" | "pair";
+
 const cleanCargoDamageLimit = 0.02;
 const cometReserveMinRatio = 0.75;
 const cometReserveNearMissRatio = 0.6;
@@ -223,6 +230,10 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
     value: "Tighten landing angle",
     tone: "opportunity"
   };
+}
+
+export function buildResultActionsLayout(input: ResultActionsLayoutInput): ResultActionsLayout {
+  return input.status === "delivered" && input.hasBoardAction ? "pair" : "solo";
 }
 
 function isDeliveryNearMiss(input: ResultCoachInput): boolean {

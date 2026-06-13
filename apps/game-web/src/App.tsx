@@ -64,7 +64,13 @@ import { buildApproachRewardReadout, buildDockingSpeedReadout } from "./game/doc
 import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./game/cargo";
 import { buildReplayReceipt, buildResultHighlight, buildResultOutcomePresentation, buildResultStats } from "./game/resultStats";
 import { buildHazardPressureReadout } from "./game/hazard";
-import { buildResultBoardAction, buildResultBoardMasteryPrompt, buildResultBoardPrompt, buildResultCoach } from "./game/resultCoach";
+import {
+  buildResultActionsLayout,
+  buildResultBoardAction,
+  buildResultBoardMasteryPrompt,
+  buildResultBoardPrompt,
+  buildResultCoach
+} from "./game/resultCoach";
 import { getOverlayVisibility } from "./game/overlays";
 import { buildCometRunReadout } from "./game/comet";
 import { buildResultRetryAction, buildRetryActionBriefing, buildRetryTarget } from "./game/retryTarget";
@@ -550,6 +556,10 @@ export function App() {
     hud.status === "delivered" || hud.status === "crashed"
       ? buildResultBoardAction({ status: hud.status, currentContractId: hud.contractId, routeBoardTarget })
       : undefined;
+  const resultActionsLayout =
+    hud.status === "delivered" || hud.status === "crashed"
+      ? buildResultActionsLayout({ status: hud.status, hasBoardAction: Boolean(resultBoardAction) })
+      : "solo";
   const retryTarget = buildRetryTarget({
     status: hud.status,
     contractId: hud.contractId,
@@ -1397,7 +1407,7 @@ export function App() {
               <strong>{resultBoardMasteryPrompt.value}</strong>
             </div>
           ) : null}
-          <div className="result-actions">
+          <div className={`result-actions result-actions-${resultActionsLayout}`}>
             <button
               type="button"
               className={`result-button result-button-retry result-button-retry-${resultRetryAction.tone}`}

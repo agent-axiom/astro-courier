@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { buildResultBoardAction, buildResultBoardMasteryPrompt, buildResultBoardPrompt, buildResultCoach } from "./resultCoach";
+import {
+  buildResultActionsLayout,
+  buildResultBoardAction,
+  buildResultBoardMasteryPrompt,
+  buildResultBoardPrompt,
+  buildResultCoach
+} from "./resultCoach";
 
 const baseBreakdown = {
   base: 1000,
@@ -599,5 +605,16 @@ describe("result board action", () => {
       targetContractId: "gravity-slingshot",
       tone: "complete"
     });
+  });
+});
+
+describe("result action layout", () => {
+  it("centers a single retry action after failed runs or missing board actions", () => {
+    expect(buildResultActionsLayout({ status: "crashed", hasBoardAction: true })).toBe("solo");
+    expect(buildResultActionsLayout({ status: "delivered", hasBoardAction: false })).toBe("solo");
+  });
+
+  it("uses a paired action row only when delivery can open a board target", () => {
+    expect(buildResultActionsLayout({ status: "delivered", hasBoardAction: true })).toBe("pair");
   });
 });
