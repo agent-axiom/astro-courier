@@ -38,6 +38,14 @@ describe("result stat formatting", () => {
     });
   });
 
+  it("keeps generic style highlights for non-style milestones", () => {
+    expect(buildResultHighlight({ ...baseBreakdown, styleBonus: 405 }, "Delivered")).toEqual({
+      label: "Run highlight",
+      value: "Style +405",
+      tone: "style"
+    });
+  });
+
   it("surfaces danger pay when it beats other bonus sources", () => {
     expect(buildResultHighlight({ ...baseBreakdown, fuelBonus: 180, styleBonus: 260, dangerBonus: 480 })).toEqual({
       label: "Run highlight",

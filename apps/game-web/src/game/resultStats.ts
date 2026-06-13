@@ -17,6 +17,18 @@ export type ResultHighlight = {
   tone: "pace" | "efficiency" | "cargo" | "precision" | "style" | "danger";
 };
 
+const styleMilestones = new Set([
+  "Clean Hazard Skim",
+  "Needle Thread",
+  "Gravity Sling",
+  "Quick Pickup",
+  "Launch Burst",
+  "Perfect Approach",
+  "Eco Drift",
+  "Chain Finish",
+  "Express Finish"
+]);
+
 export function buildResultStats(input: ResultStatsInput): ResultStat[] {
   return [
     { label: "Score", value: `${input.score}` },
@@ -40,9 +52,11 @@ export function buildResultHighlight(breakdown: ScoreBreakdown, lastMilestone?: 
     return undefined;
   }
 
+  const highlightLabel = winner.tone === "style" && lastMilestone && styleMilestones.has(lastMilestone) ? lastMilestone : winner.label;
+
   return {
     label: "Run highlight",
-    value: `${winner.tone === "style" && lastMilestone ? lastMilestone : winner.label} +${Math.round(winner.value)}`,
+    value: `${highlightLabel} +${Math.round(winner.value)}`,
     tone: winner.tone
   };
 }
