@@ -221,6 +221,36 @@ describe("GameShell lifecycle", () => {
     expect(onHud.mock.calls.at(-1)?.[0].targetDistance).toBeCloseTo(196.82, 2);
   });
 
+  it("publishes gravity sling opportunity telemetry inside the gravity pocket", async () => {
+    const { renderer, input } = createShellDoubles();
+    const onHud = vi.fn();
+    vi.stubGlobal("requestAnimationFrame", vi.fn(() => 7));
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    vi.spyOn(performance, "now").mockReturnValue(1000);
+
+    const shell = new GameShell({
+      mount: {} as HTMLElement,
+      onHud,
+      renderer,
+      input,
+      initialPaused: true
+    });
+
+    await shell.start();
+    (shell as GameShell & { selectContract: (contractId: string) => void }).selectContract("gravity-slingshot");
+    const world = (shell as unknown as { world: SimulationWorld }).world;
+    world.ship.position = { x: 0, y: -160 };
+    world.ship.velocity = { x: 48, y: 0 };
+    (shell as unknown as { publishHud: () => void }).publishHud();
+
+    expect(onHud.mock.calls.at(-1)?.[0]).toMatchObject({
+      gravitySlingDistance: 160,
+      gravitySlingReady: false,
+      gravitySlingSpeedThreshold: 54,
+      gravitySlingStyleBonus: 240
+    });
+  });
+
   it("publishes predicted hazard trajectory risk before current proximity", async () => {
     const { renderer, input } = createShellDoubles();
     const onHud = vi.fn();

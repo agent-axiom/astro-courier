@@ -77,6 +77,10 @@ export type HudState = {
   hazardSeverity?: number;
   trajectoryRiskLevel?: TrajectoryRiskLevel;
   trajectoryRiskSeconds?: number;
+  gravitySlingDistance?: number;
+  gravitySlingReady?: boolean;
+  gravitySlingSpeedThreshold?: number;
+  gravitySlingStyleBonus?: number;
 };
 
 export type ContractOption = Pick<ContractContent, "id" | "title" | "briefing" | "riskLabel" | "rewardLabel" | "medalTimes"> & {
@@ -332,6 +336,10 @@ export class GameShell {
       hazardDangerLevel: snapshot.nearestHazard?.dangerLevel,
       hazardDistance: snapshot.nearestHazard?.distance,
       hazardSeverity: snapshot.nearestHazard?.severity,
+      gravitySlingDistance: snapshot.gravitySlingOpportunity?.distance,
+      gravitySlingReady: snapshot.gravitySlingOpportunity?.ready,
+      gravitySlingSpeedThreshold: snapshot.gravitySlingOpportunity?.speedThreshold,
+      gravitySlingStyleBonus: snapshot.gravitySlingOpportunity?.styleBonus,
       trajectoryRiskLevel: trajectoryRisk?.level,
       trajectoryRiskSeconds: trajectoryRisk?.seconds
     });

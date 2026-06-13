@@ -167,6 +167,21 @@ describe("deterministic Astro Courier simulation", () => {
     expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(firstBreakdown.styleBonus);
   });
 
+  it("reports a gravity sling opportunity while the ship is clean inside a gravity pocket", () => {
+    const world = createWorldFromSystem(starterSystem, "gravity-sling-window-seed");
+    world.ship.position = { x: 0, y: -160 };
+    world.ship.velocity = { x: 48, y: 0 };
+
+    expect(snapshotWorld(world).gravitySlingOpportunity).toEqual({
+      id: "luma",
+      name: "Luma",
+      distance: 160,
+      ready: false,
+      speedThreshold: 54,
+      styleBonus: 240
+    });
+  });
+
   it("does not award gravity sling style for a near-surface hard landing", () => {
     const world = createWorldFromSystem(starterSystem, "gravity-sling-crash-seed");
     world.ship.position = { x: 0, y: -74 };

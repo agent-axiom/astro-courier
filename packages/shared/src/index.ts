@@ -96,6 +96,14 @@ export type SimulationSnapshot = {
     assistAvailable: boolean;
     landingStatus: LandingGuidanceStatus;
   };
+  gravitySlingOpportunity?: {
+    id: string;
+    name: string;
+    distance: number;
+    ready: boolean;
+    speedThreshold: number;
+    styleBonus: number;
+  };
   ship: {
     position: Vec2;
     velocity: Vec2;

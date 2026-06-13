@@ -440,6 +440,7 @@ export function snapshotWorld(world: SimulationWorld): SimulationSnapshot {
     elapsedSeconds: world.elapsedSeconds,
     score: world.score,
     objectiveTarget: getObjectiveTarget(world),
+    gravitySlingOpportunity: getGravitySlingOpportunity(world),
     ship: {
       position: { ...world.ship.position },
       velocity: { ...world.ship.velocity },
@@ -644,10 +645,21 @@ function integrate(world: SimulationWorld, fixedDt: number): void {
 }
 
 function updateGravitySling(world: SimulationWorld): void {
-  if (magnitude(world.ship.velocity) < GRAVITY_SLING_SPEED_THRESHOLD || world.ship.cargoDamage > 0.02) {
+  const opportunity = getGravitySlingOpportunity(world);
+  if (!opportunity?.ready) {
     return;
   }
 
+  world.slungGravitySourceIds.push(opportunity.id);
+  awardStyle(world, GRAVITY_SLING_STYLE_BONUS, "Gravity Sling");
+}
+
+function getGravitySlingOpportunity(world: SimulationWorld): SimulationSnapshot["gravitySlingOpportunity"] {
+  if (world.ship.cargoDamage > 0.02) {
+    return undefined;
+  }
+
+  const speed = magnitude(world.ship.velocity);
   for (const source of world.gravitySources) {
     if (world.slungGravitySourceIds.includes(source.id)) {
       continue;
@@ -657,11 +669,18 @@ function updateGravitySling(world: SimulationWorld): void {
     const outerRadius = Math.min(source.influenceRadius, source.radius * GRAVITY_SLING_OUTER_RADIUS);
     const safelyAboveSurface = distance > source.radius * GRAVITY_SLING_SAFE_SURFACE_RADIUS;
     if (safelyAboveSurface && distance <= outerRadius) {
-      world.slungGravitySourceIds.push(source.id);
-      awardStyle(world, GRAVITY_SLING_STYLE_BONUS, "Gravity Sling");
-      return;
+      return {
+        id: source.id,
+        name: source.name,
+        distance: round(distance, 3),
+        ready: speed >= GRAVITY_SLING_SPEED_THRESHOLD,
+        speedThreshold: GRAVITY_SLING_SPEED_THRESHOLD,
+        styleBonus: GRAVITY_SLING_STYLE_BONUS
+      };
     }
   }
+
+  return undefined;
 }
 
 function updateHazards(world: SimulationWorld, fixedDt: number): void {

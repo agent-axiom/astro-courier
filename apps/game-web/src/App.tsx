@@ -331,6 +331,10 @@ export function App() {
     speed: hud.speed,
     trajectoryRiskLevel: hud.trajectoryRiskLevel,
     trajectoryRiskSeconds: hud.trajectoryRiskSeconds,
+    gravitySlingDistance: hud.gravitySlingDistance,
+    gravitySlingReady: hud.gravitySlingReady,
+    gravitySlingSpeedThreshold: hud.gravitySlingSpeedThreshold,
+    gravitySlingStyleBonus: hud.gravitySlingStyleBonus,
     cargoDamage: hud.cargoDamage
   });
 

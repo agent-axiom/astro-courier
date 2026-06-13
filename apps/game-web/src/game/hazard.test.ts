@@ -96,6 +96,39 @@ describe("hazard pressure readout", () => {
     });
   });
 
+  it("turns a gravity pocket into a sling setup readout", () => {
+    expect(
+      buildHazardPressureReadout({
+        gravitySlingDistance: 160,
+        gravitySlingReady: false,
+        gravitySlingSpeedThreshold: 54,
+        gravitySlingStyleBonus: 240,
+        cargoDamage: 0
+      })
+    ).toEqual({
+      label: "Risk pulse",
+      value: "Sling 54+ speed / 160m",
+      tone: "opportunity"
+    });
+  });
+
+  it("previews the multiplied gravity sling payout during an active style chain", () => {
+    expect(
+      buildHazardPressureReadout({
+        gravitySlingDistance: 160,
+        gravitySlingReady: true,
+        gravitySlingSpeedThreshold: 54,
+        gravitySlingStyleBonus: 240,
+        styleMultiplier: 1.5,
+        cargoDamage: 0
+      })
+    ).toEqual({
+      label: "Risk pulse",
+      value: "Sling +360 / x1.50 / 160m",
+      tone: "opportunity"
+    });
+  });
+
   it("warns the player to keep damaged cargo wide near hazards", () => {
     expect(
       buildHazardPressureReadout({

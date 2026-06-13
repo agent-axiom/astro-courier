@@ -12,6 +12,10 @@ export type HazardPressureInput = {
   speed?: number;
   trajectoryRiskLevel?: "near" | "inside";
   trajectoryRiskSeconds?: number;
+  gravitySlingDistance?: number;
+  gravitySlingReady?: boolean;
+  gravitySlingSpeedThreshold?: number;
+  gravitySlingStyleBonus?: number;
   cargoDamage?: number;
 };
 
@@ -23,7 +27,7 @@ export type HazardPressureReadout = {
 
 export function buildHazardPressureReadout(input: HazardPressureInput): HazardPressureReadout | undefined {
   if (!input.hazardDangerLevel) {
-    return buildTrajectoryRiskPressureReadout(input);
+    return buildTrajectoryRiskPressureReadout(input) ?? buildGravitySlingPressureReadout(input);
   }
 
   const distance = input.hazardDistance === undefined ? "" : ` ${Math.round(input.hazardDistance)}m`;
@@ -57,6 +61,31 @@ export function buildHazardPressureReadout(input: HazardPressureInput): HazardPr
     label: "Risk pulse",
     value: cargoDamage <= 0.02 ? `${fastSkim ? "Thread" : "Skim"} window${distance}` : `Keep wide${distance}`,
     tone: cargoDamage <= 0.02 ? "opportunity" : "warning"
+  };
+}
+
+function buildGravitySlingPressureReadout(input: HazardPressureInput): HazardPressureReadout | undefined {
+  if (input.gravitySlingDistance === undefined || (input.cargoDamage ?? 0) > 0.02) {
+    return undefined;
+  }
+
+  const distanceSuffix = ` / ${Math.round(input.gravitySlingDistance)}m`;
+  if (input.gravitySlingReady && input.gravitySlingStyleBonus !== undefined) {
+    const multiplier = Math.max(1, input.styleMultiplier ?? 1);
+    const payout = Math.round(input.gravitySlingStyleBonus * multiplier);
+    const multiplierSuffix = multiplier > 1 ? ` / x${multiplier.toFixed(2)}` : "";
+    return {
+      label: "Risk pulse",
+      value: `Sling +${payout}${multiplierSuffix}${distanceSuffix}`,
+      tone: "opportunity"
+    };
+  }
+
+  const speedCall = input.gravitySlingSpeedThreshold === undefined ? "Sling window" : `Sling ${input.gravitySlingSpeedThreshold}+ speed`;
+  return {
+    label: "Risk pulse",
+    value: `${speedCall}${distanceSuffix}`,
+    tone: "opportunity"
   };
 }
 
