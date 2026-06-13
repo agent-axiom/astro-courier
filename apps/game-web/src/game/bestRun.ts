@@ -276,6 +276,14 @@ export function buildLiveBestPace(input: LiveBestPaceInput): LiveBestPace | unde
   }
 
   const secondsDelta = input.bestRun.elapsedSeconds - input.elapsedSeconds;
+  if (input.score !== undefined && scoreDelta < 0 && secondsDelta < 0) {
+    return {
+      label: "PB chase",
+      value: `Need +${Math.round(Math.abs(scoreDelta))} score`,
+      tone: "behind"
+    };
+  }
+
   if (secondsDelta >= 0) {
     return {
       label: "PB pace",

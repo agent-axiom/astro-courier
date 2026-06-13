@@ -393,6 +393,21 @@ describe("live personal best pace copy", () => {
       tone: "behind"
     });
   });
+
+  it("shows the live score gap once the run is behind the saved score and time", () => {
+    expect(
+      buildLiveBestPace({
+        bestRun: { score: 3290, elapsedSeconds: 24.7, medal: "gold" },
+        score: 3040,
+        elapsedSeconds: 27.1,
+        status: "flying"
+      })
+    ).toEqual({
+      label: "PB chase",
+      value: "Need +250 score",
+      tone: "behind"
+    });
+  });
 });
 
 class MemoryStorage implements Pick<Storage, "getItem" | "setItem"> {
