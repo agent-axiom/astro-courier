@@ -1,8 +1,9 @@
-import { Gauge, PackageCheck, Pause, Play, RotateCcw, Satellite, Trophy, Zap } from "lucide-react";
+import { Gauge, OctagonMinus, PackageCheck, Pause, Play, RotateCcw, Satellite, Trophy, Zap } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { create } from "zustand";
 import { getBestRun, recordBestRun, type BestRun } from "./game/bestRun";
 import { GameShell, type HudState } from "./game/GameShell";
+import { canUseImpulseControl } from "./game/hudControls";
 import { buildRadioMessage } from "./game/radio";
 
 type GameStore = {
@@ -112,6 +113,8 @@ export function App() {
   const radioMessage = buildRadioMessage(hud);
   const targetDistanceLabel = hud.targetDistance === undefined ? "-" : `${Math.round(hud.targetDistance)}m`;
   const primaryActionLabel = preflightOpen ? "Launch" : paused ? "Resume" : "Pause";
+  const canBoost = canUseImpulseControl({ action: "boost", fuel: hud.fuel, paused, preflightOpen, status: hud.status });
+  const canBrake = canUseImpulseControl({ action: "brake", fuel: hud.fuel, paused, preflightOpen, status: hud.status });
 
   const launchContract = () => {
     setPreflightOpen(false);
@@ -155,12 +158,24 @@ export function App() {
             className="icon-button"
             aria-label="Boost"
             title="Boost"
-            disabled={preflightOpen || paused || runFinished || hud.fuel <= 2}
+            disabled={!canBoost}
             onClick={() => {
               shellRef.current?.queueCommand({ type: "BOOST" });
             }}
           >
             <Zap size={20} />
+          </button>
+          <button
+            type="button"
+            className="icon-button"
+            aria-label="Brake"
+            title="Brake"
+            disabled={!canBrake}
+            onClick={() => {
+              shellRef.current?.queueCommand({ type: "BRAKE", amount: 1 });
+            }}
+          >
+            <OctagonMinus size={20} />
           </button>
           <button
             type="button"
