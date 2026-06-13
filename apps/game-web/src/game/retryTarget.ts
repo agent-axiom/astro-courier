@@ -23,7 +23,16 @@ export type RetryTarget = {
 };
 
 export type ResultRetryAction = {
-  label: "Retry Route" | "Defend PB" | "Chase PB" | "Repeat Line" | "Clean Run" | "Run Again";
+  label:
+    | "Retry Route"
+    | "Defend PB"
+    | "Chase PB"
+    | "Repeat Line"
+    | "Clean Run"
+    | "Chase Gold"
+    | "Express Run"
+    | "Set PB"
+    | "Run Again";
   mode: "restart-run";
 };
 
@@ -172,6 +181,15 @@ export function buildResultRetryAction(target: RetryTarget): ResultRetryAction {
   if (target.value === "Restore clean cargo") {
     return { label: "Clean Run", mode: "restart-run" };
   }
+  if (target.value.startsWith("Gold under ")) {
+    return { label: "Chase Gold", mode: "restart-run" };
+  }
+  if (target.value === "Chase Express Finish") {
+    return { label: "Express Run", mode: "restart-run" };
+  }
+  if (target.value === "Set first PB") {
+    return { label: "Set PB", mode: "restart-run" };
+  }
   return { label: "Run Again", mode: "restart-run" };
 }
 
@@ -208,6 +226,27 @@ export function buildRetryActionBriefing(action: ResultRetryAction, target: Retr
     return {
       label: "Next run",
       value: "No-scratch rematch",
+      tone: "opportunity"
+    };
+  }
+  if (action.label === "Chase Gold") {
+    return {
+      label: "Next run",
+      value: "Convert medal pace",
+      tone: "opportunity"
+    };
+  }
+  if (action.label === "Express Run") {
+    return {
+      label: "Next run",
+      value: "Cut the delivery split",
+      tone: "opportunity"
+    };
+  }
+  if (action.label === "Set PB") {
+    return {
+      label: "Next run",
+      value: "Bank the first line",
       tone: "opportunity"
     };
   }

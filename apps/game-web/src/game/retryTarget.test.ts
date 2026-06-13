@@ -438,9 +438,17 @@ describe("result retry action copy", () => {
     });
   });
 
-  it("keeps route improvement opportunities readable", () => {
+  it("turns medal, express, and first-PB opportunities into specific calls to action", () => {
+    expect(buildResultRetryAction({ label: "Retry target", value: "Gold under 24.0s", tone: "opportunity" })).toEqual({
+      label: "Chase Gold",
+      mode: "restart-run"
+    });
     expect(buildResultRetryAction({ label: "Retry target", value: "Chase Express Finish", tone: "opportunity" })).toEqual({
-      label: "Run Again",
+      label: "Express Run",
+      mode: "restart-run"
+    });
+    expect(buildResultRetryAction({ label: "Retry target", value: "Set first PB", tone: "opportunity" })).toEqual({
+      label: "Set PB",
       mode: "restart-run"
     });
   });
@@ -505,6 +513,39 @@ describe("result retry action briefing", () => {
     ).toEqual({
       label: "Next run",
       value: "No-scratch rematch",
+      tone: "opportunity"
+    });
+  });
+
+  it("turns medal, express, and first-PB actions into focused rematch hooks", () => {
+    expect(
+      buildRetryActionBriefing(
+        { label: "Chase Gold", mode: "restart-run" },
+        { label: "Retry target", value: "Gold under 24.0s", tone: "opportunity" }
+      )
+    ).toEqual({
+      label: "Next run",
+      value: "Convert medal pace",
+      tone: "opportunity"
+    });
+    expect(
+      buildRetryActionBriefing(
+        { label: "Express Run", mode: "restart-run" },
+        { label: "Retry target", value: "Chase Express Finish", tone: "opportunity" }
+      )
+    ).toEqual({
+      label: "Next run",
+      value: "Cut the delivery split",
+      tone: "opportunity"
+    });
+    expect(
+      buildRetryActionBriefing(
+        { label: "Set PB", mode: "restart-run" },
+        { label: "Retry target", value: "Set first PB", tone: "opportunity" }
+      )
+    ).toEqual({
+      label: "Next run",
+      value: "Bank the first line",
       tone: "opportunity"
     });
   });
