@@ -5,6 +5,7 @@ import {
   BOOST_COOLDOWN_SECONDS,
   ECO_DRIFT_FUEL_USED_LIMIT,
   ECO_DRIFT_STYLE_BONUS,
+  LANDING_ASSIST_FUEL_COST,
   QUICK_PICKUP_STYLE_BONUS,
   STYLE_CHAIN_WINDOW_SECONDS,
   createWorldFromSystem,
@@ -636,6 +637,7 @@ describe("deterministic Astro Courier simulation", () => {
     assisted.ship.position = { x: 0, y: -74 };
     assisted.ship.velocity = { x: 43, y: 0 };
     assisted.ship.rotation = -Math.PI / 2;
+    const fuelBeforeAssist = assisted.ship.fuel;
     stepWorld(assisted, 1 / 60, []);
 
     const reckless = createWorldFromSystem(starterSystem, "assist-seed");
@@ -646,9 +648,25 @@ describe("deterministic Astro Courier simulation", () => {
 
     expect(assisted.status).toBe("flying");
     expect(assisted.cargoOnboard).toBe(true);
-    expect(assisted.lastMilestone).toBe("Quick Pickup");
+    expect(assisted.lastMilestone).toBe("Assist Burn");
+    expect(assisted.ship.fuel).toBe(fuelBeforeAssist - LANDING_ASSIST_FUEL_COST);
+    expect(assisted.fuelUsed).toBe(LANDING_ASSIST_FUEL_COST);
     expect(reckless.status).toBe("crashed");
     expect(reckless.landingRating).toBe("Insurance Event");
+  });
+
+  it("does not spend assist burn or save a fast pad contact without enough fuel", () => {
+    const emptyAssist = createWorldFromSystem(starterSystem, "empty-assist-seed");
+    emptyAssist.ship.position = { x: 0, y: -74 };
+    emptyAssist.ship.velocity = { x: 43, y: 0 };
+    emptyAssist.ship.rotation = -Math.PI / 2;
+    emptyAssist.ship.fuel = LANDING_ASSIST_FUEL_COST;
+
+    stepWorld(emptyAssist, 1 / 60, []);
+
+    expect(emptyAssist.status).toBe("crashed");
+    expect(emptyAssist.ship.fuel).toBe(LANDING_ASSIST_FUEL_COST);
+    expect(emptyAssist.fuelUsed).toBe(0);
   });
 
   it("explains crash causes for hard landings and direct collisions", () => {

@@ -78,6 +78,12 @@ describe("radio feedback copy", () => {
     expect(buildRadioMessage({ ...baseHud, landingStatus: "too-fast", assistAvailable: false })).toContain("Slow");
   });
 
+  it("confirms assist burns before generic landing guidance", () => {
+    expect(buildRadioMessage({ ...baseHud, lastMilestone: "Assist Burn", landingStatus: "too-fast", assistAvailable: false })).toContain(
+      "Assist burn fired"
+    );
+  });
+
   it("warns about hazard pressure before ordinary approach guidance", () => {
     expect(buildRadioMessage({ ...baseHud, hazardDangerLevel: "inside", hazardDistance: 12 })).toContain("Hazard");
     expect(buildRadioMessage({ ...baseHud, hazardDangerLevel: "near", hazardDistance: 44 })).toContain("Asteroid");

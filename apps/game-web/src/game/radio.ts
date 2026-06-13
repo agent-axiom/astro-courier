@@ -30,6 +30,10 @@ export function buildRadioMessage(hud: HudState): string {
     return "Fast pickup logged. Keep that momentum to the destination.";
   }
 
+  if (hud.lastMilestone === "Assist Burn") {
+    return "Assist burn fired. Fuel traded for a softer contact.";
+  }
+
   if (hud.hazardDangerLevel === "inside") {
     return `Hazard contact. Exit the field${hud.hazardDistance === undefined ? "" : `, ${Math.round(hud.hazardDistance)}m from center`}.`;
   }

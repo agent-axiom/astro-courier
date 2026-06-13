@@ -201,6 +201,7 @@ const GRAVITY_SOFTENING = 16;
 const FUEL_BURN_PER_SECOND = 8;
 const BRAKE_BURN_PER_SECOND = 3;
 export const BOOST_COOLDOWN_SECONDS = 1.15;
+export const LANDING_ASSIST_FUEL_COST = 1.5;
 const HAZARD_SKIM_OUTER_RADIUS = 1.35;
 export const HAZARD_SKIM_BASE_BONUS = 140;
 export const HAZARD_SKIM_SEVERITY_BONUS = 120;
@@ -468,7 +469,7 @@ function getObjectiveTarget(world: SimulationWorld): SimulationSnapshot["objecti
   const distance = magnitude(offset);
   const speed = magnitude(world.ship.velocity);
   const angleError = Math.abs(shortestAngleDelta(world.ship.rotation, pad.normalAngle));
-  const assistAvailable = canLandingAssist(distance, speed, angleError, pad);
+  const assistAvailable = world.ship.fuel > LANDING_ASSIST_FUEL_COST && canLandingAssist(distance, speed, angleError, pad);
 
   return {
     id: pad.id,
@@ -651,12 +652,15 @@ function applyLandingAssist(world: SimulationWorld): void {
   const speed = magnitude(world.ship.velocity);
   const angleError = Math.abs(shortestAngleDelta(world.ship.rotation, pad.normalAngle));
 
-  if (!canLandingAssist(distance, speed, angleError, pad)) {
+  if (world.ship.fuel <= LANDING_ASSIST_FUEL_COST || !canLandingAssist(distance, speed, angleError, pad)) {
     return;
   }
 
   const assistedSpeed = pad.allowedApproachSpeed * 0.92;
   world.ship.velocity = scale(world.ship.velocity, assistedSpeed / speed);
+  world.ship.fuel = round(world.ship.fuel - LANDING_ASSIST_FUEL_COST, 6);
+  world.fuelUsed = round(world.fuelUsed + LANDING_ASSIST_FUEL_COST, 6);
+  world.lastMilestone = "Assist Burn";
 }
 
 function updateApproachStreak(world: SimulationWorld, fixedDt: number): void {
@@ -709,7 +713,7 @@ function resolveLandingOrCrash(world: SimulationWorld): void {
       world.cargoOnboard = true;
       world.objectivePhase = "delivery";
       if (world.elapsedSeconds <= QUICK_PICKUP_WINDOW_SECONDS) {
-        awardStyle(world, QUICK_PICKUP_STYLE_BONUS, "Quick Pickup");
+        awardStyle(world, QUICK_PICKUP_STYLE_BONUS, world.lastMilestone === "Assist Burn" ? "Assist Burn" : "Quick Pickup");
       } else {
         world.lastMilestone = "Cargo Loaded";
       }
