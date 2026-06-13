@@ -247,6 +247,26 @@ describe("result retry target", () => {
     });
   });
 
+  it("nudges return-leg gold clears without chain finish toward a chain target", () => {
+    expect(
+      buildRetryTarget({
+        status: "delivered",
+        contractId: "return-leg",
+        medal: "gold",
+        lastMilestone: "Express Finish",
+        elapsedSeconds: 28.4,
+        goldSeconds: 30,
+        score: 2520,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Carry Chain Finish",
+      tone: "opportunity"
+    });
+  });
+
   it("nudges gold clears without express finish toward the express target", () => {
     expect(
       buildRetryTarget({

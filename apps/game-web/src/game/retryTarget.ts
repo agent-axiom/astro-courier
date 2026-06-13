@@ -103,6 +103,14 @@ export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
     };
   }
 
+  if (input.contractId === "return-leg") {
+    return {
+      label: "Retry target",
+      value: "Carry Chain Finish",
+      tone: "opportunity"
+    };
+  }
+
   return {
     label: "Retry target",
     value: input.bestRun ? "Add one more bonus" : "Set first PB",
