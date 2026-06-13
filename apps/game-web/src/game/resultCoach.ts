@@ -103,6 +103,14 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
     };
   }
 
+  if (input.lastMilestone === "No Brake Finesse") {
+    return {
+      label: "Next run",
+      value: "Repeat the no-brake line",
+      tone: "success"
+    };
+  }
+
   if (input.cargoDamage >= 0.15) {
     return {
       label: "Next run",

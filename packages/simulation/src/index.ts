@@ -169,6 +169,7 @@ export type SimulationWorld = {
   launchBurstAwarded: boolean;
   skimmedHazardIds: string[];
   slungGravitySourceIds: string[];
+  manualBrakeUsed: boolean;
   fuelUsed: number;
   activeContract: ContractContent;
   activeCargo: CargoContent;
@@ -230,6 +231,7 @@ export const EXPRESS_FINISH_STYLE_BONUS = 180;
 export const DAMAGE_CONTROL_STYLE_BONUS = 140;
 export const LAST_DROP_STYLE_BONUS = 170;
 export const LAST_DROP_FUEL_RATIO = 0.05;
+export const NO_BRAKE_STYLE_BONUS = 150;
 export const STYLE_CHAIN_WINDOW_SECONDS = 4;
 export const CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS = 5.5;
 const STYLE_CHAIN_MULTIPLIER_STEP = 0.25;
@@ -285,6 +287,7 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
     launchBurstAwarded: false,
     skimmedHazardIds: [],
     slungGravitySourceIds: [],
+    manualBrakeUsed: false,
     fuelUsed: 0,
     activeContract,
     activeCargo,
@@ -352,7 +355,11 @@ export function stepWorld(world: SimulationWorld, fixedDt: number, commands: Pla
     } else if (command.type === "THRUST") {
       thrust = Math.max(thrust, clamp(command.amount, 0, 1));
     } else if (command.type === "BRAKE") {
-      brake = Math.max(brake, clamp(command.amount, 0, 1));
+      const brakeAmount = clamp(command.amount, 0, 1);
+      brake = Math.max(brake, brakeAmount);
+      if (brakeAmount > 0) {
+        world.manualBrakeUsed = true;
+      }
     } else if (command.type === "BOOST" && world.ship.fuel > 2 && world.ship.boostCooldownSeconds <= 0) {
       thrust = Math.max(thrust, 1);
       world.ship.velocity = add(world.ship.velocity, {
@@ -818,6 +825,10 @@ function canAwardLastDrop(world: SimulationWorld): boolean {
   return world.ship.maxFuel > 0 && world.ship.fuel / world.ship.maxFuel <= LAST_DROP_FUEL_RATIO && world.ship.cargoDamage <= 0.02;
 }
 
+function canAwardNoBrakeFinesse(world: SimulationWorld): boolean {
+  return !world.manualBrakeUsed && world.ship.cargoDamage <= 0.02;
+}
+
 function resolveLandingOrCrash(world: SimulationWorld): void {
   const touchedPad = world.landingPads.find((pad) => distanceBetween(world.ship.position, pad.position) <= pad.radius);
   if (touchedPad) {
@@ -874,6 +885,8 @@ function resolveLandingOrCrash(world: SimulationWorld): void {
         awardStyle(world, LAST_DROP_STYLE_BONUS, "Last Drop");
       } else if (world.fuelUsed <= ECO_DRIFT_FUEL_USED_LIMIT && world.ship.cargoDamage <= 0.02) {
         awardStyle(world, ECO_DRIFT_STYLE_BONUS, "Eco Drift");
+      } else if (canAwardNoBrakeFinesse(world)) {
+        awardStyle(world, NO_BRAKE_STYLE_BONUS, "No Brake Finesse");
       } else if (canAwardDamageControl(world)) {
         awardStyle(world, DAMAGE_CONTROL_STYLE_BONUS, "Damage Control");
       } else {

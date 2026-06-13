@@ -25,6 +25,13 @@ describe("run action feed", () => {
         tone: "style"
       }
     ]);
+    expect(deriveRunFeedUpdates(baseSnapshot, { ...baseSnapshot, lastMilestone: "No Brake Finesse", lastStyleAward: 150 })).toEqual([
+      {
+        label: "No Brake Finesse",
+        value: "+150 style",
+        tone: "style"
+      }
+    ]);
     expect(deriveRunFeedUpdates(baseSnapshot, { ...baseSnapshot, fuel: 14 })).toEqual([
       {
         label: "Fuel critical",

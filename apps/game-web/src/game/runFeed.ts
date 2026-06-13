@@ -41,6 +41,7 @@ const feedMilestones = new Set([
   "Express Finish",
   "Damage Control",
   "Last Drop",
+  "No Brake Finesse",
   "Assist Burn",
   "Boost Burn"
 ]);

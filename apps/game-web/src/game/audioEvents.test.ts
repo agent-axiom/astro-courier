@@ -21,6 +21,7 @@ describe("HUD audio events", () => {
     expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, lastMilestone: "Assist Burn" })).toEqual(["assist-burn"]);
     expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, lastMilestone: "Boost Burn" })).toEqual(["boost-burn"]);
     expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, lastMilestone: "Gravity Sling" })).toEqual(["style-hit"]);
+    expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, lastMilestone: "No Brake Finesse" })).toEqual(["style-hit"]);
   });
 
   it("ignores service milestones that are not audio-worthy style hits", () => {

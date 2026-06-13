@@ -124,6 +124,7 @@ function buildRepeatableMilestoneTarget(lastMilestone?: string): RetryTarget | u
   switch (lastMilestone) {
     case "Damage Control":
     case "Last Drop":
+    case "No Brake Finesse":
     case "Perfect Approach":
     case "Chain Finish":
       return {

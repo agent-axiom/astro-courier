@@ -378,6 +378,25 @@ describe("result coach", () => {
       tone: "success"
     });
   });
+
+  it("coaches no-brake finesse runs toward repeating the finesse line", () => {
+    expect(
+      buildResultCoach({
+        status: "delivered",
+        lastMilestone: "No Brake Finesse",
+        medal: "silver",
+        grade: "B",
+        cargoDamage: 0,
+        fuel: 36,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 150 }
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Repeat the no-brake line",
+      tone: "success"
+    });
+  });
 });
 
 describe("result board prompt", () => {

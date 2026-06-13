@@ -170,6 +170,24 @@ describe("live style reward HUD copy", () => {
     });
   });
 
+  it("treats no-brake finesse as a fresh style moment", () => {
+    expect(
+      buildLiveStyleReward({
+        styleBonus: 150,
+        lastStyleAward: 150,
+        lastMilestone: "No Brake Finesse",
+        styleMultiplier: 1.25,
+        styleChainSecondsRemaining: 4
+      })
+    ).toEqual({
+      label: "Style hit",
+      value: "+150 hit / +150 bank / x1.25",
+      fresh: true,
+      tone: "fresh",
+      chainProgress: 1
+    });
+  });
+
   it("shows an active chain even between fresh milestones", () => {
     expect(buildLiveStyleReward({ styleBonus: 180, styleMultiplier: 1.25, styleChainSecondsRemaining: 2.4 })).toEqual({
       label: "Style chain",

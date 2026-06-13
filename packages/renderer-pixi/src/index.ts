@@ -664,6 +664,18 @@ function styleShockwaveSpec(milestone?: string):
     };
   }
 
+  if (milestone === "No Brake Finesse") {
+    return {
+      color: 0xbff7ff,
+      baseRadius: 27,
+      radiusPulse: 32,
+      baseAlpha: 0.17,
+      alphaPulse: 0.31,
+      baseWidth: 1.9,
+      widthPulse: 2.7
+    };
+  }
+
   if (milestone === "Perfect Approach") {
     return {
       color: 0xf8e59a,

@@ -267,6 +267,25 @@ describe("result retry target", () => {
     });
   });
 
+  it("turns no-brake finesse finishes into a repeatable finesse target", () => {
+    expect(
+      buildRetryTarget({
+        status: "delivered",
+        medal: "silver",
+        lastMilestone: "No Brake Finesse",
+        elapsedSeconds: 34.6,
+        goldSeconds: 30,
+        score: 2210,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Repeat No Brake Finesse",
+      tone: "opportunity"
+    });
+  });
+
   it("nudges return-leg gold clears without chain finish toward a chain target", () => {
     expect(
       buildRetryTarget({

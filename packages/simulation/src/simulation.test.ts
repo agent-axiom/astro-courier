@@ -13,6 +13,7 @@ import {
   DAMAGE_CONTROL_STYLE_BONUS,
   LAST_DROP_STYLE_BONUS,
   LANDING_ASSIST_FUEL_COST,
+  NO_BRAKE_STYLE_BONUS,
   QUICK_PICKUP_STYLE_BONUS,
   STYLE_CHAIN_WINDOW_SECONDS,
   createWorldFromSystem,
@@ -777,6 +778,50 @@ describe("deterministic Astro Courier simulation", () => {
     expect(world.lastMilestone).toBe("Last Drop");
     expect(world.lastStyleAward).toBe(LAST_DROP_STYLE_BONUS);
     expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(LAST_DROP_STYLE_BONUS);
+  });
+
+  it("awards no-brake finesse for clean deliveries without manual braking", () => {
+    const world = createWorldFromSystem(starterSystem, "no-brake-finesse-seed");
+    world.cargoOnboard = true;
+    world.objectivePhase = "delivery";
+    world.elapsedSeconds = starterSystem.contracts[0]!.medalTimes.gold + 1;
+    world.fuelUsed = ECO_DRIFT_FUEL_USED_LIMIT + 4;
+    world.bestApproachStreakSeconds = 0;
+    for (const pad of world.landingPads) {
+      pad.active = pad.role === "destination";
+    }
+    world.ship.position = { x: 260, y: -80 };
+    world.ship.velocity = { x: 4, y: 1 };
+    world.ship.rotation = 0;
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("delivered");
+    expect(world.lastMilestone).toBe("No Brake Finesse");
+    expect(world.lastStyleAward).toBe(NO_BRAKE_STYLE_BONUS);
+    expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(NO_BRAKE_STYLE_BONUS);
+  });
+
+  it("does not award no-brake finesse after any manual brake command", () => {
+    const world = createWorldFromSystem(starterSystem, "manual-brake-finesse-seed");
+    stepWorld(world, 1 / 60, [{ type: "BRAKE", amount: 1 }]);
+    world.cargoOnboard = true;
+    world.objectivePhase = "delivery";
+    world.elapsedSeconds = starterSystem.contracts[0]!.medalTimes.gold + 1;
+    world.fuelUsed = ECO_DRIFT_FUEL_USED_LIMIT + 4;
+    world.bestApproachStreakSeconds = 0;
+    for (const pad of world.landingPads) {
+      pad.active = pad.role === "destination";
+    }
+    world.ship.position = { x: 260, y: -80 };
+    world.ship.velocity = { x: 4, y: 1 };
+    world.ship.rotation = 0;
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("delivered");
+    expect(world.lastMilestone).toBe("Delivered");
+    expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(0);
   });
 
   it("scales hazard contact damage by active cargo fragility", () => {

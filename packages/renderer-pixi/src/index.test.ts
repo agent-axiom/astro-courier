@@ -650,16 +650,20 @@ describe("boost burst visual", () => {
 
   it("returns distinct shockwaves for rare finish and recovery style hits", () => {
     const eco = boostBurstVisual({ status: "delivered", lastMilestone: "Eco Drift", tick: 6 });
+    const noBrake = boostBurstVisual({ status: "delivered", lastMilestone: "No Brake Finesse", tick: 6 });
     const perfect = boostBurstVisual({ status: "delivered", lastMilestone: "Perfect Approach", tick: 6 });
     const express = boostBurstVisual({ status: "delivered", lastMilestone: "Express Finish", tick: 6 });
     const damageControl = boostBurstVisual({ status: "delivered", lastMilestone: "Damage Control", tick: 6 });
 
     expect(eco).toMatchObject({ color: 0x8ee6b8 });
+    expect(noBrake).toMatchObject({ color: 0xbff7ff });
     expect(perfect).toMatchObject({ color: 0xf8e59a });
     expect(express).toMatchObject({ color: 0xffd166 });
     expect(damageControl).toMatchObject({ color: 0xff9f1c });
+    expect(noBrake?.radius).toBeGreaterThan(eco?.radius ?? 0);
     expect(perfect?.radius).toBeGreaterThan(eco?.radius ?? 0);
     expect(express?.radius).toBeGreaterThan(perfect?.radius ?? 0);
+    expect(noBrake?.alpha).toBeGreaterThanOrEqual(eco?.alpha ?? 0);
     expect(damageControl?.alpha).toBeGreaterThanOrEqual(eco?.alpha ?? 0);
   });
 });

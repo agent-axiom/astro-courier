@@ -34,7 +34,8 @@ const styleMilestones = new Set([
   "Chain Finish",
   "Express Finish",
   "Damage Control",
-  "Last Drop"
+  "Last Drop",
+  "No Brake Finesse"
 ]);
 
 export function buildResultStats(input: ResultStatsInput): ResultStat[] {

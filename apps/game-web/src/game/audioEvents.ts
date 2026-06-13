@@ -31,7 +31,8 @@ const styleMilestones = new Set([
   "Chain Finish",
   "Express Finish",
   "Damage Control",
-  "Last Drop"
+  "Last Drop",
+  "No Brake Finesse"
 ]);
 
 export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): GameAudioEvent[] {
