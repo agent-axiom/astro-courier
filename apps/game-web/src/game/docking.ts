@@ -20,6 +20,7 @@ export type ApproachRewardReadout = {
   label: "Perfect setup";
   value: string;
   tone: "charging" | "ready";
+  progress: number;
 };
 
 const FINAL_APPROACH_BRAKE_DISTANCE = 70;
@@ -49,13 +50,24 @@ export function buildApproachRewardReadout(input: ApproachRewardReadoutInput): A
     return {
       label: "Perfect setup",
       value: `+${PERFECT_APPROACH_STYLE_BONUS} ready`,
-      tone: "ready"
+      tone: "ready",
+      progress: 1
     };
   }
 
   return {
     label: "Perfect setup",
     value: `${input.approachStreakSeconds.toFixed(1)} / ${PERFECT_APPROACH_STREAK_SECONDS.toFixed(1)}s`,
-    tone: "charging"
+    tone: "charging",
+    progress: round(clamp(input.approachStreakSeconds / PERFECT_APPROACH_STREAK_SECONDS, 0, 1), 2)
   };
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+function round(value: number, digits: number): number {
+  const scale = 10 ** digits;
+  return Math.round(value * scale) / scale;
 }

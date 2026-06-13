@@ -1192,15 +1192,30 @@ button {
 }
 
 .streak-chip {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  overflow: hidden;
   min-height: 34px;
   padding: 8px 10px;
   border-radius: 7px;
   font-size: 0.84rem;
   font-weight: 850;
+}
+
+.streak-chip::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  transform: scaleX(var(--approach-streak-progress, 0));
+  transform-origin: left center;
+  background: linear-gradient(90deg, #7ce1ff, #8ee6b8);
+  opacity: 0.9;
+  content: "";
 }
 
 .streak-charging {
@@ -1214,10 +1229,14 @@ button {
 }
 
 .streak-chip span {
+  position: relative;
+  z-index: 1;
   color: rgba(255, 255, 255, 0.76);
 }
 
 .streak-chip strong {
+  position: relative;
+  z-index: 1;
   color: #ffffff;
 }
 

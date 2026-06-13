@@ -48,7 +48,8 @@ describe("approach reward readout", () => {
     expect(buildApproachRewardReadout({ approachStreakSeconds: 0.6 })).toEqual({
       label: "Perfect setup",
       value: "0.6 / 1.0s",
-      tone: "charging"
+      tone: "charging",
+      progress: 0.6
     });
   });
 
@@ -56,7 +57,8 @@ describe("approach reward readout", () => {
     expect(buildApproachRewardReadout({ approachStreakSeconds: 1.2 })).toEqual({
       label: "Perfect setup",
       value: "+220 ready",
-      tone: "ready"
+      tone: "ready",
+      progress: 1
     });
   });
 });

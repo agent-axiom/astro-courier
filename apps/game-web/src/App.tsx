@@ -354,6 +354,7 @@ export function App() {
     targetDistance: hud.targetDistance
   });
   const approachRewardReadout = buildApproachRewardReadout({ approachStreakSeconds: hud.approachStreakSeconds });
+  const approachStreakStyle = { "--approach-streak-progress": approachRewardReadout?.progress ?? 0 } as CSSProperties;
   const primaryActionLabel = preflightOpen ? "Launch" : paused ? "Resume" : "Pause";
   const canBoost = canUseImpulseControl({
     action: "boost",
@@ -863,6 +864,7 @@ export function App() {
         {approachRewardReadout ? (
           <div
             className={`streak-chip streak-${approachRewardReadout.tone}`}
+            style={approachStreakStyle}
             aria-label={`${approachRewardReadout.label}: ${approachRewardReadout.value}`}
           >
             <span>{approachRewardReadout.label}</span>
