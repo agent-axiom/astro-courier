@@ -43,7 +43,7 @@ import {
 } from "./game/contracts";
 import { buildRadioMessage } from "./game/radio";
 import { buildLiveStyleReward } from "./game/style";
-import { buildObjectiveDirective, buildObjectiveInterceptReadout } from "./game/objective";
+import { buildExpressFinishReadout, buildObjectiveDirective, buildObjectiveInterceptReadout } from "./game/objective";
 import { buildPreflightBonusObjectives, buildPreflightMasteryTargets } from "./game/mastery";
 import { buildApproachRewardReadout, buildDockingSpeedReadout } from "./game/docking";
 import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./game/cargo";
@@ -231,6 +231,12 @@ export function App() {
   });
   const boostButtonStyle = { "--boost-cooldown": boostPresentation.cooldownProgress } as CSSProperties;
   const objectiveDirective = buildObjectiveDirective(hud);
+  const expressFinishReadout = buildExpressFinishReadout({
+    objectivePhase: hud.objectivePhase,
+    paceTier: hud.paceTier,
+    paceSecondsRemaining: hud.paceSecondsRemaining,
+    cargoDamage: hud.cargoDamage
+  });
   const objectiveInterceptReadout = buildObjectiveInterceptReadout({
     status: hud.status,
     targetDistance: hud.targetDistance,
@@ -492,6 +498,16 @@ export function App() {
             <TimerReset size={16} />
             <span>{objectiveInterceptReadout.label}</span>
             <strong>{objectiveInterceptReadout.value}</strong>
+          </div>
+        ) : null}
+        {expressFinishReadout ? (
+          <div
+            className={`finish-window-chip finish-window-${expressFinishReadout.tone}`}
+            aria-label={`${expressFinishReadout.label}: ${expressFinishReadout.value}`}
+          >
+            <TimerReset size={16} />
+            <span>{expressFinishReadout.label}</span>
+            <strong>{expressFinishReadout.value}</strong>
           </div>
         ) : null}
         {bearingGuidance ? (

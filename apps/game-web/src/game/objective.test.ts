@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildObjectiveDirective, buildObjectiveInterceptReadout } from "./objective";
+import { buildExpressFinishReadout, buildObjectiveDirective, buildObjectiveInterceptReadout } from "./objective";
 
 describe("objective directive HUD copy", () => {
   it("points pickup phase at the pickup pad", () => {
@@ -110,5 +110,72 @@ describe("objective intercept readout", () => {
       value: "ETA 30.0s",
       tone: "slow"
     });
+  });
+});
+
+describe("express finish readout", () => {
+  it("surfaces the clean gold-pace delivery window", () => {
+    expect(
+      buildExpressFinishReadout({
+        objectivePhase: "delivery",
+        paceTier: "gold",
+        paceSecondsRemaining: 8.6,
+        cargoDamage: 0.01
+      })
+    ).toEqual({
+      label: "Finish window",
+      value: "Express +180 / 8.6s",
+      tone: "open"
+    });
+  });
+
+  it("turns urgent during the closing seconds", () => {
+    expect(
+      buildExpressFinishReadout({
+        objectivePhase: "delivery",
+        paceTier: "gold",
+        paceSecondsRemaining: 3.8,
+        cargoDamage: 0
+      })
+    ).toEqual({
+      label: "Finish window",
+      value: "Close now / +180 / 3.8s",
+      tone: "urgent"
+    });
+  });
+
+  it("hides outside clean gold-pace delivery", () => {
+    expect(
+      buildExpressFinishReadout({
+        objectivePhase: "pickup",
+        paceTier: "gold",
+        paceSecondsRemaining: 8.6,
+        cargoDamage: 0
+      })
+    ).toBeUndefined();
+    expect(
+      buildExpressFinishReadout({
+        objectivePhase: "delivery",
+        paceTier: "silver",
+        paceSecondsRemaining: 8.6,
+        cargoDamage: 0
+      })
+    ).toBeUndefined();
+    expect(
+      buildExpressFinishReadout({
+        objectivePhase: "delivery",
+        paceTier: "gold",
+        paceSecondsRemaining: 0,
+        cargoDamage: 0
+      })
+    ).toBeUndefined();
+    expect(
+      buildExpressFinishReadout({
+        objectivePhase: "delivery",
+        paceTier: "gold",
+        paceSecondsRemaining: 8.6,
+        cargoDamage: 0.03
+      })
+    ).toBeUndefined();
   });
 });
