@@ -1,6 +1,9 @@
 import type { RunStatus } from "@astro-courier/shared";
 import type { ContractPaceTier } from "./pace";
 
+export const COMET_RESERVE_MIN_RATIO = 0.75;
+export const COMET_RESERVE_WARNING_RATIO = 0.82;
+
 export type CometRunReadoutInput = {
   status: RunStatus;
   preflightOpen: boolean;
@@ -38,7 +41,7 @@ export function buildCometRunReadout(input: CometRunReadoutInput): CometRunReado
   }
 
   const fuelReserve = input.maxFuel > 0 ? input.fuel / input.maxFuel : 0;
-  if (fuelReserve < 0.75) {
+  if (fuelReserve < COMET_RESERVE_MIN_RATIO) {
     return {
       label: "Comet run",
       value: "Reserve low",
@@ -46,7 +49,7 @@ export function buildCometRunReadout(input: CometRunReadoutInput): CometRunReado
     };
   }
 
-  if (fuelReserve < 0.82) {
+  if (fuelReserve < COMET_RESERVE_WARNING_RATIO) {
     return {
       label: "Comet run",
       value: "Reserve tight",

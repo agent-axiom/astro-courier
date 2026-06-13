@@ -170,6 +170,21 @@ describe("radio feedback copy", () => {
     expect(buildRadioMessage({ ...baseHud, fuel: 10, maxFuel: 100, landingStatus: "approach" })).toContain("Fuel critical");
   });
 
+  it("warns about tight comet reserve before generic delivery guidance", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        paceTier: "gold",
+        fuel: 78,
+        maxFuel: 100,
+        cargoDamage: 0,
+        landingStatus: "approach"
+      })
+    ).toContain("Comet reserve tight");
+  });
+
   it("warns when a style chain is about to expire before generic objective guidance", () => {
     expect(
       buildRadioMessage({
