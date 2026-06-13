@@ -66,6 +66,7 @@ import {
   buildRouteFocusReadout,
   buildTacticalCue
 } from "./game/objective";
+import { buildFlightDirector } from "./game/flightDirector";
 import { buildPreflightBonusObjectives, buildPreflightMasteryTargets } from "./game/mastery";
 import { buildApproachRewardReadout, buildDockingSpeedReadout } from "./game/docking";
 import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./game/cargo";
@@ -465,6 +466,24 @@ export function App() {
     gravitySlingStyleBonus: hud.gravitySlingStyleBonus,
     approachStreakSeconds: hud.approachStreakSeconds
   });
+  const flightDirector = buildFlightDirector({
+    status: hud.status,
+    objectivePhase: hud.objectivePhase,
+    cargoOnboard: hud.cargoOnboard,
+    targetDistance: hud.targetDistance,
+    landingStatus: hud.landingStatus,
+    trajectoryRiskLevel: hud.trajectoryRiskLevel,
+    trajectoryRiskSeconds: hud.trajectoryRiskSeconds,
+    hazardDangerLevel: hud.hazardDangerLevel,
+    quickPickupSecondsRemaining: hud.quickPickupSecondsRemaining,
+    quickPickupBonus: hud.quickPickupBonus,
+    gravitySlingReady: hud.gravitySlingReady,
+    gravitySlingStyleBonus: hud.gravitySlingStyleBonus,
+    cargoDamage: hud.cargoDamage,
+    styleMultiplier: hud.styleMultiplier,
+    styleChainSecondsRemaining: hud.styleChainSecondsRemaining
+  });
+  const flightDirectorStyle = { "--flight-director-progress": flightDirector?.progress ?? 0 } as CSSProperties;
   const routeFocusReadout = buildRouteFocusReadout({
     status: hud.status,
     contractId: hud.contractId,
@@ -903,6 +922,18 @@ export function App() {
 
       <aside className="run-panel" aria-label="Delivery status">
         <div className="radio-message">{radioMessage}</div>
+        {flightDirector ? (
+          <div
+            className={`flight-director flight-director-${flightDirector.tone}`}
+            style={flightDirectorStyle}
+            aria-label={`${flightDirector.label}: ${flightDirector.action}. ${flightDirector.detail}`}
+          >
+            <Activity size={16} />
+            <span>{flightDirector.label}</span>
+            <strong>{flightDirector.action}</strong>
+            <small>{flightDirector.detail}</small>
+          </div>
+        ) : null}
         {runFeed.length > 0 && !preflightOpen ? (
           <div className="action-feed" aria-label="Recent run events">
             {runFeed.map((entry) => (
