@@ -413,6 +413,7 @@ export function App() {
             aria-label={boostPresentation.label}
             title={boostPresentation.label}
             style={boostButtonStyle}
+            data-boost-badge={boostPresentation.badge}
             disabled={!canBoost}
             onClick={() => {
               shellRef.current?.queueCommand({ type: "BOOST" });

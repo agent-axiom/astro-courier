@@ -167,6 +167,21 @@ button {
   z-index: 1;
 }
 
+.boost-button[data-boost-badge]::after {
+  position: absolute;
+  right: 3px;
+  bottom: 2px;
+  z-index: 2;
+  padding: 1px 3px;
+  border-radius: 4px;
+  background: rgba(5, 14, 20, 0.78);
+  color: #eafff3;
+  font-size: 8px;
+  font-weight: 800;
+  line-height: 1;
+  content: attr(data-boost-badge);
+}
+
 .boost-button::before {
   position: absolute;
   inset: 3px;

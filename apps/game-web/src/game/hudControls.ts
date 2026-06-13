@@ -20,6 +20,7 @@ export type BoostControlPresentationInput = {
 
 export type BoostControlPresentation = {
   label: string;
+  badge?: string;
   tone: "ready" | "burst" | "cooldown" | "disabled";
   cooldownProgress: number;
 };
@@ -47,8 +48,10 @@ export function buildBoostControlPresentation(input: BoostControlPresentationInp
   }
 
   if (input.canBoost && (input.launchBurstSecondsRemaining ?? 0) > 0) {
+    const launchBurstBadge = `${(input.launchBurstSecondsRemaining ?? 0).toFixed(1)}s`;
     return {
-      label: "Launch Burst",
+      label: `Launch Burst ${launchBurstBadge}`,
+      badge: launchBurstBadge,
       tone: "burst",
       cooldownProgress: 0
     };

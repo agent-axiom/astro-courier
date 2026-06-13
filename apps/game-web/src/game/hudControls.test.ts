@@ -47,7 +47,8 @@ describe("boost control presentation", () => {
 
   it("promotes ready boosts during the launch burst window", () => {
     expect(buildBoostControlPresentation({ canBoost: true, boostCooldownSeconds: 0, launchBurstSecondsRemaining: 2.4 })).toEqual({
-      label: "Launch Burst",
+      label: "Launch Burst 2.4s",
+      badge: "2.4s",
       tone: "burst",
       cooldownProgress: 0
     });
