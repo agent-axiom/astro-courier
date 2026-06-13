@@ -1,3 +1,4 @@
+import { PERFECT_APPROACH_STREAK_SECONDS, PERFECT_APPROACH_STYLE_BONUS } from "@astro-courier/simulation";
 import type { HudState } from "./GameShell";
 
 export function buildRadioMessage(hud: HudState): string {
@@ -57,8 +58,8 @@ export function buildRadioMessage(hud: HudState): string {
     return "Align ship attitude before contact. Landing pads are picky.";
   }
 
-  if (hud.approachStreakSeconds >= 1) {
-    return "Keep that steady approach. Courier telemetry likes this line.";
+  if (hud.approachStreakSeconds >= PERFECT_APPROACH_STREAK_SECONDS) {
+    return `Perfect setup banked. Soft dock now for +${PERFECT_APPROACH_STYLE_BONUS} style.`;
   }
 
   if (hud.landingStatus === "ready") {
