@@ -98,12 +98,12 @@
     {
       "id": "asteroid-sprint",
       "title": "Asteroid Sprint",
-      "briefing": "Thread the asteroid field, load fast, and bring the cargo home before the sprint window closes.",
+      "briefing": "Thread the asteroid field with volatile comet ice, load fast, and bring the cargo home before the sprint window closes.",
       "riskLabel": "Asteroid Field",
       "rewardLabel": "Skim style bonuses",
       "pickupId": "north-pad",
       "destinationId": "dock-a",
-      "cargoId": "bottled-starlight",
+      "cargoId": "volatile-comet-ice",
       "medalTimes": {
         "bronze": 70,
         "silver": 42,
@@ -117,6 +117,12 @@
       "name": "Bottled Starlight",
       "kind": "fragile",
       "fragility": 0.8
+    },
+    {
+      "id": "volatile-comet-ice",
+      "name": "Volatile Comet Ice",
+      "kind": "unstable",
+      "fragility": 1
     }
   ]
 }

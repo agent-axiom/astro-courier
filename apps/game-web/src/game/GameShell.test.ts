@@ -156,12 +156,12 @@ describe("GameShell lifecycle", () => {
       {
         id: "asteroid-sprint",
         title: "Asteroid Sprint",
-        briefing: "Thread the asteroid field, load fast, and bring the cargo home before the sprint window closes.",
+        briefing: "Thread the asteroid field with volatile comet ice, load fast, and bring the cargo home before the sprint window closes.",
         riskLabel: "Asteroid Field",
         rewardLabel: "Skim style bonuses",
         pickupLabel: "Luma North Pad",
         destinationLabel: "Tea Station Dock A",
-        cargoName: "Bottled Starlight",
+        cargoName: "Volatile Comet Ice",
         medalTimes: { bronze: 70, silver: 42, gold: 24 }
       }
     ]);
@@ -188,12 +188,13 @@ describe("GameShell lifecycle", () => {
     expect(onHud.mock.calls.at(-1)?.[0]).toMatchObject({
       contractId: "asteroid-sprint",
       contractTitle: "Asteroid Sprint",
-      contractBriefing: "Thread the asteroid field, load fast, and bring the cargo home before the sprint window closes."
+      contractBriefing: "Thread the asteroid field with volatile comet ice, load fast, and bring the cargo home before the sprint window closes.",
+      cargoName: "Volatile Comet Ice"
     });
     expect(onHud.mock.calls.at(-1)?.[0].contractOptions).toContainEqual(
       expect.objectContaining({
         id: "asteroid-sprint",
-        briefing: "Thread the asteroid field, load fast, and bring the cargo home before the sprint window closes."
+        briefing: "Thread the asteroid field with volatile comet ice, load fast, and bring the cargo home before the sprint window closes."
       })
     );
   });

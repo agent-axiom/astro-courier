@@ -26,6 +26,7 @@ import { buildLiveStyleReward } from "./game/style";
 import { buildObjectiveDirective } from "./game/objective";
 import { buildPreflightMasteryTargets } from "./game/mastery";
 import { buildDockingSpeedReadout } from "./game/docking";
+import { buildCargoManifest } from "./game/cargo";
 
 type GameStore = {
   hud: HudState;
@@ -164,6 +165,7 @@ export function App() {
     lastMilestone: hud.lastMilestone
   });
   const preflightMasteryTargets = buildPreflightMasteryTargets({ goldSeconds: hud.paceSecondsRemaining });
+  const cargoManifest = buildCargoManifest({ cargoName: hud.cargoName, cargoOnboard: hud.cargoOnboard });
 
   const launchContract = () => {
     setPreflightOpen(false);
@@ -344,6 +346,11 @@ export function App() {
           <div className="preflight-kicker">Starter Contract</div>
           <h2>{hud.contractTitle}</h2>
           <p>{hud.contractBriefing}</p>
+          <div className="cargo-manifest" aria-label="Cargo manifest">
+            <PackageCheck size={18} />
+            <span>{cargoManifest.label}</span>
+            <strong>{cargoManifest.value}</strong>
+          </div>
           <div className="contract-traits" aria-label="Contract risk and reward">
             <span>
               <Gauge size={17} />

@@ -16,6 +16,12 @@ describe("content schemas", () => {
     expect(parsed.contracts.find((contract) => contract.id === "asteroid-sprint")?.briefing ?? "").toContain("asteroid");
     expect(parsed.contracts.find((contract) => contract.id === "asteroid-sprint")?.riskLabel).toBe("Asteroid Field");
     expect(parsed.contracts.find((contract) => contract.id === "asteroid-sprint")?.rewardLabel).toBe("Skim style bonuses");
+    expect(parsed.contracts.find((contract) => contract.id === "asteroid-sprint")?.cargoId).toBe("volatile-comet-ice");
+    expect(parsed.cargo.find((cargo) => cargo.id === "volatile-comet-ice")).toMatchObject({
+      name: "Volatile Comet Ice",
+      kind: "unstable",
+      fragility: 1
+    });
     expect(parsed.contracts.find((contract) => contract.id === "return-leg")?.shipStart?.position).toEqual([360, -140]);
     expect(parsed.planets[0]?.landingPads[0]?.allowedApproachSpeed).toBeGreaterThan(0);
   });
