@@ -218,6 +218,17 @@ describe("route board recommendation badge", () => {
     ).toBe("Clear");
   });
 
+  it("labels chain relay clear targets as relay badges", () => {
+    expect(
+      buildRouteBoardRecommendationBadge({
+        label: "Next clear",
+        value: "Clear Chain Relay",
+        tone: "clear",
+        contractId: "chain-relay"
+      })
+    ).toBe("Relay");
+  });
+
   it("labels comet targets as comet badges", () => {
     expect(
       buildRouteBoardRecommendationBadge({
