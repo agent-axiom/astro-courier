@@ -269,7 +269,18 @@ export function App() {
         screenFeedbackTimerRef.current = undefined;
       }, feedback.durationMs);
     }
-  }, [hud.fuel, hud.hazardDangerLevel, hud.lastMilestone, hud.maxFuel, hud.score, hud.status, hud.trajectoryRiskLevel, bestRun?.score]);
+  }, [
+    hud.fuel,
+    hud.hazardDangerLevel,
+    hud.lastMilestone,
+    hud.maxFuel,
+    hud.score,
+    hud.status,
+    hud.styleChainSecondsRemaining,
+    hud.styleMultiplier,
+    hud.trajectoryRiskLevel,
+    bestRun?.score
+  ]);
 
   useEffect(() => {
     const currentSnapshot = toRunFeedSnapshot(hud, bestRun);
@@ -1296,6 +1307,8 @@ function toHudAudioSnapshot(hud: HudState, bestRun: BestRun | undefined): HudAud
     lastMilestone: hud.lastMilestone,
     score: hud.score,
     bestRunScore: bestRun?.score,
+    styleMultiplier: hud.styleMultiplier,
+    styleChainSecondsRemaining: hud.styleChainSecondsRemaining,
     fuel: hud.fuel,
     maxFuel: hud.maxFuel,
     hazardDangerLevel: hud.hazardDangerLevel,

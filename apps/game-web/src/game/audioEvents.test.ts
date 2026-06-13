@@ -67,4 +67,19 @@ describe("HUD audio events", () => {
       )
     ).toEqual([]);
   });
+
+  it("warns once when an active style chain reaches the critical window", () => {
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, styleMultiplier: 1.35, styleChainSecondsRemaining: 1.35 },
+        { ...baseSnapshot, styleMultiplier: 1.35, styleChainSecondsRemaining: 0.85 }
+      )
+    ).toEqual(["chain-critical"]);
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, styleMultiplier: 1.35, styleChainSecondsRemaining: 0.85 },
+        { ...baseSnapshot, styleMultiplier: 1.35, styleChainSecondsRemaining: 0.45 }
+      )
+    ).toEqual([]);
+  });
 });

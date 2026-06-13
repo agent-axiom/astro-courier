@@ -52,6 +52,14 @@ describe("screen feedback", () => {
     });
   });
 
+  it("maps critical style chains to light warning feedback", () => {
+    expect(buildScreenFeedback(["chain-critical"])).toEqual({
+      tone: "warning",
+      intensity: "light",
+      durationMs: 320
+    });
+  });
+
   it("maps launch bursts to medium style feedback", () => {
     expect(buildScreenFeedback(["launch-burst"])).toEqual({
       tone: "style",

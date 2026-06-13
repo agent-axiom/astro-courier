@@ -54,6 +54,17 @@ describe("game audio controller", () => {
     expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.12, 3);
   });
 
+  it("plays a short alert tone for critical style chains", () => {
+    const context = new FakeAudioContext();
+    const controller = createGameAudioController({ createContext: () => context });
+
+    controller.play(["chain-critical"]);
+
+    expect(context.oscillators).toHaveLength(1);
+    expect(context.oscillators[0]?.frequencyValue).toBe(640);
+    expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.09, 3);
+  });
+
   it("does not create an audio context for empty event batches", () => {
     const createContext = vi.fn(() => new FakeAudioContext());
     const controller = createGameAudioController({ createContext });

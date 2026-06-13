@@ -6,6 +6,7 @@ export type GameAudioEvent =
   | "style-hit"
   | "launch-burst"
   | "pb-lead"
+  | "chain-critical"
   | "assist-burn"
   | "boost-burn"
   | "fuel-critical"
@@ -17,6 +18,8 @@ export type HudAudioSnapshot = {
   lastMilestone?: string;
   score?: number;
   bestRunScore?: number;
+  styleMultiplier?: number;
+  styleChainSecondsRemaining?: number;
   fuel: number;
   maxFuel: number;
   hazardDangerLevel?: "near" | "inside";
@@ -24,6 +27,7 @@ export type HudAudioSnapshot = {
 };
 
 const criticalFuelRatio = 0.15;
+const criticalStyleChainSeconds = 1;
 const styleMilestones = new Set([
   "Clean Hazard Skim",
   "Needle Thread",
@@ -70,6 +74,10 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
     events.push("pb-lead");
   }
 
+  if (hasStyleChainReachedCriticalWindow(previous, current)) {
+    events.push("chain-critical");
+  }
+
   if (previous?.hazardDangerLevel !== "inside" && current.hazardDangerLevel === "inside") {
     events.push("hazard-contact");
   }
@@ -93,4 +101,15 @@ function hasCrossedBestRunScore(previous: HudAudioSnapshot | undefined, current:
     return false;
   }
   return (previous.score ?? 0) <= current.bestRunScore && (current.score ?? 0) > current.bestRunScore;
+}
+
+function hasStyleChainReachedCriticalWindow(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {
+  const currentChainActive = (current.styleMultiplier ?? 1) > 1 && (current.styleChainSecondsRemaining ?? 0) > 0;
+  if (!previous || !currentChainActive) {
+    return false;
+  }
+  return (
+    (previous.styleChainSecondsRemaining ?? 0) > criticalStyleChainSeconds &&
+    (current.styleChainSecondsRemaining ?? 0) <= criticalStyleChainSeconds
+  );
 }
