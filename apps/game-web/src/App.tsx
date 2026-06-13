@@ -63,7 +63,7 @@ import { buildHazardPressureReadout } from "./game/hazard";
 import { buildResultBoardAction, buildResultBoardPrompt, buildResultCoach } from "./game/resultCoach";
 import { getOverlayVisibility } from "./game/overlays";
 import { buildCometRunReadout } from "./game/comet";
-import { buildResultRetryAction, buildRetryTarget } from "./game/retryTarget";
+import { buildResultRetryAction, buildRetryActionBriefing, buildRetryTarget } from "./game/retryTarget";
 import { buildRunIntensity } from "./game/intensity";
 import { buildCrashReasonLabel } from "./game/crash";
 import { buildReplayCaptureReadout } from "./game/replayReadout";
@@ -536,6 +536,7 @@ export function App() {
     bestRun
   });
   const resultRetryAction = buildResultRetryAction(retryTarget);
+  const retryActionBriefing = buildRetryActionBriefing(resultRetryAction, retryTarget);
   const hazardLoadTrait = buildContractHazardTrait({ hazardSeverityMultiplier: hud.hazardSeverityMultiplier });
   const dangerPayTrait = buildContractDangerPayTrait({ hazardSeverityMultiplier: hud.hazardSeverityMultiplier });
   const dangerPayAmount = dangerPayTrait?.replace("Danger pay ", "");
@@ -1265,6 +1266,14 @@ export function App() {
             <Target size={18} />
             <span>{retryTarget.label}</span>
             <strong>{retryTarget.value}</strong>
+          </div>
+          <div
+            className={`retry-action-briefing retry-action-${retryActionBriefing.tone}`}
+            aria-label={`${retryActionBriefing.label}: ${retryActionBriefing.value}`}
+          >
+            <RotateCcw size={18} />
+            <span>{retryActionBriefing.label}</span>
+            <strong>{retryActionBriefing.value}</strong>
           </div>
           {resultBoardPrompt ? (
             <div className={`result-board-target result-board-target-${resultBoardPrompt.tone}`} aria-label={`${resultBoardPrompt.label}: ${resultBoardPrompt.value}`}>

@@ -2570,6 +2570,57 @@ button {
   color: #bff7d8;
 }
 
+.retry-action-briefing {
+  display: grid;
+  grid-template-columns: 18px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 850;
+  text-align: left;
+}
+
+.retry-action-briefing span,
+.retry-action-briefing strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.retry-action-briefing span {
+  color: rgba(255, 255, 255, 0.72);
+  text-transform: uppercase;
+}
+
+.retry-action-briefing strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.retry-action-danger {
+  background: rgba(255, 111, 145, 0.13);
+  color: #ffadc1;
+}
+
+.retry-action-chase {
+  background: rgba(124, 225, 255, 0.13);
+  color: #c6f6ff;
+}
+
+.retry-action-opportunity {
+  background: rgba(255, 209, 102, 0.14);
+  color: #ffe19a;
+}
+
+.retry-action-success {
+  background: rgba(142, 230, 184, 0.14);
+  color: #bff7d8;
+}
+
 .result-board-target {
   display: grid;
   grid-template-columns: 18px auto 1fr;

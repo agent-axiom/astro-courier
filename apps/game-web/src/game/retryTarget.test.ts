@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildResultRetryAction, buildRetryTarget } from "./retryTarget";
+import { buildResultRetryAction, buildRetryActionBriefing, buildRetryTarget } from "./retryTarget";
 
 describe("result retry target", () => {
   it("asks crashed runs to finish the delivery first", () => {
@@ -398,6 +398,57 @@ describe("result retry action copy", () => {
     expect(buildResultRetryAction({ label: "Retry target", value: "Chase Express Finish", tone: "opportunity" })).toEqual({
       label: "Run Again",
       mode: "restart-run"
+    });
+  });
+});
+
+describe("result retry action briefing", () => {
+  it("turns personal best defense into a high-confidence rematch hook", () => {
+    expect(
+      buildRetryActionBriefing(
+        { label: "Defend PB", mode: "restart-run" },
+        { label: "Retry target", value: "Defend 3520 / 24.1s", tone: "success" }
+      )
+    ).toEqual({
+      label: "Next run",
+      value: "Protect the new line",
+      tone: "success"
+    });
+  });
+
+  it("turns chase and repeat actions into focused rematch hooks", () => {
+    expect(
+      buildRetryActionBriefing(
+        { label: "Chase PB", mode: "restart-run" },
+        { label: "Retry target", value: "Find +330 score", tone: "chase" }
+      )
+    ).toEqual({
+      label: "Next run",
+      value: "Route has score left",
+      tone: "chase"
+    });
+    expect(
+      buildRetryActionBriefing(
+        { label: "Repeat Line", mode: "restart-run" },
+        { label: "Retry target", value: "Repeat Chain Finish", tone: "opportunity" }
+      )
+    ).toEqual({
+      label: "Next run",
+      value: "Lock the style route",
+      tone: "opportunity"
+    });
+  });
+
+  it("keeps failed retries focused on the repair target", () => {
+    expect(
+      buildRetryActionBriefing(
+        { label: "Retry Route", mode: "restart-run" },
+        { label: "Retry target", value: "Clear asteroid field", tone: "danger" }
+      )
+    ).toEqual({
+      label: "Next run",
+      value: "Fix the failure point",
+      tone: "danger"
     });
   });
 });

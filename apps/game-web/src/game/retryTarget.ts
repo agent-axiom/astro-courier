@@ -26,6 +26,12 @@ export type ResultRetryAction = {
   mode: "restart-run";
 };
 
+export type RetryActionBriefing = {
+  label: "Next run";
+  value: string;
+  tone: RetryTarget["tone"];
+};
+
 export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
   if (input.status === "crashed") {
     if (input.crashReason === "Hard Landing" && input.targetAllowedSpeed !== undefined) {
@@ -153,4 +159,40 @@ export function buildResultRetryAction(target: RetryTarget): ResultRetryAction {
     return { label: "Repeat Line", mode: "restart-run" };
   }
   return { label: "Run Again", mode: "restart-run" };
+}
+
+export function buildRetryActionBriefing(action: ResultRetryAction, target: RetryTarget): RetryActionBriefing {
+  if (action.label === "Defend PB") {
+    return {
+      label: "Next run",
+      value: "Protect the new line",
+      tone: "success"
+    };
+  }
+  if (action.label === "Chase PB") {
+    return {
+      label: "Next run",
+      value: "Route has score left",
+      tone: "chase"
+    };
+  }
+  if (action.label === "Repeat Line") {
+    return {
+      label: "Next run",
+      value: "Lock the style route",
+      tone: "opportunity"
+    };
+  }
+  if (action.label === "Retry Route") {
+    return {
+      label: "Next run",
+      value: "Fix the failure point",
+      tone: "danger"
+    };
+  }
+  return {
+    label: "Next run",
+    value: target.value,
+    tone: target.tone
+  };
 }
