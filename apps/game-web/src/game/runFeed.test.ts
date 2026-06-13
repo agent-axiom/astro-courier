@@ -174,6 +174,27 @@ describe("run action feed", () => {
     ).toEqual([]);
   });
 
+  it("announces when the live run enters personal-best chase range", () => {
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, score: 2980, bestRunScore: 3290 },
+        { ...baseSnapshot, score: 3105, bestRunScore: 3290 }
+      )
+    ).toEqual([
+      {
+        label: "PB pressure",
+        value: "185 score back",
+        tone: "style"
+      }
+    ]);
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, score: 3105, bestRunScore: 3290 },
+        { ...baseSnapshot, score: 3180, bestRunScore: 3290 }
+      )
+    ).toEqual([]);
+  });
+
   it("prepends fresh updates and caps the feed", () => {
     const result = appendRunFeedUpdates(
       [

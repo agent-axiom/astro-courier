@@ -37,6 +37,7 @@ export type AppendRunFeedResult = {
 
 const criticalFuelRatio = 0.15;
 const criticalStyleChainSeconds = 1;
+const bestRunPressureGap = 200;
 const feedMilestones = new Set([
   "Clean Hazard Skim",
   "Needle Thread",
@@ -130,6 +131,14 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
     });
   }
 
+  if (hasEnteredBestRunPressure(previous, current)) {
+    updates.push({
+      label: "PB pressure",
+      value: `${Math.round((current.bestRunScore ?? 0) - (current.score ?? 0))} score back`,
+      tone: "style"
+    });
+  }
+
   if (previous.trajectoryRiskLevel !== current.trajectoryRiskLevel && current.trajectoryRiskLevel === "inside") {
     updates.push({
       label: "Collision forecast",
@@ -197,6 +206,16 @@ function hasCrossedBestRunScore(previous: RunFeedSnapshot, current: RunFeedSnaps
     return false;
   }
   return (previous.score ?? 0) <= current.bestRunScore && (current.score ?? 0) > current.bestRunScore;
+}
+
+function hasEnteredBestRunPressure(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
+  if (current.bestRunScore === undefined || previous.bestRunScore !== current.bestRunScore) {
+    return false;
+  }
+
+  const previousGap = current.bestRunScore - (previous.score ?? 0);
+  const currentGap = current.bestRunScore - (current.score ?? 0);
+  return previousGap > bestRunPressureGap && currentGap > 0 && currentGap <= bestRunPressureGap;
 }
 
 function hasStyleChainReachedCriticalWindow(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
