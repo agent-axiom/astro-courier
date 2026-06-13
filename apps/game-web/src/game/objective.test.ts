@@ -230,6 +230,30 @@ describe("tactical cue", () => {
     });
   });
 
+  it("surfaces damaged cargo recovery while a salvage delivery is still possible", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        cargoDamage: 0.18
+      })
+    ).toEqual({
+      label: "Tactical cue",
+      value: "Damage control / +140",
+      tone: "opportunity"
+    });
+  });
+
+  it("does not promise damage control after the cargo is too compromised", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        cargoDamage: 0.52
+      })
+    ).toBeUndefined();
+  });
+
   it("hides outside active flight", () => {
     expect(
       buildTacticalCue({

@@ -1,4 +1,4 @@
-import { EXPRESS_FINISH_STYLE_BONUS } from "@astro-courier/simulation";
+import { DAMAGE_CONTROL_STYLE_BONUS, EXPRESS_FINISH_STYLE_BONUS } from "@astro-courier/simulation";
 import type { LandingGuidanceStatus, ObjectivePhase, RunStatus } from "@astro-courier/shared";
 import type { ContractPaceTier } from "./pace";
 
@@ -214,6 +214,14 @@ export function buildTacticalCue(input: TacticalCueInput): TacticalCue | undefin
     };
   }
 
+  if (isRecoverableDamagedDelivery(input)) {
+    return {
+      label: "Tactical cue",
+      value: `Damage control / +${DAMAGE_CONTROL_STYLE_BONUS}`,
+      tone: "opportunity"
+    };
+  }
+
   const quickPickupSecondsRemaining = input.quickPickupSecondsRemaining ?? 0;
   const quickPickupBonus = input.quickPickupBonus ?? 0;
   if (input.objectivePhase === "pickup" && quickPickupSecondsRemaining > 0 && quickPickupBonus > 0) {
@@ -234,6 +242,11 @@ function isCleanGoldDelivery(input: TacticalCueInput): boolean {
     (input.paceSecondsRemaining ?? 0) > 0 &&
     (input.cargoDamage ?? 0) <= 0.02
   );
+}
+
+function isRecoverableDamagedDelivery(input: TacticalCueInput): boolean {
+  const cargoDamage = input.cargoDamage ?? 0;
+  return input.objectivePhase === "delivery" && cargoDamage > 0.02 && cargoDamage <= 0.35;
 }
 
 function formatSeconds(seconds?: number): string {
