@@ -328,6 +328,37 @@ button {
   color: #ffe19a;
 }
 
+.dock-speed-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 34px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  background: rgba(142, 230, 184, 0.14);
+  color: #bff7d8;
+  font-size: 0.84rem;
+  font-weight: 850;
+}
+
+.dock-speed-chip span {
+  color: rgba(234, 255, 243, 0.76);
+}
+
+.dock-speed-chip strong {
+  color: #ffffff;
+}
+
+.dock-speed-over-limit {
+  background: rgba(255, 111, 145, 0.16);
+  color: #ffadc1;
+}
+
+.dock-speed-over-limit span {
+  color: rgba(255, 220, 229, 0.78);
+}
+
 .hazard-chip {
   display: flex;
   align-items: center;

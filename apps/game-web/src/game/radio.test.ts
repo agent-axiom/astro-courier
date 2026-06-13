@@ -47,6 +47,7 @@ const baseHud: HudState = {
   },
   landingStatus: "approach",
   targetDistance: 220,
+  targetAllowedSpeed: 42,
   paceTier: "gold",
   paceSecondsRemaining: 35,
   quickPickupSecondsRemaining: 12,

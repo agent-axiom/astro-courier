@@ -25,6 +25,7 @@ import { buildRadioMessage } from "./game/radio";
 import { buildLiveStyleReward } from "./game/style";
 import { buildObjectiveDirective } from "./game/objective";
 import { buildPreflightMasteryTargets } from "./game/mastery";
+import { buildDockingSpeedReadout } from "./game/docking";
 
 type GameStore = {
   hud: HudState;
@@ -50,6 +51,7 @@ const initialHud: HudState = {
   cargoDamage: 0,
   cargoOnboard: false,
   speed: 0,
+  targetAllowedSpeed: 42,
   medal: "none",
   grade: "F",
   scoreBreakdown: {
@@ -150,6 +152,7 @@ export function App() {
   const radioMessage = buildRadioMessage(hud);
   const targetDistanceLabel = hud.targetDistance === undefined ? "-" : `${Math.round(hud.targetDistance)}m`;
   const bearingGuidance = hud.targetRelativeBearing === undefined ? undefined : formatBearingGuidance(hud.targetRelativeBearing);
+  const dockingSpeedReadout = buildDockingSpeedReadout({ speed: hud.speed, allowedSpeed: hud.targetAllowedSpeed });
   const primaryActionLabel = preflightOpen ? "Launch" : paused ? "Resume" : "Pause";
   const canBoost = canUseImpulseControl({ action: "boost", fuel: hud.fuel, paused, preflightOpen, status: hud.status });
   const canBrake = canUseImpulseControl({ action: "brake", fuel: hud.fuel, paused, preflightOpen, status: hud.status });
@@ -281,6 +284,12 @@ export function App() {
           <div className={`bearing-chip bearing-${bearingGuidance.tone}`}>
             <span>{bearingGuidance.label}</span>
             <strong>{bearingGuidance.value}</strong>
+          </div>
+        ) : null}
+        {dockingSpeedReadout ? (
+          <div className={`dock-speed-chip dock-speed-${dockingSpeedReadout.tone}`}>
+            <span>{dockingSpeedReadout.label}</span>
+            <strong>{dockingSpeedReadout.value}</strong>
           </div>
         ) : null}
         <div className={`pace-chip pace-${hud.paceTier}`}>
