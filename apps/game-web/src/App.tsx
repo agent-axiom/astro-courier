@@ -143,6 +143,18 @@ export function App() {
           <button
             type="button"
             className="icon-button"
+            aria-label="Boost"
+            title="Boost"
+            disabled={preflightOpen || paused || runFinished || hud.fuel <= 2}
+            onClick={() => {
+              shellRef.current?.queueCommand({ type: "BOOST" });
+            }}
+          >
+            <Zap size={20} />
+          </button>
+          <button
+            type="button"
+            className="icon-button"
             aria-label={primaryActionLabel}
             title={primaryActionLabel}
             onClick={() => {

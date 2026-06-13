@@ -130,6 +130,39 @@ describe("GameShell lifecycle", () => {
 
     expect(onHud.mock.calls.at(-1)?.[0].lastMilestone).toBe("Boost Burn");
   });
+
+  it("executes queued commands once on the next simulation frame", async () => {
+    const { renderer, input } = createShellDoubles();
+    const onHud = vi.fn();
+    let frame: FrameRequestCallback = () => 0;
+    vi.stubGlobal(
+      "requestAnimationFrame",
+      vi.fn((callback: FrameRequestCallback) => {
+        frame = callback;
+        return 7;
+      })
+    );
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    vi.spyOn(performance, "now").mockReturnValue(1000);
+
+    const shell = new GameShell({
+      mount: {} as HTMLElement,
+      onHud,
+      renderer,
+      input
+    });
+
+    await shell.start();
+    shell.queueCommand({ type: "BOOST" });
+    frame(1167);
+    const fuelAfterBoost = onHud.mock.calls.at(-1)?.[0].fuel;
+    frame(1267);
+    const fuelAfterNextFrame = onHud.mock.calls.at(-1)?.[0].fuel;
+
+    expect(onHud.mock.calls.at(-2)?.[0].lastMilestone).toBe("Boost Burn");
+    expect(fuelAfterBoost).toBeLessThan(100);
+    expect(fuelAfterNextFrame).toBe(fuelAfterBoost);
+  });
 });
 
 function createShellDoubles(options?: { mount?: AstroPixiRenderer["mount"]; commands?: InputSource["commands"] }) {

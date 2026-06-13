@@ -63,6 +63,7 @@ export class GameShell {
   private paused = false;
   private retainedMilestone?: string;
   private retainedMilestoneTimer = 0;
+  private readonly queuedCommands: PlayerCommand[] = [];
   private destroyed = false;
 
   constructor(options: GameShellOptions) {
@@ -94,6 +95,7 @@ export class GameShell {
     this.hudTimer = 0;
     this.retainedMilestone = undefined;
     this.retainedMilestoneTimer = 0;
+    this.queuedCommands.length = 0;
     this.lastTime = performance.now();
     this.world = this.createFreshWorld();
     this.publishHud();
@@ -105,6 +107,13 @@ export class GameShell {
       this.world.status = paused ? "paused" : "flying";
     }
     this.publishHud();
+  }
+
+  queueCommand(command: PlayerCommand): void {
+    if (this.destroyed) {
+      return;
+    }
+    this.queuedCommands.push(command);
   }
 
   destroy(): void {
@@ -127,7 +136,7 @@ export class GameShell {
       let sawMilestone = false;
 
       while (this.accumulator >= fixedDt && subSteps < maxSubSteps) {
-        stepWorld(this.world, fixedDt, this.input.commands(this.world.ship.rotation));
+        stepWorld(this.world, fixedDt, [...this.input.commands(this.world.ship.rotation), ...this.consumeQueuedCommands()]);
         if (this.world.lastMilestone) {
           this.retainedMilestone = this.world.lastMilestone;
           this.retainedMilestoneTimer = milestoneHoldSeconds;
@@ -160,6 +169,13 @@ export class GameShell {
 
     this.rafId = requestAnimationFrame(this.frame);
   };
+
+  private consumeQueuedCommands(): PlayerCommand[] {
+    if (this.queuedCommands.length === 0) {
+      return [];
+    }
+    return this.queuedCommands.splice(0);
+  }
 
   private createFreshWorld(): SimulationWorld {
     const system = validateSystemContent(starterRoute);
