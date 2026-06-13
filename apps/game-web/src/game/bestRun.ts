@@ -58,7 +58,7 @@ export type RouteBoardProgress = {
 };
 
 export type RouteBoardTarget = {
-  label: "Next target";
+  label: "Next clear" | "Comet chase" | "Board status";
   value: string;
   tone: "clear" | "comet" | "complete";
   contractId?: string;
@@ -172,7 +172,7 @@ export function buildRouteBoardTarget(
   const unclearedContract = contracts.find((contract) => !bestRunsByContract[contract.id]);
   if (unclearedContract) {
     return {
-      label: "Next target",
+      label: "Next clear",
       value: `Clear ${unclearedContract.title}`,
       tone: "clear",
       contractId: unclearedContract.id
@@ -184,14 +184,14 @@ export function buildRouteBoardTarget(
     .sort((left, right) => medalRank(bestRunsByContract[right.id]?.medal) - medalRank(bestRunsByContract[left.id]?.medal))[0];
   if (unmasteredContract) {
     return {
-      label: "Next target",
+      label: "Comet chase",
       value: `Comet ${unmasteredContract.title}`,
       tone: "comet",
       contractId: unmasteredContract.id
     };
   }
 
-  return { label: "Next target", value: "Board mastered", tone: "complete" };
+  return { label: "Board status", value: "Board mastered", tone: "complete" };
 }
 
 export function buildRouteBoardSelectionAction(

@@ -144,7 +144,7 @@ describe("route board next target copy", () => {
         "asteroid-sprint": undefined,
         "gravity-slingshot": undefined
       })
-    ).toEqual({ label: "Next target", value: "Clear Return Leg", tone: "clear", contractId: "return-leg" });
+    ).toEqual({ label: "Next clear", value: "Clear Return Leg", tone: "clear", contractId: "return-leg" });
   });
 
   it("switches to comet chase once every route is cleared", () => {
@@ -155,7 +155,7 @@ describe("route board next target copy", () => {
         "asteroid-sprint": { score: 2400, elapsedSeconds: 35.5, medal: "gold" },
         "gravity-slingshot": { score: 2100, elapsedSeconds: 48.6, medal: "bronze" }
       })
-    ).toEqual({ label: "Next target", value: "Comet Asteroid Sprint", tone: "comet", contractId: "asteroid-sprint" });
+    ).toEqual({ label: "Comet chase", value: "Comet Asteroid Sprint", tone: "comet", contractId: "asteroid-sprint" });
   });
 
   it("keeps board order as the tie-breaker among equal comet chases", () => {
@@ -166,7 +166,7 @@ describe("route board next target copy", () => {
         "asteroid-sprint": { score: 2400, elapsedSeconds: 35.5, medal: "silver" },
         "gravity-slingshot": { score: 2100, elapsedSeconds: 48.6, medal: "bronze" }
       })
-    ).toEqual({ label: "Next target", value: "Comet First Light", tone: "comet", contractId: "first-light-delivery" });
+    ).toEqual({ label: "Comet chase", value: "Comet First Light", tone: "comet", contractId: "first-light-delivery" });
   });
 
   it("celebrates a fully mastered route board", () => {
@@ -177,7 +177,7 @@ describe("route board next target copy", () => {
         "asteroid-sprint": { score: 3500, elapsedSeconds: 21.8, medal: "comet" },
         "gravity-slingshot": { score: 3300, elapsedSeconds: 20.9, medal: "comet" }
       })
-    ).toEqual({ label: "Next target", value: "Board mastered", tone: "complete" });
+    ).toEqual({ label: "Board status", value: "Board mastered", tone: "complete" });
   });
 });
 
@@ -185,7 +185,7 @@ describe("route board target selection action", () => {
   it("selects the recommended target when it differs from the current route", () => {
     expect(
       buildRouteBoardSelectionAction(
-        { label: "Next target", value: "Clear Return Leg", tone: "clear", contractId: "return-leg" },
+        { label: "Next clear", value: "Clear Return Leg", tone: "clear", contractId: "return-leg" },
         "first-light-delivery"
       )
     ).toEqual({ label: "Select target", contractId: "return-leg" });
@@ -194,14 +194,14 @@ describe("route board target selection action", () => {
   it("stays passive when the current route is already the target", () => {
     expect(
       buildRouteBoardSelectionAction(
-        { label: "Next target", value: "Comet Asteroid Sprint", tone: "comet", contractId: "asteroid-sprint" },
+        { label: "Comet chase", value: "Comet Asteroid Sprint", tone: "comet", contractId: "asteroid-sprint" },
         "asteroid-sprint"
       )
     ).toBeUndefined();
   });
 
   it("stays passive after the full route board is mastered", () => {
-    expect(buildRouteBoardSelectionAction({ label: "Next target", value: "Board mastered", tone: "complete" }, "gravity-slingshot")).toBeUndefined();
+    expect(buildRouteBoardSelectionAction({ label: "Board status", value: "Board mastered", tone: "complete" }, "gravity-slingshot")).toBeUndefined();
   });
 });
 
