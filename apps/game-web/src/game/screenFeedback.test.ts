@@ -14,6 +14,8 @@ describe("screen feedback", () => {
 
   it("maps delivery and style events to positive feedback", () => {
     expect(buildScreenFeedback(["delivery-complete"])).toEqual({
+      label: "Delivery sealed",
+      value: "Manifest closed",
       tone: "success",
       intensity: "heavy",
       durationMs: 620
@@ -31,6 +33,8 @@ describe("screen feedback", () => {
       durationMs: 360
     });
     expect(buildScreenFeedback(["comet-armed"])).toEqual({
+      label: "Comet dock",
+      value: "Perfect line armed",
       tone: "style",
       intensity: "medium",
       durationMs: 460
@@ -120,6 +124,8 @@ describe("screen feedback", () => {
       durationMs: 420
     });
     expect(buildScreenFeedback(["ghost-pass"])).toEqual({
+      label: "Ghost passed",
+      value: "Keep it clean",
       tone: "success",
       intensity: "heavy",
       durationMs: 520
@@ -145,6 +151,8 @@ describe("screen feedback", () => {
       durationMs: 420
     });
     expect(buildScreenFeedback(["ghost-pressure", "ghost-pass"])).toEqual({
+      label: "Ghost passed",
+      value: "Keep it clean",
       tone: "success",
       intensity: "heavy",
       durationMs: 520

@@ -13,13 +13,13 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[]): ScreenFe
     return { label: "Insurance event", value: "Recover line", tone: "danger", intensity: "heavy", durationMs: 520 };
   }
   if (events.includes("delivery-complete")) {
-    return { tone: "success", intensity: "heavy", durationMs: 620 };
+    return { label: "Delivery sealed", value: "Manifest closed", tone: "success", intensity: "heavy", durationMs: 620 };
   }
   if (events.includes("cargo-loaded")) {
     return { label: "Cargo secured", value: "Outbound line", tone: "success", intensity: "medium", durationMs: 360 };
   }
   if (events.includes("ghost-pass")) {
-    return { tone: "success", intensity: "heavy", durationMs: 520 };
+    return { label: "Ghost passed", value: "Keep it clean", tone: "success", intensity: "heavy", durationMs: 520 };
   }
   if (events.includes("pb-lead")) {
     return { label: "PB lead", value: "Hold pace", tone: "success", intensity: "medium", durationMs: 420 };
@@ -31,7 +31,7 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[]): ScreenFe
     return { tone: "style", intensity: "medium", durationMs: 360 };
   }
   if (events.includes("comet-armed")) {
-    return { tone: "style", intensity: "medium", durationMs: 460 };
+    return { label: "Comet dock", value: "Perfect line armed", tone: "style", intensity: "medium", durationMs: 460 };
   }
   if (events.includes("hazard-contact")) {
     return { tone: "danger", intensity: "medium", durationMs: 440 };
