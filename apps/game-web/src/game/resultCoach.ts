@@ -9,6 +9,7 @@ export type ResultCoachInput = {
   crashReason?: CrashReason;
   medal: RunMedal;
   grade: RunGrade;
+  cargoKind?: string;
   cargoDamage: number;
   fuel: number;
   maxFuel: number;
@@ -171,6 +172,14 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
       label: "Next run",
       value: "Repeat the no-brake line",
       tone: "success"
+    };
+  }
+
+  if (input.cargoKind === "volatile" && input.cargoDamage > cleanCargoDamageLimit) {
+    return {
+      label: "Next run",
+      value: "Avoid brake shocks",
+      tone: "warning"
     };
   }
 

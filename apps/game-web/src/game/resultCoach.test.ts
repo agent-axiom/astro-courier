@@ -181,6 +181,25 @@ describe("result coach", () => {
     });
   });
 
+  it("coaches scratched volatile cargo toward avoiding brake shocks", () => {
+    expect(
+      buildResultCoach({
+        status: "delivered",
+        cargoKind: "volatile",
+        medal: "silver",
+        grade: "B",
+        cargoDamage: 0.05,
+        fuel: 40,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 180 }
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Avoid brake shocks",
+      tone: "warning"
+    });
+  });
+
   it("nudges clean deliveries without style toward bonus play", () => {
     expect(
       buildResultCoach({

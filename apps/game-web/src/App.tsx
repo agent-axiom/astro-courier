@@ -727,6 +727,7 @@ export function App() {
     crashReason: hud.crashReason,
     medal: hud.medal,
     grade: hud.grade,
+    cargoKind: hud.cargoKind,
     cargoDamage: hud.cargoDamage,
     fuel: hud.fuel,
     maxFuel: hud.maxFuel,
