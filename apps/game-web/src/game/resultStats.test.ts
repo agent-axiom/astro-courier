@@ -76,6 +76,11 @@ describe("result stat formatting", () => {
       value: "Last Drop +170",
       tone: "style"
     });
+    expect(buildResultHighlight({ ...baseBreakdown, styleBonus: 210 }, "Antimatter Drift")).toEqual({
+      label: "Run highlight",
+      value: "Antimatter Drift +210",
+      tone: "style"
+    });
   });
 
   it("names burn control milestones on the result highlight", () => {

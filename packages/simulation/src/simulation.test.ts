@@ -827,6 +827,54 @@ describe("deterministic Astro Courier simulation", () => {
     expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(NO_BRAKE_STYLE_BONUS);
   });
 
+  it("awards antimatter drift style for clean no-brake antimatter deliveries", () => {
+    const systemWithAntimatter: SystemContent = {
+      ...starterSystem,
+      contracts: [
+        ...starterSystem.contracts,
+        {
+          ...starterSystem.contracts[0]!,
+          id: "antimatter-drift",
+          title: "Antimatter Drift",
+          cargoId: "unstable-antimatter-vial",
+          medalTimes: {
+            bronze: 78,
+            silver: 46,
+            gold: 28
+          }
+        }
+      ],
+      cargo: [
+        ...starterSystem.cargo,
+        {
+          id: "unstable-antimatter-vial",
+          name: "Unstable Antimatter Vial",
+          kind: "unstable",
+          fragility: 0.95
+        }
+      ]
+    };
+    const world = createWorldFromSystem(systemWithAntimatter, "antimatter-drift-style-seed", { contractId: "antimatter-drift" });
+    world.cargoOnboard = true;
+    world.objectivePhase = "delivery";
+    world.elapsedSeconds = world.activeContract.medalTimes.gold + 1;
+    world.fuelUsed = ECO_DRIFT_FUEL_USED_LIMIT + 4;
+    world.bestApproachStreakSeconds = 0;
+    for (const pad of world.landingPads) {
+      pad.active = pad.role === "destination";
+    }
+    world.ship.position = { x: 260, y: -80 };
+    world.ship.velocity = { x: 4, y: 1 };
+    world.ship.rotation = 0;
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("delivered");
+    expect(world.lastMilestone).toBe("Antimatter Drift");
+    expect(world.lastStyleAward).toBe(210);
+    expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(210);
+  });
+
   it("does not award no-brake finesse after any manual brake command", () => {
     const world = createWorldFromSystem(starterSystem, "manual-brake-finesse-seed");
     stepWorld(world, 1 / 60, [{ type: "BRAKE", amount: 1 }]);

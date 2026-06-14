@@ -85,6 +85,7 @@ const styleMilestones = new Set([
   "Damage Control",
   "Last Drop",
   "No Brake Finesse",
+  "Antimatter Drift",
   "Assist Burn",
   "Boost Burn"
 ]);

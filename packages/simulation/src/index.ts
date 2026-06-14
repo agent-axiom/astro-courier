@@ -234,6 +234,7 @@ export const DAMAGE_CONTROL_STYLE_BONUS = 140;
 export const LAST_DROP_STYLE_BONUS = 170;
 export const LAST_DROP_FUEL_RATIO = 0.05;
 export const NO_BRAKE_STYLE_BONUS = 150;
+export const ANTIMATTER_DRIFT_STYLE_BONUS = 210;
 export const STYLE_CHAIN_WINDOW_SECONDS = 4;
 export const CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS = 5.5;
 const STYLE_CHAIN_MULTIPLIER_STEP = 0.25;
@@ -860,6 +861,10 @@ function canAwardNoBrakeFinesse(world: SimulationWorld): boolean {
   return !world.manualBrakeUsed && world.ship.cargoDamage <= 0.02;
 }
 
+function canAwardAntimatterDrift(world: SimulationWorld): boolean {
+  return world.activeContract.id === "antimatter-drift" && world.activeCargo.kind === "unstable" && canAwardNoBrakeFinesse(world);
+}
+
 function resolveLandingOrCrash(world: SimulationWorld): void {
   const touchedPad = world.landingPads.find((pad) => distanceBetween(world.ship.position, pad.position) <= pad.radius);
   if (touchedPad) {
@@ -918,6 +923,8 @@ function resolveLandingOrCrash(world: SimulationWorld): void {
         awardStyle(world, LAST_DROP_STYLE_BONUS, "Last Drop");
       } else if (world.fuelUsed <= ECO_DRIFT_FUEL_USED_LIMIT && world.ship.cargoDamage <= 0.02) {
         awardStyle(world, ECO_DRIFT_STYLE_BONUS, "Eco Drift");
+      } else if (canAwardAntimatterDrift(world)) {
+        awardStyle(world, ANTIMATTER_DRIFT_STYLE_BONUS, "Antimatter Drift");
       } else if (canAwardNoBrakeFinesse(world)) {
         awardStyle(world, NO_BRAKE_STYLE_BONUS, "No Brake Finesse");
       } else if (canAwardDamageControl(world)) {

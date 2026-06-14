@@ -156,6 +156,8 @@ function buildStyleMilestoneFeedback(milestone: string | undefined): ScreenFeedb
       return { label: "Last drop", value: "Fuel miracle", tone: "style", intensity: "heavy", durationMs: 520 };
     case "No Brake Finesse":
       return { label: "No brake finesse", value: "Clean hands", tone: "style", intensity: "medium", durationMs: 460 };
+    case "Antimatter Drift":
+      return { label: "Antimatter drift", value: "No brake line", accent: "precision", tone: "style", intensity: "heavy", durationMs: 520 };
     default:
       return undefined;
   }

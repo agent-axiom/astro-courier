@@ -76,7 +76,8 @@ const styleMilestones = new Set([
   "Express Finish",
   "Damage Control",
   "Last Drop",
-  "No Brake Finesse"
+  "No Brake Finesse",
+  "Antimatter Drift"
 ]);
 
 export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): GameAudioEvent[] {

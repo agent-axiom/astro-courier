@@ -40,6 +40,13 @@ describe("run action feed", () => {
         tone: "style"
       }
     ]);
+    expect(deriveRunFeedUpdates(baseSnapshot, { ...baseSnapshot, lastMilestone: "Antimatter Drift", lastStyleAward: 210 })).toEqual([
+      {
+        label: "Antimatter Drift",
+        value: "+210 style",
+        tone: "style"
+      }
+    ]);
     expect(deriveRunFeedUpdates(baseSnapshot, { ...baseSnapshot, fuel: 14 })).toEqual([
       {
         label: "Fuel critical",
