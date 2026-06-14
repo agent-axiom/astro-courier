@@ -4601,6 +4601,58 @@ button {
   background: rgba(142, 230, 184, 0.26);
 }
 
+@media (min-width: 900px) {
+  .preflight-overlay {
+    width: min(860px, calc(100vw - 48px));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+  }
+
+  .preflight-kicker,
+  .preflight-overlay h2,
+  .preflight-overlay p,
+  .cargo-manifest,
+  .contract-modifiers,
+  .route-board,
+  .route-mastery-briefing,
+  .route-campaign-briefing,
+  .route-campaign-milestone-target,
+  .route-target-briefing,
+  .daily-dispatch-briefing,
+  .contract-traits,
+  .bonus-objectives,
+  .contract-selector,
+  .preflight-stats,
+  .preflight-button {
+    grid-column: 1 / -1;
+  }
+
+  .preflight-overlay h2 {
+    font-size: 1.72rem;
+  }
+
+  .contract-selector {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bonus-objectives,
+  .preflight-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .route-plan-briefing,
+  .route-pressure-briefing,
+  .signature-maneuver-briefing,
+  .best-chase-briefing,
+  .route-mark-target-briefing,
+  .cargo-risk-briefing,
+  .hazard-load-briefing,
+  .danger-pay-briefing,
+  .rush-briefing {
+    min-height: 48px;
+  }
+}
+
 @media (max-width: 760px) {
   .top-hud {
     grid-template-columns: 1fr auto;
