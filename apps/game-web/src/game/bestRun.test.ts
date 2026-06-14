@@ -6,6 +6,7 @@ import {
   buildContractMasteryBadge,
   buildContractBestRunLabel,
   buildLiveBestPace,
+  buildRouteBoardContractMarks,
   buildRouteBoardCampaignProgress,
   buildRouteBoardMastery,
   buildRouteBoardRecommendationBadge,
@@ -167,6 +168,41 @@ describe("contract option mastery badge copy", () => {
       label: "Mastery",
       value: "Comet",
       tone: "comet"
+    });
+  });
+});
+
+describe("contract option route marks copy", () => {
+  it("summarizes each contract contribution to campaign progress", () => {
+    expect(buildRouteBoardContractMarks(undefined)).toEqual({
+      label: "Marks",
+      value: "0/3",
+      tone: "open"
+    });
+    expect(buildRouteBoardContractMarks({ score: 1800, elapsedSeconds: 34.2, medal: "gold" })).toEqual({
+      label: "Marks",
+      value: "1/3",
+      tone: "progress"
+    });
+    expect(buildRouteBoardContractMarks({ score: 2600, elapsedSeconds: 27.1, medal: "comet" })).toEqual({
+      label: "Marks",
+      value: "2/3",
+      tone: "mastery"
+    });
+    expect(
+      buildRouteBoardContractMarks({
+        score: 3200,
+        elapsedSeconds: 22.4,
+        medal: "comet",
+        ghostTrail: [
+          { x: 0, y: 0 },
+          { x: 12, y: 8 }
+        ]
+      })
+    ).toEqual({
+      label: "Marks",
+      value: "3/3",
+      tone: "complete"
     });
   });
 });

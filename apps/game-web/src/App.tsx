@@ -31,6 +31,7 @@ import {
   buildContractBestRunTone,
   buildLiveBestPace,
   buildRouteBoardCampaignProgress,
+  buildRouteBoardContractMarks,
   buildRouteBoardMastery,
   buildRouteBoardRecommendationBadge,
   buildRouteBoardProgress,
@@ -1415,6 +1416,7 @@ export function App() {
               {hud.contractOptions.map((contract) => {
                 const contractBestRun = bestRunsByContract[contract.id];
                 const contractMasteryBadge = buildContractMasteryBadge(contractBestRun);
+                const contractMarks = buildRouteBoardContractMarks(contractBestRun);
                 const contractRecommended = routeBoardTarget.contractId === contract.id;
                 const contractCargoRisk = buildCargoRiskReadout({
                   cargoKind: contract.cargoKind,
@@ -1481,6 +1483,7 @@ export function App() {
                       <em className={`contract-option-mastery contract-option-mastery-${contractMasteryBadge.tone}`}>
                         {contractMasteryBadge.value}
                       </em>
+                      <em className={`contract-option-marks contract-option-marks-${contractMarks.tone}`}>{contractMarks.value}</em>
                       {contractRecommendationBadge ? (
                         <em className={`contract-option-next contract-option-next-${routeBoardTarget.tone}`}>{contractRecommendationBadge}</em>
                       ) : null}

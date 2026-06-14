@@ -2742,6 +2742,30 @@ button {
   color: #ffe19a;
 }
 
+.contract-option-marks {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.contract-option-marks-open {
+  background: rgba(160, 196, 255, 0.1);
+  color: #d8e6ff;
+}
+
+.contract-option-marks-progress {
+  background: rgba(124, 225, 255, 0.14);
+  color: #c6f6ff;
+}
+
+.contract-option-marks-mastery {
+  background: rgba(255, 209, 102, 0.17);
+  color: #ffe19a;
+}
+
+.contract-option-marks-complete {
+  background: rgba(142, 230, 184, 0.16);
+  color: #bff7d8;
+}
+
 .contract-option-next {
   border: 1px solid rgba(255, 255, 255, 0.08);
 }

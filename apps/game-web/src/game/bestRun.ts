@@ -19,6 +19,12 @@ export type ContractMasteryBadge = {
   tone: "open" | "cleared" | "comet";
 };
 
+export type RouteBoardContractMarks = {
+  label: "Marks";
+  value: `${number}/3`;
+  tone: "open" | "progress" | "mastery" | "complete";
+};
+
 export type ContractBestRunTone = "open" | "pb" | "ghost";
 
 export type BestRunDeltaInput = {
@@ -172,6 +178,15 @@ export function buildContractMasteryBadge(bestRun: BestRun | undefined): Contrac
   }
 
   return { label: "Mastery", value: "Cleared", tone: "cleared" };
+}
+
+export function buildRouteBoardContractMarks(bestRun: BestRun | undefined): RouteBoardContractMarks {
+  const marks = routeMarks(bestRun);
+  return {
+    label: "Marks",
+    value: `${marks}/3`,
+    tone: marks === 0 ? "open" : marks === 3 ? "complete" : marks === 2 ? "mastery" : "progress"
+  };
 }
 
 export function buildRouteBoardProgress(
