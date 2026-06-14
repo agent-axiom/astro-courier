@@ -4,6 +4,7 @@ import {
   buildBestRunDelta,
   buildContractBestRunTone,
   buildContractMasteryBadge,
+  buildContractRouteMarkTarget,
   buildContractBestRunLabel,
   buildLiveBestPace,
   buildRouteBoardContractMarks,
@@ -230,6 +231,50 @@ describe("contract option route marks copy", () => {
     ).toEqual({
       label: "Marks",
       value: "3/3",
+      tone: "complete"
+    });
+  });
+});
+
+describe("current contract route mark target copy", () => {
+  it("targets the first clear before a route has any saved best", () => {
+    expect(buildContractRouteMarkTarget(undefined)).toEqual({
+      label: "Next mark",
+      value: "Clear route",
+      tone: "clear"
+    });
+  });
+
+  it("targets comet mastery after a non-comet clear", () => {
+    expect(buildContractRouteMarkTarget({ score: 1800, elapsedSeconds: 34.2, medal: "gold" })).toEqual({
+      label: "Next mark",
+      value: "Bank comet",
+      tone: "comet"
+    });
+  });
+
+  it("targets ghost capture after a comet clear without a replay trail", () => {
+    expect(buildContractRouteMarkTarget({ score: 2600, elapsedSeconds: 27.1, medal: "comet" })).toEqual({
+      label: "Next mark",
+      value: "Capture ghost",
+      tone: "ghost"
+    });
+  });
+
+  it("marks fully banked routes as complete", () => {
+    expect(
+      buildContractRouteMarkTarget({
+        score: 3200,
+        elapsedSeconds: 22.4,
+        medal: "comet",
+        ghostTrail: [
+          { x: 0, y: 0 },
+          { x: 12, y: 8 }
+        ]
+      })
+    ).toEqual({
+      label: "Next mark",
+      value: "3/3 banked",
       tone: "complete"
     });
   });

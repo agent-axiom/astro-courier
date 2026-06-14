@@ -19,6 +19,12 @@ export type ContractMasteryBadge = {
   tone: "open" | "cleared" | "comet";
 };
 
+export type ContractRouteMarkTarget = {
+  label: "Next mark";
+  value: "Clear route" | "Bank comet" | "Capture ghost" | "3/3 banked";
+  tone: "clear" | "comet" | "ghost" | "complete";
+};
+
 export type RouteBoardContractMarks = {
   label: "Marks";
   value: `${number}/3`;
@@ -190,6 +196,22 @@ export function buildContractMasteryBadge(bestRun: BestRun | undefined): Contrac
   }
 
   return { label: "Mastery", value: "Cleared", tone: "cleared" };
+}
+
+export function buildContractRouteMarkTarget(bestRun: BestRun | undefined): ContractRouteMarkTarget {
+  if (!bestRun) {
+    return { label: "Next mark", value: "Clear route", tone: "clear" };
+  }
+
+  if (bestRun.medal !== "comet") {
+    return { label: "Next mark", value: "Bank comet", tone: "comet" };
+  }
+
+  if (!hasReplayTrail(bestRun)) {
+    return { label: "Next mark", value: "Capture ghost", tone: "ghost" };
+  }
+
+  return { label: "Next mark", value: "3/3 banked", tone: "complete" };
 }
 
 export function buildRouteBoardContractMarks(bestRun: BestRun | undefined): RouteBoardContractMarks {

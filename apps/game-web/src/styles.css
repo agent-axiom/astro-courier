@@ -1987,6 +1987,60 @@ button {
   color: #ffe19a;
 }
 
+.route-mark-target-briefing {
+  display: grid;
+  grid-template-columns: 18px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 860;
+}
+
+.route-mark-target-briefing span,
+.route-mark-target-briefing strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.route-mark-target-briefing span {
+  color: rgba(255, 255, 255, 0.74);
+  text-transform: uppercase;
+}
+
+.route-mark-target-briefing strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.route-mark-target-clear {
+  background: rgba(124, 225, 255, 0.12);
+  border-color: rgba(124, 225, 255, 0.24);
+  color: #c6f6ff;
+}
+
+.route-mark-target-comet {
+  background: rgba(255, 209, 102, 0.16);
+  border-color: rgba(255, 209, 102, 0.3);
+  color: #ffe19a;
+}
+
+.route-mark-target-ghost {
+  background: rgba(84, 241, 214, 0.13);
+  border-color: rgba(84, 241, 214, 0.28);
+  color: #c8fff6;
+}
+
+.route-mark-target-complete {
+  background: rgba(142, 230, 184, 0.16);
+  border-color: rgba(142, 230, 184, 0.3);
+  color: #bff7d8;
+}
+
 .route-board {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));

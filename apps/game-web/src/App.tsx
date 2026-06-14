@@ -30,6 +30,7 @@ import {
   buildContractBestRunLabel,
   buildContractBestRunTone,
   buildLiveBestPace,
+  buildContractRouteMarkTarget,
   buildRouteBoardCampaignProgress,
   buildRouteBoardCampaignMilestoneReceipt,
   buildRouteBoardContractMarks,
@@ -640,6 +641,7 @@ export function App() {
         })
       : undefined;
   const bestRunChase = buildBestRunChase(bestRun);
+  const contractRouteMarkTarget = buildContractRouteMarkTarget(bestRun);
   const routeBoardProgress = buildRouteBoardProgress(hud.contractOptions, bestRunsByContract);
   const routeBoardCampaignProgress = buildRouteBoardCampaignProgress(hud.contractOptions, bestRunsByContract);
   const routeBoardMastery = buildRouteBoardMastery(hud.contractOptions, bestRunsByContract);
@@ -1265,6 +1267,22 @@ export function App() {
             {bestRunChase.label === "PB ghost" ? <Route size={18} /> : <Trophy size={18} />}
             <span>{bestRunChase.label}</span>
             <strong>{bestRunChase.value}</strong>
+          </div>
+          <div
+            className={`route-mark-target-briefing route-mark-target-${contractRouteMarkTarget.tone}`}
+            aria-label={`${contractRouteMarkTarget.label}: ${contractRouteMarkTarget.value}`}
+          >
+            {contractRouteMarkTarget.tone === "complete" ? (
+              <Trophy size={18} />
+            ) : contractRouteMarkTarget.tone === "comet" ? (
+              <Star size={18} />
+            ) : contractRouteMarkTarget.tone === "ghost" ? (
+              <Route size={18} />
+            ) : (
+              <Target size={18} />
+            )}
+            <span>{contractRouteMarkTarget.label}</span>
+            <strong>{contractRouteMarkTarget.value}</strong>
           </div>
           {hud.contractOptions.length > 0 ? (
             <>
