@@ -30,4 +30,11 @@ describe("responsive game layout CSS", () => {
     expect(styles).toContain(".brake-button-stress");
     expect(styles).toContain("rgba(255, 111, 145");
   });
+
+  it("defines tone-aware route tempo HUD chips", () => {
+    expect(styles).toContain(".tempo-chip");
+    expect(styles).toContain(".tempo-chip-flow");
+    expect(styles).toContain(".tempo-chip-clutch");
+    expect(styles).toContain(".tempo-chip-danger");
+  });
 });

@@ -116,6 +116,7 @@ import { getOverlayVisibility } from "./game/overlays";
 import { buildCometRunReadout } from "./game/comet";
 import { buildResultRetryAction, buildRetryActionBriefing, buildRetryTarget } from "./game/retryTarget";
 import { buildRunIntensity } from "./game/intensity";
+import { buildRouteTempo } from "./game/tempo";
 import { buildRestartFlowTransition, type RestartFlowMode } from "./game/restartFlow";
 import { buildCrashDebrief, buildCrashReasonLabel } from "./game/crash";
 import { buildReplayCaptureReadout } from "./game/replayReadout";
@@ -624,6 +625,25 @@ export function App() {
     manualBrakeUsed: hud.manualBrakeUsed
   });
   const flightDirectorStyle = { "--flight-director-progress": flightDirector?.progress ?? 0 } as CSSProperties;
+  const routeTempo = buildRouteTempo({
+    status: hud.status,
+    preflightOpen,
+    speed: hud.speed,
+    fuelRatio,
+    targetDistance: hud.targetDistance,
+    objectivePhase: hud.objectivePhase,
+    paceTier: hud.paceTier,
+    paceSecondsRemaining: hud.paceSecondsRemaining,
+    cargoDamage: hud.cargoDamage,
+    landingStatus: hud.landingStatus,
+    perfectDockReady: hud.perfectDockReady,
+    approachStreakSeconds: hud.approachStreakSeconds,
+    hazardDangerLevel: hud.hazardDangerLevel,
+    trajectoryRiskLevel: hud.trajectoryRiskLevel,
+    styleMultiplier: hud.styleMultiplier,
+    styleChainSecondsRemaining: hud.styleChainSecondsRemaining
+  });
+  const routeTempoStyle = { "--route-tempo-progress": routeTempo?.progress ?? 0 } as CSSProperties;
   const routeFocusReadout = buildRouteFocusReadout({
     status: hud.status,
     contractId: hud.contractId,
@@ -1251,6 +1271,17 @@ export function App() {
             <span>{flightDirector.label}</span>
             <strong>{flightDirector.action}</strong>
             <small>{flightDirector.detail}</small>
+          </div>
+        ) : null}
+        {routeTempo ? (
+          <div
+            className={`tempo-chip tempo-chip-${routeTempo.tone}`}
+            style={routeTempoStyle}
+            aria-label={`${routeTempo.label}: ${routeTempo.value}`}
+          >
+            <Gauge size={16} />
+            <span>{routeTempo.label}</span>
+            <strong>{routeTempo.value}</strong>
           </div>
         ) : null}
         {runFeed.length > 0 && !preflightOpen ? (

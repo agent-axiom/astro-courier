@@ -907,6 +907,77 @@ button {
   background: linear-gradient(90deg, #ff4d6d, #ffd166);
 }
 
+.tempo-chip {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: 16px auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 8px 10px 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  background: rgba(160, 196, 255, 0.1);
+  color: #d8e6ff;
+  font-size: 0.82rem;
+  font-weight: 860;
+}
+
+.tempo-chip::after {
+  content: "";
+  position: absolute;
+  right: auto;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+  width: calc(var(--route-tempo-progress, 0) * 100%);
+  height: 3px;
+  background: currentColor;
+  opacity: 0.72;
+}
+
+.tempo-chip span,
+.tempo-chip strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.tempo-chip span {
+  color: rgba(255, 255, 255, 0.74);
+}
+
+.tempo-chip strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.tempo-chip-push {
+  border-color: rgba(124, 225, 255, 0.24);
+  background: rgba(124, 225, 255, 0.12);
+  color: #c6f6ff;
+}
+
+.tempo-chip-flow {
+  border-color: rgba(142, 230, 184, 0.3);
+  background: rgba(142, 230, 184, 0.15);
+  color: #bff7d8;
+}
+
+.tempo-chip-clutch {
+  border-color: rgba(255, 209, 102, 0.34);
+  background: rgba(255, 209, 102, 0.17);
+  color: #ffe19a;
+}
+
+.tempo-chip-danger {
+  border-color: rgba(255, 111, 145, 0.36);
+  background: rgba(255, 111, 145, 0.17);
+  color: #ffadc1;
+}
+
 .action-feed {
   display: grid;
   gap: 6px;
