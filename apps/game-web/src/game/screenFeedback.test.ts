@@ -107,6 +107,14 @@ describe("screen feedback", () => {
       intensity: "heavy",
       durationMs: 520
     });
+    expect(buildScreenFeedback(["antimatter-drift"], "Antimatter Drift")).toEqual({
+      label: "Antimatter drift",
+      value: "No brake line",
+      accent: "precision",
+      tone: "style",
+      intensity: "heavy",
+      durationMs: 520
+    });
   });
 
   it("maps boost burns to light style feedback", () => {

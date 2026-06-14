@@ -7,6 +7,7 @@ export type GameAudioEvent =
   | "delivery-complete"
   | "ship-crash"
   | "style-hit"
+  | "antimatter-drift"
   | "launch-burst"
   | "cargo-loaded"
   | "pickup-lineup"
@@ -98,6 +99,8 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
       events.push("boost-burn");
     } else if (current.lastMilestone === "Launch Burst") {
       events.push("launch-burst");
+    } else if (current.lastMilestone === "Antimatter Drift") {
+      events.push("antimatter-drift");
     } else if (styleMilestones.has(current.lastMilestone)) {
       events.push("style-hit");
     }

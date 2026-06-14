@@ -92,6 +92,9 @@ export function hapticPatternForEvents(events: readonly GameAudioEvent[]): Hapti
   if (events.includes("launch-burst")) {
     return [18, 18];
   }
+  if (events.includes("antimatter-drift")) {
+    return [10, 14, 10, 20];
+  }
   if (events.includes("style-hit") || events.includes("assist-burn")) {
     return [14];
   }

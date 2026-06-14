@@ -124,6 +124,9 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[], milestone
   if (events.includes("assist-burn")) {
     return { label: "Assist burn", value: "Vector trim", tone: "style", intensity: "light", durationMs: 320 };
   }
+  if (events.includes("antimatter-drift")) {
+    return buildStyleMilestoneFeedback(milestone ?? "Antimatter Drift");
+  }
   if (events.includes("style-hit")) {
     return buildStyleMilestoneFeedback(milestone) ?? { label: "Style hit", value: "Bonus banked", tone: "style", intensity: "light", durationMs: 360 };
   }

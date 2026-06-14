@@ -5,6 +5,7 @@ describe("game haptics", () => {
   it("maps gameplay event batches to tactile patterns by priority", () => {
     expect(hapticPatternForEvents(["boost-burn"])).toEqual([12]);
     expect(hapticPatternForEvents(["style-hit"])).toEqual([14]);
+    expect(hapticPatternForEvents(["antimatter-drift"])).toEqual([10, 14, 10, 20]);
     expect(hapticPatternForEvents(["comet-armed"])).toEqual([12, 16, 12]);
     expect(hapticPatternForEvents(["launch-burst"])).toEqual([18, 18]);
     expect(hapticPatternForEvents(["pb-pressure"])).toEqual([12, 18, 12]);
