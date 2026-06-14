@@ -23,6 +23,9 @@ export function buildRadioMessage(hud: HudState): string {
     if (hud.cargoKind === "time-sensitive") {
       return `Rush cargo loaded: ${hud.cargoName}. Gold window is ${hud.paceSecondsRemaining.toFixed(1)}s; launch clean.`;
     }
+    if (hud.cargoKind === "unstable") {
+      return `Unstable cargo loaded: ${hud.cargoName}. Brake taps stress the load; plan a coast line.`;
+    }
     return "Contract loaded. Review the route and launch when the courier is lined up.";
   }
 

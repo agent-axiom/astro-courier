@@ -509,6 +509,18 @@ describe("radio feedback copy", () => {
     ).toBe("Rush cargo loaded: Midnight Medicine. Gold window is 27.0s; launch clean.");
   });
 
+  it("calls out brake-sensitive cargo in preflight radio copy", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        status: "paused",
+        cargoName: "Unstable Antimatter Vial",
+        cargoKind: "unstable",
+        cargoFragility: 0.95
+      })
+    ).toBe("Unstable cargo loaded: Unstable Antimatter Vial. Brake taps stress the load; plan a coast line.");
+  });
+
   it("reports asteroid sprint hull collisions as asteroid impacts", () => {
     expect(
       buildRadioMessage({
