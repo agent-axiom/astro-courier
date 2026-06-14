@@ -177,6 +177,58 @@ describe("run action feed", () => {
     ).toEqual([]);
   });
 
+  it("announces the first route tempo flow shift without repeating push states", () => {
+    const pushTempo = {
+      ...baseSnapshot,
+      speed: 18,
+      targetDistance: 260
+    };
+
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, speed: 12, targetDistance: 320 },
+        pushTempo
+      )
+    ).toEqual([]);
+
+    expect(
+      deriveRunFeedUpdates(pushTempo, {
+        ...pushTempo,
+        objectivePhase: "delivery",
+        cargoDamage: 0,
+        landingStatus: "ready",
+        perfectDockReady: true
+      })
+    ).toEqual([
+      {
+        label: "Tempo flow",
+        value: "Perfect flow / dock now",
+        tone: "success"
+      }
+    ]);
+
+    expect(
+      deriveRunFeedUpdates(
+        {
+          ...pushTempo,
+          objectivePhase: "delivery",
+          cargoDamage: 0,
+          landingStatus: "ready",
+          perfectDockReady: true,
+          approachStreakSeconds: 1.4
+        },
+        {
+          ...pushTempo,
+          objectivePhase: "delivery",
+          cargoDamage: 0,
+          landingStatus: "ready",
+          perfectDockReady: true,
+          approachStreakSeconds: 1.4
+        }
+      )
+    ).toEqual([]);
+  });
+
   it("derives medal-aware terminal updates for strong deliveries", () => {
     expect(deriveRunFeedUpdates(baseSnapshot, { ...baseSnapshot, status: "delivered", medal: "comet" })).toEqual([
       {

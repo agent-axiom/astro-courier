@@ -79,8 +79,8 @@ describe("route tempo readout", () => {
       label: "Route tempo",
       value: "Perfect flow / dock now",
       tone: "flow",
-        progress: 1
-      });
+      progress: 1
+    });
 
     expect(
       buildRouteTempo({

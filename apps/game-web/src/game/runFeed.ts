@@ -17,6 +17,7 @@ import {
 } from "./comet";
 import type { DailyDispatchProgressReceipt } from "./contracts";
 import type { ContractPaceTier } from "./pace";
+import { buildRouteTempo } from "./tempo";
 
 export type RunFeedTone = "neutral" | "style" | "success" | "warning" | "danger";
 
@@ -332,6 +333,11 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
     });
   }
 
+  const routeTempoUpdate = buildRouteTempoShiftUpdate(previous, current);
+  if (routeTempoUpdate && updates.length === 0) {
+    updates.push(routeTempoUpdate);
+  }
+
   return updates;
 }
 
@@ -452,6 +458,42 @@ function buildTargetLineupUpdate(previous: RunFeedSnapshot, current: RunFeedSnap
   }
 
   return { label: "Dock lined", value: `Dock ${distance}m`, tone: "success" };
+}
+
+function buildRouteTempoShiftUpdate(previous: RunFeedSnapshot, current: RunFeedSnapshot): RunFeedUpdate | undefined {
+  const previousTempo = buildRouteTempoFromSnapshot(previous);
+  const currentTempo = buildRouteTempoFromSnapshot(current);
+
+  if (!previousTempo || !currentTempo || previousTempo.tone === currentTempo.tone || currentTempo.tone !== "flow") {
+    return undefined;
+  }
+
+  return {
+    label: "Tempo flow",
+    value: currentTempo.value,
+    tone: "success"
+  };
+}
+
+function buildRouteTempoFromSnapshot(snapshot: RunFeedSnapshot) {
+  return buildRouteTempo({
+    status: snapshot.status,
+    preflightOpen: false,
+    speed: snapshot.speed ?? 0,
+    fuelRatio: snapshot.maxFuel > 0 ? snapshot.fuel / snapshot.maxFuel : 0,
+    targetDistance: snapshot.targetDistance,
+    objectivePhase: snapshot.objectivePhase,
+    paceTier: snapshot.paceTier,
+    paceSecondsRemaining: snapshot.paceSecondsRemaining,
+    cargoDamage: snapshot.cargoDamage,
+    landingStatus: snapshot.landingStatus,
+    perfectDockReady: snapshot.perfectDockReady,
+    approachStreakSeconds: snapshot.approachStreakSeconds,
+    hazardDangerLevel: snapshot.hazardDangerLevel,
+    trajectoryRiskLevel: snapshot.trajectoryRiskLevel,
+    styleMultiplier: snapshot.styleMultiplier,
+    styleChainSecondsRemaining: snapshot.styleChainSecondsRemaining
+  });
 }
 
 function hasSpentNoBrakeFinesse(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
