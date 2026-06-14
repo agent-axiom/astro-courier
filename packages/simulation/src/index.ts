@@ -266,6 +266,7 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
   const shipRotation = shipStart?.rotation ?? system.ship.rotation;
   const shipFuel = shipStart?.fuel ?? system.ship.fuel;
   const hazardSeverityMultiplier = activeContract.hazardSeverityMultiplier ?? 1;
+  const hazardSeedPulse = dailyHazardSeverityPulse(seed);
 
   return {
     systemId: system.id,
@@ -320,7 +321,7 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
       type: hazard.type,
       position: toVec2(hazard.position),
       radius: hazard.radius,
-      severity: round(clamp(hazard.severity * hazardSeverityMultiplier, 0, 1), 3)
+      severity: round(clamp(hazard.severity * hazardSeverityMultiplier * hazardSeedPulse(hazard.id), 0, 1), 3)
     })),
     ship: {
       position: toVec2(shipPosition),
@@ -1110,6 +1111,23 @@ function distanceBetween(left: Vec2, right: Vec2): number {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
+}
+
+function dailyHazardSeverityPulse(seed: string): (hazardId: string) => number {
+  if (!seed.startsWith("daily-")) {
+    return () => 1;
+  }
+
+  return (hazardId: string) => 0.9 + deterministicUnit(`${seed}:${hazardId}:hazard`) * 0.2;
+}
+
+function deterministicUnit(value: string): number {
+  let hash = 2166136261;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0) / 0xffffffff;
 }
 
 function normalizeAngle(angle: number): number {

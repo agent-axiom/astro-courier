@@ -938,6 +938,33 @@ describe("deterministic Astro Courier simulation", () => {
     expect(sprint.ship.cargoDamage).toBeGreaterThan(training.ship.cargoDamage);
   });
 
+  it("applies deterministic daily hazard variance without changing ordinary seeds", () => {
+    const systemWithDailyHazard: SystemContent = {
+      ...starterSystem,
+      hazards: [
+        {
+          id: "daily-field",
+          type: "asteroid_field",
+          position: [120, 0],
+          radius: 50,
+          severity: 0.4
+        }
+      ]
+    };
+
+    const ordinary = createWorldFromSystem(systemWithDailyHazard, "contract-risk-seed");
+    const daily = createWorldFromSystem(systemWithDailyHazard, "daily-2026-06-13-first-light-delivery");
+    const dailyAgain = createWorldFromSystem(systemWithDailyHazard, "daily-2026-06-13-first-light-delivery");
+    const nextDaily = createWorldFromSystem(systemWithDailyHazard, "daily-2026-06-14-first-light-delivery");
+
+    expect(ordinary.hazards[0]?.severity).toBe(0.4);
+    expect(daily.hazards[0]?.severity).toBe(dailyAgain.hazards[0]?.severity);
+    expect(daily.hazards[0]?.severity).not.toBe(ordinary.hazards[0]?.severity);
+    expect(nextDaily.hazards[0]?.severity).not.toBe(daily.hazards[0]?.severity);
+    expect(daily.hazards[0]?.severity).toBeGreaterThanOrEqual(0.36);
+    expect(daily.hazards[0]?.severity).toBeLessThanOrEqual(0.44);
+  });
+
   it("awards a one-time style bonus for quick cargo pickup", () => {
     const quick = createWorldFromSystem(starterSystem, "quick-pickup-seed");
     quick.elapsedSeconds = 8;
