@@ -859,6 +859,47 @@ describe("deterministic Astro Courier simulation", () => {
     expect(snapshotWorld(world).manualBrakeUsed).toBe(true);
   });
 
+  it("adds handling stress to unstable cargo when braking under load", () => {
+    const systemWithBrakeSensitiveCargo: SystemContent = {
+      ...starterSystem,
+      contracts: [
+        {
+          ...starterSystem.contracts[0],
+          id: "stable-run",
+          cargoId: "bottled-starlight"
+        },
+        {
+          ...starterSystem.contracts[0],
+          id: "unstable-run",
+          cargoId: "volatile-comet-ice"
+        }
+      ],
+      cargo: [
+        ...starterSystem.cargo,
+        {
+          id: "volatile-comet-ice",
+          name: "Volatile Comet Ice",
+          kind: "unstable",
+          fragility: 1
+        }
+      ]
+    };
+    const stable = createWorldFromSystem(systemWithBrakeSensitiveCargo, "brake-sensitive-cargo-seed", { contractId: "stable-run" });
+    const unstable = createWorldFromSystem(systemWithBrakeSensitiveCargo, "brake-sensitive-cargo-seed", { contractId: "unstable-run" });
+    for (const world of [stable, unstable]) {
+      world.cargoOnboard = true;
+      world.objectivePhase = "delivery";
+      world.ship.position = { x: 500, y: 500 };
+      world.ship.velocity = { x: 10, y: 0 };
+    }
+
+    stepWorld(stable, 1, [{ type: "BRAKE", amount: 1 }]);
+    stepWorld(unstable, 1, [{ type: "BRAKE", amount: 1 }]);
+
+    expect(stable.ship.cargoDamage).toBe(0);
+    expect(unstable.ship.cargoDamage).toBeCloseTo(0.012, 3);
+  });
+
   it("scales hazard contact damage by active cargo fragility", () => {
     const systemWithCargoRisk: SystemContent = {
       ...starterSystem,

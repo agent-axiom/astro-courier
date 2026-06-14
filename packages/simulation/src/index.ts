@@ -208,6 +208,7 @@ const FUEL_BURN_PER_SECOND = 8;
 const BRAKE_BURN_PER_SECOND = 3;
 export const BOOST_COOLDOWN_SECONDS = 1.15;
 const BOOST_IMPULSE_SPEED = 24;
+const UNSTABLE_BRAKE_STRESS_PER_SECOND = 0.012;
 export const LANDING_ASSIST_FUEL_COST = 1.5;
 const HAZARD_SKIM_OUTER_RADIUS = 1.35;
 export const HAZARD_SKIM_BASE_BONUS = 140;
@@ -387,6 +388,7 @@ export function stepWorld(world: SimulationWorld, fixedDt: number, commands: Pla
   applyGravity(world, fixedDt);
   applyThrust(world, fixedDt, thrust);
   applyBrake(world, fixedDt, brake);
+  applyCargoHandlingStress(world, fixedDt, brake);
   integrate(world, fixedDt);
   updateGravitySling(world);
   applyLandingAssist(world);
@@ -695,6 +697,22 @@ function applyBrake(world: SimulationWorld, fixedDt: number, amount: number): vo
   world.ship.velocity = scale(world.ship.velocity, damping);
   world.ship.fuel = round(world.ship.fuel - spend, 6);
   world.fuelUsed = round(world.fuelUsed + spend, 6);
+}
+
+function applyCargoHandlingStress(world: SimulationWorld, fixedDt: number, brakeAmount: number): void {
+  if (!world.cargoOnboard || brakeAmount <= 0 || !isBrakeSensitiveCargo(world.activeCargo.kind)) {
+    return;
+  }
+
+  world.ship.cargoDamage = clamp(
+    world.ship.cargoDamage + brakeAmount * Math.max(0, fixedDt) * UNSTABLE_BRAKE_STRESS_PER_SECOND,
+    0,
+    1
+  );
+}
+
+function isBrakeSensitiveCargo(cargoKind: string): boolean {
+  return cargoKind === "unstable" || cargoKind === "volatile";
 }
 
 function integrate(world: SimulationWorld, fixedDt: number): void {

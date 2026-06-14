@@ -54,6 +54,13 @@ export function buildCargoRiskReadout(input: CargoRiskReadoutInput): CargoRiskRe
         tone: input.cargoDamage >= 0.3 ? "danger" : "warning"
       };
     }
+    if (isBrakeSensitiveCargo(input.cargoKind)) {
+      return {
+        label: "Cargo stress",
+        value: "Brake sensitive / keep smooth",
+        tone: "warning"
+      };
+    }
     if (isRushCargo(input)) {
       return {
         label: "Cargo stress",
@@ -68,6 +75,14 @@ export function buildCargoRiskReadout(input: CargoRiskReadoutInput): CargoRiskRe
       label: "Cargo risk",
       value: `Rush cargo / ${formatRushSeconds(input.paceSecondsRemaining)} gold`,
       tone: getRushCargoTone(input.paceSecondsRemaining)
+    };
+  }
+
+  if (isBrakeSensitiveCargo(input.cargoKind)) {
+    return {
+      label: "Cargo risk",
+      value: `Brake sensitive / ${input.cargoFragility.toFixed(2)}x`,
+      tone: "warning"
     };
   }
 
@@ -96,6 +111,10 @@ function titleCase(value: string): string {
 
 function isRushCargo(input: CargoRiskReadoutInput): input is CargoRiskReadoutInput & { paceSecondsRemaining: number } {
   return input.cargoKind === "time-sensitive" && typeof input.paceSecondsRemaining === "number" && input.paceSecondsRemaining > 0;
+}
+
+function isBrakeSensitiveCargo(cargoKind: string): boolean {
+  return cargoKind === "unstable" || cargoKind === "volatile";
 }
 
 function getRushCargoTone(secondsRemaining: number): CargoRiskReadout["tone"] {
