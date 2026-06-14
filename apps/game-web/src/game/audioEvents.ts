@@ -25,6 +25,7 @@ export type GameAudioEvent =
   | "cargo-damage"
   | "hazard-contact"
   | "trajectory-warning"
+  | "trajectory-caution"
   | "trajectory-clear";
 
 export type HudAudioSnapshot = {
@@ -141,12 +142,8 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
 
   if (previous?.trajectoryRiskLevel !== current.trajectoryRiskLevel && current.trajectoryRiskLevel === "inside") {
     events.push("trajectory-warning");
-  } else if (
-    previous?.trajectoryRiskLevel !== current.trajectoryRiskLevel &&
-    current.trajectoryRiskLevel === "near" &&
-    (current.cargoDamage ?? 0) > cleanCargoDamageLimit
-  ) {
-    events.push("trajectory-warning");
+  } else if (previous?.trajectoryRiskLevel !== current.trajectoryRiskLevel && current.trajectoryRiskLevel === "near") {
+    events.push((current.cargoDamage ?? 0) > cleanCargoDamageLimit ? "trajectory-warning" : "trajectory-caution");
   } else if (hasClearedTrajectoryRisk(previous, current)) {
     events.push("trajectory-clear");
   }

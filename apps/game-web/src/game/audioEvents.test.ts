@@ -157,6 +157,16 @@ describe("HUD audio events", () => {
     ).toEqual(["trajectory-warning"]);
   });
 
+  it("signals a light caution when clean cargo enters a predicted hazard vector", () => {
+    expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, trajectoryRiskLevel: "near" })).toEqual(["trajectory-caution"]);
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, trajectoryRiskLevel: "near" },
+        { ...baseSnapshot, trajectoryRiskLevel: "near" }
+      )
+    ).toEqual([]);
+  });
+
   it("signals when the predicted trajectory clears a dangerous line", () => {
     expect(
       deriveHudAudioEvents(

@@ -139,6 +139,16 @@ describe("screen feedback", () => {
     });
   });
 
+  it("maps trajectory cautions to light warning feedback", () => {
+    expect(buildScreenFeedback(["trajectory-caution"])).toEqual({
+      label: "Vector caution",
+      value: "Thread line",
+      tone: "warning",
+      intensity: "light",
+      durationMs: 300
+    });
+  });
+
   it("maps trajectory clears to quick success feedback", () => {
     expect(buildScreenFeedback(["trajectory-clear"])).toEqual({
       label: "Vector clear",
