@@ -88,6 +88,9 @@ describe("radio feedback copy", () => {
     expect(buildRadioMessage({ ...baseHud, lastMilestone: "Assist Burn", landingStatus: "too-fast", assistAvailable: false })).toContain(
       "Assist burn fired"
     );
+    expect(buildRadioMessage({ ...baseHud, lastMilestone: "Boost Burn", landingStatus: "ready", assistAvailable: false })).toContain(
+      "Boost burn logged"
+    );
   });
 
   it("warns about hazard pressure before ordinary approach guidance", () => {

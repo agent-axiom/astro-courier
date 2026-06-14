@@ -84,6 +84,10 @@ export function buildRadioMessage(hud: HudState): string {
     return "Assist burn fired. Fuel traded for a softer contact.";
   }
 
+  if (hud.lastMilestone === "Boost Burn") {
+    return "Boost burn logged. Vector corrected, now settle the line.";
+  }
+
   if (hud.hazardDangerLevel === "inside") {
     return `Hazard contact. Exit the field${hud.hazardDistance === undefined ? "" : `, ${Math.round(hud.hazardDistance)}m from center`}.`;
   }
