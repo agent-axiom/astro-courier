@@ -44,6 +44,7 @@ import { formatBearingGuidance } from "./game/bearing";
 import { buildBoostControlPresentation, buildBrakeControlPresentation, buildPrimaryRunControlPresentation, canUseImpulseControl } from "./game/hudControls";
 import {
   buildActiveDailyDispatchPulse,
+  buildActiveDailyDispatchProgressStatus,
   buildContractDangerPayTrait,
   buildContractHazardTrait,
   buildContractModifiers,
@@ -631,6 +632,7 @@ export function App() {
   const dailyDispatchReset = buildDailyDispatchReset(dailyDispatch, currentDate);
   const dailyDispatchPulse = buildDailyDispatchPulse(dailyDispatch);
   const activeDailyDispatchPulse = buildActiveDailyDispatchPulse(dailyDispatch, hud.contractId);
+  const activeDailyDispatchProgressStatus = buildActiveDailyDispatchProgressStatus(dailyDispatch, hud.contractId, dailyProgress);
   const dailyDispatchStatus = buildDailyDispatchStatus(
     dailyDispatch,
     dailyDispatch ? bestRunsByContract[dailyDispatch.contractId] : undefined
@@ -1076,6 +1078,16 @@ export function App() {
             <CalendarDays size={16} />
             <span>{activeDailyDispatchPulse.label}</span>
             <strong>{activeDailyDispatchPulse.value}</strong>
+          </div>
+        ) : null}
+        {!preflightOpen && activeDailyDispatchProgressStatus ? (
+          <div
+            className={`daily-streak-chip daily-streak-chip-${activeDailyDispatchProgressStatus.tone}`}
+            aria-label={`${activeDailyDispatchProgressStatus.label}: ${activeDailyDispatchProgressStatus.value}`}
+          >
+            <CalendarDays size={16} />
+            <span>{activeDailyDispatchProgressStatus.label}</span>
+            <strong>{activeDailyDispatchProgressStatus.value}</strong>
           </div>
         ) : null}
         {cometRunReadout ? (

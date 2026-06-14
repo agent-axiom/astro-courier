@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildActiveDailyDispatchPulse,
+  buildActiveDailyDispatchProgressStatus,
   buildContractDangerPayTrait,
   buildContractModifiers,
   buildContractOptionHook,
@@ -281,6 +282,35 @@ describe("contract rotation", () => {
       label: "Daily pulse",
       value: "Hazards +7%",
       tone: "hot"
+    });
+  });
+
+  it("only exposes the daily streak status for the active daily route", () => {
+    const dispatch = {
+      label: "Daily dispatch" as const,
+      value: "Asteroid Sprint",
+      contractId: "asteroid-sprint",
+      seed: "daily-2026-06-13-asteroid-sprint",
+      tone: "daily" as const
+    };
+
+    expect(buildActiveDailyDispatchProgressStatus(dispatch, "return-leg", undefined)).toBeUndefined();
+    expect(buildActiveDailyDispatchProgressStatus(undefined, "asteroid-sprint", undefined)).toBeUndefined();
+    expect(buildActiveDailyDispatchProgressStatus(dispatch, "asteroid-sprint", undefined)).toEqual({
+      label: "Daily streak",
+      value: "Start streak",
+      tone: "open"
+    });
+    expect(
+      buildActiveDailyDispatchProgressStatus(dispatch, "asteroid-sprint", {
+        dayKey: "2026-06-12",
+        lastContractId: "return-leg",
+        streak: 4
+      })
+    ).toEqual({
+      label: "Daily streak",
+      value: "Keep 4-day streak",
+      tone: "streak"
     });
   });
 

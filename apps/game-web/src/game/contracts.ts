@@ -454,6 +454,18 @@ export function buildActiveDailyDispatchPulse(dispatch: DailyDispatch | undefine
   return buildDailyDispatchPulse(dispatch);
 }
 
+export function buildActiveDailyDispatchProgressStatus(
+  dispatch: DailyDispatch | undefined,
+  currentContractId: string,
+  progress: DailyDispatchProgress | undefined
+): DailyDispatchProgressStatus | undefined {
+  if (!dispatch || dispatch.contractId !== currentContractId) {
+    return undefined;
+  }
+
+  return buildDailyDispatchProgressStatus(dispatch, progress);
+}
+
 export function buildDailyDispatchResult(input: DailyDispatchResultInput): DailyDispatchResult | undefined {
   if (!input.dispatch || input.dispatch.contractId !== input.contractId) {
     return undefined;

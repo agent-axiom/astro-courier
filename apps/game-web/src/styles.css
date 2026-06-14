@@ -962,6 +962,54 @@ button {
   color: #d8e6ff;
 }
 
+.daily-streak-chip {
+  display: grid;
+  grid-template-columns: 16px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.daily-streak-chip span,
+.daily-streak-chip strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.daily-streak-chip span {
+  color: rgba(255, 255, 255, 0.74);
+}
+
+.daily-streak-chip strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.daily-streak-chip-open {
+  background: rgba(124, 225, 255, 0.12);
+  color: #c6f6ff;
+}
+
+.daily-streak-chip-banked {
+  background: rgba(142, 230, 184, 0.14);
+  color: #bff7d8;
+}
+
+.daily-streak-chip-streak {
+  background: rgba(255, 209, 102, 0.16);
+  color: #ffe19a;
+}
+
+.daily-streak-chip-reset {
+  background: rgba(255, 111, 145, 0.15);
+  color: #ffadc1;
+}
+
 .comet-chip {
   display: grid;
   grid-template-columns: 16px auto 1fr;
