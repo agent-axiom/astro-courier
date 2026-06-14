@@ -33,6 +33,7 @@ export type RunFeedSnapshot = {
   bestRunScore?: number;
   bestRunHasGhostTrail?: boolean;
   paceTier?: ContractPaceTier;
+  paceSecondsRemaining?: number;
   fuel: number;
   maxFuel: number;
   cargoKind?: string;
@@ -72,6 +73,7 @@ export type ProgressReceiptFeedInput = {
 
 const criticalFuelRatio = 0.15;
 const criticalStyleChainSeconds = 1;
+const expressCloseSeconds = 4;
 const bestRunPressureGap = 200;
 const cleanCargoDamageLimit = 0.02;
 const closeTargetDistance = 90;
@@ -172,6 +174,14 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
   const medalDrop = buildMedalDropUpdate(previous.paceTier, current.paceTier);
   if (medalDrop) {
     updates.push(medalDrop);
+  }
+
+  if (hasEnteredExpressCloseWindow(previous, current)) {
+    updates.push({
+      label: "Express close",
+      value: `Dock in ${formatSeconds(current.paceSecondsRemaining)}`,
+      tone: "warning"
+    });
   }
 
   if (hasEnteredTightCometReserve(previous, current)) {
@@ -484,6 +494,18 @@ function hasEnteredTightCometReserve(previous: RunFeedSnapshot, current: RunFeed
     previousReserve >= COMET_RESERVE_WARNING_RATIO &&
     currentReserve >= COMET_RESERVE_MIN_RATIO &&
     currentReserve < COMET_RESERVE_WARNING_RATIO
+  );
+}
+
+function hasEnteredExpressCloseWindow(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
+  return (
+    current.status === "flying" &&
+    current.objectivePhase === "delivery" &&
+    current.paceTier === "gold" &&
+    (current.cargoDamage ?? 0) <= cleanCargoDamageLimit &&
+    (previous.paceSecondsRemaining ?? 0) > expressCloseSeconds &&
+    (current.paceSecondsRemaining ?? 0) > 0 &&
+    (current.paceSecondsRemaining ?? 0) <= expressCloseSeconds
   );
 }
 

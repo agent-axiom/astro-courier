@@ -386,11 +386,14 @@ export function App() {
     });
   }, [
     hud.fuel,
+    hud.cargoDamage,
     hud.hazardDangerLevel,
     hud.lastMilestone,
     hud.lastStyleAward,
     hud.maxFuel,
     hud.medal,
+    hud.objectivePhase,
+    hud.paceSecondsRemaining,
     hud.paceTier,
     hud.score,
     hud.speed,
@@ -2041,6 +2044,7 @@ function toRunFeedSnapshot(hud: HudState, bestRun: BestRun | undefined): RunFeed
     bestRunScore: bestRun?.score,
     bestRunHasGhostTrail: (bestRun?.ghostTrail?.length ?? 0) >= 2,
     paceTier: hud.paceTier,
+    paceSecondsRemaining: hud.paceSecondsRemaining,
     fuel: hud.fuel,
     maxFuel: hud.maxFuel,
     cargoKind: hud.cargoKind,

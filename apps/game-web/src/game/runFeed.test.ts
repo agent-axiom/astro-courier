@@ -525,6 +525,69 @@ describe("run action feed", () => {
     expect(deriveRunFeedUpdates({ ...baseSnapshot, paceTier: "silver" }, { ...baseSnapshot, paceTier: "silver" })).toEqual([]);
   });
 
+  it("announces the closing express finish window once", () => {
+    expect(
+      deriveRunFeedUpdates(
+        {
+          ...baseSnapshot,
+          objectivePhase: "delivery",
+          paceTier: "gold",
+          paceSecondsRemaining: 4.4,
+          cargoDamage: 0
+        },
+        {
+          ...baseSnapshot,
+          objectivePhase: "delivery",
+          paceTier: "gold",
+          paceSecondsRemaining: 3.8,
+          cargoDamage: 0
+        }
+      )
+    ).toEqual([
+      {
+        label: "Express close",
+        value: "Dock in 3.8s",
+        tone: "warning"
+      }
+    ]);
+    expect(
+      deriveRunFeedUpdates(
+        {
+          ...baseSnapshot,
+          objectivePhase: "delivery",
+          paceTier: "gold",
+          paceSecondsRemaining: 3.8,
+          cargoDamage: 0
+        },
+        {
+          ...baseSnapshot,
+          objectivePhase: "delivery",
+          paceTier: "gold",
+          paceSecondsRemaining: 3.2,
+          cargoDamage: 0
+        }
+      )
+    ).toEqual([]);
+    expect(
+      deriveRunFeedUpdates(
+        {
+          ...baseSnapshot,
+          objectivePhase: "delivery",
+          paceTier: "gold",
+          paceSecondsRemaining: 4.4,
+          cargoDamage: 0.08
+        },
+        {
+          ...baseSnapshot,
+          objectivePhase: "delivery",
+          paceTier: "gold",
+          paceSecondsRemaining: 3.8,
+          cargoDamage: 0.08
+        }
+      )
+    ).toEqual([]);
+  });
+
   it("announces when the live run first overtakes the saved personal best score", () => {
     expect(
       deriveRunFeedUpdates(
