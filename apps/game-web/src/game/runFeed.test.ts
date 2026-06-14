@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { HAZARD_THREAD_SPEED_THRESHOLD } from "@astro-courier/simulation";
-import { appendRunFeedUpdates, buildProgressReceiptFeedUpdates, deriveRunFeedUpdates, type RunFeedSnapshot } from "./runFeed";
+import {
+  appendRunFeedUpdates,
+  buildLaunchFeedUpdate,
+  buildProgressReceiptFeedUpdates,
+  deriveRunFeedUpdates,
+  type RunFeedSnapshot
+} from "./runFeed";
 
 const baseSnapshot: RunFeedSnapshot = {
   status: "flying",
@@ -16,6 +22,18 @@ const baseSnapshot: RunFeedSnapshot = {
 describe("run action feed", () => {
   it("keeps initial snapshots quiet", () => {
     expect(deriveRunFeedUpdates(undefined, baseSnapshot)).toEqual([]);
+  });
+
+  it("adds a persistent launch feed item only when committing from briefing", () => {
+    expect(buildLaunchFeedUpdate({ status: "paused", preflightOpen: true, resultOpen: false })).toEqual({
+      label: "Route live",
+      value: "Launch vector",
+      tone: "success"
+    });
+
+    expect(buildLaunchFeedUpdate({ status: "paused", preflightOpen: false, resultOpen: false })).toBeUndefined();
+    expect(buildLaunchFeedUpdate({ status: "flying", preflightOpen: true, resultOpen: false })).toBeUndefined();
+    expect(buildLaunchFeedUpdate({ status: "crashed", preflightOpen: false, resultOpen: true })).toBeUndefined();
   });
 
   it("turns banked route board receipts into terminal feed updates", () => {

@@ -71,6 +71,12 @@ export type ProgressReceiptFeedInput = {
   dailyProgressReceipt?: DailyDispatchProgressReceipt;
 };
 
+export type LaunchFeedInput = {
+  status: RunStatus;
+  preflightOpen: boolean;
+  resultOpen: boolean;
+};
+
 const criticalFuelRatio = 0.15;
 const criticalStyleChainSeconds = 1;
 const expressCloseSeconds = 4;
@@ -95,6 +101,18 @@ const feedMilestones = new Set([
   "Assist Burn",
   "Boost Burn"
 ]);
+
+export function buildLaunchFeedUpdate(input: LaunchFeedInput): RunFeedUpdate | undefined {
+  if (input.status !== "paused" || !input.preflightOpen || input.resultOpen) {
+    return undefined;
+  }
+
+  return {
+    label: "Route live",
+    value: "Launch vector",
+    tone: "success"
+  };
+}
 
 export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, current: RunFeedSnapshot): RunFeedUpdate[] {
   if (!previous) {

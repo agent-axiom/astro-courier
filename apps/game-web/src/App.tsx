@@ -136,6 +136,7 @@ import {
 } from "./game/screenFeedback";
 import {
   appendRunFeedUpdates,
+  buildLaunchFeedUpdate,
   buildProgressReceiptFeedUpdates,
   deriveRunFeedUpdates,
   type RunFeedEntry,
@@ -964,6 +965,18 @@ export function App() {
         resultOpen: overlays.result
       })
     );
+    const launchFeedUpdate = buildLaunchFeedUpdate({
+      status: hud.status,
+      preflightOpen: overlays.preflight,
+      resultOpen: overlays.result
+    });
+    if (launchFeedUpdate) {
+      setRunFeed((currentEntries) => {
+        const result = appendRunFeedUpdates(currentEntries, [launchFeedUpdate], nextRunFeedIdRef.current, 4);
+        nextRunFeedIdRef.current = result.nextId;
+        return result.entries;
+      });
+    }
     applyDailyReplaySeed(hud.contractId);
     setPreflightOpen(false);
     setPaused(false);
