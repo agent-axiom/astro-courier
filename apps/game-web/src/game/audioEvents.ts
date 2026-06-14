@@ -159,12 +159,12 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
 
   if (previous?.trajectoryRiskLevel !== current.trajectoryRiskLevel && current.trajectoryRiskLevel === "inside") {
     events.push("trajectory-warning");
+  } else if (!isThreadWindowOpen(previous) && isThreadWindowOpen(current)) {
+    events.push("thread-window");
   } else if (previous?.trajectoryRiskLevel !== current.trajectoryRiskLevel && current.trajectoryRiskLevel === "near") {
     const damagedCargo = (current.cargoDamage ?? 0) > cleanCargoDamageLimit;
     if (damagedCargo) {
       events.push("trajectory-warning");
-    } else if ((current.speed ?? 0) >= HAZARD_THREAD_SPEED_THRESHOLD) {
-      events.push("thread-window");
     } else {
       events.push("trajectory-caution");
     }
@@ -173,6 +173,15 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
   }
 
   return events;
+}
+
+function isThreadWindowOpen(snapshot: HudAudioSnapshot | undefined): boolean {
+  return (
+    snapshot?.status === "flying" &&
+    snapshot.trajectoryRiskLevel === "near" &&
+    (snapshot.cargoDamage ?? 0) <= cleanCargoDamageLimit &&
+    (snapshot.speed ?? 0) >= HAZARD_THREAD_SPEED_THRESHOLD
+  );
 }
 
 function isFuelCritical(snapshot: HudAudioSnapshot | undefined): boolean {

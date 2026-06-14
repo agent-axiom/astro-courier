@@ -362,6 +362,27 @@ describe("HUD audio events", () => {
     ).toEqual([]);
   });
 
+  it("signals a thread window when a near hazard line reaches thread speed", () => {
+    expect(
+      deriveHudAudioEvents(
+        {
+          ...baseSnapshot,
+          trajectoryRiskLevel: "near",
+          speed: HAZARD_THREAD_SPEED_THRESHOLD - 1,
+          styleMultiplier: 1.35,
+          styleChainSecondsRemaining: 1.35
+        },
+        {
+          ...baseSnapshot,
+          trajectoryRiskLevel: "near",
+          speed: HAZARD_THREAD_SPEED_THRESHOLD,
+          styleMultiplier: 1.35,
+          styleChainSecondsRemaining: 0.85
+        }
+      )
+    ).toEqual(["chain-critical", "thread-window"]);
+  });
+
   it("signals when a critical style chain is saved back into a live window", () => {
     expect(
       deriveHudAudioEvents(
