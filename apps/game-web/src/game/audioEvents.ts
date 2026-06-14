@@ -9,6 +9,8 @@ export type GameAudioEvent =
   | "style-hit"
   | "antimatter-drift"
   | "antimatter-armed"
+  | "route-launch"
+  | "route-resume"
   | "launch-burst"
   | "cargo-loaded"
   | "pickup-lineup"
@@ -65,6 +67,20 @@ export type HudAudioSnapshot = {
   trajectoryRiskLevel?: "near" | "inside";
 };
 
+export type LaunchAudioInput = {
+  status: RunStatus;
+  preflightOpen: boolean;
+  resultOpen: boolean;
+};
+
+export type PauseResumeAudioInput = {
+  status: RunStatus;
+  wasPaused: boolean;
+  nextPaused: boolean;
+  preflightOpen: boolean;
+  resultOpen: boolean;
+};
+
 const criticalFuelRatio = 0.15;
 const cleanCargoDamageLimit = 0.02;
 const criticalStyleChainSeconds = 1;
@@ -87,6 +103,22 @@ const styleMilestones = new Set([
   "No Brake Finesse",
   "Antimatter Drift"
 ]);
+
+export function buildLaunchAudioEvents(input: LaunchAudioInput): GameAudioEvent[] {
+  if (input.status !== "paused" || !input.preflightOpen || input.resultOpen) {
+    return [];
+  }
+
+  return ["route-launch"];
+}
+
+export function buildPauseResumeAudioEvents(input: PauseResumeAudioInput): GameAudioEvent[] {
+  if (input.status !== "paused" || !input.wasPaused || input.nextPaused || input.preflightOpen || input.resultOpen) {
+    return [];
+  }
+
+  return ["route-resume"];
+}
 
 export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): GameAudioEvent[] {
   const events: GameAudioEvent[] = [];

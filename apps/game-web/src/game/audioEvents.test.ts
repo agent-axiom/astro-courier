@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { HAZARD_THREAD_SPEED_THRESHOLD } from "@astro-courier/simulation";
-import { deriveHudAudioEvents, type HudAudioSnapshot } from "./audioEvents";
+import {
+  buildLaunchAudioEvents,
+  buildPauseResumeAudioEvents,
+  deriveHudAudioEvents,
+  type HudAudioSnapshot
+} from "./audioEvents";
 
 const baseSnapshot: HudAudioSnapshot = {
   status: "flying",
@@ -12,6 +17,50 @@ const baseSnapshot: HudAudioSnapshot = {
 };
 
 describe("HUD audio events", () => {
+  it("emits explicit route action cues for launch and live resume", () => {
+    expect(buildLaunchAudioEvents({ status: "paused", preflightOpen: true, resultOpen: false })).toEqual(["route-launch"]);
+    expect(buildLaunchAudioEvents({ status: "paused", preflightOpen: false, resultOpen: false })).toEqual([]);
+    expect(buildLaunchAudioEvents({ status: "flying", preflightOpen: true, resultOpen: false })).toEqual([]);
+    expect(buildLaunchAudioEvents({ status: "crashed", preflightOpen: false, resultOpen: true })).toEqual([]);
+
+    expect(
+      buildPauseResumeAudioEvents({
+        status: "paused",
+        wasPaused: true,
+        nextPaused: false,
+        preflightOpen: false,
+        resultOpen: false
+      })
+    ).toEqual(["route-resume"]);
+    expect(
+      buildPauseResumeAudioEvents({
+        status: "paused",
+        wasPaused: false,
+        nextPaused: true,
+        preflightOpen: false,
+        resultOpen: false
+      })
+    ).toEqual([]);
+    expect(
+      buildPauseResumeAudioEvents({
+        status: "paused",
+        wasPaused: true,
+        nextPaused: false,
+        preflightOpen: true,
+        resultOpen: false
+      })
+    ).toEqual([]);
+    expect(
+      buildPauseResumeAudioEvents({
+        status: "crashed",
+        wasPaused: true,
+        nextPaused: false,
+        preflightOpen: false,
+        resultOpen: true
+      })
+    ).toEqual([]);
+  });
+
   it("emits terminal run events once when status changes", () => {
     expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, status: "delivered" })).toEqual(["delivery-complete"]);
     expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, status: "crashed" })).toEqual(["ship-crash"]);

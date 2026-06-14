@@ -80,6 +80,12 @@ export function hapticPatternForEvents(events: readonly GameAudioEvent[]): Hapti
   if (events.includes("comet-armed")) {
     return [12, 16, 12];
   }
+  if (events.includes("route-launch")) {
+    return [16, 20, 16];
+  }
+  if (events.includes("route-resume")) {
+    return [8, 10];
+  }
   if (events.includes("last-drop-armed")) {
     return [18, 18, 28];
   }

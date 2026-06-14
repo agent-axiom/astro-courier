@@ -120,7 +120,13 @@ import { buildRestartFlowTransition, type RestartFlowMode } from "./game/restart
 import { buildCrashDebrief, buildCrashReasonLabel } from "./game/crash";
 import { buildReplayCaptureReadout } from "./game/replayReadout";
 import { resolveRunHotkeyAction } from "./game/runHotkeys";
-import { deriveHudAudioEvents, type HudAudioSnapshot } from "./game/audioEvents";
+import {
+  buildLaunchAudioEvents,
+  buildPauseResumeAudioEvents,
+  deriveHudAudioEvents,
+  type GameAudioEvent,
+  type HudAudioSnapshot
+} from "./game/audioEvents";
 import { createGameAudioController, type GameAudioController } from "./game/gameAudio";
 import { createGameHapticsController, type GameHapticsController } from "./game/gameHaptics";
 import { buildAudioTogglePresentation } from "./game/audioControls";
@@ -941,8 +947,22 @@ export function App() {
     shellRef.current?.restart(transition.shellRestartPaused);
   };
 
+  const playRouteActionEvents = (events: GameAudioEvent[]) => {
+    audioRef.current?.play(events);
+    hapticsRef.current?.play(events);
+  };
+
   const setRunPaused = (next: boolean) => {
     audioRef.current?.unlock();
+    playRouteActionEvents(
+      buildPauseResumeAudioEvents({
+        status: hud.status,
+        wasPaused: paused,
+        nextPaused: next,
+        preflightOpen: overlays.preflight,
+        resultOpen: overlays.result
+      })
+    );
     pushScreenFeedback(
       buildPauseResumeScreenFeedback({
         status: hud.status,
@@ -958,6 +978,13 @@ export function App() {
 
   const launchContract = () => {
     audioRef.current?.unlock();
+    playRouteActionEvents(
+      buildLaunchAudioEvents({
+        status: hud.status,
+        preflightOpen: overlays.preflight,
+        resultOpen: overlays.result
+      })
+    );
     pushScreenFeedback(
       buildLaunchScreenFeedback({
         status: hud.status,
