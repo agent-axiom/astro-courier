@@ -520,7 +520,7 @@ export function App() {
     styleChainSecondsRemaining: hud.styleChainSecondsRemaining
   });
   const pickupRushActive = hud.objectivePhase === "pickup" && hud.quickPickupSecondsRemaining > 0 && !runFinished;
-  const radioMessage = buildRadioMessage(hud);
+  const radioMessage = buildRadioMessage(hud, { preflightOpen });
   const targetDistanceLabel = hud.targetDistance === undefined ? "-" : `${Math.round(hud.targetDistance)}m`;
   const bearingGuidance = hud.targetRelativeBearing === undefined ? undefined : formatBearingGuidance(hud.targetRelativeBearing);
   const dockingSpeedReadout = buildDockingSpeedReadout({

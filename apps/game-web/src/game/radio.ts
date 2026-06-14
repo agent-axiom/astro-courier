@@ -18,8 +18,15 @@ const cometReserveNearMissRatio = 0.6;
 const cleanCargoDamageLimit = 0.02;
 const perfectLandingBonus = 300;
 
-export function buildRadioMessage(hud: HudState): string {
+export type RadioMessageContext = {
+  preflightOpen?: boolean;
+};
+
+export function buildRadioMessage(hud: HudState, context: RadioMessageContext = {}): string {
   if (hud.status === "paused") {
+    if (context.preflightOpen === false) {
+      return buildLivePauseMessage(hud);
+    }
     if (hud.cargoKind === "time-sensitive") {
       return `Rush cargo loaded: ${hud.cargoName}. Gold window is ${hud.paceSecondsRemaining.toFixed(1)}s; launch clean.`;
     }
@@ -215,6 +222,14 @@ export function buildRadioMessage(hud: HudState): string {
   }
 
   return "Pickup beacon active. Bring the courier close and keep it tidy.";
+}
+
+function buildLivePauseMessage(hud: HudState): string {
+  if (hud.objectivePhase === "delivery" && hud.cargoOnboard) {
+    return `Route paused. Cargo line held for ${hud.destinationLabel}.`;
+  }
+
+  return `Route paused. Pickup line held for ${hud.pickupLabel}.`;
 }
 
 function buildUrgentStyleChainMessage(hud: HudState): string | undefined {

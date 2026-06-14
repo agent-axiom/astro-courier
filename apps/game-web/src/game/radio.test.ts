@@ -495,6 +495,23 @@ describe("radio feedback copy", () => {
     expect(buildRadioMessage({ ...baseHud, status: "paused" })).toContain("Contract loaded");
   });
 
+  it("uses live pause copy once the launch briefing is closed", () => {
+    expect(buildRadioMessage({ ...baseHud, status: "paused" }, { preflightOpen: false })).toBe(
+      "Route paused. Pickup line held for Luma North Pad."
+    );
+    expect(
+      buildRadioMessage(
+        {
+          ...baseHud,
+          status: "paused",
+          objectivePhase: "delivery",
+          cargoOnboard: true
+        },
+        { preflightOpen: false }
+      )
+    ).toBe("Route paused. Cargo line held for Tea Station Dock A.");
+  });
+
   it("calls out rush cargo in preflight radio copy", () => {
     expect(
       buildRadioMessage({
