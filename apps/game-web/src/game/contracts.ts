@@ -28,6 +28,7 @@ export type DailyDispatchBestRun = {
   medal: "none" | "bronze" | "silver" | "gold" | "comet";
   score?: number;
   elapsedSeconds?: number;
+  ghostTrail?: readonly { x: number; y: number }[];
 };
 
 export type DailyDispatchStatus = {
@@ -198,6 +199,9 @@ function formatDailyBestRun(bestRun: DailyDispatchBestRun): string | undefined {
   const result = `${Math.round(bestRun.score)} / ${bestRun.elapsedSeconds.toFixed(1)}s`;
   if (bestRun.medal === "comet") {
     return `Comet PB ${result}`;
+  }
+  if ((bestRun.ghostTrail?.length ?? 0) >= 2) {
+    return `Ghost PB ${result}`;
   }
   if (bestRun.medal === "gold") {
     return `Gold PB ${result}`;

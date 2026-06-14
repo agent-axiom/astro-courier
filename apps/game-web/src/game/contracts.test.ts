@@ -156,6 +156,21 @@ describe("contract rotation", () => {
       value: "Gold PB 2960 / 25.8s",
       tone: "chase"
     });
+    expect(
+      buildDailyDispatchStatus(dispatch, {
+        medal: "gold",
+        score: 2960,
+        elapsedSeconds: 25.8,
+        ghostTrail: [
+          { x: 0, y: 0 },
+          { x: 18, y: -6 }
+        ]
+      })
+    ).toEqual({
+      label: "Daily status",
+      value: "Ghost PB 2960 / 25.8s",
+      tone: "chase"
+    });
     expect(buildDailyDispatchStatus(dispatch, { medal: "comet", score: 3260, elapsedSeconds: 27.4 })).toEqual({
       label: "Daily status",
       value: "Comet PB 3260 / 27.4s",
