@@ -348,6 +348,42 @@ describe("result retry target", () => {
     });
   });
 
+  it("turns assist and boost burns into repeatable burn-control targets", () => {
+    expect(
+      buildRetryTarget({
+        status: "delivered",
+        medal: "silver",
+        lastMilestone: "Assist Burn",
+        elapsedSeconds: 34.6,
+        goldSeconds: 30,
+        score: 2190,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Repeat Assist Burn",
+      tone: "opportunity"
+    });
+
+    expect(
+      buildRetryTarget({
+        status: "delivered",
+        medal: "silver",
+        lastMilestone: "Boost Burn",
+        elapsedSeconds: 34.6,
+        goldSeconds: 30,
+        score: 2210,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Repeat Boost Burn",
+      tone: "opportunity"
+    });
+  });
+
   it("turns quick pickups into a repeatable fast-load target", () => {
     expect(
       buildRetryTarget({
@@ -755,6 +791,16 @@ describe("result retry action briefing", () => {
     ).toEqual({
       label: "Next run",
       value: "Lock the risk line",
+      tone: "opportunity"
+    });
+    expect(
+      buildRetryActionBriefing(
+        { label: "Repeat Line", tone: "opportunity", mode: "restart-run" },
+        { label: "Retry target", value: "Repeat Assist Burn", tone: "opportunity" }
+      )
+    ).toEqual({
+      label: "Next run",
+      value: "Lock burn control",
       tone: "opportunity"
     });
     expect(

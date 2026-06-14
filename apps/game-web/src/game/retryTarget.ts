@@ -191,6 +191,8 @@ function buildRepeatableMilestoneTarget(lastMilestone?: string): RetryTarget | u
     case "Perfect Approach":
     case "Chain Finish":
     case "Launch Burst":
+    case "Assist Burn":
+    case "Boost Burn":
     case "Quick Pickup":
     case "Clean Hazard Skim":
     case "Needle Thread":
@@ -282,6 +284,14 @@ export function buildRetryActionBriefing(action: ResultRetryAction, target: Retr
       return {
         label: "Next run",
         value: "Lock the risk line",
+        tone: "opportunity"
+      };
+    }
+
+    if (target.value === "Repeat Assist Burn" || target.value === "Repeat Boost Burn") {
+      return {
+        label: "Next run",
+        value: "Lock burn control",
         tone: "opportunity"
       };
     }
