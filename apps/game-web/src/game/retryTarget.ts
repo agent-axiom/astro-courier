@@ -1,4 +1,4 @@
-import type { CrashReason, RunMedal, RunStatus } from "@astro-courier/shared";
+import type { CrashReason, RunMedal, RunStatus, ScoreBreakdown } from "@astro-courier/shared";
 import type { BestRun } from "./bestRun";
 
 export type RetryTargetInput = {
@@ -14,6 +14,7 @@ export type RetryTargetInput = {
   fuel?: number;
   maxFuel?: number;
   landingBonus?: number;
+  scoreBreakdown?: ScoreBreakdown;
   score: number;
   isNewBest: boolean;
   bestRun: BestRun | undefined;
@@ -54,6 +55,7 @@ export type RetryActionBriefing = {
 const cleanCargoDamageLimit = 0.02;
 const cometReserveMinRatio = 0.75;
 const cometReserveNearMissRatio = 0.6;
+const dangerPayMinBonus = 300;
 const perfectLandingBonus = 300;
 
 export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
@@ -123,6 +125,14 @@ export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
   const milestoneTarget = buildRepeatableMilestoneTarget(input.lastMilestone);
   if (milestoneTarget) {
     return milestoneTarget;
+  }
+
+  if (isDangerPayClear(input.scoreBreakdown)) {
+    return {
+      label: "Retry target",
+      value: "Repeat Danger Pay",
+      tone: "opportunity"
+    };
   }
 
   if ((input.cargoDamage ?? 0) > cleanCargoDamageLimit) {
@@ -268,6 +278,14 @@ export function buildRetryActionBriefing(action: ResultRetryAction, target: Retr
     };
   }
   if (action.label === "Repeat Line") {
+    if (target.value === "Repeat Danger Pay") {
+      return {
+        label: "Next run",
+        value: "Lock the risk line",
+        tone: "opportunity"
+      };
+    }
+
     return {
       label: "Next run",
       value: "Lock the style route",
@@ -343,6 +361,14 @@ function isLaneRepairTarget(value: string): boolean {
     value === "Hold outer sling lane" ||
     value === "Clear relay lane" ||
     value === "Clear asteroid field"
+  );
+}
+
+function isDangerPayClear(scoreBreakdown: ScoreBreakdown | undefined): boolean {
+  return Boolean(
+    scoreBreakdown &&
+      scoreBreakdown.dangerBonus > scoreBreakdown.styleBonus &&
+      scoreBreakdown.dangerBonus >= dangerPayMinBonus
   );
 }
 

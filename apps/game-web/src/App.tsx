@@ -753,6 +753,7 @@ export function App() {
     fuel: hud.fuel,
     maxFuel: hud.maxFuel,
     landingBonus: hud.scoreBreakdown.landingBonus,
+    scoreBreakdown: hud.scoreBreakdown,
     score: hud.score,
     isNewBest: newBest,
     bestRun

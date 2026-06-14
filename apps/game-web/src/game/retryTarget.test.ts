@@ -437,6 +437,38 @@ describe("result retry target", () => {
     });
   });
 
+  it("turns danger-pay clears into a repeatable risk-line target", () => {
+    expect(
+      buildRetryTarget({
+        status: "delivered",
+        medal: "gold",
+        lastMilestone: "Express Finish",
+        elapsedSeconds: 28.4,
+        goldSeconds: 30,
+        cargoDamage: 0,
+        landingBonus: 300,
+        score: 3120,
+        scoreBreakdown: {
+          base: 1000,
+          paceBonus: 400,
+          fuelBonus: 180,
+          cargoBonus: 500,
+          landingBonus: 300,
+          styleBonus: 120,
+          dangerBonus: 360,
+          incidentPenalty: 0,
+          total: 2660
+        },
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Repeat Danger Pay",
+      tone: "opportunity"
+    });
+  });
+
   it("turns scratched deliveries into a clean-cargo recovery target", () => {
     expect(
       buildRetryTarget({
@@ -713,6 +745,16 @@ describe("result retry action briefing", () => {
     ).toEqual({
       label: "Next run",
       value: "Lock the style route",
+      tone: "opportunity"
+    });
+    expect(
+      buildRetryActionBriefing(
+        { label: "Repeat Line", tone: "opportunity", mode: "restart-run" },
+        { label: "Retry target", value: "Repeat Danger Pay", tone: "opportunity" }
+      )
+    ).toEqual({
+      label: "Next run",
+      value: "Lock the risk line",
       tone: "opportunity"
     });
     expect(
