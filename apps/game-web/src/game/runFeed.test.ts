@@ -227,10 +227,37 @@ describe("run action feed", () => {
     ]);
   });
 
+  it("celebrates clean escapes from dangerous projected hazard lines", () => {
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, trajectoryRiskLevel: "inside", trajectoryRiskSeconds: 1.2, cargoDamage: 0 },
+        { ...baseSnapshot, trajectoryRiskLevel: undefined, trajectoryRiskSeconds: undefined, cargoDamage: 0 }
+      )
+    ).toEqual([
+      {
+        label: "Clean escape",
+        value: "Cargo intact",
+        tone: "success"
+      }
+    ]);
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, trajectoryRiskLevel: "inside", trajectoryRiskSeconds: 1.2, cargoDamage: 0 },
+        { ...baseSnapshot, status: "crashed", trajectoryRiskLevel: undefined, trajectoryRiskSeconds: undefined, cargoDamage: 0 }
+      )
+    ).toEqual([
+      {
+        label: "Insurance event",
+        value: "Review approach",
+        tone: "danger"
+      }
+    ]);
+  });
+
   it("announces when the projected trajectory clears hazard space", () => {
     expect(
       deriveRunFeedUpdates(
-        { ...baseSnapshot, trajectoryRiskLevel: "inside", trajectoryRiskSeconds: 1.2 },
+        { ...baseSnapshot, trajectoryRiskLevel: "near", trajectoryRiskSeconds: 1.8 },
         { ...baseSnapshot, trajectoryRiskLevel: undefined, trajectoryRiskSeconds: undefined }
       )
     ).toEqual([
@@ -242,8 +269,8 @@ describe("run action feed", () => {
     ]);
     expect(
       deriveRunFeedUpdates(
-        { ...baseSnapshot, trajectoryRiskLevel: "near", trajectoryRiskSeconds: 1.8 },
-        { ...baseSnapshot, trajectoryRiskLevel: undefined, trajectoryRiskSeconds: undefined }
+        { ...baseSnapshot, trajectoryRiskLevel: "inside", trajectoryRiskSeconds: 1.2, cargoDamage: 0.08 },
+        { ...baseSnapshot, trajectoryRiskLevel: undefined, trajectoryRiskSeconds: undefined, cargoDamage: 0.08 }
       )
     ).toEqual([
       {

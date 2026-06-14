@@ -348,6 +348,14 @@ describe("screen feedback", () => {
   });
 
   it("maps trajectory clears to quick success feedback", () => {
+    expect(buildScreenFeedback(["clean-escape"])).toEqual({
+      label: "Clean escape",
+      value: "Hazard dodged",
+      accent: "precision",
+      tone: "success",
+      intensity: "medium",
+      durationMs: 420
+    });
     expect(buildScreenFeedback(["trajectory-clear"])).toEqual({
       label: "Vector clear",
       value: "Line recovered",

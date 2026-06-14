@@ -35,6 +35,9 @@ export function hapticPatternForEvents(events: readonly GameAudioEvent[]): Hapti
   if (events.includes("thread-window")) {
     return [10, 10];
   }
+  if (events.includes("clean-escape")) {
+    return [10, 10, 18];
+  }
   if (events.includes("trajectory-clear")) {
     return [8, 8];
   }

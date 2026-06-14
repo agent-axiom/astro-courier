@@ -185,6 +185,9 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[], milestone
   if (events.includes("thread-window")) {
     return { label: "Thread window", value: "Needle gap", accent: "precision", tone: "style", intensity: "medium", durationMs: 420 };
   }
+  if (events.includes("clean-escape")) {
+    return { label: "Clean escape", value: "Hazard dodged", accent: "precision", tone: "success", intensity: "medium", durationMs: 420 };
+  }
   if (events.includes("trajectory-clear")) {
     return { label: "Vector clear", value: "Line recovered", tone: "success", intensity: "light", durationMs: 300 };
   }

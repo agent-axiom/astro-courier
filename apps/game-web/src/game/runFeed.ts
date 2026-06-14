@@ -300,6 +300,12 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
         tone: "warning"
       });
     }
+  } else if (hasCleanEscapedTrajectoryRisk(previous, current)) {
+    updates.push({
+      label: "Clean escape",
+      value: "Cargo intact",
+      tone: "success"
+    });
   } else if (hasClearedTrajectoryRisk(previous, current)) {
     updates.push({
       label: "Vector clear",
@@ -441,8 +447,19 @@ function hasSpentNoBrakeFinesse(previous: RunFeedSnapshot, current: RunFeedSnaps
 
 function hasClearedTrajectoryRisk(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
   return (
+    current.status === "flying" &&
     (previous.trajectoryRiskLevel === "inside" || previous.trajectoryRiskLevel === "near") &&
     current.trajectoryRiskLevel === undefined
+  );
+}
+
+function hasCleanEscapedTrajectoryRisk(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
+  return (
+    current.status === "flying" &&
+    previous.trajectoryRiskLevel === "inside" &&
+    current.trajectoryRiskLevel === undefined &&
+    (previous.cargoDamage ?? 0) <= cleanCargoDamageLimit &&
+    (current.cargoDamage ?? 0) <= cleanCargoDamageLimit
   );
 }
 

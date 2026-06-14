@@ -73,6 +73,7 @@ const eventTones: Record<GameAudioEvent, { frequency: number; duration: number; 
   "cargo-damage": { frequency: 340, duration: 0.1, gain: 0.045 },
   "hazard-contact": { frequency: 160, duration: 0.14, gain: 0.055 },
   "thread-window": { frequency: 860, duration: 0.09, gain: 0.046 },
+  "clean-escape": { frequency: 940, duration: 0.1, gain: 0.047 },
   "trajectory-warning": { frequency: 300, duration: 0.11, gain: 0.045 },
   "trajectory-caution": { frequency: 440, duration: 0.08, gain: 0.038 },
   "trajectory-clear": { frequency: 680, duration: 0.07, gain: 0.04 }

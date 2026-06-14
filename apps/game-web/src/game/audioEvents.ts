@@ -34,6 +34,7 @@ export type GameAudioEvent =
   | "cargo-damage"
   | "hazard-contact"
   | "thread-window"
+  | "clean-escape"
   | "trajectory-warning"
   | "trajectory-caution"
   | "trajectory-clear";
@@ -192,6 +193,8 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
     } else {
       events.push("trajectory-caution");
     }
+  } else if (hasCleanEscapedTrajectoryRisk(previous, current)) {
+    events.push("clean-escape");
   } else if (hasClearedTrajectoryRisk(previous, current)) {
     events.push("trajectory-clear");
   }
@@ -253,6 +256,16 @@ function hasClearedTrajectoryRisk(previous: HudAudioSnapshot | undefined, curren
     current.status === "flying" &&
     (previous?.trajectoryRiskLevel === "inside" || previous?.trajectoryRiskLevel === "near") &&
     current.trajectoryRiskLevel === undefined
+  );
+}
+
+function hasCleanEscapedTrajectoryRisk(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {
+  return (
+    current.status === "flying" &&
+    previous?.trajectoryRiskLevel === "inside" &&
+    current.trajectoryRiskLevel === undefined &&
+    (previous.cargoDamage ?? 0) <= cleanCargoDamageLimit &&
+    (current.cargoDamage ?? 0) <= cleanCargoDamageLimit
   );
 }
 

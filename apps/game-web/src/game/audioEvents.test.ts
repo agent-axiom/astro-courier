@@ -346,17 +346,26 @@ describe("HUD audio events", () => {
     ).toEqual([]);
   });
 
+  it("celebrates clean escapes when a dangerous trajectory line clears without cargo damage", () => {
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, trajectoryRiskLevel: "inside", cargoDamage: 0 },
+        { ...baseSnapshot, trajectoryRiskLevel: undefined, cargoDamage: 0 }
+      )
+    ).toEqual(["clean-escape"]);
+  });
+
   it("signals when the predicted trajectory clears a dangerous line", () => {
     expect(
       deriveHudAudioEvents(
-        { ...baseSnapshot, trajectoryRiskLevel: "inside" },
+        { ...baseSnapshot, trajectoryRiskLevel: "near" },
         { ...baseSnapshot, trajectoryRiskLevel: undefined }
       )
     ).toEqual(["trajectory-clear"]);
     expect(
       deriveHudAudioEvents(
-        { ...baseSnapshot, trajectoryRiskLevel: "near" },
-        { ...baseSnapshot, trajectoryRiskLevel: undefined }
+        { ...baseSnapshot, trajectoryRiskLevel: "inside", cargoDamage: 0.08 },
+        { ...baseSnapshot, trajectoryRiskLevel: undefined, cargoDamage: 0.08 }
       )
     ).toEqual(["trajectory-clear"]);
     expect(
