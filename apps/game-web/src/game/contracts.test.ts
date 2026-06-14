@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildActiveDailyDispatchPulse,
   buildContractDangerPayTrait,
   buildContractModifiers,
   buildContractOptionHook,
@@ -247,6 +248,24 @@ describe("contract rotation", () => {
       label: "Daily pulse",
       value: "Hazards stable",
       tone: "steady"
+    });
+  });
+
+  it("only exposes the daily hazard pulse for the active daily route", () => {
+    const dispatch = {
+      label: "Daily dispatch" as const,
+      value: "First Light Delivery",
+      contractId: "first-light-delivery",
+      seed: "daily-2026-07-01-first-light-delivery",
+      tone: "daily" as const
+    };
+
+    expect(buildActiveDailyDispatchPulse(dispatch, "return-leg")).toBeUndefined();
+    expect(buildActiveDailyDispatchPulse(undefined, "first-light-delivery")).toBeUndefined();
+    expect(buildActiveDailyDispatchPulse(dispatch, "first-light-delivery")).toEqual({
+      label: "Daily pulse",
+      value: "Hazards +7%",
+      tone: "hot"
     });
   });
 

@@ -270,6 +270,14 @@ export function buildDailyDispatchPulse(dispatch: DailyDispatch | undefined): Da
   };
 }
 
+export function buildActiveDailyDispatchPulse(dispatch: DailyDispatch | undefined, currentContractId: string): DailyDispatchPulse | undefined {
+  if (!dispatch || dispatch.contractId !== currentContractId) {
+    return undefined;
+  }
+
+  return buildDailyDispatchPulse(dispatch);
+}
+
 export function buildDailyDispatchResult(input: DailyDispatchResultInput): DailyDispatchResult | undefined {
   if (!input.dispatch || input.dispatch.contractId !== input.contractId) {
     return undefined;

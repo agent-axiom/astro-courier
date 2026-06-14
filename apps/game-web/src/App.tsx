@@ -43,6 +43,7 @@ import { GameShell, type HudState } from "./game/GameShell";
 import { formatBearingGuidance } from "./game/bearing";
 import { buildBoostControlPresentation, buildBrakeControlPresentation, buildPrimaryRunControlPresentation, canUseImpulseControl } from "./game/hudControls";
 import {
+  buildActiveDailyDispatchPulse,
   buildContractDangerPayTrait,
   buildContractHazardTrait,
   buildContractModifiers,
@@ -610,6 +611,7 @@ export function App() {
   const dailyDispatchAction = buildDailyDispatchAction(dailyDispatch, hud.contractId);
   const dailyDispatchReset = buildDailyDispatchReset(dailyDispatch, currentDate);
   const dailyDispatchPulse = buildDailyDispatchPulse(dailyDispatch);
+  const activeDailyDispatchPulse = buildActiveDailyDispatchPulse(dailyDispatch, hud.contractId);
   const dailyDispatchStatus = buildDailyDispatchStatus(
     dailyDispatch,
     dailyDispatch ? bestRunsByContract[dailyDispatch.contractId] : undefined
@@ -1045,6 +1047,16 @@ export function App() {
           <span>{paceLabel(hud.paceTier)}</span>
           <strong>{hud.paceTier === "overtime" ? "Expired" : `${hud.paceSecondsRemaining.toFixed(1)}s`}</strong>
         </div>
+        {!preflightOpen && activeDailyDispatchPulse ? (
+          <div
+            className={`daily-pulse-chip daily-pulse-chip-${activeDailyDispatchPulse.tone}`}
+            aria-label={`${activeDailyDispatchPulse.label}: ${activeDailyDispatchPulse.value}`}
+          >
+            <CalendarDays size={16} />
+            <span>{activeDailyDispatchPulse.label}</span>
+            <strong>{activeDailyDispatchPulse.value}</strong>
+          </div>
+        ) : null}
         {cometRunReadout ? (
           <div className={`comet-chip comet-${cometRunReadout.tone}`} aria-label={`${cometRunReadout.label}: ${cometRunReadout.value}`}>
             <Star size={16} />
