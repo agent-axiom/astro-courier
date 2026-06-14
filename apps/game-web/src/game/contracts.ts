@@ -783,6 +783,14 @@ export function buildContractOptionHook(input: ContractRoutePlanInput): Contract
     };
   }
 
+  if (input.cargoKind === "unstable") {
+    return {
+      label: "Pick for",
+      value: "Brake discipline",
+      tone: "cargo"
+    };
+  }
+
   if (input.goldSeconds <= 25) {
     return {
       label: "Pick for",

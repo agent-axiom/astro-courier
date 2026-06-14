@@ -938,6 +938,17 @@ describe("contract option hooks", () => {
     });
     expect(
       buildContractOptionHook({
+        cargoKind: "unstable",
+        cargoFragility: 0.95,
+        goldSeconds: 28
+      })
+    ).toEqual({
+      label: "Pick for",
+      value: "Brake discipline",
+      tone: "cargo"
+    });
+    expect(
+      buildContractOptionHook({
         cargoKind: "standard",
         cargoFragility: 1,
         goldSeconds: 24
