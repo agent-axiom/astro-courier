@@ -281,4 +281,74 @@ describe("result stat formatting", () => {
       tone: "style"
     });
   });
+
+  it("summarizes finish mastery milestones as distinct run identities", () => {
+    expect(
+      buildRunIdentityReceipt({
+        status: "delivered",
+        lastMilestone: "Launch Burst",
+        medal: "gold",
+        grade: "A",
+        cargoDamage: 0,
+        fuel: 48,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 330 }
+      })
+    ).toEqual({
+      label: "Run identity",
+      value: "Burst-launch route",
+      tone: "style"
+    });
+
+    expect(
+      buildRunIdentityReceipt({
+        status: "delivered",
+        lastMilestone: "Eco Drift",
+        medal: "gold",
+        grade: "A",
+        cargoDamage: 0,
+        fuel: 72,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 160, fuelBonus: 280 }
+      })
+    ).toEqual({
+      label: "Run identity",
+      value: "Eco-drift route",
+      tone: "clean"
+    });
+
+    expect(
+      buildRunIdentityReceipt({
+        status: "delivered",
+        lastMilestone: "Damage Control",
+        medal: "silver",
+        grade: "B",
+        cargoDamage: 0.18,
+        fuel: 44,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 140 }
+      })
+    ).toEqual({
+      label: "Run identity",
+      value: "Damage-control save",
+      tone: "clutch"
+    });
+
+    expect(
+      buildRunIdentityReceipt({
+        status: "delivered",
+        lastMilestone: "No Brake Finesse",
+        medal: "silver",
+        grade: "B",
+        cargoDamage: 0,
+        fuel: 36,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 150 }
+      })
+    ).toEqual({
+      label: "Run identity",
+      value: "No-brake finesse line",
+      tone: "style"
+    });
+  });
 });

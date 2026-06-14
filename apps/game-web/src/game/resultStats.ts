@@ -201,6 +201,38 @@ export function buildRunIdentityReceipt(input: RunIdentityReceiptInput): RunIden
     };
   }
 
+  if (input.lastMilestone === "Launch Burst") {
+    return {
+      label: "Run identity",
+      value: "Burst-launch route",
+      tone: "style"
+    };
+  }
+
+  if (input.lastMilestone === "Eco Drift") {
+    return {
+      label: "Run identity",
+      value: "Eco-drift route",
+      tone: "clean"
+    };
+  }
+
+  if (input.lastMilestone === "Damage Control") {
+    return {
+      label: "Run identity",
+      value: "Damage-control save",
+      tone: "clutch"
+    };
+  }
+
+  if (input.lastMilestone === "No Brake Finesse") {
+    return {
+      label: "Run identity",
+      value: "No-brake finesse line",
+      tone: "style"
+    };
+  }
+
   if (input.scoreBreakdown.dangerBonus > input.scoreBreakdown.styleBonus && input.scoreBreakdown.dangerBonus >= 300) {
     return {
       label: "Run identity",
