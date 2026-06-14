@@ -264,6 +264,29 @@ describe("run action feed", () => {
     ).toEqual([]);
   });
 
+  it("points critical clean no-brake delivery chains at a finesse dock", () => {
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, objectivePhase: "delivery", styleMultiplier: 1.5, styleChainSecondsRemaining: 1.4 },
+        {
+          ...baseSnapshot,
+          objectivePhase: "delivery",
+          landingStatus: "ready",
+          cargoDamage: 0,
+          manualBrakeUsed: false,
+          styleMultiplier: 1.5,
+          styleChainSecondsRemaining: 0.8
+        }
+      )
+    ).toEqual([
+      {
+        label: "Finesse dock",
+        value: "+150 / chain x1.50 / 0.8s",
+        tone: "style"
+      }
+    ]);
+  });
+
   it("announces when a critical style chain is saved back into a live window", () => {
     expect(
       deriveRunFeedUpdates(

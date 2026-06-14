@@ -1,4 +1,9 @@
-import { HAZARD_THREAD_SPEED_THRESHOLD, PERFECT_APPROACH_STREAK_SECONDS, PERFECT_APPROACH_STYLE_BONUS } from "@astro-courier/simulation";
+import {
+  HAZARD_THREAD_SPEED_THRESHOLD,
+  NO_BRAKE_STYLE_BONUS,
+  PERFECT_APPROACH_STREAK_SECONDS,
+  PERFECT_APPROACH_STYLE_BONUS
+} from "@astro-courier/simulation";
 import type { LandingGuidanceStatus, ObjectivePhase, RunMedal, RunStatus } from "@astro-courier/shared";
 import { COMET_RESERVE_MIN_RATIO, COMET_RESERVE_WARNING_RATIO, isLiveCometDockArmed } from "./comet";
 import type { ContractPaceTier } from "./pace";
@@ -184,11 +189,7 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
   }
 
   if (hasStyleChainReachedCriticalWindow(previous, current)) {
-    updates.push({
-      label: "Chain fading",
-      value: `Save in ${formatSeconds(current.styleChainSecondsRemaining)}`,
-      tone: "warning"
-    });
+    updates.push(buildCriticalStyleChainUpdate(current));
   }
 
   if (hasCrossedBestRunScore(previous, current)) {
@@ -431,6 +432,27 @@ function hasStyleChainReachedCriticalWindow(previous: RunFeedSnapshot, current: 
     (previous.styleChainSecondsRemaining ?? 0) > criticalStyleChainSeconds &&
     (current.styleChainSecondsRemaining ?? 0) <= criticalStyleChainSeconds
   );
+}
+
+function buildCriticalStyleChainUpdate(current: RunFeedSnapshot): RunFeedUpdate {
+  if (
+    current.objectivePhase === "delivery" &&
+    current.landingStatus === "ready" &&
+    current.manualBrakeUsed === false &&
+    (current.cargoDamage ?? 0) <= cleanCargoDamageLimit
+  ) {
+    return {
+      label: "Finesse dock",
+      value: `+${NO_BRAKE_STYLE_BONUS} / chain x${(current.styleMultiplier ?? 1).toFixed(2)} / ${formatSeconds(current.styleChainSecondsRemaining)}`,
+      tone: "style"
+    };
+  }
+
+  return {
+    label: "Chain fading",
+    value: `Save in ${formatSeconds(current.styleChainSecondsRemaining)}`,
+    tone: "warning"
+  };
 }
 
 function hasStyleChainBecomeLive(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
