@@ -704,8 +704,9 @@ function applyCargoHandlingStress(world: SimulationWorld, fixedDt: number, brake
     return;
   }
 
+  const stressMultiplier = Math.max(0.25, world.activeCargo.fragility);
   world.ship.cargoDamage = clamp(
-    world.ship.cargoDamage + brakeAmount * Math.max(0, fixedDt) * UNSTABLE_BRAKE_STRESS_PER_SECOND,
+    world.ship.cargoDamage + brakeAmount * Math.max(0, fixedDt) * UNSTABLE_BRAKE_STRESS_PER_SECOND * stressMultiplier,
     0,
     1
   );

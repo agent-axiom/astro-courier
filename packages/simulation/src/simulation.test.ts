@@ -872,6 +872,11 @@ describe("deterministic Astro Courier simulation", () => {
           ...starterSystem.contracts[0],
           id: "unstable-run",
           cargoId: "volatile-comet-ice"
+        },
+        {
+          ...starterSystem.contracts[0],
+          id: "fragile-unstable-run",
+          cargoId: "volatile-antimatter-vial"
         }
       ],
       cargo: [
@@ -881,12 +886,21 @@ describe("deterministic Astro Courier simulation", () => {
           name: "Volatile Comet Ice",
           kind: "unstable",
           fragility: 1
+        },
+        {
+          id: "volatile-antimatter-vial",
+          name: "Volatile Antimatter Vial",
+          kind: "unstable",
+          fragility: 1.5
         }
       ]
     };
     const stable = createWorldFromSystem(systemWithBrakeSensitiveCargo, "brake-sensitive-cargo-seed", { contractId: "stable-run" });
     const unstable = createWorldFromSystem(systemWithBrakeSensitiveCargo, "brake-sensitive-cargo-seed", { contractId: "unstable-run" });
-    for (const world of [stable, unstable]) {
+    const fragileUnstable = createWorldFromSystem(systemWithBrakeSensitiveCargo, "brake-sensitive-cargo-seed", {
+      contractId: "fragile-unstable-run"
+    });
+    for (const world of [stable, unstable, fragileUnstable]) {
       world.cargoOnboard = true;
       world.objectivePhase = "delivery";
       world.ship.position = { x: 500, y: 500 };
@@ -895,9 +909,11 @@ describe("deterministic Astro Courier simulation", () => {
 
     stepWorld(stable, 1, [{ type: "BRAKE", amount: 1 }]);
     stepWorld(unstable, 1, [{ type: "BRAKE", amount: 1 }]);
+    stepWorld(fragileUnstable, 1, [{ type: "BRAKE", amount: 1 }]);
 
     expect(stable.ship.cargoDamage).toBe(0);
     expect(unstable.ship.cargoDamage).toBeCloseTo(0.012, 3);
+    expect(fragileUnstable.ship.cargoDamage).toBeCloseTo(0.018, 3);
   });
 
   it("scales hazard contact damage by active cargo fragility", () => {
