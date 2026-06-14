@@ -383,6 +383,24 @@ describe("style target cue", () => {
     });
   });
 
+  it("frames quick pickup as a chain target while a multiplier is live", () => {
+    expect(
+      buildStyleTargetCue({
+        status: "flying",
+        objectivePhase: "pickup",
+        styleBonus: 180,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 2.4,
+        quickPickupSecondsRemaining: 4.2,
+        quickPickupBonus: 180
+      })
+    ).toEqual({
+      label: "Style target",
+      value: "Pickup rush / +180 / 4.2s / chain x1.50",
+      tone: "chain"
+    });
+  });
+
   it("teaches the launch burst follow-up after a fast pickup", () => {
     expect(
       buildStyleTargetCue({

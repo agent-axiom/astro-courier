@@ -137,8 +137,8 @@ export function buildStyleTargetCue(input: StyleTargetCueInput): StyleTargetCue 
   ) {
     return {
       label: "Style target",
-      value: `Pickup rush / +${Math.round(input.quickPickupBonus ?? 0)} / ${(input.quickPickupSecondsRemaining ?? 0).toFixed(1)}s`,
-      tone: "opportunity"
+      value: `Pickup rush / +${Math.round(input.quickPickupBonus ?? 0)} / ${(input.quickPickupSecondsRemaining ?? 0).toFixed(1)}s${chainSuffix}`,
+      tone: chainActive ? "chain" : "opportunity"
     };
   }
 
