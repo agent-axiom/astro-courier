@@ -38,6 +38,13 @@ describe("responsive game layout CSS", () => {
     expect(styles).toContain(".tempo-chip-danger");
   });
 
+  it("defines tone-aware route tempo action chips", () => {
+    expect(styles).toContain(".tempo-action-chip");
+    expect(styles).toContain(".tempo-action-flow");
+    expect(styles).toContain(".tempo-action-clutch");
+    expect(styles).toContain(".tempo-action-danger");
+  });
+
   it("defines ambient route tempo shell states", () => {
     expect(styles).toContain(".app-route-tempo-flow::before");
     expect(styles).toContain(".app-route-tempo-clutch::before");

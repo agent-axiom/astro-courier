@@ -28,6 +28,20 @@ export type RouteTempoReadout = {
   progress: number;
 };
 
+export type RouteTempoActionInput = {
+  routeTempo?: RouteTempoReadout;
+  status: RunStatus;
+  preflightOpen: boolean;
+  speed?: number;
+  targetDistance?: number;
+};
+
+export type RouteTempoAction = {
+  label: "Tempo action";
+  value: string;
+  tone: RouteTempoReadout["tone"];
+};
+
 const criticalFuelRatio = 0.15;
 const cleanCargoDamageLimit = 0.02;
 const chainCashoutSeconds = 1.2;
@@ -97,12 +111,48 @@ export function buildRouteTempoShellClass(routeTempo: RouteTempoReadout | undefi
   return routeTempo ? `app-route-tempo-${routeTempo.tone}` : "app-route-tempo-none";
 }
 
+export function buildRouteTempoAction(input: RouteTempoActionInput): RouteTempoAction | undefined {
+  if (input.preflightOpen || input.status !== "flying" || !input.routeTempo) {
+    return undefined;
+  }
+
+  if (input.routeTempo.tone === "danger") {
+    return tempoAction("Evade now", input.routeTempo.tone);
+  }
+
+  if (input.routeTempo.tone === "clutch") {
+    if (input.routeTempo.value.startsWith("Cash chain")) {
+      return tempoAction("Cash chain", input.routeTempo.tone);
+    }
+
+    if (input.routeTempo.value.startsWith("Gold close")) {
+      return tempoAction("Close gold", input.routeTempo.tone);
+    }
+
+    return tempoAction("Protect fuel", input.routeTempo.tone);
+  }
+
+  if (input.routeTempo.tone === "flow") {
+    return tempoAction(input.routeTempo.value.startsWith("Perfect flow") ? "Hold flow" : "Extend chain", input.routeTempo.tone);
+  }
+
+  return tempoAction((input.speed ?? 0) > 0 && input.targetDistance !== undefined ? "Boost line" : "Build speed", input.routeTempo.tone);
+}
+
 function routeTempo(value: string, tone: RouteTempoReadout["tone"], progress: number): RouteTempoReadout {
   return {
     label: "Route tempo",
     value,
     tone,
     progress: round(clamp(progress, 0, 1), 2)
+  };
+}
+
+function tempoAction(value: string, tone: RouteTempoReadout["tone"]): RouteTempoAction {
+  return {
+    label: "Tempo action",
+    value,
+    tone
   };
 }
 

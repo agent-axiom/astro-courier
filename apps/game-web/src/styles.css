@@ -1066,6 +1066,62 @@ button {
   color: #ffadc1;
 }
 
+.tempo-action-chip {
+  display: grid;
+  grid-template-columns: 16px auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  background: rgba(160, 196, 255, 0.08);
+  color: #d8e6ff;
+  font-size: 0.78rem;
+  font-weight: 860;
+}
+
+.tempo-action-chip span,
+.tempo-action-chip strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.tempo-action-chip span {
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+}
+
+.tempo-action-chip strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.tempo-action-push {
+  border-color: rgba(124, 225, 255, 0.2);
+  background: rgba(124, 225, 255, 0.09);
+  color: #c6f6ff;
+}
+
+.tempo-action-flow {
+  border-color: rgba(142, 230, 184, 0.28);
+  background: rgba(142, 230, 184, 0.12);
+  color: #bff7d8;
+}
+
+.tempo-action-clutch {
+  border-color: rgba(255, 209, 102, 0.3);
+  background: rgba(255, 209, 102, 0.13);
+  color: #ffe19a;
+}
+
+.tempo-action-danger {
+  border-color: rgba(255, 111, 145, 0.34);
+  background: rgba(255, 111, 145, 0.14);
+  color: #ffadc1;
+}
+
 .action-feed {
   display: grid;
   gap: 6px;

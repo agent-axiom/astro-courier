@@ -117,7 +117,7 @@ import { getOverlayVisibility } from "./game/overlays";
 import { buildCometRunReadout } from "./game/comet";
 import { buildResultRetryAction, buildRetryActionBriefing, buildRetryTarget } from "./game/retryTarget";
 import { buildRunIntensity } from "./game/intensity";
-import { buildRouteTempo, buildRouteTempoShellClass } from "./game/tempo";
+import { buildRouteTempo, buildRouteTempoAction, buildRouteTempoShellClass } from "./game/tempo";
 import { buildRestartFlowTransition, type RestartFlowMode } from "./game/restartFlow";
 import { buildCrashDebrief, buildCrashReasonLabel } from "./game/crash";
 import { buildReplayCaptureReadout } from "./game/replayReadout";
@@ -645,6 +645,13 @@ export function App() {
     styleChainSecondsRemaining: hud.styleChainSecondsRemaining
   });
   const routeTempoShellClass = buildRouteTempoShellClass(routeTempo);
+  const routeTempoAction = buildRouteTempoAction({
+    routeTempo,
+    status: hud.status,
+    preflightOpen,
+    speed: hud.speed,
+    targetDistance: hud.targetDistance
+  });
   const routeTempoStyle = { "--route-tempo-progress": routeTempo?.progress ?? 0 } as CSSProperties;
   const routeFocusReadout = buildRouteFocusReadout({
     status: hud.status,
@@ -1294,6 +1301,13 @@ export function App() {
             <Gauge size={16} />
             <span>{routeTempo.label}</span>
             <strong>{routeTempo.value}</strong>
+          </div>
+        ) : null}
+        {routeTempoAction ? (
+          <div className={`tempo-action-chip tempo-action-${routeTempoAction.tone}`} aria-label={`${routeTempoAction.label}: ${routeTempoAction.value}`}>
+            <ArrowRight size={16} />
+            <span>{routeTempoAction.label}</span>
+            <strong>{routeTempoAction.value}</strong>
           </div>
         ) : null}
         {runFeed.length > 0 && !preflightOpen ? (
