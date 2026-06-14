@@ -120,6 +120,17 @@ describe("game audio controller", () => {
     expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.08, 3);
   });
 
+  it("plays a short amber cue for early tempo clutch windows", () => {
+    const context = new FakeAudioContext();
+    const controller = createGameAudioController({ createContext: () => context });
+
+    controller.play(["tempo-clutch"]);
+
+    expect(context.oscillators).toHaveLength(1);
+    expect(context.oscillators[0]?.frequencyValue).toBe(680);
+    expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.1, 3);
+  });
+
   it("plays a glassy confirmation tone for antimatter drift", () => {
     const context = new FakeAudioContext();
     const controller = createGameAudioController({ createContext: () => context });

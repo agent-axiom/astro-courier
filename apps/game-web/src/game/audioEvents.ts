@@ -13,6 +13,7 @@ export type GameAudioEvent =
   | "route-launch"
   | "route-resume"
   | "tempo-flow"
+  | "tempo-clutch"
   | "launch-burst"
   | "cargo-loaded"
   | "pickup-lineup"
@@ -236,18 +237,33 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
   if (events.length === 0 && hasEnteredRouteTempoFlow(previous, current)) {
     events.push("tempo-flow");
   }
+  if (events.length === 0 && hasEnteredRouteTempoClutch(previous, current)) {
+    events.push("tempo-clutch");
+  }
 
   return events;
 }
 
 function hasEnteredRouteTempoFlow(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {
+  return hasEnteredRouteTempoTone(previous, current, "flow");
+}
+
+function hasEnteredRouteTempoClutch(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {
+  return hasEnteredRouteTempoTone(previous, current, "clutch");
+}
+
+function hasEnteredRouteTempoTone(
+  previous: HudAudioSnapshot | undefined,
+  current: HudAudioSnapshot,
+  tone: NonNullable<ReturnType<typeof buildRouteTempo>>["tone"]
+): boolean {
   if (!previous) {
     return false;
   }
 
   const previousTempo = buildRouteTempo(toRouteTempoAudioInput(previous));
   const currentTempo = buildRouteTempo(toRouteTempoAudioInput(current));
-  return previousTempo?.tone !== "flow" && currentTempo?.tone === "flow";
+  return previousTempo?.tone !== tone && currentTempo?.tone === tone;
 }
 
 function toRouteTempoAudioInput(snapshot: HudAudioSnapshot): Parameters<typeof buildRouteTempo>[0] {

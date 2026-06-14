@@ -253,6 +253,14 @@ describe("screen feedback", () => {
       intensity: "medium",
       durationMs: 420
     });
+    expect(buildScreenFeedback(["tempo-clutch"])).toEqual({
+      label: "Tempo clutch",
+      value: "Cash soon",
+      accent: "tempo",
+      tone: "warning",
+      intensity: "medium",
+      durationMs: 400
+    });
   });
 
   it("names high-skill style milestone hits when milestone context is available", () => {

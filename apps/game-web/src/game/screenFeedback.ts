@@ -213,6 +213,9 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[], milestone
   if (events.includes("tempo-flow")) {
     return { label: "Tempo flow", value: "Hold line", accent: "tempo", tone: "success", intensity: "medium", durationMs: 420 };
   }
+  if (events.includes("tempo-clutch")) {
+    return { label: "Tempo clutch", value: "Cash soon", accent: "tempo", tone: "warning", intensity: "medium", durationMs: 400 };
+  }
   if (events.includes("hazard-contact")) {
     return { label: "Hazard contact", value: "Burn out", tone: "danger", intensity: "medium", durationMs: 440 };
   }

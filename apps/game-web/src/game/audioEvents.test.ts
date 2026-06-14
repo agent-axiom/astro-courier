@@ -561,4 +561,20 @@ describe("HUD audio events", () => {
       )
     ).toEqual(["perfect-approach-ready"]);
   });
+
+  it("adds an early tempo-clutch cue before a chain reaches the critical audio window", () => {
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, styleMultiplier: 1.5, styleChainSecondsRemaining: 1.4 },
+        { ...baseSnapshot, styleMultiplier: 1.5, styleChainSecondsRemaining: 1.1 }
+      )
+    ).toEqual(["tempo-clutch"]);
+
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, styleMultiplier: 1.5, styleChainSecondsRemaining: 1.4 },
+        { ...baseSnapshot, styleMultiplier: 1.5, styleChainSecondsRemaining: 0.8 }
+      )
+    ).toEqual(["chain-critical"]);
+  });
 });

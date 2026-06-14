@@ -11,6 +11,7 @@ describe("game haptics", () => {
     expect(hapticPatternForEvents(["route-launch"])).toEqual([16, 20, 16]);
     expect(hapticPatternForEvents(["route-resume"])).toEqual([8, 10]);
     expect(hapticPatternForEvents(["tempo-flow"])).toEqual([8, 8, 12]);
+    expect(hapticPatternForEvents(["tempo-clutch"])).toEqual([10, 16, 10]);
     expect(hapticPatternForEvents(["launch-burst"])).toEqual([18, 18]);
     expect(hapticPatternForEvents(["pb-pressure"])).toEqual([12, 18, 12]);
     expect(hapticPatternForEvents(["pb-lead"])).toEqual([16, 20, 16]);
