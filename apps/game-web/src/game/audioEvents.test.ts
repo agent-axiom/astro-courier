@@ -93,6 +93,26 @@ describe("HUD audio events", () => {
     ).toEqual(["cargo-damage"]);
   });
 
+  it("warns once when clean gold runs enter tight comet reserve", () => {
+    const cometReserveSnapshot = {
+      ...baseSnapshot,
+      paceTier: "gold" as const,
+      fuel: 90,
+      maxFuel: 100,
+      cargoDamage: 0
+    };
+
+    expect(deriveHudAudioEvents(cometReserveSnapshot, { ...cometReserveSnapshot, fuel: 79 })).toEqual(["comet-reserve-tight"]);
+    expect(deriveHudAudioEvents({ ...cometReserveSnapshot, fuel: 79 }, { ...cometReserveSnapshot, fuel: 78 })).toEqual([]);
+    expect(deriveHudAudioEvents(cometReserveSnapshot, { ...cometReserveSnapshot, fuel: 74 })).toEqual([]);
+    expect(deriveHudAudioEvents(cometReserveSnapshot, { ...cometReserveSnapshot, paceTier: "silver", fuel: 79 })).toEqual([
+      "medal-drop"
+    ]);
+    expect(deriveHudAudioEvents(cometReserveSnapshot, { ...cometReserveSnapshot, cargoDamage: 0.05, fuel: 79 })).toEqual([
+      "cargo-damage"
+    ]);
+  });
+
   it("warns once when the current medal window drops", () => {
     expect(deriveHudAudioEvents({ ...baseSnapshot, paceTier: "gold" }, { ...baseSnapshot, paceTier: "silver" })).toEqual(["medal-drop"]);
     expect(deriveHudAudioEvents({ ...baseSnapshot, paceTier: "silver" }, { ...baseSnapshot, paceTier: "silver" })).toEqual([]);

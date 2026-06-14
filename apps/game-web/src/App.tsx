@@ -303,11 +303,14 @@ export function App() {
       }, feedback.durationMs);
     }
   }, [
+    hud.cargoDamage,
     hud.fuel,
     hud.hazardDangerLevel,
     hud.lastMilestone,
     hud.maxFuel,
+    hud.objectivePhase,
     hud.paceTier,
+    hud.perfectDockReady,
     hud.score,
     hud.status,
     hud.styleChainSecondsRemaining,

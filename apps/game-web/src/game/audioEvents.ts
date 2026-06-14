@@ -1,5 +1,5 @@
 import type { ObjectivePhase, RunStatus } from "@astro-courier/shared";
-import { isLiveCometDockArmed } from "./comet";
+import { COMET_RESERVE_MIN_RATIO, COMET_RESERVE_WARNING_RATIO, isLiveCometDockArmed } from "./comet";
 import type { ContractPaceTier } from "./pace";
 
 export type GameAudioEvent =
@@ -13,6 +13,7 @@ export type GameAudioEvent =
   | "ghost-pressure"
   | "ghost-pass"
   | "comet-armed"
+  | "comet-reserve-tight"
   | "chain-critical"
   | "chain-save"
   | "medal-drop"
@@ -112,6 +113,10 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
     events.push("comet-armed");
   }
 
+  if (hasEnteredTightCometReserve(previous, current)) {
+    events.push("comet-reserve-tight");
+  }
+
   if (hasStyleChainReachedCriticalWindow(previous, current)) {
     events.push("chain-critical");
   }
@@ -173,6 +178,23 @@ function hasArmedCometDock(previous: HudAudioSnapshot | undefined, current: HudA
     return false;
   }
   return isLiveCometDockArmed(current);
+}
+
+function hasEnteredTightCometReserve(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {
+  if (!previous || current.status !== "flying" || current.paceTier !== "gold" || current.maxFuel <= 0 || previous.maxFuel <= 0) {
+    return false;
+  }
+  if ((current.cargoDamage ?? 0) > cleanCargoDamageLimit) {
+    return false;
+  }
+
+  const previousReserve = previous.fuel / previous.maxFuel;
+  const currentReserve = current.fuel / current.maxFuel;
+  return (
+    previousReserve >= COMET_RESERVE_WARNING_RATIO &&
+    currentReserve >= COMET_RESERVE_MIN_RATIO &&
+    currentReserve < COMET_RESERVE_WARNING_RATIO
+  );
 }
 
 function hasDroppedMedalWindow(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {

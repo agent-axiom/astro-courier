@@ -58,6 +58,9 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[]): ScreenFe
   if (events.includes("medal-drop")) {
     return { label: "Pace slipping", value: "Recover medal", tone: "warning", intensity: "medium", durationMs: 360 };
   }
+  if (events.includes("comet-reserve-tight")) {
+    return { label: "Comet reserve", value: "Coast now", tone: "warning", intensity: "medium", durationMs: 380 };
+  }
   if (events.includes("chain-critical")) {
     return { label: "Chain critical", value: "Save it", tone: "warning", intensity: "light", durationMs: 320 };
   }

@@ -120,6 +120,17 @@ describe("game audio controller", () => {
     expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.11, 3);
   });
 
+  it("plays a tight-reserve warning tone for comet fuel pressure", () => {
+    const context = new FakeAudioContext();
+    const controller = createGameAudioController({ createContext: () => context });
+
+    controller.play(["comet-reserve-tight"]);
+
+    expect(context.oscillators).toHaveLength(1);
+    expect(context.oscillators[0]?.frequencyValue).toBe(520);
+    expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.1, 3);
+  });
+
   it("plays a cargo warning tone when clean cargo is damaged", () => {
     const context = new FakeAudioContext();
     const controller = createGameAudioController({ createContext: () => context });

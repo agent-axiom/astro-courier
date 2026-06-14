@@ -136,6 +136,16 @@ describe("screen feedback", () => {
     });
   });
 
+  it("maps tight comet reserve to an immediate coast warning", () => {
+    expect(buildScreenFeedback(["comet-reserve-tight"])).toEqual({
+      label: "Comet reserve",
+      value: "Coast now",
+      tone: "warning",
+      intensity: "medium",
+      durationMs: 380
+    });
+  });
+
   it("maps launch bursts to medium style feedback", () => {
     expect(buildScreenFeedback(["launch-burst"])).toEqual({
       label: "Launch burst",

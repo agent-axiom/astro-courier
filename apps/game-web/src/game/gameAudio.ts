@@ -53,6 +53,7 @@ const eventTones: Record<GameAudioEvent, { frequency: number; duration: number; 
   "ghost-pressure": { frequency: 880, duration: 0.1, gain: 0.045 },
   "ghost-pass": { frequency: 1120, duration: 0.13, gain: 0.052 },
   "comet-armed": { frequency: 1040, duration: 0.13, gain: 0.05 },
+  "comet-reserve-tight": { frequency: 520, duration: 0.1, gain: 0.045 },
   "chain-critical": { frequency: 640, duration: 0.09, gain: 0.045 },
   "chain-save": { frequency: 900, duration: 0.11, gain: 0.05 },
   "medal-drop": { frequency: 260, duration: 0.11, gain: 0.045 },
