@@ -32,7 +32,7 @@ export type GhostTrailReceiptInput = {
 
 export type GhostTrailReceipt = {
   label: "Ghost trail";
-  value: "Saved for next chase";
+  value: "Saved to route board";
   tone: "saved";
 };
 
@@ -239,7 +239,7 @@ export function buildGhostTrailReceipt(input: GhostTrailReceiptInput): GhostTrai
 
   return {
     label: "Ghost trail",
-    value: "Saved for next chase",
+    value: "Saved to route board",
     tone: "saved"
   };
 }

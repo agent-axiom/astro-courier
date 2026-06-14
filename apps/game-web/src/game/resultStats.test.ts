@@ -109,7 +109,7 @@ describe("result stat formatting", () => {
   it("marks new delivered personal bests as saved ghost trails", () => {
     expect(buildGhostTrailReceipt({ status: "delivered", isNewBest: true, runTrailSampleCount: 24 })).toEqual({
       label: "Ghost trail",
-      value: "Saved for next chase",
+      value: "Saved to route board",
       tone: "saved"
     });
     expect(buildGhostTrailReceipt({ status: "delivered", isNewBest: true, runTrailSampleCount: 1 })).toBeUndefined();
