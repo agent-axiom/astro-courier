@@ -1,4 +1,4 @@
-import { PERFECT_APPROACH_STREAK_SECONDS, PERFECT_APPROACH_STYLE_BONUS } from "@astro-courier/simulation";
+import { HAZARD_THREAD_SPEED_THRESHOLD, PERFECT_APPROACH_STREAK_SECONDS, PERFECT_APPROACH_STYLE_BONUS } from "@astro-courier/simulation";
 import type { LandingGuidanceStatus, ObjectivePhase, RunMedal, RunStatus } from "@astro-courier/shared";
 import { COMET_RESERVE_MIN_RATIO, COMET_RESERVE_WARNING_RATIO, isLiveCometDockArmed } from "./comet";
 import type { ContractPaceTier } from "./pace";
@@ -12,6 +12,7 @@ export type RunFeedSnapshot = {
   lastMilestone?: string;
   lastStyleAward?: number;
   score?: number;
+  speed?: number;
   targetDistance?: number;
   bestRunScore?: number;
   bestRunHasGhostTrail?: boolean;
@@ -230,11 +231,19 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
     });
   } else if (previous.trajectoryRiskLevel !== current.trajectoryRiskLevel && current.trajectoryRiskLevel === "near") {
     const damagedCargo = (current.cargoDamage ?? 0) > cleanCargoDamageLimit;
-    updates.push({
-      label: damagedCargo ? "Damaged vector" : "Hazard vector",
-      value: `${damagedCargo ? "Clear" : "Thread"} in ${formatSeconds(current.trajectoryRiskSeconds)}`,
-      tone: "warning"
-    });
+    if (!damagedCargo && (current.speed ?? 0) >= HAZARD_THREAD_SPEED_THRESHOLD) {
+      updates.push({
+        label: "Thread window",
+        value: `Needle gap in ${formatSeconds(current.trajectoryRiskSeconds)}`,
+        tone: "style"
+      });
+    } else {
+      updates.push({
+        label: damagedCargo ? "Damaged vector" : "Hazard vector",
+        value: `${damagedCargo ? "Clear" : "Thread"} in ${formatSeconds(current.trajectoryRiskSeconds)}`,
+        tone: "warning"
+      });
+    }
   } else if (hasClearedTrajectoryRisk(previous, current)) {
     updates.push({
       label: "Vector clear",

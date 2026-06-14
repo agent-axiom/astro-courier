@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { HAZARD_THREAD_SPEED_THRESHOLD } from "@astro-courier/simulation";
 import { appendRunFeedUpdates, deriveRunFeedUpdates, type RunFeedSnapshot } from "./runFeed";
 
 const baseSnapshot: RunFeedSnapshot = {
@@ -129,6 +130,20 @@ describe("run action feed", () => {
         label: "Hazard vector",
         value: "Thread in 2.4s",
         tone: "warning"
+      }
+    ]);
+    expect(
+      deriveRunFeedUpdates(baseSnapshot, {
+        ...baseSnapshot,
+        speed: HAZARD_THREAD_SPEED_THRESHOLD,
+        trajectoryRiskLevel: "near",
+        trajectoryRiskSeconds: 2.4
+      })
+    ).toEqual([
+      {
+        label: "Thread window",
+        value: "Needle gap in 2.4s",
+        tone: "style"
       }
     ]);
     expect(
