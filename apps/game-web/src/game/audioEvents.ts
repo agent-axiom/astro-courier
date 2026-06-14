@@ -18,6 +18,7 @@ export type GameAudioEvent =
   | "comet-armed"
   | "perfect-approach-ready"
   | "comet-reserve-tight"
+  | "comet-reserve-lost"
   | "chain-critical"
   | "chain-save"
   | "medal-drop"
@@ -135,6 +136,10 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
 
   if (hasEnteredTightCometReserve(previous, current)) {
     events.push("comet-reserve-tight");
+  }
+
+  if (hasLostCometReserve(previous, current)) {
+    events.push("comet-reserve-lost");
   }
 
   if (hasStyleChainReachedCriticalWindow(previous, current)) {
@@ -257,6 +262,19 @@ function hasEnteredTightCometReserve(previous: HudAudioSnapshot | undefined, cur
     currentReserve >= COMET_RESERVE_MIN_RATIO &&
     currentReserve < COMET_RESERVE_WARNING_RATIO
   );
+}
+
+function hasLostCometReserve(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {
+  if (!previous || current.status !== "flying" || current.paceTier !== "gold" || current.maxFuel <= 0 || previous.maxFuel <= 0) {
+    return false;
+  }
+  if ((current.cargoDamage ?? 0) > cleanCargoDamageLimit) {
+    return false;
+  }
+
+  const previousReserve = previous.fuel / previous.maxFuel;
+  const currentReserve = current.fuel / current.maxFuel;
+  return previousReserve >= COMET_RESERVE_MIN_RATIO && currentReserve < COMET_RESERVE_MIN_RATIO;
 }
 
 function hasDroppedMedalWindow(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {

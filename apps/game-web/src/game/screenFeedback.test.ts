@@ -244,6 +244,16 @@ describe("screen feedback", () => {
     });
   });
 
+  it("maps lost comet reserve to a heavy danger flash", () => {
+    expect(buildScreenFeedback(["comet-reserve-lost"])).toEqual({
+      label: "Comet lost",
+      value: "Bank more fuel",
+      tone: "danger",
+      intensity: "heavy",
+      durationMs: 460
+    });
+  });
+
   it("maps launch bursts to medium style feedback", () => {
     expect(buildScreenFeedback(["launch-burst"])).toEqual({
       label: "Launch burst",

@@ -85,6 +85,9 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[], milestone
   if (events.includes("medal-drop")) {
     return { label: "Pace slipping", value: "Recover medal", tone: "warning", intensity: "medium", durationMs: 360 };
   }
+  if (events.includes("comet-reserve-lost")) {
+    return { label: "Comet lost", value: "Bank more fuel", tone: "danger", intensity: "heavy", durationMs: 460 };
+  }
   if (events.includes("comet-reserve-tight")) {
     return { label: "Comet reserve", value: "Coast now", tone: "warning", intensity: "medium", durationMs: 380 };
   }

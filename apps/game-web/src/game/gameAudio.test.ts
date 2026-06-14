@@ -175,6 +175,17 @@ describe("game audio controller", () => {
     expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.1, 3);
   });
 
+  it("plays a heavier warning tone when comet reserve is lost", () => {
+    const context = new FakeAudioContext();
+    const controller = createGameAudioController({ createContext: () => context });
+
+    controller.play(["comet-reserve-lost"]);
+
+    expect(context.oscillators).toHaveLength(1);
+    expect(context.oscillators[0]?.frequencyValue).toBe(360);
+    expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.14, 3);
+  });
+
   it("plays a cargo warning tone when clean cargo is damaged", () => {
     const context = new FakeAudioContext();
     const controller = createGameAudioController({ createContext: () => context });
