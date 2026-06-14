@@ -141,6 +141,14 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
     });
   }
 
+  if (hasCargoStressStarted(previous, current)) {
+    updates.push({
+      label: "Cargo stress",
+      value: "Smooth inputs",
+      tone: "warning"
+    });
+  }
+
   if (hasSpentNoBrakeFinesse(previous, current)) {
     updates.push({
       label: "Finesse spent",
@@ -337,6 +345,12 @@ function isFuelCritical(snapshot: RunFeedSnapshot): boolean {
 
 function hasCargoDamageCrossedCleanLimit(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
   return (previous.cargoDamage ?? 0) <= cleanCargoDamageLimit && (current.cargoDamage ?? 0) > cleanCargoDamageLimit;
+}
+
+function hasCargoStressStarted(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
+  const previousDamage = previous.cargoDamage ?? 0;
+  const currentDamage = current.cargoDamage ?? 0;
+  return previousDamage <= 0 && currentDamage > 0 && currentDamage <= cleanCargoDamageLimit;
 }
 
 function buildTargetLineupUpdate(previous: RunFeedSnapshot, current: RunFeedSnapshot): RunFeedUpdate | undefined {

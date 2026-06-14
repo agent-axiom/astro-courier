@@ -627,6 +627,24 @@ describe("run action feed", () => {
     expect(deriveRunFeedUpdates({ ...baseSnapshot, cargoDamage: 0.05 }, { ...baseSnapshot, cargoDamage: 0.12 })).toEqual([]);
   });
 
+  it("logs first minor cargo stress before cargo is exposed", () => {
+    expect(deriveRunFeedUpdates({ ...baseSnapshot, cargoDamage: 0 }, { ...baseSnapshot, cargoDamage: 0.012 })).toEqual([
+      {
+        label: "Cargo stress",
+        value: "Smooth inputs",
+        tone: "warning"
+      }
+    ]);
+    expect(deriveRunFeedUpdates({ ...baseSnapshot, cargoDamage: 0.012 }, { ...baseSnapshot, cargoDamage: 0.018 })).toEqual([]);
+    expect(deriveRunFeedUpdates({ ...baseSnapshot, cargoDamage: 0 }, { ...baseSnapshot, cargoDamage: 0.05 })).toEqual([
+      {
+        label: "Cargo exposed",
+        value: "Protect the load",
+        tone: "warning"
+      }
+    ]);
+  });
+
   it("prepends fresh updates and caps the feed", () => {
     const result = appendRunFeedUpdates(
       [
