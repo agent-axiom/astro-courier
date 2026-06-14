@@ -42,4 +42,44 @@ describe("adaptive run intensity", () => {
       })
     ).toBe("lockdown");
   });
+
+  it("enters flow when a clean perfect approach is banked for delivery", () => {
+    expect(
+      buildRunIntensity({
+        status: "flying",
+        preflightOpen: false,
+        objectivePhase: "delivery",
+        fuelRatio: 0.9,
+        cargoDamage: 0,
+        landingStatus: "ready",
+        approachStreakSeconds: 1.2
+      })
+    ).toBe("flow");
+    expect(
+      buildRunIntensity({
+        status: "flying",
+        preflightOpen: false,
+        objectivePhase: "delivery",
+        fuelRatio: 0.9,
+        cargoDamage: 0.05,
+        landingStatus: "ready",
+        approachStreakSeconds: 1.2
+      })
+    ).toBe("stealth");
+  });
+
+  it("keeps immediate danger above perfect approach flow", () => {
+    expect(
+      buildRunIntensity({
+        status: "flying",
+        preflightOpen: false,
+        objectivePhase: "delivery",
+        fuelRatio: 0.9,
+        cargoDamage: 0,
+        landingStatus: "ready",
+        approachStreakSeconds: 1.2,
+        trajectoryRiskLevel: "inside"
+      })
+    ).toBe("lockdown");
+  });
 });

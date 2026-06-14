@@ -48,10 +48,29 @@ button {
   opacity: 1;
 }
 
+.app-intensity-flow::after {
+  box-shadow:
+    inset 0 0 118px rgba(124, 225, 255, 0.15),
+    inset 0 0 72px rgba(248, 229, 154, 0.1);
+  opacity: 1;
+  animation: flow-pulse 1.8s ease-in-out infinite;
+}
+
 .app-intensity-lockdown::after {
   box-shadow: inset 0 0 130px rgba(255, 77, 109, 0.2);
   opacity: 1;
   animation: intensity-pulse 1.25s ease-in-out infinite;
+}
+
+@keyframes flow-pulse {
+  0%,
+  100% {
+    opacity: 0.58;
+  }
+
+  50% {
+    opacity: 0.92;
+  }
 }
 
 @keyframes intensity-pulse {
