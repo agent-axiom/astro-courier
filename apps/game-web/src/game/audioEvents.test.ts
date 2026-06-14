@@ -114,6 +114,62 @@ describe("HUD audio events", () => {
     ).toEqual(["cargo-damage"]);
   });
 
+  it("signals when a clean delivery approach arms the perfect dock window", () => {
+    const approachSnapshot = {
+      ...baseSnapshot,
+      objectivePhase: "delivery" as const,
+      landingStatus: "ready" as const,
+      cargoDamage: 0,
+      approachStreakSeconds: 0.8
+    };
+
+    expect(
+      deriveHudAudioEvents(approachSnapshot, {
+        ...approachSnapshot,
+        approachStreakSeconds: 1.2
+      })
+    ).toEqual(["perfect-approach-ready"]);
+    expect(
+      deriveHudAudioEvents(
+        { ...approachSnapshot, approachStreakSeconds: 1.2 },
+        { ...approachSnapshot, approachStreakSeconds: 1.4 }
+      )
+    ).toEqual([]);
+    expect(
+      deriveHudAudioEvents(approachSnapshot, {
+        ...approachSnapshot,
+        cargoDamage: 0.05,
+        approachStreakSeconds: 1.2
+      })
+    ).toEqual(["cargo-damage"]);
+    expect(
+      deriveHudAudioEvents(approachSnapshot, {
+        ...approachSnapshot,
+        objectivePhase: "pickup",
+        approachStreakSeconds: 1.2
+      })
+    ).toEqual([]);
+  });
+
+  it("prefers the comet-specific armed cue over the generic perfect approach cue", () => {
+    const cometDockSnapshot = {
+      ...baseSnapshot,
+      objectivePhase: "delivery" as const,
+      landingStatus: "ready" as const,
+      paceTier: "gold" as const,
+      fuel: 84,
+      maxFuel: 100,
+      cargoDamage: 0
+    };
+
+    expect(
+      deriveHudAudioEvents(
+        { ...cometDockSnapshot, perfectDockReady: false, approachStreakSeconds: 0.8 },
+        { ...cometDockSnapshot, perfectDockReady: true, approachStreakSeconds: 1.2 }
+      )
+    ).toEqual(["comet-armed"]);
+  });
+
   it("warns once when clean gold runs enter tight comet reserve", () => {
     const cometReserveSnapshot = {
       ...baseSnapshot,

@@ -1891,6 +1891,8 @@ function toHudAudioSnapshot(hud: HudState, bestRun: BestRun | undefined): HudAud
     bestRunHasGhostTrail: (bestRun?.ghostTrail?.length ?? 0) >= 2,
     paceTier: hud.paceTier,
     perfectDockReady: hud.perfectDockReady,
+    landingStatus: hud.landingStatus,
+    approachStreakSeconds: hud.approachStreakSeconds,
     styleMultiplier: hud.styleMultiplier,
     styleChainSecondsRemaining: hud.styleChainSecondsRemaining,
     fuel: hud.fuel,

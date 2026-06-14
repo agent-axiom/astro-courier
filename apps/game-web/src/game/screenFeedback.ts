@@ -57,6 +57,9 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[], milestone
   if (events.includes("comet-armed")) {
     return { label: "Comet dock", value: "Perfect line armed", tone: "style", intensity: "medium", durationMs: 460 };
   }
+  if (events.includes("perfect-approach-ready")) {
+    return { label: "Perfect setup", value: "Soft dock armed", tone: "style", intensity: "medium", durationMs: 420 };
+  }
   if (events.includes("hazard-contact")) {
     return { label: "Hazard contact", value: "Burn out", tone: "danger", intensity: "medium", durationMs: 440 };
   }

@@ -59,6 +59,9 @@ export function hapticPatternForEvents(events: readonly GameAudioEvent[]): Hapti
   if (events.includes("comet-armed")) {
     return [12, 16, 12];
   }
+  if (events.includes("perfect-approach-ready")) {
+    return [10, 12, 10];
+  }
   if (events.includes("ghost-pressure")) {
     return [10, 14, 10, 14];
   }

@@ -87,6 +87,17 @@ describe("game audio controller", () => {
     expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.13, 3);
   });
 
+  it("plays a clear arming tone when the perfect approach window is ready", () => {
+    const context = new FakeAudioContext();
+    const controller = createGameAudioController({ createContext: () => context });
+
+    controller.play(["perfect-approach-ready"]);
+
+    expect(context.oscillators).toHaveLength(1);
+    expect(context.oscillators[0]?.frequencyValue).toBe(980);
+    expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.1, 3);
+  });
+
   it("plays an anticipatory tone for personal-best pressure", () => {
     const context = new FakeAudioContext();
     const controller = createGameAudioController({ createContext: () => context });

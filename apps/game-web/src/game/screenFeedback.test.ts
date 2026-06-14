@@ -41,6 +41,13 @@ describe("screen feedback", () => {
       intensity: "medium",
       durationMs: 460
     });
+    expect(buildScreenFeedback(["perfect-approach-ready"])).toEqual({
+      label: "Perfect setup",
+      value: "Soft dock armed",
+      tone: "style",
+      intensity: "medium",
+      durationMs: 420
+    });
   });
 
   it("names high-skill style milestone hits when milestone context is available", () => {

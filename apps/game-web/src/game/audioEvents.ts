@@ -1,4 +1,5 @@
-import type { ObjectivePhase, RunStatus } from "@astro-courier/shared";
+import { PERFECT_APPROACH_STREAK_SECONDS } from "@astro-courier/simulation";
+import type { LandingGuidanceStatus, ObjectivePhase, RunStatus } from "@astro-courier/shared";
 import { COMET_RESERVE_MIN_RATIO, COMET_RESERVE_WARNING_RATIO, isLiveCometDockArmed } from "./comet";
 import type { ContractPaceTier } from "./pace";
 
@@ -15,6 +16,7 @@ export type GameAudioEvent =
   | "ghost-pressure"
   | "ghost-pass"
   | "comet-armed"
+  | "perfect-approach-ready"
   | "comet-reserve-tight"
   | "chain-critical"
   | "chain-save"
@@ -38,6 +40,8 @@ export type HudAudioSnapshot = {
   bestRunHasGhostTrail?: boolean;
   paceTier?: ContractPaceTier;
   perfectDockReady?: boolean;
+  landingStatus?: LandingGuidanceStatus;
+  approachStreakSeconds?: number;
   styleMultiplier?: number;
   styleChainSecondsRemaining?: number;
   fuel: number;
@@ -120,8 +124,11 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
     events.push(current.bestRunHasGhostTrail ? "ghost-pressure" : "pb-pressure");
   }
 
-  if (hasArmedCometDock(previous, current)) {
+  const cometDockArmed = hasArmedCometDock(previous, current);
+  if (cometDockArmed) {
     events.push("comet-armed");
+  } else if (hasArmedPerfectApproach(previous, current)) {
+    events.push("perfect-approach-ready");
   }
 
   if (hasEnteredTightCometReserve(previous, current)) {
@@ -211,6 +218,19 @@ function hasArmedCometDock(previous: HudAudioSnapshot | undefined, current: HudA
     return false;
   }
   return isLiveCometDockArmed(current);
+}
+
+function hasArmedPerfectApproach(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {
+  if (!previous || current.status !== "flying") {
+    return false;
+  }
+  return (
+    current.objectivePhase === "delivery" &&
+    current.landingStatus === "ready" &&
+    (current.cargoDamage ?? 0) <= cleanCargoDamageLimit &&
+    (previous.approachStreakSeconds ?? 0) < PERFECT_APPROACH_STREAK_SECONDS &&
+    (current.approachStreakSeconds ?? 0) >= PERFECT_APPROACH_STREAK_SECONDS
+  );
 }
 
 function hasEnteredTightCometReserve(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {
