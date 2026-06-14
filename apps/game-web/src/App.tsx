@@ -607,6 +607,7 @@ export function App() {
     quickPickupSecondsRemaining: hud.quickPickupSecondsRemaining,
     cargoDamage: hud.cargoDamage,
     hazardDangerLevel: hud.hazardDangerLevel,
+    trajectoryRiskLevel: hud.trajectoryRiskLevel,
     gravitySlingReady: hud.gravitySlingReady,
     objectivePhase: hud.objectivePhase,
     manualBrakeUsed: hud.manualBrakeUsed

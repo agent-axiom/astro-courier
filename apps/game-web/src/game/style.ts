@@ -25,6 +25,7 @@ export type LiveStyleRewardInput = {
   quickPickupSecondsRemaining?: number;
   cargoDamage?: number;
   hazardDangerLevel?: "near" | "inside";
+  trajectoryRiskLevel?: "near" | "inside";
   gravitySlingReady?: boolean;
   objectivePhase?: ObjectivePhase;
   manualBrakeUsed?: boolean;
@@ -236,6 +237,9 @@ function buildUrgentChainAction(input: LiveStyleRewardInput): string {
   }
   if (input.hazardDangerLevel === "near" && (input.cargoDamage ?? 0) <= 0.02) {
     return "Skim now";
+  }
+  if (input.trajectoryRiskLevel === "near" && (input.cargoDamage ?? 0) <= 0.02) {
+    return "Thread now";
   }
   if ((input.launchBurstSecondsRemaining ?? 0) > 0) {
     return "Boost now";

@@ -338,6 +338,25 @@ describe("live style reward HUD copy", () => {
     });
   });
 
+  it("points urgent chains at predicted clean hazard thread lines", () => {
+    expect(
+      buildLiveStyleReward({
+        styleBonus: 440,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 0.8,
+        trajectoryRiskLevel: "near",
+        cargoDamage: 0
+      })
+    ).toEqual({
+      label: "Style chain",
+      value: "Thread now / x1.50 / 0.8s",
+      action: "Thread now",
+      fresh: false,
+      tone: "urgent",
+      chainProgress: 0.2
+    });
+  });
+
   it("points urgent chains at a ready gravity sling before a hazard skim", () => {
     expect(
       buildLiveStyleReward({
