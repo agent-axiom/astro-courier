@@ -40,7 +40,7 @@ export const hazardSchema = z.object({
 export const cargoSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
-  kind: z.enum(["fragile", "hot", "cold", "live", "illegal-ish", "unstable", "magnetic", "time-sensitive", "luxury"]),
+  kind: z.enum(["fragile", "hot", "cold", "live", "illegal-ish", "unstable", "volatile", "magnetic", "time-sensitive", "luxury"]),
   fragility: z.number().min(0).max(1)
 });
 

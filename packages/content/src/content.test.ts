@@ -57,7 +57,7 @@ describe("content schemas", () => {
     });
     expect(parsed.cargo.find((cargo) => cargo.id === "volatile-comet-ice")).toMatchObject({
       name: "Volatile Comet Ice",
-      kind: "unstable",
+      kind: "volatile",
       fragility: 1
     });
     expect(parsed.cargo.find((cargo) => cargo.id === "midnight-medicine")).toMatchObject({

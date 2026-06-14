@@ -180,7 +180,7 @@
     {
       "id": "volatile-comet-ice",
       "name": "Volatile Comet Ice",
-      "kind": "unstable",
+      "kind": "volatile",
       "fragility": 1
     },
     {

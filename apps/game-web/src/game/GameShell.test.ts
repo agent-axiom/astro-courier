@@ -199,7 +199,7 @@ describe("GameShell lifecycle", () => {
         pickupLabel: "Luma North Pad",
         destinationLabel: "Tea Station Dock A",
         cargoName: "Volatile Comet Ice",
-        cargoKind: "unstable",
+        cargoKind: "volatile",
         cargoFragility: 1,
         hazardSeverityMultiplier: 1.45,
         medalTimes: { bronze: 70, silver: 42, gold: 24 }
@@ -227,7 +227,7 @@ describe("GameShell lifecycle", () => {
         pickupLabel: "Luma North Pad",
         destinationLabel: "Tea Station Dock A",
         cargoName: "Volatile Comet Ice",
-        cargoKind: "unstable",
+        cargoKind: "volatile",
         cargoFragility: 1,
         hazardSeverityMultiplier: 1.3,
         medalTimes: { bronze: 64, silver: 38, gold: 22 }
@@ -420,7 +420,7 @@ describe("GameShell lifecycle", () => {
       contractTitle: "Asteroid Sprint",
       contractBriefing: "Thread the asteroid field with volatile comet ice, load fast, and bring the cargo home before the sprint window closes.",
       cargoName: "Volatile Comet Ice",
-      cargoKind: "unstable",
+      cargoKind: "volatile",
       cargoFragility: 1,
       hazardSeverityMultiplier: 1.45
     });
@@ -428,7 +428,7 @@ describe("GameShell lifecycle", () => {
       expect.objectContaining({
         id: "asteroid-sprint",
         briefing: "Thread the asteroid field with volatile comet ice, load fast, and bring the cargo home before the sprint window closes.",
-        cargoKind: "unstable",
+        cargoKind: "volatile",
         cargoFragility: 1,
         hazardSeverityMultiplier: 1.45
       })
