@@ -137,6 +137,56 @@ describe("result retry target", () => {
     });
   });
 
+  it("turns saved ghost trails into concrete ghost chase targets", () => {
+    expect(
+      buildRetryTarget({
+        status: "delivered",
+        medal: "gold",
+        elapsedSeconds: 25.8,
+        goldSeconds: 30,
+        score: 2960,
+        isNewBest: false,
+        bestRun: {
+          score: 3290,
+          elapsedSeconds: 24.7,
+          medal: "gold",
+          ghostTrail: [
+            { x: 0, y: 0 },
+            { x: 1, y: 1 }
+          ]
+        }
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Catch ghost +330 score",
+      tone: "chase"
+    });
+
+    expect(
+      buildRetryTarget({
+        status: "delivered",
+        medal: "gold",
+        elapsedSeconds: 26.2,
+        goldSeconds: 30,
+        score: 3290,
+        isNewBest: false,
+        bestRun: {
+          score: 3290,
+          elapsedSeconds: 24.7,
+          medal: "gold",
+          ghostTrail: [
+            { x: 0, y: 0 },
+            { x: 1, y: 1 }
+          ]
+        }
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Beat ghost 24.7s",
+      tone: "chase"
+    });
+  });
+
   it("turns a tied score into a best-time target", () => {
     expect(
       buildRetryTarget({
@@ -722,6 +772,11 @@ describe("result retry action copy", () => {
       tone: "chase",
       mode: "restart-run"
     });
+    expect(buildResultRetryAction({ label: "Retry target", value: "Catch ghost +330 score", tone: "chase" })).toEqual({
+      label: "Race Ghost",
+      tone: "chase",
+      mode: "restart-run"
+    });
   });
 
   it("turns repeatable style targets into a repeat-line call to action", () => {
@@ -811,6 +866,16 @@ describe("result retry action briefing", () => {
     ).toEqual({
       label: "Next run",
       value: "Route has score left",
+      tone: "chase"
+    });
+    expect(
+      buildRetryActionBriefing(
+        { label: "Race Ghost", tone: "chase", mode: "restart-run" },
+        { label: "Retry target", value: "Beat ghost 24.7s", tone: "chase" }
+      )
+    ).toEqual({
+      label: "Next run",
+      value: "Hunt the saved line",
       tone: "chase"
     });
     expect(

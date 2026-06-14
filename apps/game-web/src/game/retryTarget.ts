@@ -34,6 +34,7 @@ export type ResultRetryAction = {
     | "Clear Lane"
     | "Defend PB"
     | "Chase PB"
+    | "Race Ghost"
     | "Repeat Line"
     | "Clean Run"
     | "Chase Gold"
@@ -99,11 +100,12 @@ export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
   }
 
   if (input.bestRun) {
+    const hasGhostTrail = (input.bestRun.ghostTrail?.length ?? 0) >= 2;
     const scoreGap = input.bestRun.score - input.score;
     if (scoreGap > 0) {
       return {
         label: "Retry target",
-        value: `Find +${Math.round(scoreGap)} score`,
+        value: hasGhostTrail ? `Catch ghost +${Math.round(scoreGap)} score` : `Find +${Math.round(scoreGap)} score`,
         tone: "chase"
       };
     }
@@ -111,7 +113,7 @@ export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
     if (input.elapsedSeconds > input.bestRun.elapsedSeconds + 0.05) {
       return {
         label: "Retry target",
-        value: `Beat ${input.bestRun.elapsedSeconds.toFixed(1)}s`,
+        value: hasGhostTrail ? `Beat ghost ${input.bestRun.elapsedSeconds.toFixed(1)}s` : `Beat ${input.bestRun.elapsedSeconds.toFixed(1)}s`,
         tone: "chase"
       };
     }
@@ -223,6 +225,9 @@ export function buildResultRetryAction(target: RetryTarget): ResultRetryAction {
     return { label: "Defend PB", tone: "success", mode: "restart-run" };
   }
   if (target.tone === "chase") {
+    if (isGhostRetryTarget(target.value)) {
+      return { label: "Race Ghost", tone: "chase", mode: "restart-run" };
+    }
     return { label: "Chase PB", tone: "chase", mode: "restart-run" };
   }
   if (target.value.startsWith("Repeat ")) {
@@ -278,6 +283,13 @@ export function buildRetryActionBriefing(action: ResultRetryAction, target: Retr
     return {
       label: "Next run",
       value: "Route has score left",
+      tone: "chase"
+    };
+  }
+  if (action.label === "Race Ghost") {
+    return {
+      label: "Next run",
+      value: "Hunt the saved line",
       tone: "chase"
     };
   }
@@ -460,6 +472,10 @@ function buildCometNearMissTarget(input: RetryTargetInput): RetryTarget | undefi
 
 function isCometRetryTarget(value: string): boolean {
   return value === "Perfect dock for comet" || (value.startsWith("Bank +") && value.endsWith("% fuel for comet"));
+}
+
+function isGhostRetryTarget(value: string): boolean {
+  return value.startsWith("Catch ghost ") || value.startsWith("Beat ghost ");
 }
 
 function extractCometFuelGoal(value: string): `+${number}% fuel` | undefined {
