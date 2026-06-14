@@ -177,7 +177,7 @@ describe("run action feed", () => {
     ).toEqual([]);
   });
 
-  it("announces the first route tempo flow shift without repeating push states", () => {
+  it("announces the first route tempo action shift without repeating push states", () => {
     const pushTempo = {
       ...baseSnapshot,
       speed: 18,
@@ -201,8 +201,8 @@ describe("run action feed", () => {
       })
     ).toEqual([
       {
-        label: "Tempo flow",
-        value: "Perfect flow / dock now",
+        label: "Tempo action",
+        value: "Hold flow",
         tone: "success"
       }
     ]);

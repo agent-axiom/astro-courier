@@ -17,7 +17,7 @@ import {
 } from "./comet";
 import type { DailyDispatchProgressReceipt } from "./contracts";
 import type { ContractPaceTier } from "./pace";
-import { buildRouteTempo } from "./tempo";
+import { buildRouteTempo, buildRouteTempoAction } from "./tempo";
 
 export type RunFeedTone = "neutral" | "style" | "success" | "warning" | "danger";
 
@@ -463,14 +463,33 @@ function buildTargetLineupUpdate(previous: RunFeedSnapshot, current: RunFeedSnap
 function buildRouteTempoShiftUpdate(previous: RunFeedSnapshot, current: RunFeedSnapshot): RunFeedUpdate | undefined {
   const previousTempo = buildRouteTempoFromSnapshot(previous);
   const currentTempo = buildRouteTempoFromSnapshot(current);
+  const previousAction = buildRouteTempoAction({
+    routeTempo: previousTempo,
+    status: previous.status,
+    preflightOpen: false,
+    speed: previous.speed,
+    targetDistance: previous.targetDistance
+  });
+  const currentAction = buildRouteTempoAction({
+    routeTempo: currentTempo,
+    status: current.status,
+    preflightOpen: false,
+    speed: current.speed,
+    targetDistance: current.targetDistance
+  });
 
-  if (!previousTempo || !currentTempo || previousTempo.tone === currentTempo.tone || currentTempo.tone !== "flow") {
+  if (
+    !previousAction ||
+    !currentAction ||
+    currentAction.tone !== "flow" ||
+    (previousAction.tone === currentAction.tone && previousAction.value === currentAction.value)
+  ) {
     return undefined;
   }
 
   return {
-    label: "Tempo flow",
-    value: currentTempo.value,
+    label: "Tempo action",
+    value: currentAction.value,
     tone: "success"
   };
 }
