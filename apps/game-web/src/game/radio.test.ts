@@ -79,6 +79,19 @@ describe("radio feedback copy", () => {
     expect(buildRadioMessage({ ...baseHud, objectivePhase: "delivery", cargoOnboard: true })).toContain("destination");
   });
 
+  it("teaches volatile cargo handling before generic delivery guidance", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        cargoKind: "volatile",
+        cargoDamage: 0,
+        landingStatus: "approach"
+      })
+    ).toBe("Volatile cargo armed. Coast or tap thrust; brake shocks the load.");
+  });
+
   it("surfaces landing assist before generic speed warnings", () => {
     expect(buildRadioMessage({ ...baseHud, landingStatus: "too-fast", assistAvailable: true })).toContain("Assist");
     expect(buildRadioMessage({ ...baseHud, landingStatus: "too-fast", assistAvailable: false })).toContain("Slow");

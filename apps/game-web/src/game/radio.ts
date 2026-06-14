@@ -203,6 +203,10 @@ export function buildRadioMessage(hud: HudState): string {
     return "Docking window is green. Set it down softly.";
   }
 
+  if (hud.objectivePhase === "delivery" && hud.cargoOnboard && hud.cargoKind === "volatile" && hud.cargoDamage <= cleanCargoDamageLimit) {
+    return "Volatile cargo armed. Coast or tap thrust; brake shocks the load.";
+  }
+
   if (hud.objectivePhase === "delivery") {
     return "Cargo secured. Drift toward the destination beacon.";
   }
