@@ -1004,6 +1004,7 @@ export function App() {
         code: event.code,
         preflightOpen: overlays.preflight,
         resultOpen: overlays.result,
+        canTogglePause: !overlays.preflight && !overlays.result && (hud.status === "flying" || hud.status === "paused"),
         target: event.target as { tagName?: string; isContentEditable?: boolean } | null,
         altKey: event.altKey,
         ctrlKey: event.ctrlKey,
@@ -1021,6 +1022,10 @@ export function App() {
         launchContract();
       } else if (action === "restart-run") {
         restartActiveRun();
+      } else if (action === "toggle-pause") {
+        const next = !paused;
+        setPaused(next);
+        shellRef.current?.setPaused(next);
       } else {
         restartToBriefing();
       }
@@ -1030,7 +1035,7 @@ export function App() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [overlays.preflight, overlays.result, launchContract, restartActiveRun, restartToBriefing]);
+  }, [hud.status, overlays.preflight, overlays.result, launchContract, paused, restartActiveRun, restartToBriefing]);
 
   return (
     <main className={`app-shell app-intensity-${runIntensity}`}>

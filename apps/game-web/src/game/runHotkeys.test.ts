@@ -13,10 +13,29 @@ describe("run shell hotkeys", () => {
     expect(resolveRunHotkeyAction({ code: "KeyR", preflightOpen: false, resultOpen: false })).toBeUndefined();
   });
 
+  it("toggles pause from live routes with Escape or P", () => {
+    expect(resolveRunHotkeyAction({ code: "Escape", preflightOpen: false, resultOpen: false, canTogglePause: true })).toBe(
+      "toggle-pause"
+    );
+    expect(resolveRunHotkeyAction({ code: "KeyP", preflightOpen: false, resultOpen: false, canTogglePause: true })).toBe("toggle-pause");
+    expect(resolveRunHotkeyAction({ code: "KeyP", preflightOpen: true, resultOpen: false, canTogglePause: true })).toBeUndefined();
+    expect(resolveRunHotkeyAction({ code: "Escape", preflightOpen: false, resultOpen: true, canTogglePause: true })).toBeUndefined();
+    expect(resolveRunHotkeyAction({ code: "KeyP", preflightOpen: false, resultOpen: false, canTogglePause: false })).toBeUndefined();
+  });
+
   it("ignores modified, repeated, composed, or focused-control keypresses", () => {
     expect(resolveRunHotkeyAction({ code: "Enter", preflightOpen: true, resultOpen: false, altKey: true })).toBeUndefined();
     expect(resolveRunHotkeyAction({ code: "KeyR", preflightOpen: false, resultOpen: true, repeat: true })).toBeUndefined();
     expect(resolveRunHotkeyAction({ code: "KeyB", preflightOpen: false, resultOpen: true, isComposing: true })).toBeUndefined();
+    expect(
+      resolveRunHotkeyAction({
+        code: "KeyP",
+        preflightOpen: false,
+        resultOpen: false,
+        canTogglePause: true,
+        ctrlKey: true
+      })
+    ).toBeUndefined();
     expect(
       resolveRunHotkeyAction({
         code: "KeyR",

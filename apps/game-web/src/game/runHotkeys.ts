@@ -1,4 +1,4 @@
-export type RunHotkeyAction = "launch" | "restart-run" | "restart-briefing";
+export type RunHotkeyAction = "launch" | "restart-run" | "restart-briefing" | "toggle-pause";
 
 export type RunHotkeyTargetLike = {
   tagName?: string;
@@ -9,6 +9,7 @@ export type RunHotkeyInput = {
   code: string;
   preflightOpen: boolean;
   resultOpen: boolean;
+  canTogglePause?: boolean;
   target?: RunHotkeyTargetLike | null;
   altKey?: boolean;
   ctrlKey?: boolean;
@@ -31,6 +32,10 @@ export function resolveRunHotkeyAction(input: RunHotkeyInput): RunHotkeyAction |
 
   if (input.preflightOpen && input.code === "Enter") {
     return "launch";
+  }
+
+  if (!input.preflightOpen && !input.resultOpen && input.canTogglePause && (input.code === "Escape" || input.code === "KeyP")) {
+    return "toggle-pause";
   }
 
   if (!input.resultOpen) {
