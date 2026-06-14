@@ -125,6 +125,7 @@ import { createGameAudioController, type GameAudioController } from "./game/game
 import { createGameHapticsController, type GameHapticsController } from "./game/gameHaptics";
 import { buildAudioTogglePresentation } from "./game/audioControls";
 import { buildTouchFlightPadPresentation } from "./game/touchControls";
+import { buildPauseOverlayPresentation, type PauseOverlayActionId } from "./game/pauseOverlay";
 import {
   buildMilestoneScreenFeedback,
   buildProgressReceiptScreenFeedback,
@@ -492,6 +493,15 @@ export function App() {
   const activeScreenFeedback =
     screenFeedback ?? (!runFinished && milestoneScreenFeedback ? { key: -1, feedback: milestoneScreenFeedback } : undefined);
   const overlays = getOverlayVisibility({ status: hud.status, preflightOpen, resultDismissed });
+  const pauseOverlay = buildPauseOverlayPresentation({
+    status: hud.status,
+    preflightOpen: overlays.preflight,
+    resultOpen: overlays.result,
+    contractTitle: hud.contractTitle,
+    elapsedSeconds: hud.elapsedSeconds,
+    score: hud.score,
+    cargoIntegrity
+  });
   const touchFlightPad = buildTouchFlightPadPresentation({ status: hud.status, preflightOpen });
   const runIntensity = buildRunIntensity({
     status: hud.status,
@@ -928,6 +938,12 @@ export function App() {
     shellRef.current?.restart(transition.shellRestartPaused);
   };
 
+  const setRunPaused = (next: boolean) => {
+    audioRef.current?.unlock();
+    setPaused(next);
+    shellRef.current?.setPaused(next);
+  };
+
   const launchContract = () => {
     audioRef.current?.unlock();
     applyDailyReplaySeed(hud.contractId);
@@ -956,6 +972,16 @@ export function App() {
 
   const restartToBriefing = () => {
     openContractBriefing();
+  };
+
+  const runPauseOverlayAction = (action: PauseOverlayActionId) => {
+    if (action === "resume") {
+      setRunPaused(false);
+    } else if (action === "restart") {
+      restartActiveRun();
+    } else {
+      restartToBriefing();
+    }
   };
 
   const runResultRetryAction = () => {
@@ -1023,9 +1049,7 @@ export function App() {
       } else if (action === "restart-run") {
         restartActiveRun();
       } else if (action === "toggle-pause") {
-        const next = !paused;
-        setPaused(next);
-        shellRef.current?.setPaused(next);
+        setRunPaused(!paused);
       } else {
         restartToBriefing();
       }
@@ -1132,10 +1156,7 @@ export function App() {
               aria-label={primaryRunControl.label}
               title={primaryRunControl.label}
               onClick={() => {
-                audioRef.current?.unlock();
-                const next = !paused;
-                setPaused(next);
-                shellRef.current?.setPaused(next);
+                setRunPaused(!paused);
               }}
             >
               {paused ? <Play size={20} /> : <Pause size={20} />}
@@ -1783,6 +1804,37 @@ export function App() {
             <span>Launch Contract</span>
             <small>{routeMarkLaunchCaption.value}</small>
           </button>
+        </section>
+      ) : null}
+
+      {pauseOverlay ? (
+        <section className="pause-overlay" aria-label="Paused route controls">
+          <span className="pause-icon" aria-hidden="true">
+            <Pause size={28} />
+          </span>
+          <h2>{pauseOverlay.title}</h2>
+          <p>{pauseOverlay.detail}</p>
+          <div className="pause-stats" aria-label="Paused run stats">
+            {pauseOverlay.stats.map((stat) => (
+              <span key={stat.label}>
+                <small>{stat.label}</small>
+                <strong>{stat.value}</strong>
+              </span>
+            ))}
+          </div>
+          <div className="pause-actions">
+            {pauseOverlay.actions.map((action) => (
+              <button
+                key={action.id}
+                type="button"
+                className={`pause-button pause-button-${action.tone}`}
+                onClick={() => runPauseOverlayAction(action.id)}
+              >
+                {action.icon === "play" ? <Play size={18} /> : action.icon === "restart" ? <RotateCcw size={18} /> : <Route size={18} />}
+                {action.label}
+              </button>
+            ))}
+          </div>
         </section>
       ) : null}
 
