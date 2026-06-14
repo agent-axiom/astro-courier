@@ -120,6 +120,7 @@ export type RouteBoardCampaignMilestoneTarget = {
 export type RouteBoardTarget = {
   label: "Next clear" | "Comet chase" | "Ghost chase" | "Board status";
   value: string;
+  detail?: string;
   tone: "clear" | "comet" | "ghost" | "complete";
   contractId?: string;
 };
@@ -471,9 +472,13 @@ export function buildRouteBoardTarget(
 
   const ghostCaptureContract = contracts.find((contract) => !hasReplayTrail(bestRunsByContract[contract.id]));
   if (ghostCaptureContract) {
+    const ghostBestRun = bestRunsByContract[ghostCaptureContract.id];
     return {
       label: "Ghost chase",
       value: `Capture ${ghostCaptureContract.title} ghost`,
+      ...(ghostBestRun
+        ? { detail: `Beat ${ghostBestRun.score} / ${ghostBestRun.elapsedSeconds.toFixed(1)}s to save trail` }
+        : {}),
       tone: "ghost",
       contractId: ghostCaptureContract.id
     };

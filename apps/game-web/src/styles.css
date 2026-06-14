@@ -2639,7 +2639,8 @@ button {
 }
 
 .route-target-briefing span,
-.route-target-briefing strong {
+.route-target-briefing strong,
+.route-target-briefing small {
   min-width: 0;
   overflow-wrap: anywhere;
   line-height: 1.15;
@@ -2652,6 +2653,14 @@ button {
 
 .route-target-briefing strong {
   color: #ffffff;
+  text-align: right;
+}
+
+.route-target-briefing small {
+  grid-column: 2 / -1;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.72rem;
+  font-weight: 750;
   text-align: right;
 }
 
@@ -4255,7 +4264,8 @@ button {
 }
 
 .result-board-target span,
-.result-board-target strong {
+.result-board-target strong,
+.result-board-target small {
   min-width: 0;
   overflow-wrap: anywhere;
   line-height: 1.15;
@@ -4268,6 +4278,14 @@ button {
 
 .result-board-target strong {
   color: #ffffff;
+  text-align: right;
+}
+
+.result-board-target small {
+  grid-column: 2 / -1;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.72rem;
+  font-weight: 750;
   text-align: right;
 }
 

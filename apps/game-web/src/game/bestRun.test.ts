@@ -1028,7 +1028,13 @@ describe("route board next target copy", () => {
         "asteroid-sprint": { score: 3500, elapsedSeconds: 21.8, medal: "comet" },
         "gravity-slingshot": { score: 3300, elapsedSeconds: 20.9, medal: "comet" }
       })
-    ).toEqual({ label: "Ghost chase", value: "Capture First Light ghost", tone: "ghost", contractId: "first-light-delivery" });
+    ).toEqual({
+      label: "Ghost chase",
+      value: "Capture First Light ghost",
+      detail: "Beat 3200 / 22.4s to save trail",
+      tone: "ghost",
+      contractId: "first-light-delivery"
+    });
   });
 
   it("keeps board order as the tie-breaker among missing ghost marks", () => {
@@ -1047,7 +1053,13 @@ describe("route board next target copy", () => {
         "asteroid-sprint": { score: 3500, elapsedSeconds: 21.8, medal: "comet" },
         "gravity-slingshot": { score: 3300, elapsedSeconds: 20.9, medal: "comet" }
       })
-    ).toEqual({ label: "Ghost chase", value: "Capture First Light ghost", tone: "ghost", contractId: "first-light-delivery" });
+    ).toEqual({
+      label: "Ghost chase",
+      value: "Capture First Light ghost",
+      detail: "Beat 3200 / 22.4s to save trail",
+      tone: "ghost",
+      contractId: "first-light-delivery"
+    });
   });
 });
 

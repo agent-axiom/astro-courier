@@ -705,9 +705,19 @@ describe("result board prompt", () => {
   });
 
   it("surfaces ghost capture targets after comet-sweep deliveries", () => {
-    expect(buildResultBoardPrompt({ status: "delivered", routeBoardTarget: { value: "Capture Return Leg ghost", tone: "ghost" } })).toEqual({
+    expect(
+      buildResultBoardPrompt({
+        status: "delivered",
+        routeBoardTarget: {
+          value: "Capture Return Leg ghost",
+          detail: "Beat 3100 / 23.1s to save trail",
+          tone: "ghost"
+        }
+      })
+    ).toEqual({
       label: "Board target",
       value: "Capture Return Leg ghost",
+      detail: "Beat 3100 / 23.1s to save trail",
       tone: "ghost"
     });
   });

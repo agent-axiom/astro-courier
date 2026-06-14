@@ -1423,7 +1423,9 @@ export function App() {
               <button
                 type="button"
                 className={`route-target-briefing route-target-${routeBoardTarget.tone} route-target-action`}
-                aria-label={`${routeBoardTarget.label}: ${routeBoardTarget.value}. ${routeTargetSelectionAction.label}`}
+                aria-label={`${routeBoardTarget.label}: ${routeBoardTarget.value}${
+                  routeBoardTarget.detail ? `. ${routeBoardTarget.detail}` : ""
+                }. ${routeTargetSelectionAction.label}`}
                 onClick={selectRouteBoardTarget}
               >
                 {routeBoardTarget.tone === "complete" ? (
@@ -1437,9 +1439,13 @@ export function App() {
                 )}
                 <span>{routeBoardTarget.label}</span>
                 <strong>{routeBoardTarget.value}</strong>
+                {routeBoardTarget.detail ? <small>{routeBoardTarget.detail}</small> : null}
               </button>
             ) : (
-              <div className={`route-target-briefing route-target-${routeBoardTarget.tone}`} aria-label={`${routeBoardTarget.label}: ${routeBoardTarget.value}`}>
+              <div
+                className={`route-target-briefing route-target-${routeBoardTarget.tone}`}
+                aria-label={`${routeBoardTarget.label}: ${routeBoardTarget.value}${routeBoardTarget.detail ? `. ${routeBoardTarget.detail}` : ""}`}
+              >
                 {routeBoardTarget.tone === "complete" ? (
                   <Trophy size={18} />
                 ) : routeBoardTarget.tone === "comet" ? (
@@ -1451,6 +1457,7 @@ export function App() {
                 )}
                 <span>{routeBoardTarget.label}</span>
                 <strong>{routeBoardTarget.value}</strong>
+                {routeBoardTarget.detail ? <small>{routeBoardTarget.detail}</small> : null}
               </div>
             )
           ) : null}
@@ -1836,7 +1843,10 @@ export function App() {
             <strong>{retryActionBriefing.value}</strong>
           </div>
           {resultBoardPrompt ? (
-            <div className={`result-board-target result-board-target-${resultBoardPrompt.tone}`} aria-label={`${resultBoardPrompt.label}: ${resultBoardPrompt.value}`}>
+            <div
+              className={`result-board-target result-board-target-${resultBoardPrompt.tone}`}
+              aria-label={`${resultBoardPrompt.label}: ${resultBoardPrompt.value}${resultBoardPrompt.detail ? `. ${resultBoardPrompt.detail}` : ""}`}
+            >
               {resultBoardPrompt.tone === "retry" ? (
                 <RotateCcw size={18} />
               ) : resultBoardPrompt.tone === "complete" ? (
@@ -1850,6 +1860,7 @@ export function App() {
               )}
               <span>{resultBoardPrompt.label}</span>
               <strong>{resultBoardPrompt.value}</strong>
+              {resultBoardPrompt.detail ? <small>{resultBoardPrompt.detail}</small> : null}
             </div>
           ) : null}
           {resultBoardMasteryPrompt ? (

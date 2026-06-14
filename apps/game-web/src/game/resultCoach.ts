@@ -27,6 +27,7 @@ export type ResultBoardPromptInput = {
   status: Extract<RunStatus, "delivered" | "crashed">;
   routeBoardTarget: {
     value: string;
+    detail?: string;
     tone: "clear" | "comet" | "ghost" | "complete";
     contractId?: string;
   };
@@ -35,6 +36,7 @@ export type ResultBoardPromptInput = {
 export type ResultBoardPrompt = {
   label: "Board target";
   value: string;
+  detail?: string;
   tone: "retry" | "clear" | "comet" | "ghost" | "complete";
 };
 
@@ -388,6 +390,7 @@ export function buildResultBoardPrompt(input: ResultBoardPromptInput): ResultBoa
   return {
     label: "Board target",
     value: input.routeBoardTarget.value,
+    ...(input.routeBoardTarget.detail ? { detail: input.routeBoardTarget.detail } : {}),
     tone: input.routeBoardTarget.tone
   };
 }
