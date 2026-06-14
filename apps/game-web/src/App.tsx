@@ -127,6 +127,7 @@ import { buildAudioTogglePresentation } from "./game/audioControls";
 import { buildTouchFlightPadPresentation } from "./game/touchControls";
 import { buildPauseOverlayPresentation, type PauseOverlayActionId } from "./game/pauseOverlay";
 import {
+  buildLaunchScreenFeedback,
   buildMilestoneScreenFeedback,
   buildPauseResumeScreenFeedback,
   buildProgressReceiptScreenFeedback,
@@ -956,6 +957,13 @@ export function App() {
 
   const launchContract = () => {
     audioRef.current?.unlock();
+    pushScreenFeedback(
+      buildLaunchScreenFeedback({
+        status: hud.status,
+        preflightOpen: overlays.preflight,
+        resultOpen: overlays.result
+      })
+    );
     applyDailyReplaySeed(hud.contractId);
     setPreflightOpen(false);
     setPaused(false);

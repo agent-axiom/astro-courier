@@ -26,6 +26,12 @@ export type PauseResumeScreenFeedbackInput = {
   resultOpen: boolean;
 };
 
+export type LaunchScreenFeedbackInput = {
+  status: RunStatus;
+  preflightOpen: boolean;
+  resultOpen: boolean;
+};
+
 export function buildMilestoneScreenFeedback(milestone: string | undefined): ScreenFeedback | undefined {
   const styleFeedback = buildStyleMilestoneFeedback(milestone);
   if (styleFeedback) {
@@ -144,6 +150,20 @@ export function buildPauseResumeScreenFeedback(input: PauseResumeScreenFeedbackI
     tone: "success",
     intensity: "light",
     durationMs: 300
+  };
+}
+
+export function buildLaunchScreenFeedback(input: LaunchScreenFeedbackInput): ScreenFeedback | undefined {
+  if (input.status !== "paused" || !input.preflightOpen || input.resultOpen) {
+    return undefined;
+  }
+
+  return {
+    label: "Route live",
+    value: "Launch vector",
+    tone: "success",
+    intensity: "medium",
+    durationMs: 360
   };
 }
 

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildCampaignMilestoneScreenFeedback,
   buildDailyDispatchScreenFeedback,
+  buildLaunchScreenFeedback,
   buildMilestoneScreenFeedback,
   buildPauseResumeScreenFeedback,
   buildProgressReceiptScreenFeedback,
@@ -123,6 +124,20 @@ describe("screen feedback", () => {
       intensity: "heavy",
       durationMs: 520
     });
+  });
+
+  it("adds a route-live pulse when committing from the launch briefing", () => {
+    expect(buildLaunchScreenFeedback({ status: "paused", preflightOpen: true, resultOpen: false })).toEqual({
+      label: "Route live",
+      value: "Launch vector",
+      tone: "success",
+      intensity: "medium",
+      durationMs: 360
+    });
+
+    expect(buildLaunchScreenFeedback({ status: "paused", preflightOpen: false, resultOpen: false })).toBeUndefined();
+    expect(buildLaunchScreenFeedback({ status: "flying", preflightOpen: true, resultOpen: false })).toBeUndefined();
+    expect(buildLaunchScreenFeedback({ status: "crashed", preflightOpen: false, resultOpen: true })).toBeUndefined();
   });
 
   it("adds a light route-live pulse only when resuming a paused live route", () => {
