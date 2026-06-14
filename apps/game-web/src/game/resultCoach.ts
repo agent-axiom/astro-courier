@@ -175,6 +175,14 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
     };
   }
 
+  if (input.lastMilestone === "Antimatter Drift") {
+    return {
+      label: "Next run",
+      value: "Repeat the drift dock",
+      tone: "success"
+    };
+  }
+
   if (input.cargoKind === "volatile" && input.cargoDamage > cleanCargoDamageLimit) {
     return {
       label: "Next run",

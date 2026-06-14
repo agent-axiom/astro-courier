@@ -649,6 +649,25 @@ describe("result coach", () => {
     });
   });
 
+  it("coaches antimatter drift runs toward repeating the drift dock", () => {
+    expect(
+      buildResultCoach({
+        status: "delivered",
+        lastMilestone: "Antimatter Drift",
+        medal: "silver",
+        grade: "B",
+        cargoDamage: 0,
+        fuel: 34,
+        maxFuel: 72,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 210 }
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Repeat the drift dock",
+      tone: "success"
+    });
+  });
+
   it("coaches danger-pay deliveries toward repeating the risky line", () => {
     expect(
       buildResultCoach({
