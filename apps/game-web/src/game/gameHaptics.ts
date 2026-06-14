@@ -47,6 +47,9 @@ export function hapticPatternForEvents(events: readonly GameAudioEvent[]): Hapti
   if (events.includes("comet-reserve-tight")) {
     return [14, 22, 14];
   }
+  if (events.includes("cargo-shock")) {
+    return [14, 18, 14];
+  }
   if (events.includes("cargo-stress")) {
     return [10, 18];
   }

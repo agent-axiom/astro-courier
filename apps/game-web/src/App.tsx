@@ -337,6 +337,7 @@ export function App() {
     }
   }, [
     hud.cargoDamage,
+    hud.cargoKind,
     hud.fuel,
     hud.hazardDangerLevel,
     hud.lastMilestone,
@@ -1950,6 +1951,7 @@ function toHudAudioSnapshot(hud: HudState, bestRun: BestRun | undefined): HudAud
     styleChainSecondsRemaining: hud.styleChainSecondsRemaining,
     fuel: hud.fuel,
     maxFuel: hud.maxFuel,
+    cargoKind: hud.cargoKind,
     cargoDamage: hud.cargoDamage,
     hazardDangerLevel: hud.hazardDangerLevel,
     trajectoryRiskLevel: hud.trajectoryRiskLevel

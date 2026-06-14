@@ -106,6 +106,9 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[], milestone
   if (events.includes("fuel-critical")) {
     return { label: "Fuel critical", value: "Coast now", tone: "warning", intensity: "medium", durationMs: 440 };
   }
+  if (events.includes("cargo-shock")) {
+    return { label: "Brake shock", value: "Volatile load", tone: "warning", intensity: "medium", durationMs: 360 };
+  }
   if (events.includes("cargo-stress")) {
     return { label: "Cargo stress", value: "Smooth inputs", tone: "warning", intensity: "light", durationMs: 320 };
   }

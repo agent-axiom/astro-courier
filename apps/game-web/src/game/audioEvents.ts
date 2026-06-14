@@ -26,6 +26,7 @@ export type GameAudioEvent =
   | "assist-burn"
   | "boost-burn"
   | "fuel-critical"
+  | "cargo-shock"
   | "cargo-stress"
   | "cargo-damage"
   | "hazard-contact"
@@ -51,6 +52,7 @@ export type HudAudioSnapshot = {
   styleChainSecondsRemaining?: number;
   fuel: number;
   maxFuel: number;
+  cargoKind?: string;
   cargoDamage?: number;
   hazardDangerLevel?: "near" | "inside";
   trajectoryRiskLevel?: "near" | "inside";
@@ -113,8 +115,9 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
     events.push("fuel-critical");
   }
 
-  if (hasCargoStressStarted(previous, current)) {
-    events.push("cargo-stress");
+  const cargoStressStarted = hasCargoStressStarted(previous, current);
+  if (cargoStressStarted) {
+    events.push(current.cargoKind === "volatile" ? "cargo-shock" : "cargo-stress");
   }
 
   if (hasCargoDamageCrossedCleanLimit(previous, current)) {

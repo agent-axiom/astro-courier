@@ -90,6 +90,21 @@ describe("HUD audio events", () => {
     ]);
   });
 
+  it("signals volatile brake shock distinctly from generic minor cargo stress", () => {
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, cargoKind: "volatile", cargoDamage: 0 },
+        { ...baseSnapshot, cargoKind: "volatile", cargoDamage: 0.012 }
+      )
+    ).toEqual(["cargo-shock"]);
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, cargoKind: "unstable", cargoDamage: 0 },
+        { ...baseSnapshot, cargoKind: "unstable", cargoDamage: 0.012 }
+      )
+    ).toEqual(["cargo-stress"]);
+  });
+
   it("celebrates arming the final comet dock once while comet conditions are live", () => {
     const cometDockSnapshot = {
       ...baseSnapshot,

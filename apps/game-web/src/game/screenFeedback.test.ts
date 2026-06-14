@@ -146,6 +146,13 @@ describe("screen feedback", () => {
   });
 
   it("maps cargo damage to a medium warning flash", () => {
+    expect(buildScreenFeedback(["cargo-shock"])).toEqual({
+      label: "Brake shock",
+      value: "Volatile load",
+      tone: "warning",
+      intensity: "medium",
+      durationMs: 360
+    });
     expect(buildScreenFeedback(["cargo-stress"])).toEqual({
       label: "Cargo stress",
       value: "Smooth inputs",
