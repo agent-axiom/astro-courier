@@ -8,6 +8,7 @@ import {
   PERFECT_APPROACH_STYLE_BONUS
 } from "@astro-courier/simulation";
 import type { LandingGuidanceStatus, ObjectivePhase, RunMedal, RunStatus } from "@astro-courier/shared";
+import type { RouteBoardCampaignMilestoneReceipt, RouteMarkReceipt } from "./bestRun";
 import {
   COMET_RESERVE_MIN_RATIO,
   COMET_RESERVE_WARNING_RATIO,
@@ -60,6 +61,11 @@ export type RunFeedEntry = RunFeedUpdate & {
 export type AppendRunFeedResult = {
   entries: RunFeedEntry[];
   nextId: number;
+};
+
+export type ProgressReceiptFeedInput = {
+  routeMarkReceipt?: RouteMarkReceipt;
+  campaignMilestoneReceipt?: RouteBoardCampaignMilestoneReceipt;
 };
 
 const criticalFuelRatio = 0.15;
@@ -338,6 +344,24 @@ export function appendRunFeedUpdates(
     entries: [...nextEntries, ...currentEntries].slice(0, maxEntries),
     nextId: nextEntryId
   };
+}
+
+export function buildProgressReceiptFeedUpdates(input: ProgressReceiptFeedInput): RunFeedUpdate[] {
+  const updates: RunFeedUpdate[] = [];
+
+  if (input.routeMarkReceipt?.tone === "ghost") {
+    updates.push({ label: "Ghost mark", value: "PB trail banked", tone: "success" });
+  } else if (input.routeMarkReceipt?.tone === "comet") {
+    updates.push({ label: "Comet mark", value: "Route upgraded", tone: "style" });
+  } else if (input.routeMarkReceipt?.tone === "clear") {
+    updates.push({ label: "Route mark", value: "Clear banked", tone: "success" });
+  }
+
+  if (input.campaignMilestoneReceipt) {
+    updates.push({ label: input.campaignMilestoneReceipt.value, value: "Campaign milestone", tone: "success" });
+  }
+
+  return updates;
 }
 
 function formatMilestoneValue(styleAward: number | undefined): string {

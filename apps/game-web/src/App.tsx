@@ -124,7 +124,13 @@ import { createGameHapticsController, type GameHapticsController } from "./game/
 import { buildAudioTogglePresentation } from "./game/audioControls";
 import { buildTouchFlightPadPresentation } from "./game/touchControls";
 import { buildMilestoneScreenFeedback, buildRouteMarkScreenFeedback, buildScreenFeedback, type ScreenFeedback } from "./game/screenFeedback";
-import { appendRunFeedUpdates, deriveRunFeedUpdates, type RunFeedEntry, type RunFeedSnapshot } from "./game/runFeed";
+import {
+  appendRunFeedUpdates,
+  buildProgressReceiptFeedUpdates,
+  deriveRunFeedUpdates,
+  type RunFeedEntry,
+  type RunFeedSnapshot
+} from "./game/runFeed";
 
 type GameStore = {
   hud: HudState;
@@ -428,9 +434,23 @@ export function App() {
     const nextRouteMarkReceipt = buildRouteMarkReceipt(previousBestRun, result.best);
     setRouteMarkReceipt(nextRouteMarkReceipt);
     pushScreenFeedback(buildRouteMarkScreenFeedback(nextRouteMarkReceipt));
-    setCampaignMilestoneReceipt(
-      buildRouteBoardCampaignMilestoneReceipt(hud.contractOptions, previousBestRunsByContract, nextBestRunsByContract)
+    const nextCampaignMilestoneReceipt = buildRouteBoardCampaignMilestoneReceipt(
+      hud.contractOptions,
+      previousBestRunsByContract,
+      nextBestRunsByContract
     );
+    setCampaignMilestoneReceipt(nextCampaignMilestoneReceipt);
+    const progressFeedUpdates = buildProgressReceiptFeedUpdates({
+      routeMarkReceipt: nextRouteMarkReceipt,
+      campaignMilestoneReceipt: nextCampaignMilestoneReceipt
+    });
+    if (progressFeedUpdates.length > 0) {
+      setRunFeed((currentEntries) => {
+        const result = appendRunFeedUpdates(currentEntries, progressFeedUpdates, nextRunFeedIdRef.current, 4);
+        nextRunFeedIdRef.current = result.nextId;
+        return result.entries;
+      });
+    }
     setBestRun(result.best);
     setBestRunsByContract(nextBestRunsByContract);
     setNewBest(result.isNewBest);

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { HAZARD_THREAD_SPEED_THRESHOLD } from "@astro-courier/simulation";
-import { appendRunFeedUpdates, deriveRunFeedUpdates, type RunFeedSnapshot } from "./runFeed";
+import { appendRunFeedUpdates, buildProgressReceiptFeedUpdates, deriveRunFeedUpdates, type RunFeedSnapshot } from "./runFeed";
 
 const baseSnapshot: RunFeedSnapshot = {
   status: "flying",
@@ -16,6 +16,38 @@ const baseSnapshot: RunFeedSnapshot = {
 describe("run action feed", () => {
   it("keeps initial snapshots quiet", () => {
     expect(deriveRunFeedUpdates(undefined, baseSnapshot)).toEqual([]);
+  });
+
+  it("turns banked route board receipts into terminal feed updates", () => {
+    expect(
+      buildProgressReceiptFeedUpdates({
+        routeMarkReceipt: { label: "Route mark", value: "Ghost mark banked", tone: "ghost" },
+        campaignMilestoneReceipt: { label: "Campaign milestone", value: "50% route board", tone: "half" }
+      })
+    ).toEqual([
+      {
+        label: "Ghost mark",
+        value: "PB trail banked",
+        tone: "success"
+      },
+      {
+        label: "50% route board",
+        value: "Campaign milestone",
+        tone: "success"
+      }
+    ]);
+
+    expect(
+      buildProgressReceiptFeedUpdates({
+        routeMarkReceipt: { label: "Route mark", value: "Comet mark banked", tone: "comet" }
+      })
+    ).toEqual([
+      {
+        label: "Comet mark",
+        value: "Route upgraded",
+        tone: "style"
+      }
+    ]);
   });
 
   it("derives expressive updates from fresh run events", () => {
