@@ -574,6 +574,24 @@ describe("result coach", () => {
       tone: "success"
     });
   });
+
+  it("coaches danger-pay deliveries toward repeating the risky line", () => {
+    expect(
+      buildResultCoach({
+        status: "delivered",
+        medal: "gold",
+        grade: "A",
+        cargoDamage: 0,
+        fuel: 44,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 120, dangerBonus: 360 }
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Repeat the danger-pay line",
+      tone: "success"
+    });
+  });
 });
 
 describe("result board prompt", () => {

@@ -102,6 +102,7 @@ export type ResultActionsLayout = "solo" | "pair";
 const cleanCargoDamageLimit = 0.02;
 const cometReserveMinRatio = 0.75;
 const cometReserveNearMissRatio = 0.6;
+const dangerPayMinBonus = 300;
 const perfectLandingBonus = 300;
 
 export function buildResultCoach(input: ResultCoachInput): ResultCoach {
@@ -278,6 +279,14 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
     return {
       label: "Next run",
       value: "Repeat the sling arc",
+      tone: "success"
+    };
+  }
+
+  if (input.scoreBreakdown.dangerBonus > input.scoreBreakdown.styleBonus && input.scoreBreakdown.dangerBonus >= dangerPayMinBonus) {
+    return {
+      label: "Next run",
+      value: "Repeat the danger-pay line",
       tone: "success"
     };
   }
