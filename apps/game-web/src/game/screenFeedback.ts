@@ -6,7 +6,7 @@ import type { DailyDispatchProgressReceipt } from "./contracts";
 export type ScreenFeedback = {
   label?: string;
   value?: string;
-  accent?: "chain" | "fuel" | "precision" | "rush" | "sling";
+  accent?: "chain" | "fuel" | "precision" | "rush" | "sling" | "tempo";
   tone: "style" | "success" | "warning" | "danger";
   intensity: "light" | "medium" | "heavy";
   durationMs: number;
@@ -209,6 +209,9 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[], milestone
   }
   if (events.includes("perfect-approach-ready")) {
     return { label: "Perfect setup", value: "Soft dock armed", tone: "style", intensity: "medium", durationMs: 420 };
+  }
+  if (events.includes("tempo-flow")) {
+    return { label: "Tempo flow", value: "Hold line", accent: "tempo", tone: "success", intensity: "medium", durationMs: 420 };
   }
   if (events.includes("hazard-contact")) {
     return { label: "Hazard contact", value: "Burn out", tone: "danger", intensity: "medium", durationMs: 440 };

@@ -245,6 +245,14 @@ describe("screen feedback", () => {
       intensity: "medium",
       durationMs: 420
     });
+    expect(buildScreenFeedback(["tempo-flow"])).toEqual({
+      label: "Tempo flow",
+      value: "Hold line",
+      accent: "tempo",
+      tone: "success",
+      intensity: "medium",
+      durationMs: 420
+    });
   });
 
   it("names high-skill style milestone hits when milestone context is available", () => {

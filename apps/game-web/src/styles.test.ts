@@ -22,6 +22,11 @@ describe("responsive game layout CSS", () => {
     expect(styles).toContain("screen-feedback-fuel-surge");
   });
 
+  it("defines a dedicated route tempo screen feedback accent", () => {
+    expect(styles).toContain(".screen-feedback-accent-tempo");
+    expect(styles).toContain("screen-feedback-tempo-sweep");
+  });
+
   it("defines a dedicated clutch tone for low-fuel style targets", () => {
     expect(styles).toContain(".style-target-clutch");
   });
