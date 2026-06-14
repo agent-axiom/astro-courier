@@ -22,6 +22,7 @@ export type ContractMasteryBadge = {
 export type ContractRouteMarkTarget = {
   label: "Next mark";
   value: "Clear route" | "Bank comet" | "Capture ghost" | "3/3 banked";
+  detail?: string;
   tone: "clear" | "comet" | "ghost" | "complete";
 };
 
@@ -44,7 +45,8 @@ export type LiveRouteMarkCueInput = {
 
 export type LiveRouteMarkCue = {
   label: "Route mark";
-  value: "Clear this route" | "Push comet mark" | "Record ghost mark" | "Mastery lap";
+  value: "Clear this route" | "Push comet mark" | "Match PB ghost" | "Record ghost mark" | "Mastery lap";
+  detail?: string;
   tone: ContractRouteMarkTarget["tone"];
 };
 
@@ -249,7 +251,12 @@ export function buildContractRouteMarkTarget(bestRun: BestRun | undefined): Cont
   }
 
   if (!hasReplayTrail(bestRun)) {
-    return { label: "Next mark", value: "Capture ghost", tone: "ghost" };
+    return {
+      label: "Next mark",
+      value: "Capture ghost",
+      detail: `Beat ${bestRun.score} / ${bestRun.elapsedSeconds.toFixed(1)}s to save trail`,
+      tone: "ghost"
+    };
   }
 
   return { label: "Next mark", value: "3/3 banked", tone: "complete" };
@@ -293,7 +300,12 @@ export function buildLiveRouteMarkCue(input: LiveRouteMarkCueInput): LiveRouteMa
     return { label: "Route mark", value: "Push comet mark", tone: "comet" };
   }
   if (input.target.tone === "ghost") {
-    return { label: "Route mark", value: "Record ghost mark", tone: "ghost" };
+    return {
+      label: "Route mark",
+      value: input.target.detail ? "Match PB ghost" : "Record ghost mark",
+      ...(input.target.detail ? { detail: input.target.detail } : {}),
+      tone: "ghost"
+    };
   }
   return { label: "Route mark", value: "Mastery lap", tone: "complete" };
 }

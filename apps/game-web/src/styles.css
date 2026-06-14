@@ -1091,7 +1091,8 @@ button {
 }
 
 .route-mark-cue-chip span,
-.route-mark-cue-chip strong {
+.route-mark-cue-chip strong,
+.route-mark-cue-chip small {
   min-width: 0;
   overflow-wrap: anywhere;
   line-height: 1.15;
@@ -1103,6 +1104,14 @@ button {
 
 .route-mark-cue-chip strong {
   color: #ffffff;
+  text-align: right;
+}
+
+.route-mark-cue-chip small {
+  grid-column: 2 / -1;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.68rem;
+  font-weight: 760;
   text-align: right;
 }
 
@@ -2342,7 +2351,8 @@ button {
 }
 
 .route-mark-target-briefing span,
-.route-mark-target-briefing strong {
+.route-mark-target-briefing strong,
+.route-mark-target-briefing small {
   min-width: 0;
   overflow-wrap: anywhere;
   line-height: 1.15;
@@ -2355,6 +2365,14 @@ button {
 
 .route-mark-target-briefing strong {
   color: #ffffff;
+  text-align: right;
+}
+
+.route-mark-target-briefing small {
+  grid-column: 2 / -1;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.72rem;
+  font-weight: 750;
   text-align: right;
 }
 

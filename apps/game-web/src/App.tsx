@@ -1121,10 +1121,14 @@ export function App() {
           </div>
         ) : null}
         {liveRouteMarkCue ? (
-          <div className={`route-mark-cue-chip route-mark-cue-${liveRouteMarkCue.tone}`} aria-label={`${liveRouteMarkCue.label}: ${liveRouteMarkCue.value}`}>
+          <div
+            className={`route-mark-cue-chip route-mark-cue-${liveRouteMarkCue.tone}`}
+            aria-label={`${liveRouteMarkCue.label}: ${liveRouteMarkCue.value}${liveRouteMarkCue.detail ? `. ${liveRouteMarkCue.detail}` : ""}`}
+          >
             {liveRouteMarkCue.tone === "complete" ? <Trophy size={16} /> : liveRouteMarkCue.tone === "comet" ? <Star size={16} /> : <Route size={16} />}
             <span>{liveRouteMarkCue.label}</span>
             <strong>{liveRouteMarkCue.value}</strong>
+            {liveRouteMarkCue.detail ? <small>{liveRouteMarkCue.detail}</small> : null}
           </div>
         ) : null}
         <div className="status-row">
@@ -1365,7 +1369,9 @@ export function App() {
           </div>
           <div
             className={`route-mark-target-briefing route-mark-target-${contractRouteMarkTarget.tone}`}
-            aria-label={`${contractRouteMarkTarget.label}: ${contractRouteMarkTarget.value}`}
+            aria-label={`${contractRouteMarkTarget.label}: ${contractRouteMarkTarget.value}${
+              contractRouteMarkTarget.detail ? `. ${contractRouteMarkTarget.detail}` : ""
+            }`}
           >
             {contractRouteMarkTarget.tone === "complete" ? (
               <Trophy size={18} />
@@ -1378,6 +1384,7 @@ export function App() {
             )}
             <span>{contractRouteMarkTarget.label}</span>
             <strong>{contractRouteMarkTarget.value}</strong>
+            {contractRouteMarkTarget.detail ? <small>{contractRouteMarkTarget.detail}</small> : null}
           </div>
           {hud.contractOptions.length > 0 ? (
             <>
