@@ -316,7 +316,7 @@ export function App() {
     previousAudioSnapshotRef.current = currentSnapshot;
     audioRef.current?.play(events);
     hapticsRef.current?.play(events);
-    const feedback = buildScreenFeedback(events);
+    const feedback = buildScreenFeedback(events, hud.lastMilestone);
     if (feedback) {
       if (screenFeedbackTimerRef.current) {
         clearTimeout(screenFeedbackTimerRef.current);

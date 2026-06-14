@@ -28,6 +28,8 @@ describe("screen feedback", () => {
       durationMs: 360
     });
     expect(buildScreenFeedback(["style-hit"])).toEqual({
+      label: "Style hit",
+      value: "Bonus banked",
       tone: "style",
       intensity: "light",
       durationMs: 360
@@ -38,6 +40,31 @@ describe("screen feedback", () => {
       tone: "style",
       intensity: "medium",
       durationMs: 460
+    });
+  });
+
+  it("names high-skill style milestone hits when milestone context is available", () => {
+    expect(buildScreenFeedback(["style-hit"], "Needle Thread")).toEqual({
+      label: "Needle thread",
+      value: "Clean gap",
+      tone: "style",
+      intensity: "medium",
+      durationMs: 440
+    });
+    expect(buildScreenFeedback(["style-hit"], "Gravity Sling")).toEqual({
+      label: "Gravity sling",
+      value: "Arc held",
+      tone: "style",
+      intensity: "medium",
+      durationMs: 440
+    });
+    expect(buildScreenFeedback(["style-hit"], "Chain Finish")).toEqual({
+      label: "Chain finish",
+      value: "Combo delivered",
+      accent: "chain",
+      tone: "style",
+      intensity: "heavy",
+      durationMs: 560
     });
   });
 
@@ -170,6 +197,21 @@ describe("screen feedback", () => {
       tone: "style",
       intensity: "medium",
       durationMs: 420
+    });
+    expect(buildMilestoneScreenFeedback("Needle Thread")).toEqual({
+      label: "Needle thread",
+      value: "Clean gap",
+      tone: "style",
+      intensity: "medium",
+      durationMs: 440
+    });
+    expect(buildMilestoneScreenFeedback("Chain Finish")).toEqual({
+      label: "Chain finish",
+      value: "Combo delivered",
+      accent: "chain",
+      tone: "style",
+      intensity: "heavy",
+      durationMs: 560
     });
     expect(buildMilestoneScreenFeedback("Pickup Required")).toBeUndefined();
   });

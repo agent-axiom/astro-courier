@@ -10,6 +10,11 @@ export type ScreenFeedback = {
 };
 
 export function buildMilestoneScreenFeedback(milestone: string | undefined): ScreenFeedback | undefined {
+  const styleFeedback = buildStyleMilestoneFeedback(milestone);
+  if (styleFeedback) {
+    return styleFeedback;
+  }
+
   if (milestone === "Launch Burst") {
     return buildScreenFeedback(["launch-burst"]);
   }
@@ -21,7 +26,7 @@ export function buildMilestoneScreenFeedback(milestone: string | undefined): Scr
   return undefined;
 }
 
-export function buildScreenFeedback(events: readonly GameAudioEvent[]): ScreenFeedback | undefined {
+export function buildScreenFeedback(events: readonly GameAudioEvent[], milestone?: string): ScreenFeedback | undefined {
   if (events.includes("ship-crash")) {
     return { label: "Insurance event", value: "Recover line", tone: "danger", intensity: "heavy", durationMs: 520 };
   }
@@ -79,8 +84,42 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[]): ScreenFe
   if (events.includes("boost-burn")) {
     return { label: "Impulse burn", value: "Vector kick", tone: "style", intensity: "light", durationMs: 300 };
   }
-  if (events.includes("style-hit") || events.includes("assist-burn")) {
-    return { tone: "style", intensity: "light", durationMs: 360 };
+  if (events.includes("assist-burn")) {
+    return { label: "Assist burn", value: "Vector trim", tone: "style", intensity: "light", durationMs: 320 };
+  }
+  if (events.includes("style-hit")) {
+    return buildStyleMilestoneFeedback(milestone) ?? { label: "Style hit", value: "Bonus banked", tone: "style", intensity: "light", durationMs: 360 };
   }
   return undefined;
+}
+
+function buildStyleMilestoneFeedback(milestone: string | undefined): ScreenFeedback | undefined {
+  switch (milestone) {
+    case "Clean Hazard Skim":
+      return { label: "Clean skim", value: "Danger pay", tone: "style", intensity: "medium", durationMs: 440 };
+    case "Needle Thread":
+      return { label: "Needle thread", value: "Clean gap", tone: "style", intensity: "medium", durationMs: 440 };
+    case "Gravity Sling":
+      return { label: "Gravity sling", value: "Arc held", tone: "style", intensity: "medium", durationMs: 440 };
+    case "Quick Pickup":
+      return { label: "Quick pickup", value: "Rush banked", tone: "style", intensity: "medium", durationMs: 420 };
+    case "Comet Finish":
+      return { label: "Comet finish", value: "Perfect delivery", tone: "style", intensity: "heavy", durationMs: 560 };
+    case "Perfect Approach":
+      return { label: "Perfect approach", value: "Soft dock", tone: "style", intensity: "medium", durationMs: 460 };
+    case "Eco Drift":
+      return { label: "Eco drift", value: "Fuel banked", tone: "style", intensity: "medium", durationMs: 420 };
+    case "Chain Finish":
+      return { label: "Chain finish", value: "Combo delivered", accent: "chain", tone: "style", intensity: "heavy", durationMs: 560 };
+    case "Express Finish":
+      return { label: "Express finish", value: "Time banked", tone: "style", intensity: "heavy", durationMs: 520 };
+    case "Damage Control":
+      return { label: "Damage control", value: "Cargo saved", tone: "style", intensity: "medium", durationMs: 460 };
+    case "Last Drop":
+      return { label: "Last drop", value: "Fuel miracle", tone: "style", intensity: "heavy", durationMs: 520 };
+    case "No Brake Finesse":
+      return { label: "No brake finesse", value: "Clean hands", tone: "style", intensity: "medium", durationMs: 460 };
+    default:
+      return undefined;
+  }
 }
