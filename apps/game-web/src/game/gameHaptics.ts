@@ -72,7 +72,7 @@ export function hapticPatternForEvents(events: readonly GameAudioEvent[]): Hapti
     return [12, 18, 12];
   }
   if (events.includes("chain-critical")) {
-    return [10, 18, 10];
+    return [12, 24, 12, 24];
   }
   if (events.includes("chain-save")) {
     return [12, 14, 12];
