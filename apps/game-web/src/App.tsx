@@ -113,6 +113,7 @@ import { getOverlayVisibility } from "./game/overlays";
 import { buildCometRunReadout } from "./game/comet";
 import { buildResultRetryAction, buildRetryActionBriefing, buildRetryTarget } from "./game/retryTarget";
 import { buildRunIntensity } from "./game/intensity";
+import { buildRestartFlowTransition, type RestartFlowMode } from "./game/restartFlow";
 import { buildCrashDebrief, buildCrashReasonLabel } from "./game/crash";
 import { buildReplayCaptureReadout } from "./game/replayReadout";
 import { deriveHudAudioEvents, type HudAudioSnapshot } from "./game/audioEvents";
@@ -831,6 +832,14 @@ export function App() {
     }
   };
 
+  const applyRestartFlowTransition = (mode: RestartFlowMode) => {
+    const transition = buildRestartFlowTransition(mode);
+    setResultDismissed(transition.resultDismissed);
+    setPreflightOpen(transition.preflightOpen);
+    setPaused(transition.paused);
+    shellRef.current?.restart(transition.shellRestartPaused);
+  };
+
   const launchContract = () => {
     audioRef.current?.unlock();
     applyDailyReplaySeed(hud.contractId);
@@ -842,9 +851,7 @@ export function App() {
   const openContractBriefing = (contractId = hud.contractId) => {
     audioRef.current?.unlock();
     resetRunUiState();
-    setPreflightOpen(true);
-    setPaused(true);
-    shellRef.current?.restart(true);
+    applyRestartFlowTransition("briefing");
     const replaySeed = replaySeedForContract(contractId);
     if (contractId !== hud.contractId) {
       shellRef.current?.selectContract(contractId, replaySeed ? { replaySeed } : undefined);
@@ -856,10 +863,7 @@ export function App() {
   const restartActiveRun = () => {
     audioRef.current?.unlock();
     resetRunUiState();
-    setResultDismissed(true);
-    setPreflightOpen(false);
-    setPaused(false);
-    shellRef.current?.restart(false);
+    applyRestartFlowTransition("direct-run");
   };
 
   const restartToBriefing = () => {
