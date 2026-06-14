@@ -31,6 +31,7 @@ import {
   buildContractBestRunTone,
   buildLiveBestPace,
   buildContractRouteMarkTarget,
+  buildLiveRouteMarkCue,
   buildRouteMarkLaunchCaption,
   buildRouteBoardCampaignProgress,
   buildRouteBoardCampaignMilestoneReceipt,
@@ -644,6 +645,11 @@ export function App() {
   const bestRunChase = buildBestRunChase(bestRun);
   const contractRouteMarkTarget = buildContractRouteMarkTarget(bestRun);
   const routeMarkLaunchCaption = buildRouteMarkLaunchCaption(contractRouteMarkTarget);
+  const liveRouteMarkCue = buildLiveRouteMarkCue({
+    target: contractRouteMarkTarget,
+    status: hud.status,
+    preflightOpen
+  });
   const routeBoardProgress = buildRouteBoardProgress(hud.contractOptions, bestRunsByContract);
   const routeBoardCampaignProgress = buildRouteBoardCampaignProgress(hud.contractOptions, bestRunsByContract);
   const routeBoardMastery = buildRouteBoardMastery(hud.contractOptions, bestRunsByContract);
@@ -1053,6 +1059,13 @@ export function App() {
             <Route size={16} />
             <span>{routeFocusReadout.label}</span>
             <strong>{routeFocusReadout.value}</strong>
+          </div>
+        ) : null}
+        {liveRouteMarkCue ? (
+          <div className={`route-mark-cue-chip route-mark-cue-${liveRouteMarkCue.tone}`} aria-label={`${liveRouteMarkCue.label}: ${liveRouteMarkCue.value}`}>
+            {liveRouteMarkCue.tone === "complete" ? <Trophy size={16} /> : liveRouteMarkCue.tone === "comet" ? <Star size={16} /> : <Route size={16} />}
+            <span>{liveRouteMarkCue.label}</span>
+            <strong>{liveRouteMarkCue.value}</strong>
           </div>
         ) : null}
         <div className="status-row">

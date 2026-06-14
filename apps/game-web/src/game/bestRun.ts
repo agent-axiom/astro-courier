@@ -30,6 +30,18 @@ export type RouteMarkLaunchCaption = {
   value: "Launch first clear" | "Launch comet push" | "Launch ghost capture" | "Launch mastery lap";
 };
 
+export type LiveRouteMarkCueInput = {
+  target: ContractRouteMarkTarget;
+  status: RunStatus;
+  preflightOpen: boolean;
+};
+
+export type LiveRouteMarkCue = {
+  label: "Route mark";
+  value: "Clear this route" | "Push comet mark" | "Record ghost mark" | "Mastery lap";
+  tone: ContractRouteMarkTarget["tone"];
+};
+
 export type RouteBoardContractMarks = {
   label: "Marks";
   value: `${number}/3`;
@@ -230,6 +242,23 @@ export function buildRouteMarkLaunchCaption(target: ContractRouteMarkTarget): Ro
     return { label: "Launch focus", value: "Launch ghost capture" };
   }
   return { label: "Launch focus", value: "Launch mastery lap" };
+}
+
+export function buildLiveRouteMarkCue(input: LiveRouteMarkCueInput): LiveRouteMarkCue | undefined {
+  if (input.preflightOpen || input.status === "delivered" || input.status === "crashed") {
+    return undefined;
+  }
+
+  if (input.target.tone === "clear") {
+    return { label: "Route mark", value: "Clear this route", tone: "clear" };
+  }
+  if (input.target.tone === "comet") {
+    return { label: "Route mark", value: "Push comet mark", tone: "comet" };
+  }
+  if (input.target.tone === "ghost") {
+    return { label: "Route mark", value: "Record ghost mark", tone: "ghost" };
+  }
+  return { label: "Route mark", value: "Mastery lap", tone: "complete" };
 }
 
 export function buildRouteBoardContractMarks(bestRun: BestRun | undefined): RouteBoardContractMarks {

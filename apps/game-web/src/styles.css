@@ -858,6 +858,54 @@ button {
   color: #ffe19a;
 }
 
+.route-mark-cue-chip {
+  display: grid;
+  grid-template-columns: 16px auto 1fr;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.route-mark-cue-chip span,
+.route-mark-cue-chip strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.route-mark-cue-chip span {
+  color: rgba(255, 255, 255, 0.74);
+}
+
+.route-mark-cue-chip strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.route-mark-cue-clear {
+  background: rgba(124, 225, 255, 0.13);
+  color: #c6f6ff;
+}
+
+.route-mark-cue-comet {
+  background: rgba(255, 209, 102, 0.17);
+  color: #ffe19a;
+}
+
+.route-mark-cue-ghost {
+  background: rgba(84, 241, 214, 0.14);
+  color: #c8fff6;
+}
+
+.route-mark-cue-complete {
+  background: rgba(142, 230, 184, 0.16);
+  color: #bff7d8;
+}
+
 .status-row {
   display: flex;
   justify-content: space-between;

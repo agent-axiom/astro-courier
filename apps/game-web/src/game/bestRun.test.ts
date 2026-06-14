@@ -7,6 +7,7 @@ import {
   buildContractRouteMarkTarget,
   buildContractBestRunLabel,
   buildRouteMarkLaunchCaption,
+  buildLiveRouteMarkCue,
   buildLiveBestPace,
   buildRouteBoardContractMarks,
   buildRouteBoardCampaignProgress,
@@ -298,6 +299,63 @@ describe("route mark launch caption copy", () => {
     expect(buildRouteMarkLaunchCaption({ label: "Next mark", value: "3/3 banked", tone: "complete" })).toEqual({
       label: "Launch focus",
       value: "Launch mastery lap"
+    });
+  });
+});
+
+describe("live route mark cue copy", () => {
+  it("stays hidden in preflight and after the run is over", () => {
+    const target = { label: "Next mark", value: "Clear route", tone: "clear" } as const;
+
+    expect(buildLiveRouteMarkCue({ target, status: "paused", preflightOpen: true })).toBeUndefined();
+    expect(buildLiveRouteMarkCue({ target, status: "delivered", preflightOpen: false })).toBeUndefined();
+    expect(buildLiveRouteMarkCue({ target, status: "crashed", preflightOpen: false })).toBeUndefined();
+  });
+
+  it("turns the active route mark target into an in-run cue", () => {
+    expect(
+      buildLiveRouteMarkCue({
+        target: { label: "Next mark", value: "Clear route", tone: "clear" },
+        status: "flying",
+        preflightOpen: false
+      })
+    ).toEqual({
+      label: "Route mark",
+      value: "Clear this route",
+      tone: "clear"
+    });
+    expect(
+      buildLiveRouteMarkCue({
+        target: { label: "Next mark", value: "Bank comet", tone: "comet" },
+        status: "flying",
+        preflightOpen: false
+      })
+    ).toEqual({
+      label: "Route mark",
+      value: "Push comet mark",
+      tone: "comet"
+    });
+    expect(
+      buildLiveRouteMarkCue({
+        target: { label: "Next mark", value: "Capture ghost", tone: "ghost" },
+        status: "paused",
+        preflightOpen: false
+      })
+    ).toEqual({
+      label: "Route mark",
+      value: "Record ghost mark",
+      tone: "ghost"
+    });
+    expect(
+      buildLiveRouteMarkCue({
+        target: { label: "Next mark", value: "3/3 banked", tone: "complete" },
+        status: "flying",
+        preflightOpen: false
+      })
+    ).toEqual({
+      label: "Route mark",
+      value: "Mastery lap",
+      tone: "complete"
     });
   });
 });
