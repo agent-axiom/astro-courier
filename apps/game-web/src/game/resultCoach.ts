@@ -381,6 +381,14 @@ export function buildResultTempoRecap(input: ResultTempoRecapInput): ResultTempo
   }
 
   const fuelRatio = input.maxFuel > 0 ? input.fuel / input.maxFuel : 0;
+  if (input.lastMilestone === "Chain Finish") {
+    return {
+      label: "Tempo recap",
+      value: "Chain cashed",
+      tone: "clutch"
+    };
+  }
+
   if (flowFinishMilestones.has(input.lastMilestone ?? "") || input.medal === "comet" || input.grade === "S") {
     return {
       label: "Tempo recap",

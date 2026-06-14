@@ -1015,6 +1015,23 @@ describe("result tempo recap", () => {
     expect(
       buildResultTempoRecap({
         status: "delivered",
+        medal: "gold",
+        grade: "A",
+        lastMilestone: "Chain Finish",
+        cargoDamage: 0,
+        fuel: 44,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 620 }
+      })
+    ).toEqual({
+      label: "Tempo recap",
+      value: "Chain cashed",
+      tone: "clutch"
+    });
+
+    expect(
+      buildResultTempoRecap({
+        status: "delivered",
         medal: "silver",
         grade: "B",
         lastMilestone: undefined,
