@@ -118,9 +118,11 @@ export function buildFlightDirector(input: FlightDirectorInput): FlightDirector 
 
   const quickPickupSeconds = input.quickPickupSecondsRemaining ?? 0;
   if (input.objectivePhase === "pickup" && quickPickupSeconds > 0 && (input.quickPickupBonus ?? 0) > 0) {
+    const chainActive = (input.styleMultiplier ?? 1) > 1 && (input.styleChainSecondsRemaining ?? 0) > 0;
+    const chainSuffix = chainActive ? ` / x${(input.styleMultiplier ?? 1).toFixed(2)}` : "";
     return director(
-      "Load fast",
-      `+${Math.round(input.quickPickupBonus ?? 0)} / ${formatSeconds(quickPickupSeconds)}`,
+      chainActive ? "Load chain" : "Load fast",
+      `+${Math.round(input.quickPickupBonus ?? 0)} / ${formatSeconds(quickPickupSeconds)}${chainSuffix}`,
       "opportunity",
       countdownProgress(quickPickupSeconds, QUICK_PICKUP_WINDOW_SECONDS)
     );

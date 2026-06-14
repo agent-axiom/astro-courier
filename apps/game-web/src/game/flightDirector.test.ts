@@ -134,6 +134,26 @@ describe("flight director", () => {
     });
   });
 
+  it("frames quick pickup as a chain load while a multiplier is live", () => {
+    expect(
+      buildFlightDirector({
+        status: "flying",
+        objectivePhase: "pickup",
+        cargoOnboard: false,
+        quickPickupSecondsRemaining: 4.2,
+        quickPickupBonus: 180,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 2.4
+      })
+    ).toEqual({
+      label: "Flight director",
+      action: "Load chain",
+      detail: "+180 / 4.2s / x1.50",
+      tone: "opportunity",
+      progress: 0.65
+    });
+  });
+
   it("turns a clean near trajectory vector into a style opportunity", () => {
     expect(
       buildFlightDirector({
