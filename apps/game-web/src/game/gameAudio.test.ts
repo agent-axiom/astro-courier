@@ -142,6 +142,21 @@ describe("game audio controller", () => {
     expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.13, 3);
   });
 
+  it("staggers stacked event tones so clutch moments read as a sequence", () => {
+    const context = new FakeAudioContext();
+    const controller = createGameAudioController({ createContext: () => context });
+
+    controller.play(["thread-window", "chain-critical"]);
+
+    expect(context.oscillators).toHaveLength(2);
+    expect(context.oscillators[0]?.frequencyValue).toBe(860);
+    expect(context.oscillators[0]?.startedAt).toBe(0);
+    expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.09, 3);
+    expect(context.oscillators[1]?.frequencyValue).toBe(580);
+    expect(context.oscillators[1]?.startedAt).toBeCloseTo(0.045, 3);
+    expect(context.oscillators[1]?.stoppedAt).toBeCloseTo(0.175, 3);
+  });
+
   it("plays a bright restore tone when a style chain is saved", () => {
     const context = new FakeAudioContext();
     const controller = createGameAudioController({ createContext: () => context });

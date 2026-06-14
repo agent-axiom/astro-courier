@@ -73,6 +73,8 @@ const eventTones: Record<GameAudioEvent, { frequency: number; duration: number; 
   "trajectory-clear": { frequency: 680, duration: 0.07, gain: 0.04 }
 };
 
+const stackedToneStepSeconds = 0.045;
+
 export function createGameAudioController(options: GameAudioControllerOptions = {}): GameAudioController {
   const createContext = options.createContext ?? createBrowserAudioContext;
   let context: GameAudioContextLike | undefined;
@@ -98,8 +100,8 @@ export function createGameAudioController(options: GameAudioControllerOptions = 
       if (activeContext.state === "suspended") {
         void activeContext.resume();
       }
-      for (const event of events) {
-        playTone(activeContext, eventTones[event]);
+      for (const [index, event] of events.entries()) {
+        playTone(activeContext, eventTones[event], index * stackedToneStepSeconds);
       }
     },
     setMuted(nextMuted) {
@@ -125,10 +127,10 @@ function createBrowserAudioContext(): GameAudioContextLike | undefined {
   return AudioContextConstructor ? (new AudioContextConstructor() as unknown as GameAudioContextLike) : undefined;
 }
 
-function playTone(context: GameAudioContextLike, tone: { frequency: number; duration: number; gain: number }): void {
+function playTone(context: GameAudioContextLike, tone: { frequency: number; duration: number; gain: number }, delaySeconds = 0): void {
   const oscillator = context.createOscillator();
   const gain = context.createGain();
-  const start = context.currentTime;
+  const start = context.currentTime + delaySeconds;
   const stop = start + tone.duration;
 
   oscillator.frequency.setValueAtTime(tone.frequency, start);
