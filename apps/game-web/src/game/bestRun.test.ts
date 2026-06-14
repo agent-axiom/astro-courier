@@ -12,6 +12,7 @@ import {
   buildLiveBestPace,
   buildRouteBoardContractMarks,
   buildRouteBoardCampaignProgress,
+  buildRouteBoardCampaignMilestoneTarget,
   buildRouteBoardCampaignMilestoneReceipt,
   buildRouteBoardMastery,
   buildRouteBoardRecommendationBadge,
@@ -590,6 +591,86 @@ describe("route board campaign progress copy", () => {
       tone: "complete",
       progress: 1
     });
+  });
+});
+
+describe("route board campaign milestone target", () => {
+  const contracts = [{ id: "first-light-delivery" }, { id: "return-leg" }, { id: "asteroid-sprint" }, { id: "gravity-slingshot" }];
+
+  it("points untouched campaigns at the first quarter milestone", () => {
+    expect(buildRouteBoardCampaignMilestoneTarget(contracts, {})).toEqual({
+      label: "Next milestone",
+      value: "25% route board",
+      detail: "3 marks to go",
+      tone: "quarter"
+    });
+  });
+
+  it("shows marks remaining to the next crossed milestone", () => {
+    expect(
+      buildRouteBoardCampaignMilestoneTarget(contracts, {
+        "first-light-delivery": {
+          score: 3200,
+          elapsedSeconds: 22.4,
+          medal: "comet",
+          ghostTrail: [
+            { x: 0, y: 0 },
+            { x: 12, y: 8 }
+          ]
+        },
+        "return-leg": { score: 2600, elapsedSeconds: 27.1, medal: "gold" },
+        "asteroid-sprint": undefined,
+        "gravity-slingshot": undefined
+      })
+    ).toEqual({
+      label: "Next milestone",
+      value: "50% route board",
+      detail: "2 marks to go",
+      tone: "half"
+    });
+  });
+
+  it("stays hidden after the campaign is fully mastered", () => {
+    expect(
+      buildRouteBoardCampaignMilestoneTarget(contracts, {
+        "first-light-delivery": {
+          score: 3200,
+          elapsedSeconds: 22.4,
+          medal: "comet",
+          ghostTrail: [
+            { x: 0, y: 0 },
+            { x: 12, y: 8 }
+          ]
+        },
+        "return-leg": {
+          score: 3100,
+          elapsedSeconds: 23.1,
+          medal: "comet",
+          ghostTrail: [
+            { x: 0, y: 0 },
+            { x: 18, y: -6 }
+          ]
+        },
+        "asteroid-sprint": {
+          score: 3500,
+          elapsedSeconds: 21.8,
+          medal: "comet",
+          ghostTrail: [
+            { x: 0, y: 0 },
+            { x: 20, y: -10 }
+          ]
+        },
+        "gravity-slingshot": {
+          score: 3300,
+          elapsedSeconds: 20.9,
+          medal: "comet",
+          ghostTrail: [
+            { x: 0, y: 0 },
+            { x: 16, y: 4 }
+          ]
+        }
+      })
+    ).toBeUndefined();
   });
 });
 

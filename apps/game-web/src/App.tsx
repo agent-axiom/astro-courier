@@ -35,6 +35,7 @@ import {
   buildLiveRouteMarkCue,
   buildRouteMarkLaunchCaption,
   buildRouteBoardCampaignProgress,
+  buildRouteBoardCampaignMilestoneTarget,
   buildRouteBoardCampaignMilestoneReceipt,
   buildRouteBoardContractMarks,
   buildRouteBoardMastery,
@@ -654,6 +655,7 @@ export function App() {
   });
   const routeBoardProgress = buildRouteBoardProgress(hud.contractOptions, bestRunsByContract);
   const routeBoardCampaignProgress = buildRouteBoardCampaignProgress(hud.contractOptions, bestRunsByContract);
+  const routeBoardCampaignMilestoneTarget = buildRouteBoardCampaignMilestoneTarget(hud.contractOptions, bestRunsByContract);
   const routeBoardMastery = buildRouteBoardMastery(hud.contractOptions, bestRunsByContract);
   const routeBoardTarget = buildRouteBoardTarget(hud.contractOptions, bestRunsByContract);
   const routeTargetSelectionAction = buildRouteBoardSelectionAction(routeBoardTarget, hud.contractId);
@@ -1331,6 +1333,17 @@ export function App() {
                 <strong>{routeBoardCampaignProgress.value}</strong>
                 <small>{routeBoardCampaignProgress.detail}</small>
               </div>
+              {routeBoardCampaignMilestoneTarget ? (
+                <div
+                  className={`route-campaign-milestone-target route-campaign-target-${routeBoardCampaignMilestoneTarget.tone}`}
+                  aria-label={`${routeBoardCampaignMilestoneTarget.label}: ${routeBoardCampaignMilestoneTarget.value}. ${routeBoardCampaignMilestoneTarget.detail}`}
+                >
+                  {routeBoardCampaignMilestoneTarget.tone === "complete" ? <Trophy size={18} /> : <Flag size={18} />}
+                  <span>{routeBoardCampaignMilestoneTarget.label}</span>
+                  <strong>{routeBoardCampaignMilestoneTarget.value}</strong>
+                  <small>{routeBoardCampaignMilestoneTarget.detail}</small>
+                </div>
+              ) : null}
             </>
           ) : null}
           {hud.contractOptions.length > 0 ? (

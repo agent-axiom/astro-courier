@@ -110,6 +110,13 @@ export type RouteBoardCampaignMilestoneReceipt = {
   tone: "quarter" | "half" | "mastery" | "complete";
 };
 
+export type RouteBoardCampaignMilestoneTarget = {
+  label: "Next milestone";
+  value: RouteBoardCampaignMilestoneReceipt["value"];
+  detail: `${number} mark to go` | `${number} marks to go`;
+  tone: RouteBoardCampaignMilestoneReceipt["tone"];
+};
+
 export type RouteBoardTarget = {
   label: "Next clear" | "Comet chase" | "Ghost chase" | "Board status";
   value: string;
@@ -385,6 +392,32 @@ export function buildRouteBoardCampaignProgress(
     detail: `${earnedMarks}/${totalMarks} route marks`,
     tone: progress >= 0.75 ? "mastery" : "progress",
     progress
+  };
+}
+
+export function buildRouteBoardCampaignMilestoneTarget(
+  contracts: readonly RouteBoardContract[],
+  bestRunsByContract: Readonly<Record<string, BestRun | undefined>>
+): RouteBoardCampaignMilestoneTarget | undefined {
+  const totalMarks = contracts.length * 3;
+  if (totalMarks === 0) {
+    return undefined;
+  }
+
+  const earnedMarks = contracts.reduce((total, contract) => total + routeMarks(bestRunsByContract[contract.id]), 0);
+  const progress = earnedMarks / totalMarks;
+  const milestone = [...campaignMilestones].reverse().find((entry) => progress < entry.progress);
+  if (!milestone) {
+    return undefined;
+  }
+
+  const marksToGo = Math.max(1, Math.ceil(milestone.progress * totalMarks) - earnedMarks);
+  const detail: RouteBoardCampaignMilestoneTarget["detail"] = marksToGo === 1 ? `${marksToGo} mark to go` : `${marksToGo} marks to go`;
+  return {
+    label: "Next milestone",
+    value: milestone.value,
+    detail,
+    tone: milestone.tone
   };
 }
 

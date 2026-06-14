@@ -2270,6 +2270,66 @@ button {
   color: #bff7d8;
 }
 
+.route-campaign-milestone-target {
+  display: grid;
+  grid-template-columns: 18px auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px 8px;
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 850;
+  text-align: left;
+}
+
+.route-campaign-milestone-target span,
+.route-campaign-milestone-target strong,
+.route-campaign-milestone-target small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.route-campaign-milestone-target span {
+  color: rgba(255, 255, 255, 0.72);
+  text-transform: uppercase;
+}
+
+.route-campaign-milestone-target strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.route-campaign-milestone-target small {
+  grid-column: 2 / 4;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.route-campaign-target-quarter {
+  background: rgba(124, 225, 255, 0.11);
+  color: #c6f6ff;
+}
+
+.route-campaign-target-half {
+  background: rgba(124, 225, 255, 0.14);
+  color: #d8fbff;
+}
+
+.route-campaign-target-mastery {
+  background: rgba(255, 209, 102, 0.14);
+  color: #ffe19a;
+}
+
+.route-campaign-target-complete {
+  background: rgba(142, 230, 184, 0.15);
+  color: #bff7d8;
+}
+
 .route-target-briefing {
   display: grid;
   grid-template-columns: 18px auto 1fr;
