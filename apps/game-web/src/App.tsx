@@ -540,6 +540,7 @@ export function App() {
     gravitySlingReady: hud.gravitySlingReady,
     gravitySlingStyleBonus: hud.gravitySlingStyleBonus,
     cargoDamage: hud.cargoDamage,
+    approachStreakSeconds: hud.approachStreakSeconds,
     styleMultiplier: hud.styleMultiplier,
     styleChainSecondsRemaining: hud.styleChainSecondsRemaining,
     manualBrakeUsed: hud.manualBrakeUsed

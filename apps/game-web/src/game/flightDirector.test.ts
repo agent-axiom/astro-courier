@@ -94,6 +94,27 @@ describe("flight director", () => {
     });
   });
 
+  it("guides charging perfect approach windows before the final dock command", () => {
+    expect(
+      buildFlightDirector({
+        status: "flying",
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        landingStatus: "ready",
+        approachStreakSeconds: 0.6,
+        cargoDamage: 0,
+        manualBrakeUsed: false,
+        targetDistance: 18
+      })
+    ).toEqual({
+      label: "Flight director",
+      action: "Hold approach",
+      detail: "0.6 / 1.0s",
+      tone: "opportunity",
+      progress: 0.6
+    });
+  });
+
   it("cashouts a fading style chain before ordinary delivery guidance", () => {
     expect(
       buildFlightDirector({

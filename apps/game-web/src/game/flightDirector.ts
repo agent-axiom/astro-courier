@@ -1,4 +1,4 @@
-import { HAZARD_THREAD_SPEED_THRESHOLD, NO_BRAKE_STYLE_BONUS } from "@astro-courier/simulation";
+import { HAZARD_THREAD_SPEED_THRESHOLD, NO_BRAKE_STYLE_BONUS, PERFECT_APPROACH_STREAK_SECONDS } from "@astro-courier/simulation";
 import type { LandingGuidanceStatus, ObjectivePhase, RunStatus } from "@astro-courier/shared";
 
 export type FlightDirectorInput = {
@@ -16,6 +16,7 @@ export type FlightDirectorInput = {
   gravitySlingReady?: boolean;
   gravitySlingStyleBonus?: number;
   cargoDamage?: number;
+  approachStreakSeconds?: number;
   styleMultiplier?: number;
   styleChainSecondsRemaining?: number;
   manualBrakeUsed?: boolean;
@@ -84,6 +85,22 @@ export function buildFlightDirector(input: FlightDirectorInput): FlightDirector 
   if (input.gravitySlingReady === true && (input.gravitySlingStyleBonus ?? 0) > 0 && (input.cargoDamage ?? 0) <= 0.02) {
     const payout = Math.round((input.gravitySlingStyleBonus ?? 0) * Math.max(1, input.styleMultiplier ?? 1));
     return director("Hold sling", `+${payout} ready`, "opportunity", 1);
+  }
+
+  const approachStreakSeconds = input.approachStreakSeconds ?? 0;
+  if (
+    input.landingStatus === "ready" &&
+    input.objectivePhase === "delivery" &&
+    approachStreakSeconds >= 0.25 &&
+    approachStreakSeconds < PERFECT_APPROACH_STREAK_SECONDS &&
+    (input.cargoDamage ?? 0) <= 0.02
+  ) {
+    return director(
+      "Hold approach",
+      `${approachStreakSeconds.toFixed(1)} / ${formatSeconds(PERFECT_APPROACH_STREAK_SECONDS)}`,
+      "opportunity",
+      approachStreakSeconds / PERFECT_APPROACH_STREAK_SECONDS
+    );
   }
 
   if (
