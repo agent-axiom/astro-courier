@@ -1,5 +1,7 @@
 import {
   HAZARD_THREAD_SPEED_THRESHOLD,
+  LAST_DROP_FUEL_RATIO,
+  LAST_DROP_STYLE_BONUS,
   NO_BRAKE_STYLE_BONUS,
   PERFECT_APPROACH_STREAK_SECONDS,
   PERFECT_APPROACH_STYLE_BONUS
@@ -185,7 +187,12 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
     });
   }
 
-  if (!freshFeedMilestone && !launchBurstArmed && hasStyleChainBecomeLive(previous, current)) {
+  const lastDropArmed = hasArmedLastDrop(previous, current);
+  if (lastDropArmed) {
+    updates.push(buildLastDropArmedUpdate(current));
+  }
+
+  if (!freshFeedMilestone && !launchBurstArmed && !lastDropArmed && hasStyleChainBecomeLive(previous, current)) {
     updates.push({
       label: "Chain live",
       value: `x${(current.styleMultiplier ?? 1).toFixed(2)} / ${formatSeconds(current.styleChainSecondsRemaining)}`,
@@ -483,6 +490,32 @@ function buildCriticalStyleChainUpdate(current: RunFeedSnapshot): RunFeedUpdate 
     label: "Chain fading",
     value: `Save in ${formatSeconds(current.styleChainSecondsRemaining)}`,
     tone: "warning"
+  };
+}
+
+function hasArmedLastDrop(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
+  return !isLastDropWindowOpen(previous) && isLastDropWindowOpen(current);
+}
+
+function isLastDropWindowOpen(snapshot: RunFeedSnapshot): boolean {
+  return (
+    snapshot.status === "flying" &&
+    snapshot.objectivePhase === "delivery" &&
+    snapshot.landingStatus === "ready" &&
+    (snapshot.cargoDamage ?? 0) <= cleanCargoDamageLimit &&
+    snapshot.maxFuel > 0 &&
+    snapshot.fuel / snapshot.maxFuel <= LAST_DROP_FUEL_RATIO
+  );
+}
+
+function buildLastDropArmedUpdate(current: RunFeedSnapshot): RunFeedUpdate {
+  const multiplier = Math.max(1, current.styleMultiplier ?? 1);
+  const payout = Math.round(LAST_DROP_STYLE_BONUS * multiplier);
+  const chainActive = multiplier > 1 && (current.styleChainSecondsRemaining ?? 0) > 0;
+  return {
+    label: "Last drop armed",
+    value: chainActive ? `+${payout} / chain x${multiplier.toFixed(2)}` : `+${payout} / dock empty`,
+    tone: "style"
   };
 }
 

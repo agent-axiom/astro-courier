@@ -287,6 +287,51 @@ describe("run action feed", () => {
     ]);
   });
 
+  it("announces when a last-drop dock window becomes armed", () => {
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, objectivePhase: "delivery", landingStatus: "misaligned", fuel: 4, maxFuel: 100, cargoDamage: 0 },
+        { ...baseSnapshot, objectivePhase: "delivery", landingStatus: "ready", fuel: 4, maxFuel: 100, cargoDamage: 0 }
+      )
+    ).toEqual([
+      {
+        label: "Last drop armed",
+        value: "+170 / dock empty",
+        tone: "style"
+      }
+    ]);
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, objectivePhase: "delivery", landingStatus: "ready", fuel: 4, maxFuel: 100, cargoDamage: 0 },
+        { ...baseSnapshot, objectivePhase: "delivery", landingStatus: "ready", fuel: 4, maxFuel: 100, cargoDamage: 0 }
+      )
+    ).toEqual([]);
+  });
+
+  it("announces multiplied last-drop dock windows during active style chains", () => {
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, objectivePhase: "delivery", landingStatus: "misaligned", fuel: 4, maxFuel: 100, cargoDamage: 0 },
+        {
+          ...baseSnapshot,
+          objectivePhase: "delivery",
+          landingStatus: "ready",
+          fuel: 4,
+          maxFuel: 100,
+          cargoDamage: 0,
+          styleMultiplier: 1.5,
+          styleChainSecondsRemaining: 2.4
+        }
+      )
+    ).toEqual([
+      {
+        label: "Last drop armed",
+        value: "+255 / chain x1.50",
+        tone: "style"
+      }
+    ]);
+  });
+
   it("announces when a critical style chain is saved back into a live window", () => {
     expect(
       deriveRunFeedUpdates(
