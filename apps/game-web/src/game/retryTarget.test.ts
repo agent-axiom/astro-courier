@@ -855,6 +855,39 @@ describe("result retry action briefing", () => {
     });
   });
 
+  it("turns signature repeat actions into distinct rematch hooks", () => {
+    expect(
+      buildRetryActionBriefing(
+        { label: "Repeat Line", tone: "opportunity", mode: "restart-run" },
+        { label: "Retry target", value: "Repeat Antimatter Drift", tone: "opportunity" }
+      )
+    ).toEqual({
+      label: "Next run",
+      value: "Thread the drift dock",
+      tone: "opportunity"
+    });
+    expect(
+      buildRetryActionBriefing(
+        { label: "Repeat Line", tone: "opportunity", mode: "restart-run" },
+        { label: "Retry target", value: "Repeat Eco Drift", tone: "opportunity" }
+      )
+    ).toEqual({
+      label: "Next run",
+      value: "Hold the low-burn line",
+      tone: "opportunity"
+    });
+    expect(
+      buildRetryActionBriefing(
+        { label: "Repeat Line", tone: "opportunity", mode: "restart-run" },
+        { label: "Retry target", value: "Repeat Perfect Approach", tone: "opportunity" }
+      )
+    ).toEqual({
+      label: "Next run",
+      value: "Repeat the soft dock",
+      tone: "opportunity"
+    });
+  });
+
   it("keeps failed retries focused on the repair target", () => {
     expect(
       buildRetryActionBriefing(

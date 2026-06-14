@@ -298,6 +298,30 @@ export function buildRetryActionBriefing(action: ResultRetryAction, target: Retr
       };
     }
 
+    if (target.value === "Repeat Antimatter Drift") {
+      return {
+        label: "Next run",
+        value: "Thread the drift dock",
+        tone: "opportunity"
+      };
+    }
+
+    if (target.value === "Repeat Eco Drift") {
+      return {
+        label: "Next run",
+        value: "Hold the low-burn line",
+        tone: "opportunity"
+      };
+    }
+
+    if (target.value === "Repeat Perfect Approach") {
+      return {
+        label: "Next run",
+        value: "Repeat the soft dock",
+        tone: "opportunity"
+      };
+    }
+
     return {
       label: "Next run",
       value: "Lock the style route",
