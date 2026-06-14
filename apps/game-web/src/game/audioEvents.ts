@@ -26,6 +26,7 @@ export type GameAudioEvent =
   | "assist-burn"
   | "boost-burn"
   | "fuel-critical"
+  | "cargo-stress"
   | "cargo-damage"
   | "hazard-contact"
   | "thread-window"
@@ -112,6 +113,10 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
     events.push("fuel-critical");
   }
 
+  if (hasCargoStressStarted(previous, current)) {
+    events.push("cargo-stress");
+  }
+
   if (hasCargoDamageCrossedCleanLimit(previous, current)) {
     events.push("cargo-damage");
   }
@@ -196,6 +201,16 @@ function hasCargoDamageCrossedCleanLimit(previous: HudAudioSnapshot | undefined,
     return false;
   }
   return (previous.cargoDamage ?? 0) <= cleanCargoDamageLimit && (current.cargoDamage ?? 0) > cleanCargoDamageLimit;
+}
+
+function hasCargoStressStarted(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {
+  if (!previous) {
+    return false;
+  }
+
+  const previousDamage = previous.cargoDamage ?? 0;
+  const currentDamage = current.cargoDamage ?? 0;
+  return previousDamage <= 0 && currentDamage > 0 && currentDamage <= cleanCargoDamageLimit;
 }
 
 function buildTargetLineupEvent(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): GameAudioEvent | undefined {

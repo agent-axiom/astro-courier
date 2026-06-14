@@ -80,6 +80,16 @@ describe("HUD audio events", () => {
     expect(deriveHudAudioEvents({ ...baseSnapshot, cargoDamage: 0.05 }, { ...baseSnapshot, cargoDamage: 0.12 })).toEqual([]);
   });
 
+  it("signals the first minor cargo stress before the damage threshold", () => {
+    expect(deriveHudAudioEvents({ ...baseSnapshot, cargoDamage: 0 }, { ...baseSnapshot, cargoDamage: 0.012 })).toEqual([
+      "cargo-stress"
+    ]);
+    expect(deriveHudAudioEvents({ ...baseSnapshot, cargoDamage: 0.012 }, { ...baseSnapshot, cargoDamage: 0.018 })).toEqual([]);
+    expect(deriveHudAudioEvents({ ...baseSnapshot, cargoDamage: 0 }, { ...baseSnapshot, cargoDamage: 0.05 })).toEqual([
+      "cargo-damage"
+    ]);
+  });
+
   it("celebrates arming the final comet dock once while comet conditions are live", () => {
     const cometDockSnapshot = {
       ...baseSnapshot,
