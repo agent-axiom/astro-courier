@@ -119,6 +119,7 @@ import { buildRunIntensity } from "./game/intensity";
 import { buildRestartFlowTransition, type RestartFlowMode } from "./game/restartFlow";
 import { buildCrashDebrief, buildCrashReasonLabel } from "./game/crash";
 import { buildReplayCaptureReadout } from "./game/replayReadout";
+import { resolveRunHotkeyAction } from "./game/runHotkeys";
 import { deriveHudAudioEvents, type HudAudioSnapshot } from "./game/audioEvents";
 import { createGameAudioController, type GameAudioController } from "./game/gameAudio";
 import { createGameHapticsController, type GameHapticsController } from "./game/gameHaptics";
@@ -996,6 +997,40 @@ export function App() {
       audioRef.current?.unlock();
     }
   };
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const action = resolveRunHotkeyAction({
+        code: event.code,
+        preflightOpen: overlays.preflight,
+        resultOpen: overlays.result,
+        target: event.target as { tagName?: string; isContentEditable?: boolean } | null,
+        altKey: event.altKey,
+        ctrlKey: event.ctrlKey,
+        metaKey: event.metaKey,
+        repeat: event.repeat,
+        isComposing: event.isComposing
+      });
+
+      if (!action) {
+        return;
+      }
+
+      event.preventDefault();
+      if (action === "launch") {
+        launchContract();
+      } else if (action === "restart-run") {
+        restartActiveRun();
+      } else {
+        restartToBriefing();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [overlays.preflight, overlays.result, launchContract, restartActiveRun, restartToBriefing]);
 
   return (
     <main className={`app-shell app-intensity-${runIntensity}`}>
