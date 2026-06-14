@@ -11,6 +11,7 @@ import {
   buildDailyDispatchAction,
   buildDailyDispatchBadge,
   buildDailyDispatchReset,
+  buildDailyDispatchResult,
   buildDailyDispatchStatus,
   buildLaunchCommitment,
   buildRoutePressureBriefing,
@@ -203,6 +204,74 @@ describe("contract rotation", () => {
       tone: "urgent"
     });
     expect(buildDailyDispatchReset(undefined, new Date("2026-06-13T18:30:00Z"))).toBeUndefined();
+  });
+
+  it("summarizes daily dispatch outcomes for the result overlay", () => {
+    const dispatch = {
+      label: "Daily dispatch" as const,
+      value: "Asteroid Sprint",
+      contractId: "asteroid-sprint",
+      seed: "daily-2026-06-13-asteroid-sprint",
+      tone: "daily" as const
+    };
+
+    expect(
+      buildDailyDispatchResult({
+        dispatch,
+        contractId: "asteroid-sprint",
+        status: "crashed",
+        medal: "none",
+        isNewBest: false
+      })
+    ).toEqual({
+      label: "Daily dispatch",
+      value: "Daily route failed",
+      tone: "failed"
+    });
+    expect(
+      buildDailyDispatchResult({
+        dispatch,
+        contractId: "asteroid-sprint",
+        status: "delivered",
+        medal: "silver",
+        isNewBest: true
+      })
+    ).toEqual({
+      label: "Daily dispatch",
+      value: "Daily PB banked",
+      tone: "new-best"
+    });
+    expect(
+      buildDailyDispatchResult({
+        dispatch,
+        contractId: "asteroid-sprint",
+        status: "delivered",
+        medal: "comet",
+        isNewBest: false
+      })
+    ).toEqual({
+      label: "Daily dispatch",
+      value: "Comet daily clear",
+      tone: "comet"
+    });
+    expect(
+      buildDailyDispatchResult({
+        dispatch,
+        contractId: "return-leg",
+        status: "delivered",
+        medal: "gold",
+        isNewBest: true
+      })
+    ).toBeUndefined();
+    expect(
+      buildDailyDispatchResult({
+        dispatch: undefined,
+        contractId: "asteroid-sprint",
+        status: "delivered",
+        medal: "gold",
+        isNewBest: true
+      })
+    ).toBeUndefined();
   });
 
   it("formats elevated contract hazard load for briefing cards", () => {

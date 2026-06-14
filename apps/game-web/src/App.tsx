@@ -54,6 +54,7 @@ import {
   buildDailyDispatchAction,
   buildDailyDispatchBadge,
   buildDailyDispatchReset,
+  buildDailyDispatchResult,
   buildDailyDispatchStatus,
   buildLaunchCommitment,
   buildRoutePressureBriefing
@@ -610,6 +611,16 @@ export function App() {
     dailyDispatch,
     dailyDispatch ? bestRunsByContract[dailyDispatch.contractId] : undefined
   );
+  const dailyDispatchResult =
+    hud.status === "delivered" || hud.status === "crashed"
+      ? buildDailyDispatchResult({
+          dispatch: dailyDispatch,
+          contractId: hud.contractId,
+          status: hud.status,
+          medal: hud.medal,
+          isNewBest: newBest
+        })
+      : undefined;
   const bestRunDelta = buildBestRunDelta({
     bestRun,
     run: { score: hud.score, elapsedSeconds: hud.elapsedSeconds, medal: hud.medal },
@@ -1477,6 +1488,16 @@ export function App() {
               <Route size={18} />
               <span>{ghostTrailReceipt.label}</span>
               <strong>{ghostTrailReceipt.value}</strong>
+            </div>
+          ) : null}
+          {dailyDispatchResult ? (
+            <div
+              className={`daily-result daily-result-${dailyDispatchResult.tone}`}
+              aria-label={`${dailyDispatchResult.label}: ${dailyDispatchResult.value}`}
+            >
+              <CalendarDays size={18} />
+              <span>{dailyDispatchResult.label}</span>
+              <strong>{dailyDispatchResult.value}</strong>
             </div>
           ) : null}
           <div className="result-stats">

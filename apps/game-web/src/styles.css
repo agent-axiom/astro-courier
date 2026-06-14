@@ -3412,6 +3412,54 @@ button {
   color: #bff7d8;
 }
 
+.daily-result {
+  display: grid;
+  grid-template-columns: 18px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 850;
+  text-align: left;
+}
+
+.daily-result span,
+.daily-result strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.daily-result span {
+  color: rgba(255, 255, 255, 0.72);
+  text-transform: uppercase;
+}
+
+.daily-result strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.daily-result-failed {
+  background: rgba(255, 111, 145, 0.14);
+  color: #ffadc1;
+}
+
+.daily-result-new-best,
+.daily-result-clear {
+  background: rgba(124, 225, 255, 0.14);
+  color: #c6f6ff;
+}
+
+.daily-result-gold,
+.daily-result-comet {
+  background: rgba(255, 209, 102, 0.16);
+  color: #ffe19a;
+}
+
 .result-board-mastery {
   display: grid;
   grid-template-columns: 18px auto 1fr;

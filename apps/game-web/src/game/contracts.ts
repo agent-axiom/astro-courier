@@ -43,6 +43,20 @@ export type DailyDispatchReset = {
   tone: "steady" | "urgent";
 };
 
+export type DailyDispatchResultInput = {
+  dispatch: DailyDispatch | undefined;
+  contractId: string;
+  status: "crashed" | "delivered";
+  medal: DailyDispatchBestRun["medal"];
+  isNewBest: boolean;
+};
+
+export type DailyDispatchResult = {
+  label: "Daily dispatch";
+  value: "Daily route failed" | "Daily PB banked" | "Comet daily clear" | "Gold daily clear" | "Daily clear banked";
+  tone: "failed" | "new-best" | "comet" | "gold" | "clear";
+};
+
 export type ContractHazardTraitInput = {
   hazardSeverityMultiplier?: number;
 };
@@ -226,6 +240,50 @@ export function buildDailyDispatchReset(dispatch: DailyDispatch | undefined, now
     label: "Daily reset",
     value: `${resetPrefix}${formatResetTime(millisecondsRemaining)} left`,
     tone: urgent ? "urgent" : "steady"
+  };
+}
+
+export function buildDailyDispatchResult(input: DailyDispatchResultInput): DailyDispatchResult | undefined {
+  if (!input.dispatch || input.dispatch.contractId !== input.contractId) {
+    return undefined;
+  }
+
+  if (input.status === "crashed") {
+    return {
+      label: "Daily dispatch",
+      value: "Daily route failed",
+      tone: "failed"
+    };
+  }
+
+  if (input.isNewBest) {
+    return {
+      label: "Daily dispatch",
+      value: "Daily PB banked",
+      tone: "new-best"
+    };
+  }
+
+  if (input.medal === "comet") {
+    return {
+      label: "Daily dispatch",
+      value: "Comet daily clear",
+      tone: "comet"
+    };
+  }
+
+  if (input.medal === "gold") {
+    return {
+      label: "Daily dispatch",
+      value: "Gold daily clear",
+      tone: "gold"
+    };
+  }
+
+  return {
+    label: "Daily dispatch",
+    value: "Daily clear banked",
+    tone: "clear"
   };
 }
 
