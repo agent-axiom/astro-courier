@@ -6,6 +6,7 @@ import {
   buildContractMasteryBadge,
   buildContractRouteMarkTarget,
   buildContractBestRunLabel,
+  buildRouteMarkLaunchCaption,
   buildLiveBestPace,
   buildRouteBoardContractMarks,
   buildRouteBoardCampaignProgress,
@@ -276,6 +277,27 @@ describe("current contract route mark target copy", () => {
       label: "Next mark",
       value: "3/3 banked",
       tone: "complete"
+    });
+  });
+});
+
+describe("route mark launch caption copy", () => {
+  it("turns the current mark target into launch button subcopy", () => {
+    expect(buildRouteMarkLaunchCaption({ label: "Next mark", value: "Clear route", tone: "clear" })).toEqual({
+      label: "Launch focus",
+      value: "Launch first clear"
+    });
+    expect(buildRouteMarkLaunchCaption({ label: "Next mark", value: "Bank comet", tone: "comet" })).toEqual({
+      label: "Launch focus",
+      value: "Launch comet push"
+    });
+    expect(buildRouteMarkLaunchCaption({ label: "Next mark", value: "Capture ghost", tone: "ghost" })).toEqual({
+      label: "Launch focus",
+      value: "Launch ghost capture"
+    });
+    expect(buildRouteMarkLaunchCaption({ label: "Next mark", value: "3/3 banked", tone: "complete" })).toEqual({
+      label: "Launch focus",
+      value: "Launch mastery lap"
     });
   });
 });

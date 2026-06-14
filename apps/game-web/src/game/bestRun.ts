@@ -25,6 +25,11 @@ export type ContractRouteMarkTarget = {
   tone: "clear" | "comet" | "ghost" | "complete";
 };
 
+export type RouteMarkLaunchCaption = {
+  label: "Launch focus";
+  value: "Launch first clear" | "Launch comet push" | "Launch ghost capture" | "Launch mastery lap";
+};
+
 export type RouteBoardContractMarks = {
   label: "Marks";
   value: `${number}/3`;
@@ -212,6 +217,19 @@ export function buildContractRouteMarkTarget(bestRun: BestRun | undefined): Cont
   }
 
   return { label: "Next mark", value: "3/3 banked", tone: "complete" };
+}
+
+export function buildRouteMarkLaunchCaption(target: ContractRouteMarkTarget): RouteMarkLaunchCaption {
+  if (target.tone === "clear") {
+    return { label: "Launch focus", value: "Launch first clear" };
+  }
+  if (target.tone === "comet") {
+    return { label: "Launch focus", value: "Launch comet push" };
+  }
+  if (target.tone === "ghost") {
+    return { label: "Launch focus", value: "Launch ghost capture" };
+  }
+  return { label: "Launch focus", value: "Launch mastery lap" };
 }
 
 export function buildRouteBoardContractMarks(bestRun: BestRun | undefined): RouteBoardContractMarks {

@@ -31,6 +31,7 @@ import {
   buildContractBestRunTone,
   buildLiveBestPace,
   buildContractRouteMarkTarget,
+  buildRouteMarkLaunchCaption,
   buildRouteBoardCampaignProgress,
   buildRouteBoardCampaignMilestoneReceipt,
   buildRouteBoardContractMarks,
@@ -642,6 +643,7 @@ export function App() {
       : undefined;
   const bestRunChase = buildBestRunChase(bestRun);
   const contractRouteMarkTarget = buildContractRouteMarkTarget(bestRun);
+  const routeMarkLaunchCaption = buildRouteMarkLaunchCaption(contractRouteMarkTarget);
   const routeBoardProgress = buildRouteBoardProgress(hud.contractOptions, bestRunsByContract);
   const routeBoardCampaignProgress = buildRouteBoardCampaignProgress(hud.contractOptions, bestRunsByContract);
   const routeBoardMastery = buildRouteBoardMastery(hud.contractOptions, bestRunsByContract);
@@ -1561,12 +1563,12 @@ export function App() {
           <button
             type="button"
             className={`preflight-button preflight-button-${launchCommitment.tone}`}
-            aria-label={`Launch Contract. ${launchCommitment.label}: ${launchCommitment.value}`}
+            aria-label={`Launch Contract. ${launchCommitment.label}: ${launchCommitment.value}. ${routeMarkLaunchCaption.label}: ${routeMarkLaunchCaption.value}`}
             onClick={launchContract}
           >
             <Play size={18} />
             <span>Launch Contract</span>
-            <small>{launchCommitment.value}</small>
+            <small>{routeMarkLaunchCaption.value}</small>
           </button>
         </section>
       ) : null}
