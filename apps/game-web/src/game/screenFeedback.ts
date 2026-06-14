@@ -1,5 +1,5 @@
 import type { GameAudioEvent } from "./audioEvents";
-import type { RouteMarkReceipt } from "./bestRun";
+import type { RouteBoardCampaignMilestoneReceipt, RouteMarkReceipt } from "./bestRun";
 import type { DailyDispatchProgressReceipt } from "./contracts";
 
 export type ScreenFeedback = {
@@ -9,6 +9,12 @@ export type ScreenFeedback = {
   tone: "style" | "success" | "warning" | "danger";
   intensity: "light" | "medium" | "heavy";
   durationMs: number;
+};
+
+export type ProgressReceiptScreenFeedbackInput = {
+  campaignMilestoneReceipt?: RouteBoardCampaignMilestoneReceipt;
+  routeMarkReceipt?: RouteMarkReceipt;
+  dailyProgressReceipt?: DailyDispatchProgressReceipt;
 };
 
 export function buildMilestoneScreenFeedback(milestone: string | undefined): ScreenFeedback | undefined {
@@ -46,6 +52,52 @@ export function buildRouteMarkScreenFeedback(receipt: RouteMarkReceipt | undefin
   }
 
   return { label: "Route mark", value: "Clear banked", tone: "success", intensity: "medium", durationMs: 500 };
+}
+
+export function buildCampaignMilestoneScreenFeedback(
+  receipt: RouteBoardCampaignMilestoneReceipt | undefined
+): ScreenFeedback | undefined {
+  if (!receipt) {
+    return undefined;
+  }
+
+  if (receipt.tone === "complete") {
+    return {
+      label: "Campaign mastered",
+      value: "Full route board",
+      tone: "success",
+      intensity: "heavy",
+      durationMs: 700
+    };
+  }
+
+  if (receipt.tone === "mastery") {
+    return {
+      label: receipt.label,
+      value: receipt.value,
+      tone: "style",
+      intensity: "heavy",
+      durationMs: 620
+    };
+  }
+
+  return {
+    label: receipt.label,
+    value: receipt.value,
+    tone: "success",
+    intensity: "medium",
+    durationMs: 540
+  };
+}
+
+export function buildProgressReceiptScreenFeedback(
+  input: ProgressReceiptScreenFeedbackInput
+): ScreenFeedback | undefined {
+  return (
+    buildCampaignMilestoneScreenFeedback(input.campaignMilestoneReceipt) ??
+    buildRouteMarkScreenFeedback(input.routeMarkReceipt) ??
+    buildDailyDispatchScreenFeedback(input.dailyProgressReceipt)
+  );
 }
 
 export function buildDailyDispatchScreenFeedback(receipt: DailyDispatchProgressReceipt | undefined): ScreenFeedback | undefined {

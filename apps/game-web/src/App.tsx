@@ -124,9 +124,8 @@ import { createGameHapticsController, type GameHapticsController } from "./game/
 import { buildAudioTogglePresentation } from "./game/audioControls";
 import { buildTouchFlightPadPresentation } from "./game/touchControls";
 import {
-  buildDailyDispatchScreenFeedback,
   buildMilestoneScreenFeedback,
-  buildRouteMarkScreenFeedback,
+  buildProgressReceiptScreenFeedback,
   buildScreenFeedback,
   type ScreenFeedback
 } from "./game/screenFeedback";
@@ -457,7 +456,11 @@ export function App() {
       setDailyProgressReceipt(undefined);
     }
     pushScreenFeedback(
-      buildRouteMarkScreenFeedback(nextRouteMarkReceipt) ?? buildDailyDispatchScreenFeedback(nextDailyClear?.receipt)
+      buildProgressReceiptScreenFeedback({
+        campaignMilestoneReceipt: nextCampaignMilestoneReceipt,
+        routeMarkReceipt: nextRouteMarkReceipt,
+        dailyProgressReceipt: nextDailyClear?.receipt
+      })
     );
     const progressFeedUpdates = buildProgressReceiptFeedUpdates({
       routeMarkReceipt: nextRouteMarkReceipt,

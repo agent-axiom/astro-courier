@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildCampaignMilestoneScreenFeedback,
   buildDailyDispatchScreenFeedback,
   buildMilestoneScreenFeedback,
+  buildProgressReceiptScreenFeedback,
   buildRouteMarkScreenFeedback,
   buildScreenFeedback
 } from "./screenFeedback";
@@ -47,6 +49,69 @@ describe("screen feedback", () => {
       durationMs: 560
     });
     expect(buildDailyDispatchScreenFeedback(undefined)).toBeUndefined();
+  });
+
+  it("turns campaign milestone receipts into high-impact result pulses", () => {
+    expect(
+      buildCampaignMilestoneScreenFeedback({
+        label: "Campaign milestone",
+        value: "25% route board",
+        tone: "quarter"
+      })
+    ).toEqual({
+      label: "Campaign milestone",
+      value: "25% route board",
+      tone: "success",
+      intensity: "medium",
+      durationMs: 540
+    });
+    expect(
+      buildCampaignMilestoneScreenFeedback({
+        label: "Campaign milestone",
+        value: "75% route board",
+        tone: "mastery"
+      })
+    ).toEqual({
+      label: "Campaign milestone",
+      value: "75% route board",
+      tone: "style",
+      intensity: "heavy",
+      durationMs: 620
+    });
+    expect(
+      buildCampaignMilestoneScreenFeedback({
+        label: "Campaign milestone",
+        value: "Campaign mastered",
+        tone: "complete"
+      })
+    ).toEqual({
+      label: "Campaign mastered",
+      value: "Full route board",
+      tone: "success",
+      intensity: "heavy",
+      durationMs: 700
+    });
+    expect(buildCampaignMilestoneScreenFeedback(undefined)).toBeUndefined();
+  });
+
+  it("prioritizes campaign milestones over other progress receipts", () => {
+    expect(
+      buildProgressReceiptScreenFeedback({
+        campaignMilestoneReceipt: {
+          label: "Campaign milestone",
+          value: "50% route board",
+          tone: "half"
+        },
+        routeMarkReceipt: { label: "Route mark", value: "Ghost mark banked", tone: "ghost" },
+        dailyProgressReceipt: { label: "Daily streak", value: "5-day streak", tone: "streak" }
+      })
+    ).toEqual({
+      label: "Campaign milestone",
+      value: "50% route board",
+      tone: "success",
+      intensity: "medium",
+      durationMs: 540
+    });
   });
 
   it("prioritizes crash feedback over lower-impact events", () => {
