@@ -202,13 +202,14 @@ describe("screen feedback", () => {
     });
   });
 
-  it("maps critical style chains to light warning feedback", () => {
+  it("maps critical style chains to an accented urgent combo pulse", () => {
     expect(buildScreenFeedback(["chain-critical"])).toEqual({
       label: "Chain critical",
-      value: "Save it",
+      value: "Cash out now",
+      accent: "chain",
       tone: "warning",
-      intensity: "light",
-      durationMs: 320
+      intensity: "medium",
+      durationMs: 380
     });
   });
 

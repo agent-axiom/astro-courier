@@ -85,7 +85,7 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[], milestone
     return { label: "Comet reserve", value: "Coast now", tone: "warning", intensity: "medium", durationMs: 380 };
   }
   if (events.includes("chain-critical")) {
-    return { label: "Chain critical", value: "Save it", tone: "warning", intensity: "light", durationMs: 320 };
+    return { label: "Chain critical", value: "Cash out now", accent: "chain", tone: "warning", intensity: "medium", durationMs: 380 };
   }
   if (events.includes("chain-save")) {
     return { label: "Chain saved", value: "Combo restored", accent: "chain", tone: "style", intensity: "medium", durationMs: 440 };
