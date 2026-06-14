@@ -16,4 +16,9 @@ describe("responsive game layout CSS", () => {
     expect(styles).toMatch(/\.result-coach-danger\s*\{[\s\S]*border-color: rgba\(255, 111, 145, 0\.36\);/);
     expect(styles).toMatch(/\.result-coach-success\s*\{[\s\S]*box-shadow: 0 0 24px rgba\(142, 230, 184, 0\.1\);/);
   });
+
+  it("defines a dedicated fuel-clutch screen feedback accent", () => {
+    expect(styles).toContain(".screen-feedback-accent-fuel");
+    expect(styles).toContain("screen-feedback-fuel-surge");
+  });
 });

@@ -51,6 +51,7 @@ describe("screen feedback", () => {
     expect(buildScreenFeedback(["last-drop-armed"])).toEqual({
       label: "Last drop",
       value: "Dock empty",
+      accent: "fuel",
       tone: "style",
       intensity: "heavy",
       durationMs: 500
