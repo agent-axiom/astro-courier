@@ -443,7 +443,13 @@ describe("run action feed", () => {
       }
     ]);
     expect(deriveRunFeedUpdates({ ...cometReserveSnapshot, fuel: 78 }, { ...cometReserveSnapshot, fuel: 77 })).toEqual([]);
-    expect(deriveRunFeedUpdates(cometReserveSnapshot, { ...cometReserveSnapshot, fuel: 74 })).toEqual([]);
+    expect(deriveRunFeedUpdates(cometReserveSnapshot, { ...cometReserveSnapshot, fuel: 74 })).toEqual([
+      {
+        label: "Comet reserve lost",
+        value: "+1% fuel short",
+        tone: "danger"
+      }
+    ]);
     expect(deriveRunFeedUpdates(cometReserveSnapshot, { ...cometReserveSnapshot, paceTier: "silver", fuel: 78 })).toEqual([
       {
         label: "Gold missed",
@@ -458,6 +464,25 @@ describe("run action feed", () => {
         tone: "warning"
       }
     ]);
+  });
+
+  it("announces when comet reserve is lost with the fuel shortfall", () => {
+    const cometReserveSnapshot = {
+      ...baseSnapshot,
+      paceTier: "gold" as const,
+      fuel: 76,
+      maxFuel: 100,
+      cargoDamage: 0
+    };
+
+    expect(deriveRunFeedUpdates(cometReserveSnapshot, { ...cometReserveSnapshot, fuel: 74 })).toEqual([
+      {
+        label: "Comet reserve lost",
+        value: "+1% fuel short",
+        tone: "danger"
+      }
+    ]);
+    expect(deriveRunFeedUpdates({ ...cometReserveSnapshot, fuel: 74 }, { ...cometReserveSnapshot, fuel: 73 })).toEqual([]);
   });
 
   it("announces when a perfect approach setup becomes ready outside comet conditions", () => {

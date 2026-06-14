@@ -5,7 +5,12 @@ import {
   PERFECT_APPROACH_STYLE_BONUS
 } from "@astro-courier/simulation";
 import type { LandingGuidanceStatus, ObjectivePhase, RunMedal, RunStatus } from "@astro-courier/shared";
-import { COMET_RESERVE_MIN_RATIO, COMET_RESERVE_WARNING_RATIO, isLiveCometDockArmed } from "./comet";
+import {
+  COMET_RESERVE_MIN_RATIO,
+  COMET_RESERVE_WARNING_RATIO,
+  formatCometReserveShortfallFuelGoal,
+  isLiveCometDockArmed
+} from "./comet";
 import type { ContractPaceTier } from "./pace";
 
 export type RunFeedTone = "neutral" | "style" | "success" | "warning" | "danger";
@@ -152,6 +157,14 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
       label: "Comet reserve",
       value: `${formatCometReserveBuffer(current)} burn buffer`,
       tone: "warning"
+    });
+  }
+
+  if (hasLostCometReserve(previous, current)) {
+    updates.push({
+      label: "Comet reserve lost",
+      value: `${formatCometReserveShortfall(current)} short`,
+      tone: "danger"
     });
   }
 
@@ -407,10 +420,28 @@ function hasEnteredTightCometReserve(previous: RunFeedSnapshot, current: RunFeed
   );
 }
 
+function hasLostCometReserve(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
+  if (current.status !== "flying" || current.paceTier !== "gold" || current.maxFuel <= 0 || previous.maxFuel <= 0) {
+    return false;
+  }
+  if ((current.cargoDamage ?? 0) > cleanCargoDamageLimit) {
+    return false;
+  }
+
+  const previousReserve = previous.fuel / previous.maxFuel;
+  const currentReserve = current.fuel / current.maxFuel;
+  return previousReserve >= COMET_RESERVE_MIN_RATIO && currentReserve < COMET_RESERVE_MIN_RATIO;
+}
+
 function formatCometReserveBuffer(snapshot: RunFeedSnapshot): string {
   const reserve = snapshot.maxFuel > 0 ? snapshot.fuel / snapshot.maxFuel : 0;
   const bufferPercent = Math.max(0, Math.round((reserve - COMET_RESERVE_MIN_RATIO) * 100));
   return `${bufferPercent}%`;
+}
+
+function formatCometReserveShortfall(snapshot: RunFeedSnapshot): string {
+  const reserve = snapshot.maxFuel > 0 ? snapshot.fuel / snapshot.maxFuel : 0;
+  return formatCometReserveShortfallFuelGoal(reserve);
 }
 
 function hasArmedPerfectApproach(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
