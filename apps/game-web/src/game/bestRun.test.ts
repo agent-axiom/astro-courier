@@ -1072,7 +1072,16 @@ describe("route board target selection action", () => {
         { label: "Next clear", value: "Clear Return Leg", tone: "clear", contractId: "return-leg" },
         "first-light-delivery"
       )
-    ).toEqual({ label: "Select target", contractId: "return-leg" });
+    ).toEqual({ label: "Open route", contractId: "return-leg" });
+  });
+
+  it("uses chase copy when a comet target is on a different route", () => {
+    expect(
+      buildRouteBoardSelectionAction(
+        { label: "Comet chase", value: "Comet Asteroid Sprint", tone: "comet", contractId: "asteroid-sprint" },
+        "first-light-delivery"
+      )
+    ).toEqual({ label: "Chase comet", contractId: "asteroid-sprint" });
   });
 
   it("stays passive when the current route is already the target", () => {
@@ -1094,7 +1103,7 @@ describe("route board target selection action", () => {
         { label: "Ghost chase", value: "Capture First Light ghost", tone: "ghost", contractId: "first-light-delivery" },
         "gravity-slingshot"
       )
-    ).toEqual({ label: "Select target", contractId: "first-light-delivery" });
+    ).toEqual({ label: "Capture ghost", contractId: "first-light-delivery" });
   });
 });
 

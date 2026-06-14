@@ -1472,7 +1472,7 @@ export function App() {
                 )}
                 <span>{routeBoardTarget.label}</span>
                 <strong>{routeBoardTarget.value}</strong>
-                {routeBoardTarget.detail ? <small>{routeBoardTarget.detail}</small> : null}
+                <small>{routeBoardTarget.detail ?? routeTargetSelectionAction.label}</small>
               </button>
             ) : (
               <div

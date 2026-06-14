@@ -134,7 +134,7 @@ export type RouteBoardMastery = {
 };
 
 export type RouteBoardSelectionAction = {
-  label: "Select target";
+  label: "Open route" | "Chase comet" | "Capture ghost";
   contractId: string;
 };
 
@@ -561,7 +561,15 @@ export function buildRouteBoardSelectionAction(
     return undefined;
   }
 
-  return { label: "Select target", contractId: routeBoardTarget.contractId };
+  if (routeBoardTarget.tone === "ghost") {
+    return { label: "Capture ghost", contractId: routeBoardTarget.contractId };
+  }
+
+  if (routeBoardTarget.tone === "comet") {
+    return { label: "Chase comet", contractId: routeBoardTarget.contractId };
+  }
+
+  return { label: "Open route", contractId: routeBoardTarget.contractId };
 }
 
 export function buildRouteBoardRecommendationBadge(routeBoardTarget: RouteBoardTarget): RouteBoardRecommendationBadge | undefined {
