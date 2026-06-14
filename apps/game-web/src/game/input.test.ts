@@ -144,6 +144,33 @@ describe("gamepad input mapping", () => {
     ]);
   });
 
+  it("maps the right stick to aim without adding thrust", () => {
+    expect(
+      commandsFromGamepadState(
+        {
+          axes: [0, 0, 1, 0],
+          buttons: []
+        },
+        Math.PI / 2
+      )
+    ).toEqual([{ type: "AIM", angle: 0 }]);
+  });
+
+  it("lets the right stick aim while the left stick controls thrust strength", () => {
+    expect(
+      commandsFromGamepadState(
+        {
+          axes: [0, -0.72, 1, 0],
+          buttons: []
+        },
+        0
+      )
+    ).toEqual([
+      { type: "AIM", angle: 0 },
+      { type: "THRUST", amount: 0.72 }
+    ]);
+  });
+
   it("maps analog trigger pressure to brake strength", () => {
     expect(
       commandsFromGamepadState(

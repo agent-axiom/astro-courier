@@ -74,13 +74,22 @@ export function commandsFromKeyboardState(pressed: ReadonlySet<string>, currentR
 
 export function commandsFromGamepadState(gamepad: GamepadCommandInput, _currentRotation: number): PlayerCommand[] {
   const commands: PlayerCommand[] = [];
-  const stickX = gamepad.axes[0] ?? 0;
-  const stickY = gamepad.axes[1] ?? 0;
-  const stickDistance = Math.hypot(stickX, stickY);
-  const thrustAmount = Math.max(stickDistance >= gamepadStickDeadZone ? stickDistance : 0, gamepadButtonValue(gamepad.buttons[gamepadThrustButtonIndex]));
+  const leftStickX = gamepad.axes[0] ?? 0;
+  const leftStickY = gamepad.axes[1] ?? 0;
+  const rightStickX = gamepad.axes[2] ?? 0;
+  const rightStickY = gamepad.axes[3] ?? 0;
+  const leftStickDistance = Math.hypot(leftStickX, leftStickY);
+  const rightStickDistance = Math.hypot(rightStickX, rightStickY);
+  const aimStickX = rightStickDistance >= gamepadStickDeadZone ? rightStickX : leftStickX;
+  const aimStickY = rightStickDistance >= gamepadStickDeadZone ? rightStickY : leftStickY;
+  const aimStickDistance = rightStickDistance >= gamepadStickDeadZone ? rightStickDistance : leftStickDistance;
+  const thrustAmount = Math.max(
+    leftStickDistance >= gamepadStickDeadZone ? leftStickDistance : 0,
+    gamepadButtonValue(gamepad.buttons[gamepadThrustButtonIndex])
+  );
 
-  if (stickDistance >= gamepadStickDeadZone) {
-    commands.push({ type: "AIM", angle: Math.atan2(stickY, stickX) });
+  if (aimStickDistance >= gamepadStickDeadZone) {
+    commands.push({ type: "AIM", angle: Math.atan2(aimStickY, aimStickX) });
   }
 
   if (thrustAmount > 0) {
