@@ -175,7 +175,17 @@ export function recordBestRun(
   run: BestRun
 ): { best: BestRun; isNewBest: boolean } {
   const current = getBestRun(storage, contractKey);
-  if (current && !isBetterRun(run, current)) {
+  if (current) {
+    if (improvesPersonalBest(run, current)) {
+      storage.setItem(storageKey(contractKey), JSON.stringify(run));
+      return { best: run, isNewBest: true };
+    }
+
+    if (upgradesReplayTrail(run, current)) {
+      storage.setItem(storageKey(contractKey), JSON.stringify(run));
+      return { best: run, isNewBest: false };
+    }
+
     return { best: current, isNewBest: false };
   }
 
@@ -644,14 +654,20 @@ export function buildLiveBestPace(input: LiveBestPaceInput): LiveBestPace | unde
   };
 }
 
-function isBetterRun(candidate: BestRun, current: BestRun): boolean {
+function improvesPersonalBest(candidate: BestRun, current: BestRun): boolean {
   if (candidate.score !== current.score) {
     return candidate.score > current.score;
   }
-  if (candidate.elapsedSeconds !== current.elapsedSeconds) {
-    return candidate.elapsedSeconds < current.elapsedSeconds;
-  }
-  return hasReplayTrail(candidate) && !hasReplayTrail(current);
+  return candidate.elapsedSeconds < current.elapsedSeconds;
+}
+
+function upgradesReplayTrail(candidate: BestRun, current: BestRun): boolean {
+  return (
+    candidate.score === current.score &&
+    candidate.elapsedSeconds === current.elapsedSeconds &&
+    hasReplayTrail(candidate) &&
+    !hasReplayTrail(current)
+  );
 }
 
 function hasReplayTrail(bestRun: BestRun | undefined): boolean {

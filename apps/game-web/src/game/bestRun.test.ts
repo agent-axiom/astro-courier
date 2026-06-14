@@ -83,7 +83,7 @@ describe("personal best run storage", () => {
     });
   });
 
-  it("upgrades an exact personal best when the replay trail is newly captured", () => {
+  it("upgrades an exact personal best trail without calling it a new best", () => {
     const storage = new MemoryStorage();
 
     recordBestRun(storage, "starter", {
@@ -102,7 +102,7 @@ describe("personal best run storage", () => {
       ]
     });
 
-    expect(result.isNewBest).toBe(true);
+    expect(result.isNewBest).toBe(false);
     expect(getBestRun(storage, "starter")?.ghostTrail).toEqual([
       { x: 180, y: 20 },
       { x: 220, y: -12 }
