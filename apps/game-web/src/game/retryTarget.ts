@@ -38,6 +38,7 @@ export type ResultRetryAction = {
     | "Chase Comet"
     | "Chain Run"
     | "Express Run"
+    | "Perfect Dock"
     | "Set PB"
     | "Run Again";
   tone: RetryTarget["tone"];
@@ -156,6 +157,14 @@ export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
     };
   }
 
+  if ((input.landingBonus ?? 0) < perfectLandingBonus) {
+    return {
+      label: "Retry target",
+      value: "Perfect dock",
+      tone: "opportunity"
+    };
+  }
+
   return {
     label: "Retry target",
     value: input.bestRun ? "Add one more bonus" : "Set first PB",
@@ -209,6 +218,9 @@ export function buildResultRetryAction(target: RetryTarget): ResultRetryAction {
   }
   if (target.value === "Carry Chain Finish") {
     return { label: "Chain Run", tone: "opportunity", mode: "restart-run" };
+  }
+  if (target.value === "Perfect dock") {
+    return { label: "Perfect Dock", tone: "opportunity", mode: "restart-run" };
   }
   if (target.value.startsWith("Gold under ")) {
     return { label: "Chase Gold", tone: "opportunity", mode: "restart-run" };
@@ -283,6 +295,13 @@ export function buildRetryActionBriefing(action: ResultRetryAction, target: Retr
     return {
       label: "Next run",
       value: "Carry the chain home",
+      tone: "opportunity"
+    };
+  }
+  if (action.label === "Perfect Dock") {
+    return {
+      label: "Next run",
+      value: "Feather the final brake",
       tone: "opportunity"
     };
   }

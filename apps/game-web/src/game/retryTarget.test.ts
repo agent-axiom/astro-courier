@@ -462,6 +462,45 @@ describe("result retry target", () => {
       tone: "opportunity"
     });
   });
+
+  it("nudges clean gold express clears without a perfect landing toward a perfect dock", () => {
+    expect(
+      buildRetryTarget({
+        status: "delivered",
+        medal: "gold",
+        lastMilestone: "Express Finish",
+        elapsedSeconds: 28.4,
+        goldSeconds: 30,
+        cargoDamage: 0,
+        landingBonus: 120,
+        score: 2520,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Perfect dock",
+      tone: "opportunity"
+    });
+    expect(
+      buildRetryTarget({
+        status: "delivered",
+        medal: "gold",
+        lastMilestone: "Express Finish",
+        elapsedSeconds: 28.4,
+        goldSeconds: 30,
+        cargoDamage: 0,
+        landingBonus: 300,
+        score: 2520,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).not.toEqual({
+      label: "Retry target",
+      value: "Perfect dock",
+      tone: "opportunity"
+    });
+  });
 });
 
 describe("result retry action copy", () => {
@@ -544,6 +583,14 @@ describe("result retry action copy", () => {
     });
     expect(buildResultRetryAction({ label: "Retry target", value: "Set first PB", tone: "opportunity" })).toEqual({
       label: "Set PB",
+      tone: "opportunity",
+      mode: "restart-run"
+    });
+  });
+
+  it("turns perfect dock targets into a landing-focused call to action", () => {
+    expect(buildResultRetryAction({ label: "Retry target", value: "Perfect dock", tone: "opportunity" })).toEqual({
+      label: "Perfect Dock",
       tone: "opportunity",
       mode: "restart-run"
     });
@@ -698,6 +745,19 @@ describe("result retry action briefing", () => {
     ).toEqual({
       label: "Next run",
       value: "One condition from comet",
+      tone: "opportunity"
+    });
+  });
+
+  it("turns perfect dock actions into a final-brake rematch hook", () => {
+    expect(
+      buildRetryActionBriefing(
+        { label: "Perfect Dock", tone: "opportunity", mode: "restart-run" },
+        { label: "Retry target", value: "Perfect dock", tone: "opportunity" }
+      )
+    ).toEqual({
+      label: "Next run",
+      value: "Feather the final brake",
       tone: "opportunity"
     });
   });
