@@ -25,4 +25,9 @@ describe("responsive game layout CSS", () => {
   it("defines a dedicated clutch tone for low-fuel style targets", () => {
     expect(styles).toContain(".style-target-clutch");
   });
+
+  it("defines a dedicated brake stress control tone", () => {
+    expect(styles).toContain(".brake-button-stress");
+    expect(styles).toContain("rgba(255, 111, 145");
+  });
 });

@@ -125,6 +125,38 @@ describe("brake control presentation", () => {
       tone: "finesse"
     });
   });
+
+  it("warns when braking will stress brake-sensitive cargo", () => {
+    expect(
+      buildBrakeControlPresentation({
+        canBrake: true,
+        manualBrakeUsed: true,
+        objectivePhase: "delivery",
+        cargoDamage: 0,
+        cargoKind: "unstable"
+      })
+    ).toEqual({
+      label: "Brake stress",
+      badge: "cargo",
+      tone: "stress"
+    });
+  });
+
+  it("keeps no-brake finesse above brake-sensitive stress while armed", () => {
+    expect(
+      buildBrakeControlPresentation({
+        canBrake: true,
+        manualBrakeUsed: false,
+        objectivePhase: "delivery",
+        cargoDamage: 0,
+        cargoKind: "unstable"
+      })
+    ).toEqual({
+      label: "No Brake +150 armed",
+      badge: "+150",
+      tone: "finesse"
+    });
+  });
 });
 
 describe("primary run control presentation", () => {

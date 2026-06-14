@@ -31,6 +31,7 @@ export type BrakeControlPresentationInput = {
   canBrake: boolean;
   manualBrakeUsed: boolean;
   objectivePhase?: ObjectivePhase;
+  cargoKind?: string;
   cargoDamage?: number;
   styleMultiplier?: number;
   styleChainSecondsRemaining?: number;
@@ -39,7 +40,7 @@ export type BrakeControlPresentationInput = {
 export type BrakeControlPresentation = {
   label: string;
   badge?: string;
-  tone: "ready" | "finesse" | "disabled";
+  tone: "ready" | "finesse" | "stress" | "disabled";
 };
 
 export type PrimaryRunControlPresentationInput = {
@@ -131,6 +132,14 @@ export function buildBrakeControlPresentation(input: BrakeControlPresentationInp
     };
   }
 
+  if (isBrakeSensitiveCargo(input.cargoKind)) {
+    return {
+      label: "Brake stress",
+      badge: "cargo",
+      tone: "stress"
+    };
+  }
+
   return {
     label: "Brake",
     tone: "ready"
@@ -155,4 +164,8 @@ function clamp(value: number, min: number, max: number): number {
 function round(value: number, digits: number): number {
   const scale = 10 ** digits;
   return Math.round(value * scale) / scale;
+}
+
+function isBrakeSensitiveCargo(cargoKind: string | undefined): boolean {
+  return cargoKind === "unstable" || cargoKind === "volatile";
 }

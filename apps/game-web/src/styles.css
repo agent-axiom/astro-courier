@@ -774,6 +774,19 @@ button {
     0 0 18px rgba(255, 209, 102, 0.12);
 }
 
+.brake-button-stress {
+  border-color: rgba(255, 111, 145, 0.58);
+  background: rgba(58, 22, 38, 0.7);
+  color: #ffd4df;
+  box-shadow:
+    0 0 0 1px rgba(255, 111, 145, 0.12) inset,
+    0 0 20px rgba(255, 111, 145, 0.16);
+}
+
+.brake-button-stress[data-brake-badge]::after {
+  color: #ffd4df;
+}
+
 .run-panel {
   position: absolute;
   right: 16px;

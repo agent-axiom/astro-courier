@@ -493,6 +493,7 @@ export function App() {
     canBrake,
     manualBrakeUsed: hud.manualBrakeUsed,
     objectivePhase: hud.objectivePhase,
+    cargoKind: hud.cargoKind,
     cargoDamage: hud.cargoDamage,
     styleMultiplier: hud.styleMultiplier,
     styleChainSecondsRemaining: hud.styleChainSecondsRemaining
