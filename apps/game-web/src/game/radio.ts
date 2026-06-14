@@ -129,7 +129,7 @@ export function buildRadioMessage(hud: HudState): string {
 
   if (hud.trajectoryRiskLevel === "near") {
     if (hud.cargoDamage <= 0.02 && hud.speed >= HAZARD_THREAD_SPEED_THRESHOLD) {
-      return `Thread vector crosses the hazard edge${formatTrajectoryEta(hud.trajectoryRiskSeconds)}. Hold it clean for style.`;
+      return `Thread window open. Hold the needle gap for style${formatTrajectoryEta(hud.trajectoryRiskSeconds)}.`;
     }
     return `Trajectory skims the hazard edge${formatTrajectoryEta(hud.trajectoryRiskSeconds)}. Hold it clean for style.`;
   }

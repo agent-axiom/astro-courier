@@ -122,7 +122,7 @@ describe("radio feedback copy", () => {
         speed: 46,
         cargoDamage: 0
       })
-    ).toContain("Thread vector");
+    ).toBe("Thread window open. Hold the needle gap for style in 0.8s.");
   });
 
   it("warns about damaged cargo before generic hazard proximity", () => {
