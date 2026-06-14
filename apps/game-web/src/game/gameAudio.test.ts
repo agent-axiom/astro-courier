@@ -32,6 +32,17 @@ describe("game audio controller", () => {
     expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.11, 3);
   });
 
+  it("plays a quick release tone when projected trajectory danger clears", () => {
+    const context = new FakeAudioContext();
+    const controller = createGameAudioController({ createContext: () => context });
+
+    controller.play(["trajectory-clear"]);
+
+    expect(context.oscillators).toHaveLength(1);
+    expect(context.oscillators[0]?.frequencyValue).toBe(680);
+    expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.07, 3);
+  });
+
   it("plays a stronger style tone for launch bursts", () => {
     const context = new FakeAudioContext();
     const controller = createGameAudioController({ createContext: () => context });

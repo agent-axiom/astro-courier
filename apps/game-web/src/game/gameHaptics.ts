@@ -26,6 +26,9 @@ export function hapticPatternForEvents(events: readonly GameAudioEvent[]): Hapti
   if (events.includes("trajectory-warning")) {
     return [18, 24, 18];
   }
+  if (events.includes("trajectory-clear")) {
+    return [8, 8];
+  }
   if (events.includes("medal-drop")) {
     return [18, 28];
   }

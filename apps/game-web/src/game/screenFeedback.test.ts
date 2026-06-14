@@ -139,6 +139,16 @@ describe("screen feedback", () => {
     });
   });
 
+  it("maps trajectory clears to quick success feedback", () => {
+    expect(buildScreenFeedback(["trajectory-clear"])).toEqual({
+      label: "Vector clear",
+      value: "Line recovered",
+      tone: "success",
+      intensity: "light",
+      durationMs: 300
+    });
+  });
+
   it("strengthens feedback when cargo damage and trajectory warnings stack", () => {
     expect(buildScreenFeedback(["cargo-damage", "trajectory-warning"])).toEqual({
       label: "Cargo vector",

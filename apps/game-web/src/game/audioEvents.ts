@@ -24,7 +24,8 @@ export type GameAudioEvent =
   | "fuel-critical"
   | "cargo-damage"
   | "hazard-contact"
-  | "trajectory-warning";
+  | "trajectory-warning"
+  | "trajectory-clear";
 
 export type HudAudioSnapshot = {
   status: RunStatus;
@@ -146,6 +147,8 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
     (current.cargoDamage ?? 0) > cleanCargoDamageLimit
   ) {
     events.push("trajectory-warning");
+  } else if (hasClearedTrajectoryRisk(previous, current)) {
+    events.push("trajectory-clear");
   }
 
   return events;
@@ -179,6 +182,14 @@ function buildTargetLineupEvent(previous: HudAudioSnapshot | undefined, current:
   }
 
   return current.objectivePhase === "pickup" ? "pickup-lineup" : "dock-lineup";
+}
+
+function hasClearedTrajectoryRisk(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {
+  return (
+    current.status === "flying" &&
+    (previous?.trajectoryRiskLevel === "inside" || previous?.trajectoryRiskLevel === "near") &&
+    current.trajectoryRiskLevel === undefined
+  );
 }
 
 function hasCrossedBestRunScore(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {

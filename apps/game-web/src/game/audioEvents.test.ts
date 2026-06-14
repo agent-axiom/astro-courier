@@ -157,6 +157,28 @@ describe("HUD audio events", () => {
     ).toEqual(["trajectory-warning"]);
   });
 
+  it("signals when the predicted trajectory clears a dangerous line", () => {
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, trajectoryRiskLevel: "inside" },
+        { ...baseSnapshot, trajectoryRiskLevel: undefined }
+      )
+    ).toEqual(["trajectory-clear"]);
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, trajectoryRiskLevel: "near" },
+        { ...baseSnapshot, trajectoryRiskLevel: undefined }
+      )
+    ).toEqual(["trajectory-clear"]);
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, trajectoryRiskLevel: "inside" },
+        { ...baseSnapshot, status: "crashed", trajectoryRiskLevel: undefined }
+      )
+    ).toEqual(["ship-crash"]);
+    expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, trajectoryRiskLevel: undefined })).toEqual([]);
+  });
+
   it("warns when damaged cargo enters a predicted hazard vector", () => {
     expect(
       deriveHudAudioEvents(
