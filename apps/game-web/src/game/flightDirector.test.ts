@@ -154,6 +154,40 @@ describe("flight director", () => {
     });
   });
 
+  it("switches ordinary pickup flight into a close-range lineup command", () => {
+    expect(
+      buildFlightDirector({
+        status: "flying",
+        objectivePhase: "pickup",
+        cargoOnboard: false,
+        targetDistance: 74
+      })
+    ).toEqual({
+      label: "Flight director",
+      action: "Line up pickup",
+      detail: "Pad 74m",
+      tone: "approach",
+      progress: 0.82
+    });
+  });
+
+  it("switches ordinary delivery flight into a close-range dock lineup command", () => {
+    expect(
+      buildFlightDirector({
+        status: "flying",
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        targetDistance: 86
+      })
+    ).toEqual({
+      label: "Flight director",
+      action: "Line up dock",
+      detail: "Dock 86m",
+      tone: "approach",
+      progress: 0.79
+    });
+  });
+
   it("keeps ordinary flight focused on the active objective", () => {
     expect(
       buildFlightDirector({

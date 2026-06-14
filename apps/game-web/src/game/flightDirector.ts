@@ -32,6 +32,7 @@ export type FlightDirector = {
 const CHAIN_CASHOUT_SECONDS = 1.2;
 const TRAJECTORY_WARNING_SECONDS = 3;
 const TARGET_PROGRESS_DISTANCE = 400;
+const CLOSE_TARGET_DISTANCE = 90;
 const QUICK_PICKUP_WINDOW_SECONDS = 12;
 
 export function buildFlightDirector(input: FlightDirectorInput): FlightDirector | undefined {
@@ -106,6 +107,15 @@ export function buildFlightDirector(input: FlightDirectorInput): FlightDirector 
       "opportunity",
       countdownProgress(quickPickupSeconds, QUICK_PICKUP_WINDOW_SECONDS)
     );
+  }
+
+  if (input.targetDistance !== undefined && input.targetDistance <= CLOSE_TARGET_DISTANCE) {
+    const distance = Math.round(input.targetDistance);
+    if (input.objectivePhase === "pickup") {
+      return director("Line up pickup", `Pad ${distance}m`, "approach", targetProgress(input));
+    }
+
+    return director("Line up dock", `Dock ${distance}m`, "approach", targetProgress(input));
   }
 
   if (input.objectivePhase === "pickup") {
