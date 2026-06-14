@@ -1227,6 +1227,12 @@ button {
   text-transform: uppercase;
 }
 
+.style-chip-badge {
+  border-color: rgba(142, 230, 184, 0.34);
+  background: rgba(142, 230, 184, 0.16);
+  color: #d7ffec;
+}
+
 .style-chip-hot {
   background: rgba(142, 230, 184, 0.17);
   color: #bff7d8;

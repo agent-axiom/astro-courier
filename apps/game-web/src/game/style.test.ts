@@ -216,6 +216,17 @@ describe("live style reward HUD copy", () => {
     });
   });
 
+  it("surfaces the active style chain count as a compact badge", () => {
+    expect(buildLiveStyleReward({ styleBonus: 440, styleMultiplier: 1.5, styleChainSecondsRemaining: 2.4, styleChainCount: 2 })).toEqual({
+      label: "Style chain",
+      value: "+440 / x1.50 / 2.4s",
+      badge: "2 chain",
+      fresh: false,
+      tone: "chain",
+      chainProgress: 0.6
+    });
+  });
+
   it("uses the longer chain relay timing for style chain progress", () => {
     expect(
       buildLiveStyleReward({
@@ -238,6 +249,18 @@ describe("live style reward HUD copy", () => {
       label: "Style chain",
       value: "Save chain / x1.50 / 0.8s",
       action: "Save chain",
+      fresh: false,
+      tone: "urgent",
+      chainProgress: 0.2
+    });
+  });
+
+  it("keeps the chain count badge visible while urgent action copy takes over", () => {
+    expect(buildLiveStyleReward({ styleBonus: 620, styleMultiplier: 2, styleChainSecondsRemaining: 0.8, styleChainCount: 4 })).toEqual({
+      label: "Style chain",
+      value: "Save chain / x2.00 / 0.8s",
+      action: "Save chain",
+      badge: "4 chain",
       fresh: false,
       tone: "urgent",
       chainProgress: 0.2

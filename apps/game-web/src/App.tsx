@@ -560,6 +560,7 @@ export function App() {
     lastStyleAward: hud.lastStyleAward,
     lastMilestone: hud.lastMilestone,
     styleMultiplier: hud.styleMultiplier,
+    styleChainCount: hud.styleChainCount,
     styleChainSecondsRemaining: hud.styleChainSecondsRemaining,
     launchBurstSecondsRemaining: hud.launchBurstSecondsRemaining,
     quickPickupSecondsRemaining: hud.quickPickupSecondsRemaining,
@@ -1136,6 +1137,7 @@ export function App() {
           >
             <span>{liveStyleReward.label}</span>
             <strong>{liveStyleReward.value}</strong>
+            {liveStyleReward.badge ? <small className="style-chip-badge">{liveStyleReward.badge}</small> : null}
             {liveStyleReward.action ? <small>{liveStyleReward.action}</small> : null}
           </div>
         ) : null}

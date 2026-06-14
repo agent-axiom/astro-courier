@@ -16,6 +16,7 @@ export type LiveStyleRewardInput = {
   lastStyleAward?: number;
   lastMilestone?: string;
   styleMultiplier?: number;
+  styleChainCount?: number;
   styleChainSecondsRemaining?: number;
   launchBurstSecondsRemaining?: number;
   quickPickupSecondsRemaining?: number;
@@ -28,6 +29,7 @@ export type LiveStyleReward = {
   label: "Style bank" | "Style chain" | "Style hit";
   value: string;
   action?: string;
+  badge?: `${number} chain`;
   fresh: boolean;
   tone: "bank" | "chain" | "fresh" | "urgent";
   chainProgress: number;
@@ -86,6 +88,7 @@ export function buildLiveStyleReward(input: LiveStyleRewardInput): LiveStyleRewa
   const freshAward = fresh && input.lastStyleAward !== undefined && input.lastStyleAward > 0 ? Math.round(input.lastStyleAward) : undefined;
   const chainProgress = chainActive ? round(clamp(styleChainSecondsRemaining / styleChainWindowSeconds(input), 0, 1), 2) : 0;
   const urgentAction = urgent ? buildUrgentChainAction(input) : "Save chain";
+  const chainBadge = buildStyleChainBadge({ chainActive, styleChainCount: input.styleChainCount });
   return {
     label: freshAward ? "Style hit" : fresh || chainActive ? "Style chain" : "Style bank",
     value: freshAward
@@ -96,6 +99,7 @@ export function buildLiveStyleReward(input: LiveStyleRewardInput): LiveStyleRewa
       ? `+${roundedBonus} / x${(input.styleMultiplier ?? 1).toFixed(2)} / ${styleChainSecondsRemaining.toFixed(1)}s`
       : `+${roundedBonus}`,
     action: urgent ? urgentAction : undefined,
+    ...(chainBadge ? { badge: chainBadge } : {}),
     fresh,
     tone: freshAward ? "fresh" : urgent ? "urgent" : chainActive || fresh ? "chain" : "bank",
     chainProgress
@@ -187,6 +191,14 @@ function buildUrgentChainAction(input: LiveStyleRewardInput): string {
     return "Dock chain";
   }
   return "Save chain";
+}
+
+function buildStyleChainBadge(input: { chainActive: boolean; styleChainCount?: number }): `${number} chain` | undefined {
+  const count = Math.floor(input.styleChainCount ?? 0);
+  if (!input.chainActive || count < 2) {
+    return undefined;
+  }
+  return `${count} chain`;
 }
 
 function styleChainWindowSeconds(input: LiveStyleRewardInput): number {
