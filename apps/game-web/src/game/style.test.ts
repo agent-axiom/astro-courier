@@ -605,6 +605,57 @@ describe("style target cue", () => {
     });
   });
 
+  it("surfaces last-drop docks as a clutch style target outside gold express pace", () => {
+    expect(
+      buildStyleTargetCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        styleBonus: 180,
+        paceTier: "silver",
+        fuel: 4,
+        maxFuel: 100,
+        cargoDamage: 0,
+        landingStatus: "ready"
+      })
+    ).toEqual({
+      label: "Style target",
+      value: "Last drop / +170",
+      tone: "opportunity"
+    });
+
+    expect(
+      buildStyleTargetCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        styleBonus: 180,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 0.8,
+        paceTier: "bronze",
+        fuel: 4,
+        maxFuel: 100,
+        cargoDamage: 0,
+        landingStatus: "ready"
+      })
+    ).toEqual({
+      label: "Style target",
+      value: "Last drop / +255 / chain x1.50",
+      tone: "chain"
+    });
+
+    expect(
+      buildStyleTargetCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        styleBonus: 180,
+        paceTier: "gold",
+        fuel: 4,
+        maxFuel: 100,
+        cargoDamage: 0,
+        landingStatus: "ready"
+      })
+    ).toBeUndefined();
+  });
+
   it("keeps immediate hazard skim cues above the no-brake delivery target", () => {
     expect(
       buildStyleTargetCue({
