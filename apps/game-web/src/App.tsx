@@ -115,6 +115,7 @@ type ActiveScreenFeedback = {
 const initialHud: HudState = {
   status: "paused",
   objectivePhase: "pickup",
+  replaySeed: "local-starter-seed",
   contractId: "first-light-delivery",
   contractTitle: "First Light Delivery",
   contractBriefing: "Run the standard Luma courier line. Load cleanly, protect the bottle, and dock with fuel to spare.",
@@ -747,8 +748,19 @@ export function App() {
     setScreenFeedback(undefined);
   };
 
+  const replaySeedForContract = (contractId: string): string | undefined =>
+    dailyDispatch?.contractId === contractId ? dailyDispatch.seed : undefined;
+
+  const applyDailyReplaySeed = (contractId: string) => {
+    const replaySeed = replaySeedForContract(contractId);
+    if (replaySeed) {
+      shellRef.current?.setReplaySeed(replaySeed);
+    }
+  };
+
   const launchContract = () => {
     audioRef.current?.unlock();
+    applyDailyReplaySeed(hud.contractId);
     setPreflightOpen(false);
     setPaused(false);
     shellRef.current?.setPaused(false);
@@ -760,8 +772,11 @@ export function App() {
     setPreflightOpen(true);
     setPaused(true);
     shellRef.current?.restart(true);
+    const replaySeed = replaySeedForContract(contractId);
     if (contractId !== hud.contractId) {
-      shellRef.current?.selectContract(contractId);
+      shellRef.current?.selectContract(contractId, replaySeed ? { replaySeed } : undefined);
+    } else {
+      applyDailyReplaySeed(contractId);
     }
   };
 
@@ -797,15 +812,16 @@ export function App() {
     if (!routeTargetSelectionAction) {
       return;
     }
-    shellRef.current?.selectContract(routeTargetSelectionAction.contractId);
+    const replaySeed = replaySeedForContract(routeTargetSelectionAction.contractId);
+    shellRef.current?.selectContract(routeTargetSelectionAction.contractId, replaySeed ? { replaySeed } : undefined);
   };
 
   const selectDailyDispatch = () => {
     audioRef.current?.unlock();
-    if (!dailyDispatchAction) {
+    if (!dailyDispatch || !dailyDispatchAction) {
       return;
     }
-    shellRef.current?.selectContract(dailyDispatchAction.contractId);
+    shellRef.current?.selectContract(dailyDispatchAction.contractId, { replaySeed: dailyDispatch.seed });
   };
 
   const toggleAudioMuted = () => {
@@ -1362,7 +1378,8 @@ export function App() {
                     }`}
                     aria-pressed={contract.id === hud.contractId}
                     onClick={() => {
-                      shellRef.current?.selectContract(contract.id);
+                      const replaySeed = replaySeedForContract(contract.id);
+                      shellRef.current?.selectContract(contract.id, replaySeed ? { replaySeed } : undefined);
                     }}
                   >
                     <span>{contract.title}</span>

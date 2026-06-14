@@ -35,6 +35,7 @@ import { forecastTrajectoryHazardRisk, type TrajectoryRiskForecast, type Traject
 export type HudState = {
   status: RunStatus;
   objectivePhase: ObjectivePhase;
+  replaySeed: string;
   contractId: string;
   contractTitle: string;
   contractBriefing: string;
@@ -111,6 +112,10 @@ export type GameShellOptions = {
   initialPaused?: boolean;
 };
 
+export type ContractSelectionOptions = {
+  replaySeed?: string;
+};
+
 const fixedDt = 1 / 60;
 const maxSubSteps = 5;
 const milestoneHoldSeconds = 1.2;
@@ -144,6 +149,7 @@ export class GameShell {
   private runTrail: Vec2[] = [];
   private ghostTrail: Vec2[] = [];
   private selectedContractId?: string;
+  private replaySeed = localReplaySeed;
   private destroyed = false;
 
   constructor(options: GameShellOptions) {
@@ -186,7 +192,7 @@ export class GameShell {
     this.publishHud();
   }
 
-  selectContract(contractId: string): void {
+  selectContract(contractId: string, options: ContractSelectionOptions = {}): void {
     if (this.destroyed || this.world.status !== "paused") {
       return;
     }
@@ -195,6 +201,7 @@ export class GameShell {
     }
 
     this.selectedContractId = contractId;
+    this.replaySeed = options.replaySeed ?? localReplaySeed;
     this.paused = true;
     this.accumulator = 0;
     this.hudTimer = 0;
@@ -208,6 +215,15 @@ export class GameShell {
     this.world = this.createFreshWorld();
     this.resetRunTrail();
     this.publishHud();
+  }
+
+  setReplaySeed(replaySeed: string): void {
+    if (this.destroyed || this.world.status !== "paused") {
+      return;
+    }
+
+    this.replaySeed = replaySeed;
+    this.restart(true);
   }
 
   setPaused(paused: boolean): void {
@@ -333,7 +349,7 @@ export class GameShell {
   }
 
   private createFreshWorld(): SimulationWorld {
-    const world = createWorldFromSystem(this.system, localReplaySeed, { contractId: this.selectedContractId });
+    const world = createWorldFromSystem(this.system, this.replaySeed, { contractId: this.selectedContractId });
     if (this.paused) {
       world.status = "paused";
     }
@@ -359,6 +375,7 @@ export class GameShell {
     this.onHud({
       status: this.world.status,
       objectivePhase: this.world.objectivePhase,
+      replaySeed: this.world.seed,
       contractId: this.world.contractId,
       contractTitle: activeContract.title,
       contractBriefing: activeContract.briefing,
@@ -426,7 +443,7 @@ export class GameShell {
       contentVersion: this.world.contentVersion,
       systemId: this.world.systemId,
       contractId: this.world.contractId,
-      rngSeed: localReplaySeed,
+      rngSeed: this.world.seed,
       shipConfig: {
         hull: "starter",
         upgrades: []

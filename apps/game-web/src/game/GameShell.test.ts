@@ -248,6 +248,58 @@ describe("GameShell lifecycle", () => {
     ]);
   });
 
+  it("can switch contracts with a daily replay seed while waiting in preflight mode", async () => {
+    const { renderer, input } = createShellDoubles();
+    const onHud = vi.fn();
+    vi.stubGlobal("requestAnimationFrame", vi.fn(() => 7));
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    vi.spyOn(performance, "now").mockReturnValue(1000);
+
+    const shell = new GameShell({
+      mount: {} as HTMLElement,
+      onHud,
+      renderer,
+      input,
+      initialPaused: true
+    });
+
+    await shell.start();
+    shell.selectContract("asteroid-sprint", { replaySeed: "daily-2026-06-13-asteroid-sprint" });
+
+    expect(onHud.mock.calls.at(-1)?.[0]).toMatchObject({
+      status: "paused",
+      contractId: "asteroid-sprint",
+      replaySeed: "daily-2026-06-13-asteroid-sprint"
+    });
+    expect((shell as unknown as { world: SimulationWorld }).world.seed).toBe("daily-2026-06-13-asteroid-sprint");
+  });
+
+  it("can retarget the current paused contract to a daily replay seed", async () => {
+    const { renderer, input } = createShellDoubles();
+    const onHud = vi.fn();
+    vi.stubGlobal("requestAnimationFrame", vi.fn(() => 7));
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    vi.spyOn(performance, "now").mockReturnValue(1000);
+
+    const shell = new GameShell({
+      mount: {} as HTMLElement,
+      onHud,
+      renderer,
+      input,
+      initialPaused: true
+    });
+
+    await shell.start();
+    shell.setReplaySeed("daily-2026-06-13-first-light-delivery");
+
+    expect(onHud.mock.calls.at(-1)?.[0]).toMatchObject({
+      status: "paused",
+      contractId: "first-light-delivery",
+      replaySeed: "daily-2026-06-13-first-light-delivery"
+    });
+    expect((shell as unknown as { world: SimulationWorld }).world.seed).toBe("daily-2026-06-13-first-light-delivery");
+  });
+
   it("publishes the gravity slingshot contract start profile", async () => {
     const { renderer, input } = createShellDoubles();
     const onHud = vi.fn();

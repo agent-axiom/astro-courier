@@ -5,6 +5,7 @@ import type { HudState } from "./GameShell";
 const baseHud: HudState = {
   status: "flying",
   objectivePhase: "pickup",
+  replaySeed: "local-starter-seed",
   contractId: "first-light-delivery",
   contractTitle: "First Light Delivery",
   contractBriefing: "Run the standard Luma courier line.",
