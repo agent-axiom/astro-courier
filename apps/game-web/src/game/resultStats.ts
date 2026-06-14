@@ -84,7 +84,9 @@ const styleMilestones = new Set([
   "Express Finish",
   "Damage Control",
   "Last Drop",
-  "No Brake Finesse"
+  "No Brake Finesse",
+  "Assist Burn",
+  "Boost Burn"
 ]);
 const cleanCargoDamageLimit = 0.02;
 const cometReserveNearMissRatio = 0.6;
@@ -229,6 +231,22 @@ export function buildRunIdentityReceipt(input: RunIdentityReceiptInput): RunIden
     return {
       label: "Run identity",
       value: "No-brake finesse line",
+      tone: "style"
+    };
+  }
+
+  if (input.lastMilestone === "Assist Burn") {
+    return {
+      label: "Run identity",
+      value: "Assist-burn save",
+      tone: "clutch"
+    };
+  }
+
+  if (input.lastMilestone === "Boost Burn") {
+    return {
+      label: "Run identity",
+      value: "Boost-burn line",
       tone: "style"
     };
   }

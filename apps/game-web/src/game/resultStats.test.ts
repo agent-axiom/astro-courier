@@ -78,6 +78,19 @@ describe("result stat formatting", () => {
     });
   });
 
+  it("names burn control milestones on the result highlight", () => {
+    expect(buildResultHighlight({ ...baseBreakdown, styleBonus: 190 }, "Assist Burn")).toEqual({
+      label: "Run highlight",
+      value: "Assist Burn +190",
+      tone: "style"
+    });
+    expect(buildResultHighlight({ ...baseBreakdown, styleBonus: 210 }, "Boost Burn")).toEqual({
+      label: "Run highlight",
+      value: "Boost Burn +210",
+      tone: "style"
+    });
+  });
+
   it("keeps generic style highlights for non-style milestones", () => {
     expect(buildResultHighlight({ ...baseBreakdown, styleBonus: 405 }, "Delivered")).toEqual({
       label: "Run highlight",
@@ -348,6 +361,40 @@ describe("result stat formatting", () => {
     ).toEqual({
       label: "Run identity",
       value: "No-brake finesse line",
+      tone: "style"
+    });
+
+    expect(
+      buildRunIdentityReceipt({
+        status: "delivered",
+        lastMilestone: "Assist Burn",
+        medal: "silver",
+        grade: "B",
+        cargoDamage: 0,
+        fuel: 36,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 190 }
+      })
+    ).toEqual({
+      label: "Run identity",
+      value: "Assist-burn save",
+      tone: "clutch"
+    });
+
+    expect(
+      buildRunIdentityReceipt({
+        status: "delivered",
+        lastMilestone: "Boost Burn",
+        medal: "silver",
+        grade: "B",
+        cargoDamage: 0,
+        fuel: 36,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 210 }
+      })
+    ).toEqual({
+      label: "Run identity",
+      value: "Boost-burn line",
       tone: "style"
     });
   });
