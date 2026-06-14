@@ -445,6 +445,60 @@ describe("result coach", () => {
     });
   });
 
+  it("coaches hazard style runs toward repeating the precise risk line", () => {
+    expect(
+      buildResultCoach({
+        status: "delivered",
+        lastMilestone: "Clean Hazard Skim",
+        medal: "silver",
+        grade: "B",
+        cargoDamage: 0,
+        fuel: 46,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 140, dangerBonus: 120 }
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Repeat the clean skim",
+      tone: "success"
+    });
+    expect(
+      buildResultCoach({
+        status: "delivered",
+        lastMilestone: "Needle Thread",
+        medal: "gold",
+        grade: "A",
+        cargoDamage: 0,
+        fuel: 46,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 280, dangerBonus: 180 }
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Repeat the needle line",
+      tone: "success"
+    });
+  });
+
+  it("coaches gravity sling runs toward repeating the fast arc", () => {
+    expect(
+      buildResultCoach({
+        status: "delivered",
+        lastMilestone: "Gravity Sling",
+        medal: "gold",
+        grade: "A",
+        cargoDamage: 0,
+        fuel: 46,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 240 }
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Repeat the sling arc",
+      tone: "success"
+    });
+  });
+
   it("coaches eco drift runs toward repeating the low-burn line", () => {
     expect(
       buildResultCoach({

@@ -258,6 +258,30 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
     };
   }
 
+  if (input.lastMilestone === "Clean Hazard Skim") {
+    return {
+      label: "Next run",
+      value: "Repeat the clean skim",
+      tone: "success"
+    };
+  }
+
+  if (input.lastMilestone === "Needle Thread") {
+    return {
+      label: "Next run",
+      value: "Repeat the needle line",
+      tone: "success"
+    };
+  }
+
+  if (input.lastMilestone === "Gravity Sling") {
+    return {
+      label: "Next run",
+      value: "Repeat the sling arc",
+      tone: "success"
+    };
+  }
+
   return {
     label: "Next run",
     value: "Tighten landing angle",
