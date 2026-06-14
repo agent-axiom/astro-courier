@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildBestRunChase,
   buildBestRunDelta,
+  buildContractBestRunTone,
   buildContractMasteryBadge,
   buildContractBestRunLabel,
   buildLiveBestPace,
@@ -113,10 +114,12 @@ describe("personal best chase copy", () => {
 describe("contract option personal best copy", () => {
   it("marks unplayed contracts as open personal best slots", () => {
     expect(buildContractBestRunLabel(undefined)).toBe("PB open");
+    expect(buildContractBestRunTone(undefined)).toBe("open");
   });
 
   it("formats saved contract personal bests compactly", () => {
     expect(buildContractBestRunLabel({ score: 3290, elapsedSeconds: 24.667, medal: "gold" })).toBe("PB 3290 / 24.7s");
+    expect(buildContractBestRunTone({ score: 3290, elapsedSeconds: 24.667, medal: "gold" })).toBe("pb");
   });
 
   it("marks saved contract personal bests with replay trails as ghost routes", () => {
@@ -131,6 +134,17 @@ describe("contract option personal best copy", () => {
         ]
       })
     ).toBe("Ghost 3290 / 24.7s");
+    expect(
+      buildContractBestRunTone({
+        score: 3290,
+        elapsedSeconds: 24.667,
+        medal: "gold",
+        ghostTrail: [
+          { x: 0, y: 0 },
+          { x: 12, y: -4 }
+        ]
+      })
+    ).toBe("ghost");
   });
 });
 

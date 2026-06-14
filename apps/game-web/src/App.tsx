@@ -28,6 +28,7 @@ import {
   buildBestRunDelta,
   buildContractMasteryBadge,
   buildContractBestRunLabel,
+  buildContractBestRunTone,
   buildLiveBestPace,
   buildRouteBoardMastery,
   buildRouteBoardRecommendationBadge,
@@ -1388,7 +1389,9 @@ export function App() {
                       ) : null}
                       {contractSelectionBadge ? <em className="contract-option-current">{contractSelectionBadge}</em> : null}
                       {contractDailyBadge ? <em className="contract-option-daily">{contractDailyBadge}</em> : null}
-                      <em className="contract-option-best">{buildContractBestRunLabel(contractBestRun)}</em>
+                      <em className={`contract-option-best contract-option-best-${buildContractBestRunTone(contractBestRun)}`}>
+                        {buildContractBestRunLabel(contractBestRun)}
+                      </em>
                       <em className={`contract-option-cargo contract-option-cargo-${contractCargoRisk.tone}`}>
                         {buildContractCargoTrait(contract)}
                       </em>

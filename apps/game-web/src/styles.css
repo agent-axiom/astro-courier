@@ -2493,6 +2493,21 @@ button {
   color: #bff7d8;
 }
 
+.contract-option-best-open {
+  background: rgba(160, 196, 255, 0.1);
+  color: #d8e6ff;
+}
+
+.contract-option-best-pb {
+  background: rgba(142, 230, 184, 0.12);
+  color: #bff7d8;
+}
+
+.contract-option-best-ghost {
+  background: rgba(124, 225, 255, 0.17);
+  color: #d8fbff;
+}
+
 .contract-option-mastery {
   border: 1px solid rgba(255, 255, 255, 0.06);
 }

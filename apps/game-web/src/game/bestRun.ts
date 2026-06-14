@@ -19,6 +19,8 @@ export type ContractMasteryBadge = {
   tone: "open" | "cleared" | "comet";
 };
 
+export type ContractBestRunTone = "open" | "pb" | "ghost";
+
 export type BestRunDeltaInput = {
   bestRun: BestRun | undefined;
   run: BestRun;
@@ -142,6 +144,14 @@ export function buildContractBestRunLabel(bestRun: BestRun | undefined): string 
 
   const prefix = hasReplayTrail(bestRun) ? "Ghost" : "PB";
   return `${prefix} ${bestRun.score} / ${bestRun.elapsedSeconds.toFixed(1)}s`;
+}
+
+export function buildContractBestRunTone(bestRun: BestRun | undefined): ContractBestRunTone {
+  if (!bestRun) {
+    return "open";
+  }
+
+  return hasReplayTrail(bestRun) ? "ghost" : "pb";
 }
 
 export function buildContractMasteryBadge(bestRun: BestRun | undefined): ContractMasteryBadge {
