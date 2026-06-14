@@ -315,7 +315,7 @@ describe("route board next target copy", () => {
         "asteroid-sprint": { score: 3500, elapsedSeconds: 21.8, medal: "comet" },
         "gravity-slingshot": { score: 3300, elapsedSeconds: 20.9, medal: "comet" }
       })
-    ).toEqual({ label: "Ghost chase", value: "Race Return Leg", tone: "ghost", contractId: "return-leg" });
+    ).toEqual({ label: "Ghost chase", value: "Race Return Leg ghost 3100 / 23.1s", tone: "ghost", contractId: "return-leg" });
   });
 });
 
@@ -345,7 +345,7 @@ describe("route board target selection action", () => {
   it("selects a ghost chase when a mastered board has a replay target", () => {
     expect(
       buildRouteBoardSelectionAction(
-        { label: "Ghost chase", value: "Race Return Leg", tone: "ghost", contractId: "return-leg" },
+        { label: "Ghost chase", value: "Race Return Leg ghost 3100 / 23.1s", tone: "ghost", contractId: "return-leg" },
         "gravity-slingshot"
       )
     ).toEqual({ label: "Select target", contractId: "return-leg" });
@@ -390,7 +390,7 @@ describe("route board recommendation badge", () => {
     expect(
       buildRouteBoardRecommendationBadge({
         label: "Ghost chase",
-        value: "Race Return Leg",
+        value: "Race Return Leg ghost 3100 / 23.1s",
         tone: "ghost",
         contractId: "return-leg"
       })

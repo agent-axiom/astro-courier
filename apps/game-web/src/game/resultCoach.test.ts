@@ -519,9 +519,9 @@ describe("result board prompt", () => {
   });
 
   it("surfaces ghost chases after mastered-board deliveries", () => {
-    expect(buildResultBoardPrompt({ status: "delivered", routeBoardTarget: { value: "Race Return Leg", tone: "ghost" } })).toEqual({
+    expect(buildResultBoardPrompt({ status: "delivered", routeBoardTarget: { value: "Race Return Leg ghost 3100 / 23.1s", tone: "ghost" } })).toEqual({
       label: "Board target",
-      value: "Race Return Leg",
+      value: "Race Return Leg ghost 3100 / 23.1s",
       tone: "ghost"
     });
   });
@@ -621,7 +621,7 @@ describe("result board action", () => {
         status: "delivered",
         currentContractId: "gravity-slingshot",
         routeBoardTarget: {
-          value: "Race Return Leg",
+          value: "Race Return Leg ghost 3100 / 23.1s",
           tone: "ghost",
           contractId: "return-leg"
         }

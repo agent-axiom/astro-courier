@@ -213,9 +213,10 @@ export function buildRouteBoardTarget(
 
   const ghostContract = contracts.find((contract) => hasReplayTrail(bestRunsByContract[contract.id]));
   if (ghostContract) {
+    const ghostBestRun = bestRunsByContract[ghostContract.id];
     return {
       label: "Ghost chase",
-      value: `Race ${ghostContract.title}`,
+      value: `Race ${ghostContract.title} ghost ${ghostBestRun?.score ?? 0} / ${ghostBestRun?.elapsedSeconds.toFixed(1) ?? "0.0"}s`,
       tone: "ghost",
       contractId: ghostContract.id
     };
