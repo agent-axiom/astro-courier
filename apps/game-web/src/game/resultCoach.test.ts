@@ -704,10 +704,10 @@ describe("result board prompt", () => {
     });
   });
 
-  it("surfaces ghost chases after mastered-board deliveries", () => {
-    expect(buildResultBoardPrompt({ status: "delivered", routeBoardTarget: { value: "Race Return Leg ghost 3100 / 23.1s", tone: "ghost" } })).toEqual({
+  it("surfaces ghost capture targets after comet-sweep deliveries", () => {
+    expect(buildResultBoardPrompt({ status: "delivered", routeBoardTarget: { value: "Capture Return Leg ghost", tone: "ghost" } })).toEqual({
       label: "Board target",
-      value: "Race Return Leg ghost 3100 / 23.1s",
+      value: "Capture Return Leg ghost",
       tone: "ghost"
     });
   });
@@ -728,11 +728,11 @@ describe("result board mastery prompt", () => {
     expect(
       buildResultBoardMasteryPrompt({
         status: "delivered",
-        routeBoardMastery: { label: "Board mastery", value: "Full comet sweep", tone: "complete" }
+        routeBoardMastery: { label: "Board mastery", value: "Full route board", tone: "complete" }
       })
     ).toEqual({
       label: "Board mastery",
-      value: "Full comet sweep",
+      value: "Full route board",
       tone: "complete"
     });
   });
@@ -880,7 +880,25 @@ describe("result board action", () => {
     });
   });
 
-  it("opens ghost replay targets once the board is mastered", () => {
+  it("opens ghost capture targets after the comet sweep", () => {
+    expect(
+      buildResultBoardAction({
+        status: "delivered",
+        currentContractId: "gravity-slingshot",
+        routeBoardTarget: {
+          value: "Capture Return Leg ghost",
+          tone: "ghost",
+          contractId: "return-leg"
+        }
+      })
+    ).toEqual({
+      label: "Capture Ghost",
+      targetContractId: "return-leg",
+      tone: "ghost"
+    });
+  });
+
+  it("keeps explicit ghost race targets in race mode", () => {
     expect(
       buildResultBoardAction({
         status: "delivered",

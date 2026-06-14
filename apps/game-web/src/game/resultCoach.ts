@@ -89,7 +89,7 @@ export type ResultBoardActionInput = {
 };
 
 export type ResultBoardAction = {
-  label: "Open Target" | "Chase Comet" | "Race Ghost" | "Defend Board" | "Retry Route";
+  label: "Open Target" | "Chase Comet" | "Capture Ghost" | "Race Ghost" | "Defend Board" | "Retry Route";
   targetContractId: string;
   tone: "retry" | "clear" | "comet" | "ghost" | "complete";
 };
@@ -435,7 +435,7 @@ export function buildResultBoardAction(input: ResultBoardActionInput): ResultBoa
 
   if (input.routeBoardTarget.tone === "ghost") {
     return {
-      label: "Race Ghost",
+      label: input.routeBoardTarget.value.startsWith("Capture ") ? "Capture Ghost" : "Race Ghost",
       targetContractId: input.routeBoardTarget.contractId ?? input.currentContractId,
       tone: "ghost"
     };

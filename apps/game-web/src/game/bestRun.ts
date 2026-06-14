@@ -469,14 +469,13 @@ export function buildRouteBoardTarget(
     };
   }
 
-  const ghostContract = contracts.find((contract) => hasReplayTrail(bestRunsByContract[contract.id]));
-  if (ghostContract) {
-    const ghostBestRun = bestRunsByContract[ghostContract.id];
+  const ghostCaptureContract = contracts.find((contract) => !hasReplayTrail(bestRunsByContract[contract.id]));
+  if (ghostCaptureContract) {
     return {
       label: "Ghost chase",
-      value: `Race ${ghostContract.title} ghost ${ghostBestRun?.score ?? 0} / ${ghostBestRun?.elapsedSeconds.toFixed(1) ?? "0.0"}s`,
+      value: `Capture ${ghostCaptureContract.title} ghost`,
       tone: "ghost",
-      contractId: ghostContract.id
+      contractId: ghostCaptureContract.id
     };
   }
 
@@ -491,6 +490,7 @@ export function buildRouteBoardMastery(
   const bestRuns = contracts.map((contract) => bestRunsByContract[contract.id]);
   const cleared = bestRuns.filter(Boolean).length;
   const comets = bestRuns.filter((bestRun) => bestRun?.medal === "comet").length;
+  const ghosts = bestRuns.filter((bestRun) => hasReplayTrail(bestRun)).length;
 
   if (cleared < total) {
     const remaining = total - cleared;
@@ -510,9 +510,18 @@ export function buildRouteBoardMastery(
     };
   }
 
+  if (ghosts < total) {
+    const remaining = total - ghosts;
+    return {
+      label: "Board mastery",
+      value: `${remaining} ${pluralize(remaining, "ghost")} to bank`,
+      tone: "mastery"
+    };
+  }
+
   return {
     label: "Board mastery",
-    value: "Full comet sweep",
+    value: "Full route board",
     tone: "complete"
   };
 }

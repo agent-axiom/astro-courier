@@ -865,7 +865,7 @@ describe("route board mastery copy", () => {
     });
   });
 
-  it("celebrates full comet sweeps", () => {
+  it("switches to ghost banking after the comet sweep", () => {
     expect(
       buildRouteBoardMastery(contracts, {
         "first-light-delivery": { score: 3200, elapsedSeconds: 22.4, medal: "comet" },
@@ -875,7 +875,54 @@ describe("route board mastery copy", () => {
       })
     ).toEqual({
       label: "Board mastery",
-      value: "Full comet sweep",
+      value: "4 ghosts to bank",
+      tone: "mastery"
+    });
+  });
+
+  it("celebrates full route boards after every ghost mark is banked", () => {
+    expect(
+      buildRouteBoardMastery(contracts, {
+        "first-light-delivery": {
+          score: 3200,
+          elapsedSeconds: 22.4,
+          medal: "comet",
+          ghostTrail: [
+            { x: 0, y: 0 },
+            { x: 12, y: 8 }
+          ]
+        },
+        "return-leg": {
+          score: 3100,
+          elapsedSeconds: 23.1,
+          medal: "comet",
+          ghostTrail: [
+            { x: 0, y: 0 },
+            { x: 18, y: -6 }
+          ]
+        },
+        "asteroid-sprint": {
+          score: 3500,
+          elapsedSeconds: 21.8,
+          medal: "comet",
+          ghostTrail: [
+            { x: 0, y: 0 },
+            { x: 20, y: -10 }
+          ]
+        },
+        "gravity-slingshot": {
+          score: 3300,
+          elapsedSeconds: 20.9,
+          medal: "comet",
+          ghostTrail: [
+            { x: 0, y: 0 },
+            { x: 16, y: 4 }
+          ]
+        }
+      })
+    ).toEqual({
+      label: "Board mastery",
+      value: "Full route board",
       tone: "complete"
     });
   });
@@ -925,15 +972,47 @@ describe("route board next target copy", () => {
   it("celebrates a fully mastered route board", () => {
     expect(
       buildRouteBoardTarget(contracts, {
-        "first-light-delivery": { score: 3200, elapsedSeconds: 22.4, medal: "comet" },
-        "return-leg": { score: 3100, elapsedSeconds: 23.1, medal: "comet" },
-        "asteroid-sprint": { score: 3500, elapsedSeconds: 21.8, medal: "comet" },
-        "gravity-slingshot": { score: 3300, elapsedSeconds: 20.9, medal: "comet" }
+        "first-light-delivery": {
+          score: 3200,
+          elapsedSeconds: 22.4,
+          medal: "comet",
+          ghostTrail: [
+            { x: 0, y: 0 },
+            { x: 12, y: 8 }
+          ]
+        },
+        "return-leg": {
+          score: 3100,
+          elapsedSeconds: 23.1,
+          medal: "comet",
+          ghostTrail: [
+            { x: 0, y: 0 },
+            { x: 18, y: -6 }
+          ]
+        },
+        "asteroid-sprint": {
+          score: 3500,
+          elapsedSeconds: 21.8,
+          medal: "comet",
+          ghostTrail: [
+            { x: 0, y: 0 },
+            { x: 20, y: -10 }
+          ]
+        },
+        "gravity-slingshot": {
+          score: 3300,
+          elapsedSeconds: 20.9,
+          medal: "comet",
+          ghostTrail: [
+            { x: 0, y: 0 },
+            { x: 16, y: 4 }
+          ]
+        }
       })
     ).toEqual({ label: "Board status", value: "Board mastered", tone: "complete" });
   });
 
-  it("turns a mastered board into a ghost chase when a saved replay trail exists", () => {
+  it("targets ghost capture after every route has a comet clear", () => {
     expect(
       buildRouteBoardTarget(contracts, {
         "first-light-delivery": { score: 3200, elapsedSeconds: 22.4, medal: "comet" },
@@ -949,7 +1028,26 @@ describe("route board next target copy", () => {
         "asteroid-sprint": { score: 3500, elapsedSeconds: 21.8, medal: "comet" },
         "gravity-slingshot": { score: 3300, elapsedSeconds: 20.9, medal: "comet" }
       })
-    ).toEqual({ label: "Ghost chase", value: "Race Return Leg ghost 3100 / 23.1s", tone: "ghost", contractId: "return-leg" });
+    ).toEqual({ label: "Ghost chase", value: "Capture First Light ghost", tone: "ghost", contractId: "first-light-delivery" });
+  });
+
+  it("keeps board order as the tie-breaker among missing ghost marks", () => {
+    expect(
+      buildRouteBoardTarget(contracts, {
+        "first-light-delivery": { score: 3200, elapsedSeconds: 22.4, medal: "comet" },
+        "return-leg": {
+          score: 3100,
+          elapsedSeconds: 23.1,
+          medal: "comet",
+          ghostTrail: [
+            { x: 0, y: 0 },
+            { x: 18, y: -6 }
+          ]
+        },
+        "asteroid-sprint": { score: 3500, elapsedSeconds: 21.8, medal: "comet" },
+        "gravity-slingshot": { score: 3300, elapsedSeconds: 20.9, medal: "comet" }
+      })
+    ).toEqual({ label: "Ghost chase", value: "Capture First Light ghost", tone: "ghost", contractId: "first-light-delivery" });
   });
 });
 
@@ -976,13 +1074,13 @@ describe("route board target selection action", () => {
     expect(buildRouteBoardSelectionAction({ label: "Board status", value: "Board mastered", tone: "complete" }, "gravity-slingshot")).toBeUndefined();
   });
 
-  it("selects a ghost chase when a mastered board has a replay target", () => {
+  it("selects a ghost capture target when a comet route still needs a replay mark", () => {
     expect(
       buildRouteBoardSelectionAction(
-        { label: "Ghost chase", value: "Race Return Leg ghost 3100 / 23.1s", tone: "ghost", contractId: "return-leg" },
+        { label: "Ghost chase", value: "Capture First Light ghost", tone: "ghost", contractId: "first-light-delivery" },
         "gravity-slingshot"
       )
-    ).toEqual({ label: "Select target", contractId: "return-leg" });
+    ).toEqual({ label: "Select target", contractId: "first-light-delivery" });
   });
 });
 
@@ -1024,7 +1122,7 @@ describe("route board recommendation badge", () => {
     expect(
       buildRouteBoardRecommendationBadge({
         label: "Ghost chase",
-        value: "Race Return Leg ghost 3100 / 23.1s",
+        value: "Capture Return Leg ghost",
         tone: "ghost",
         contractId: "return-leg"
       })
