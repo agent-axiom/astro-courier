@@ -108,6 +108,23 @@ describe("brake control presentation", () => {
       tone: "ready"
     });
   });
+
+  it("shows active chain timing on armed no-brake finesse controls", () => {
+    expect(
+      buildBrakeControlPresentation({
+        canBrake: true,
+        manualBrakeUsed: false,
+        objectivePhase: "delivery",
+        cargoDamage: 0,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 0.8
+      })
+    ).toEqual({
+      label: "No Brake chain x1.50",
+      badge: "0.8s",
+      tone: "finesse"
+    });
+  });
 });
 
 describe("primary run control presentation", () => {

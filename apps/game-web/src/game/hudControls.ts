@@ -32,6 +32,8 @@ export type BrakeControlPresentationInput = {
   manualBrakeUsed: boolean;
   objectivePhase?: ObjectivePhase;
   cargoDamage?: number;
+  styleMultiplier?: number;
+  styleChainSecondsRemaining?: number;
 };
 
 export type BrakeControlPresentation = {
@@ -114,6 +116,14 @@ export function buildBrakeControlPresentation(input: BrakeControlPresentationInp
   const noBrakeFinesseLive =
     input.objectivePhase === "delivery" && !input.manualBrakeUsed && (input.cargoDamage ?? 0) <= 0.02;
   if (noBrakeFinesseLive) {
+    if ((input.styleMultiplier ?? 1) > 1 && (input.styleChainSecondsRemaining ?? 0) > 0) {
+      return {
+        label: `No Brake chain x${(input.styleMultiplier ?? 1).toFixed(2)}`,
+        badge: `${(input.styleChainSecondsRemaining ?? 0).toFixed(1)}s`,
+        tone: "finesse"
+      };
+    }
+
     return {
       label: `No Brake +${NO_BRAKE_STYLE_BONUS} armed`,
       badge: `+${NO_BRAKE_STYLE_BONUS}`,

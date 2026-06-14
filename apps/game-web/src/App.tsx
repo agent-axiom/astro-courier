@@ -492,7 +492,9 @@ export function App() {
     canBrake,
     manualBrakeUsed: hud.manualBrakeUsed,
     objectivePhase: hud.objectivePhase,
-    cargoDamage: hud.cargoDamage
+    cargoDamage: hud.cargoDamage,
+    styleMultiplier: hud.styleMultiplier,
+    styleChainSecondsRemaining: hud.styleChainSecondsRemaining
   });
   const boostButtonStyle = { "--boost-cooldown": boostPresentation.cooldownProgress } as CSSProperties;
   const objectiveDirective = buildObjectiveDirective(hud);
