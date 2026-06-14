@@ -635,6 +635,18 @@ describe("run action feed", () => {
         tone: "warning"
       }
     ]);
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, cargoKind: "volatile", cargoDamage: 0 },
+        { ...baseSnapshot, cargoKind: "volatile", cargoDamage: 0.012 }
+      )
+    ).toEqual([
+      {
+        label: "Brake shock",
+        value: "Volatile load",
+        tone: "warning"
+      }
+    ]);
     expect(deriveRunFeedUpdates({ ...baseSnapshot, cargoDamage: 0.012 }, { ...baseSnapshot, cargoDamage: 0.018 })).toEqual([]);
     expect(deriveRunFeedUpdates({ ...baseSnapshot, cargoDamage: 0 }, { ...baseSnapshot, cargoDamage: 0.05 })).toEqual([
       {

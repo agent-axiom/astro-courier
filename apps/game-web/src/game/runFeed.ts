@@ -31,6 +31,7 @@ export type RunFeedSnapshot = {
   paceTier?: ContractPaceTier;
   fuel: number;
   maxFuel: number;
+  cargoKind?: string;
   cargoDamage?: number;
   hazardDangerLevel?: "near" | "inside";
   trajectoryRiskLevel?: "near" | "inside";
@@ -143,8 +144,8 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
 
   if (hasCargoStressStarted(previous, current)) {
     updates.push({
-      label: "Cargo stress",
-      value: "Smooth inputs",
+      label: current.cargoKind === "volatile" ? "Brake shock" : "Cargo stress",
+      value: current.cargoKind === "volatile" ? "Volatile load" : "Smooth inputs",
       tone: "warning"
     });
   }
