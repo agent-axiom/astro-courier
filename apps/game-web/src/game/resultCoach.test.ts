@@ -3,6 +3,7 @@ import {
   buildResultActionsLayout,
   buildResultBoardAction,
   buildResultCampaignPrompt,
+  buildResultCampaignMilestonePrompt,
   buildResultBoardMasteryPrompt,
   buildResultBoardPrompt,
   buildResultCoach
@@ -595,6 +596,47 @@ describe("result campaign prompt", () => {
           tone: "progress",
           progress: 0.33
         }
+      })
+    ).toBeUndefined();
+  });
+});
+
+describe("result campaign milestone prompt", () => {
+  it("surfaces the next campaign milestone after successful deliveries", () => {
+    expect(
+      buildResultCampaignMilestonePrompt({
+        status: "delivered",
+        routeBoardCampaignMilestoneTarget: {
+          label: "Next milestone",
+          value: "50% route board",
+          detail: "2 marks to go",
+          tone: "half"
+        }
+      })
+    ).toEqual({
+      label: "Next milestone",
+      value: "50% route board",
+      detail: "2 marks to go",
+      tone: "half"
+    });
+  });
+
+  it("stays hidden after crashes and when the campaign is complete", () => {
+    expect(
+      buildResultCampaignMilestonePrompt({
+        status: "crashed",
+        routeBoardCampaignMilestoneTarget: {
+          label: "Next milestone",
+          value: "50% route board",
+          detail: "2 marks to go",
+          tone: "half"
+        }
+      })
+    ).toBeUndefined();
+    expect(
+      buildResultCampaignMilestonePrompt({
+        status: "delivered",
+        routeBoardCampaignMilestoneTarget: undefined
       })
     ).toBeUndefined();
   });

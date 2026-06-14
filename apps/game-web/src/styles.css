@@ -4161,6 +4161,66 @@ button {
   color: #bff7d8;
 }
 
+.result-campaign-milestone {
+  display: grid;
+  grid-template-columns: 18px auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px 8px;
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 850;
+  text-align: left;
+}
+
+.result-campaign-milestone span,
+.result-campaign-milestone strong,
+.result-campaign-milestone small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.result-campaign-milestone span {
+  color: rgba(255, 255, 255, 0.72);
+  text-transform: uppercase;
+}
+
+.result-campaign-milestone strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.result-campaign-milestone small {
+  grid-column: 2 / 4;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 0.72rem;
+  font-weight: 780;
+  text-transform: uppercase;
+}
+
+.result-campaign-target-quarter {
+  background: rgba(124, 225, 255, 0.11);
+  color: #c6f6ff;
+}
+
+.result-campaign-target-half {
+  background: rgba(124, 225, 255, 0.14);
+  color: #d8fbff;
+}
+
+.result-campaign-target-mastery {
+  background: rgba(255, 209, 102, 0.14);
+  color: #ffe19a;
+}
+
+.result-campaign-target-complete {
+  background: rgba(142, 230, 184, 0.15);
+  color: #bff7d8;
+}
+
 .result-actions {
   display: grid;
   width: 100%;

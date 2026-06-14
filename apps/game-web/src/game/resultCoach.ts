@@ -64,6 +64,18 @@ export type ResultCampaignPromptInput = {
 
 export type ResultCampaignPrompt = ResultCampaignPromptInput["routeBoardCampaignProgress"];
 
+export type ResultCampaignMilestonePrompt = {
+  label: "Next milestone";
+  value: "25% route board" | "50% route board" | "75% route board" | "Campaign mastered";
+  detail: `${number} mark to go` | `${number} marks to go`;
+  tone: "quarter" | "half" | "mastery" | "complete";
+};
+
+export type ResultCampaignMilestonePromptInput = {
+  status: Extract<RunStatus, "delivered" | "crashed">;
+  routeBoardCampaignMilestoneTarget: ResultCampaignMilestonePrompt | undefined;
+};
+
 export type ResultBoardActionInput = {
   status: Extract<RunStatus, "delivered" | "crashed">;
   currentContractId: string;
@@ -312,6 +324,14 @@ export function buildResultCampaignPrompt(input: ResultCampaignPromptInput): Res
   }
 
   return input.routeBoardCampaignProgress;
+}
+
+export function buildResultCampaignMilestonePrompt(input: ResultCampaignMilestonePromptInput): ResultCampaignMilestonePrompt | undefined {
+  if (input.status === "crashed") {
+    return undefined;
+  }
+
+  return input.routeBoardCampaignMilestoneTarget;
 }
 
 export function buildResultBoardAction(input: ResultBoardActionInput): ResultBoardAction {

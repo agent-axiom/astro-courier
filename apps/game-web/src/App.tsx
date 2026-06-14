@@ -105,6 +105,7 @@ import {
   buildResultBoardAction,
   buildResultBoardMasteryPrompt,
   buildResultBoardPrompt,
+  buildResultCampaignMilestonePrompt,
   buildResultCampaignPrompt,
   buildResultCoach
 } from "./game/resultCoach";
@@ -711,6 +712,10 @@ export function App() {
   const resultCampaignPrompt =
     hud.status === "delivered" || hud.status === "crashed"
       ? buildResultCampaignPrompt({ status: hud.status, routeBoardCampaignProgress })
+      : undefined;
+  const resultCampaignMilestonePrompt =
+    hud.status === "delivered" || hud.status === "crashed"
+      ? buildResultCampaignMilestonePrompt({ status: hud.status, routeBoardCampaignMilestoneTarget })
       : undefined;
   const resultBoardAction =
     hud.status === "delivered" || hud.status === "crashed"
@@ -1793,6 +1798,17 @@ export function App() {
               <span>{resultCampaignPrompt.label}</span>
               <strong>{resultCampaignPrompt.value}</strong>
               <small>{resultCampaignPrompt.detail}</small>
+            </div>
+          ) : null}
+          {resultCampaignMilestonePrompt ? (
+            <div
+              className={`result-campaign-milestone result-campaign-target-${resultCampaignMilestonePrompt.tone}`}
+              aria-label={`${resultCampaignMilestonePrompt.label}: ${resultCampaignMilestonePrompt.value}. ${resultCampaignMilestonePrompt.detail}`}
+            >
+              {resultCampaignMilestonePrompt.tone === "complete" ? <Trophy size={18} /> : <Flag size={18} />}
+              <span>{resultCampaignMilestonePrompt.label}</span>
+              <strong>{resultCampaignMilestonePrompt.value}</strong>
+              <small>{resultCampaignMilestonePrompt.detail}</small>
             </div>
           ) : null}
           <div className={`result-actions result-actions-${resultActionsLayout}`}>
