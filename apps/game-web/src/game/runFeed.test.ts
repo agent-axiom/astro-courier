@@ -339,6 +339,69 @@ describe("run action feed", () => {
     ]);
   });
 
+  it("announces when an antimatter drift dock window becomes armed", () => {
+    const antimatterSnapshot = {
+      ...baseSnapshot,
+      contractId: "antimatter-drift",
+      objectivePhase: "delivery" as const,
+      landingStatus: "misaligned" as const,
+      cargoDamage: 0,
+      manualBrakeUsed: false
+    };
+
+    expect(
+      deriveRunFeedUpdates(antimatterSnapshot, {
+        ...antimatterSnapshot,
+        landingStatus: "ready"
+      })
+    ).toEqual([
+      {
+        label: "Drift armed",
+        value: "+210 / no brake dock",
+        tone: "style"
+      }
+    ]);
+    expect(
+      deriveRunFeedUpdates(
+        { ...antimatterSnapshot, landingStatus: "ready" },
+        { ...antimatterSnapshot, landingStatus: "ready" }
+      )
+    ).toEqual([]);
+    expect(
+      deriveRunFeedUpdates({ ...antimatterSnapshot, manualBrakeUsed: true }, {
+        ...antimatterSnapshot,
+        landingStatus: "ready",
+        manualBrakeUsed: true
+      })
+    ).toEqual([]);
+  });
+
+  it("announces multiplied antimatter drift windows during active style chains", () => {
+    const antimatterSnapshot = {
+      ...baseSnapshot,
+      contractId: "antimatter-drift",
+      objectivePhase: "delivery" as const,
+      landingStatus: "misaligned" as const,
+      cargoDamage: 0,
+      manualBrakeUsed: false
+    };
+
+    expect(
+      deriveRunFeedUpdates(antimatterSnapshot, {
+        ...antimatterSnapshot,
+        landingStatus: "ready",
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 2.4
+      })
+    ).toEqual([
+      {
+        label: "Drift armed",
+        value: "+315 / chain x1.50",
+        tone: "style"
+      }
+    ]);
+  });
+
   it("announces when a critical style chain is saved back into a live window", () => {
     expect(
       deriveRunFeedUpdates(

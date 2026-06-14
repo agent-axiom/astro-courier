@@ -1,4 +1,5 @@
 import {
+  ANTIMATTER_DRIFT_STYLE_BONUS,
   HAZARD_THREAD_SPEED_THRESHOLD,
   LAST_DROP_FUEL_RATIO,
   LAST_DROP_STYLE_BONUS,
@@ -19,6 +20,7 @@ export type RunFeedTone = "neutral" | "style" | "success" | "warning" | "danger"
 
 export type RunFeedSnapshot = {
   status: RunStatus;
+  contractId?: string;
   objectivePhase?: ObjectivePhase;
   medal?: RunMedal;
   lastMilestone?: string;
@@ -202,7 +204,12 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
     updates.push(buildLastDropArmedUpdate(current));
   }
 
-  if (!freshFeedMilestone && !launchBurstArmed && !lastDropArmed && hasStyleChainBecomeLive(previous, current)) {
+  const antimatterDriftArmed = hasArmedAntimatterDrift(previous, current);
+  if (antimatterDriftArmed) {
+    updates.push(buildAntimatterDriftArmedUpdate(current));
+  }
+
+  if (!freshFeedMilestone && !launchBurstArmed && !lastDropArmed && !antimatterDriftArmed && hasStyleChainBecomeLive(previous, current)) {
     updates.push({
       label: "Chain live",
       value: `x${(current.styleMultiplier ?? 1).toFixed(2)} / ${formatSeconds(current.styleChainSecondsRemaining)}`,
@@ -513,6 +520,21 @@ function hasArmedLastDrop(previous: RunFeedSnapshot, current: RunFeedSnapshot): 
   return !isLastDropWindowOpen(previous) && isLastDropWindowOpen(current);
 }
 
+function hasArmedAntimatterDrift(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
+  return !isAntimatterDriftWindowOpen(previous) && isAntimatterDriftWindowOpen(current);
+}
+
+function isAntimatterDriftWindowOpen(snapshot: RunFeedSnapshot): boolean {
+  return (
+    snapshot.status === "flying" &&
+    snapshot.contractId === "antimatter-drift" &&
+    snapshot.objectivePhase === "delivery" &&
+    snapshot.landingStatus === "ready" &&
+    snapshot.manualBrakeUsed === false &&
+    (snapshot.cargoDamage ?? 0) <= cleanCargoDamageLimit
+  );
+}
+
 function isLastDropWindowOpen(snapshot: RunFeedSnapshot): boolean {
   return (
     snapshot.status === "flying" &&
@@ -522,6 +544,17 @@ function isLastDropWindowOpen(snapshot: RunFeedSnapshot): boolean {
     snapshot.maxFuel > 0 &&
     snapshot.fuel / snapshot.maxFuel <= LAST_DROP_FUEL_RATIO
   );
+}
+
+function buildAntimatterDriftArmedUpdate(current: RunFeedSnapshot): RunFeedUpdate {
+  const multiplier = Math.max(1, current.styleMultiplier ?? 1);
+  const payout = Math.round(ANTIMATTER_DRIFT_STYLE_BONUS * multiplier);
+  const chainActive = multiplier > 1 && (current.styleChainSecondsRemaining ?? 0) > 0;
+  return {
+    label: "Drift armed",
+    value: chainActive ? `+${payout} / chain x${multiplier.toFixed(2)}` : `+${payout} / no brake dock`,
+    tone: "style"
+  };
 }
 
 function buildLastDropArmedUpdate(current: RunFeedSnapshot): RunFeedUpdate {

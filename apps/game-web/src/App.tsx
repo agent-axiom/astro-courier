@@ -1965,6 +1965,7 @@ function toHudAudioSnapshot(hud: HudState, bestRun: BestRun | undefined): HudAud
 function toRunFeedSnapshot(hud: HudState, bestRun: BestRun | undefined): RunFeedSnapshot {
   return {
     status: hud.status,
+    contractId: hud.contractId,
     objectivePhase: hud.objectivePhase,
     medal: hud.medal,
     lastMilestone: hud.lastMilestone,
