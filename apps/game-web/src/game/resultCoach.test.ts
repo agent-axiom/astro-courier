@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildResultActionsLayout,
   buildResultBoardAction,
+  buildResultBoardActionBriefing,
   buildResultCampaignPrompt,
   buildResultCampaignMilestonePrompt,
   buildResultBoardMasteryPrompt,
@@ -924,6 +925,42 @@ describe("result board action", () => {
       targetContractId: "return-leg",
       tone: "ghost"
     });
+  });
+});
+
+describe("result board action briefing", () => {
+  it("turns board actions into compact second-line CTA copy", () => {
+    expect(buildResultBoardActionBriefing({ label: "Open Target", targetContractId: "return-leg", tone: "clear" })).toEqual({
+      label: "Board action",
+      value: "Next route armed",
+      tone: "clear"
+    });
+    expect(buildResultBoardActionBriefing({ label: "Chase Comet", targetContractId: "asteroid-sprint", tone: "comet" })).toEqual({
+      label: "Board action",
+      value: "Comet mark armed",
+      tone: "comet"
+    });
+    expect(buildResultBoardActionBriefing({ label: "Capture Ghost", targetContractId: "return-leg", tone: "ghost" })).toEqual({
+      label: "Board action",
+      value: "Ghost trail armed",
+      tone: "ghost"
+    });
+    expect(buildResultBoardActionBriefing({ label: "Race Ghost", targetContractId: "return-leg", tone: "ghost" })).toEqual({
+      label: "Board action",
+      value: "Ghost race armed",
+      tone: "ghost"
+    });
+    expect(buildResultBoardActionBriefing({ label: "Defend Board", targetContractId: "gravity-slingshot", tone: "complete" })).toEqual({
+      label: "Board action",
+      value: "Mastery lap armed",
+      tone: "complete"
+    });
+    expect(buildResultBoardActionBriefing({ label: "Retry Route", targetContractId: "gravity-slingshot", tone: "retry" })).toEqual({
+      label: "Board action",
+      value: "Same route armed",
+      tone: "retry"
+    });
+    expect(buildResultBoardActionBriefing(undefined)).toBeUndefined();
   });
 });
 

@@ -4646,6 +4646,26 @@ button {
   cursor: pointer;
 }
 
+.result-button-copy {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+  line-height: 1.05;
+  text-align: left;
+}
+
+.result-button-copy span,
+.result-button-copy small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.result-button-copy small {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.68rem;
+  font-weight: 760;
+}
+
 .result-button-primary {
   border-color: rgba(142, 230, 184, 0.72);
   background: rgba(142, 230, 184, 0.18);

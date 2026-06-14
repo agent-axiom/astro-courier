@@ -96,6 +96,18 @@ export type ResultBoardAction = {
   tone: "retry" | "clear" | "comet" | "ghost" | "complete";
 };
 
+export type ResultBoardActionBriefing = {
+  label: "Board action";
+  value:
+    | "Next route armed"
+    | "Comet mark armed"
+    | "Ghost trail armed"
+    | "Ghost race armed"
+    | "Mastery lap armed"
+    | "Same route armed";
+  tone: ResultBoardAction["tone"];
+};
+
 export type ResultActionsLayoutInput = {
   status: Extract<RunStatus, "delivered" | "crashed">;
   hasBoardAction: boolean;
@@ -449,4 +461,29 @@ export function buildResultBoardAction(input: ResultBoardActionInput): ResultBoa
     targetContractId: input.routeBoardTarget.contractId ?? input.currentContractId,
     tone: input.routeBoardTarget.tone
   };
+}
+
+export function buildResultBoardActionBriefing(action: ResultBoardAction | undefined): ResultBoardActionBriefing | undefined {
+  if (!action) {
+    return undefined;
+  }
+
+  if (action.tone === "retry") {
+    return { label: "Board action", value: "Same route armed", tone: "retry" };
+  }
+  if (action.tone === "complete") {
+    return { label: "Board action", value: "Mastery lap armed", tone: "complete" };
+  }
+  if (action.tone === "comet") {
+    return { label: "Board action", value: "Comet mark armed", tone: "comet" };
+  }
+  if (action.tone === "ghost") {
+    return {
+      label: "Board action",
+      value: action.label === "Race Ghost" ? "Ghost race armed" : "Ghost trail armed",
+      tone: "ghost"
+    };
+  }
+
+  return { label: "Board action", value: "Next route armed", tone: "clear" };
 }

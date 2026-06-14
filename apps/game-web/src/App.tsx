@@ -105,6 +105,7 @@ import { buildHazardPressureReadout } from "./game/hazard";
 import {
   buildResultActionsLayout,
   buildResultBoardAction,
+  buildResultBoardActionBriefing,
   buildResultBoardMasteryPrompt,
   buildResultBoardPrompt,
   buildResultCampaignMilestonePrompt,
@@ -796,6 +797,7 @@ export function App() {
     hud.status === "delivered" || hud.status === "crashed"
       ? buildResultBoardAction({ status: hud.status, currentContractId: hud.contractId, routeBoardTarget })
       : undefined;
+  const resultBoardActionBriefing = buildResultBoardActionBriefing(resultBoardAction);
   const resultActionsLayout =
     hud.status === "delivered" || hud.status === "crashed"
       ? buildResultActionsLayout({ status: hud.status, hasBoardAction: Boolean(resultBoardAction) })
@@ -1961,7 +1963,10 @@ export function App() {
                 onClick={openResultBoardTarget}
               >
                 <ArrowRight size={18} />
-                {resultBoardAction.label}
+                <span className="result-button-copy">
+                  <span>{resultBoardAction.label}</span>
+                  {resultBoardActionBriefing ? <small>{resultBoardActionBriefing.value}</small> : null}
+                </span>
               </button>
             ) : null}
           </div>
