@@ -2800,6 +2800,11 @@ button {
   color: #d8e6ff;
 }
 
+.daily-action-label {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
 .daily-dispatch-open {
   background: rgba(160, 196, 255, 0.11);
   color: #d8e6ff;

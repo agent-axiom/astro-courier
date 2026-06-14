@@ -20,7 +20,7 @@ export type DailyDispatch = {
 };
 
 export type DailyDispatchAction = {
-  label: "Open daily";
+  label: "Open daily" | "Push daily gold" | "Chase daily comet" | "Race daily ghost" | "Defend daily comet";
   contractId: string;
 };
 
@@ -327,15 +327,39 @@ function parseUtcDayNumber(dayKey: string): number | undefined {
   return Math.floor(date.getTime() / UTC_DAY_MILLISECONDS);
 }
 
-export function buildDailyDispatchAction(dispatch: DailyDispatch | undefined, currentContractId: string): DailyDispatchAction | undefined {
+export function buildDailyDispatchAction(
+  dispatch: DailyDispatch | undefined,
+  currentContractId: string,
+  status?: DailyDispatchStatus
+): DailyDispatchAction | undefined {
   if (!dispatch || dispatch.contractId === currentContractId) {
     return undefined;
   }
 
   return {
-    label: "Open daily",
+    label: buildDailyDispatchActionLabel(status),
     contractId: dispatch.contractId
   };
+}
+
+function buildDailyDispatchActionLabel(status: DailyDispatchStatus | undefined): DailyDispatchAction["label"] {
+  if (!status || status.tone === "open") {
+    return "Open daily";
+  }
+
+  if (status.tone === "ghost") {
+    return "Race daily ghost";
+  }
+
+  if (status.tone === "comet") {
+    return "Defend daily comet";
+  }
+
+  if (status.value === "Push daily gold" || status.value.startsWith("PB ")) {
+    return "Push daily gold";
+  }
+
+  return "Chase daily comet";
 }
 
 export function buildDailyDispatchBadge(dispatch: DailyDispatch | undefined, contractId: string): string | undefined {

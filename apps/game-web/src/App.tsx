@@ -721,15 +721,15 @@ export function App() {
   const routeTargetSelectionAction = buildRouteBoardSelectionAction(routeBoardTarget, hud.contractId);
   const currentDate = new Date();
   const dailyDispatch = buildDailyDispatch({ contracts: hud.contractOptions, now: currentDate });
-  const dailyDispatchAction = buildDailyDispatchAction(dailyDispatch, hud.contractId);
-  const dailyDispatchReset = buildDailyDispatchReset(dailyDispatch, currentDate);
-  const dailyDispatchPulse = buildDailyDispatchPulse(dailyDispatch);
-  const activeDailyDispatchPulse = buildActiveDailyDispatchPulse(dailyDispatch, hud.contractId);
-  const activeDailyDispatchProgressStatus = buildActiveDailyDispatchProgressStatus(dailyDispatch, hud.contractId, dailyProgress);
   const dailyDispatchStatus = buildDailyDispatchStatus(
     dailyDispatch,
     dailyDispatch ? bestRunsByContract[dailyDispatch.contractId] : undefined
   );
+  const dailyDispatchAction = buildDailyDispatchAction(dailyDispatch, hud.contractId, dailyDispatchStatus);
+  const dailyDispatchReset = buildDailyDispatchReset(dailyDispatch, currentDate);
+  const dailyDispatchPulse = buildDailyDispatchPulse(dailyDispatch);
+  const activeDailyDispatchPulse = buildActiveDailyDispatchPulse(dailyDispatch, hud.contractId);
+  const activeDailyDispatchProgressStatus = buildActiveDailyDispatchProgressStatus(dailyDispatch, hud.contractId, dailyProgress);
   const dailyDispatchProgressStatus = buildDailyDispatchProgressStatus(dailyDispatch, dailyProgress);
   const dailyDispatchResult =
     hud.status === "delivered" || hud.status === "crashed"
@@ -1511,6 +1511,7 @@ export function App() {
                 {dailyDispatchProgressStatus ? (
                   <b className={`daily-progress daily-progress-${dailyDispatchProgressStatus.tone}`}>{dailyDispatchProgressStatus.value}</b>
                 ) : null}
+                <b className="daily-action-label">{dailyDispatchAction.label}</b>
                 {dailyDispatchPulse ? <b className={`daily-pulse daily-pulse-${dailyDispatchPulse.tone}`}>{dailyDispatchPulse.value}</b> : null}
               </button>
             ) : (

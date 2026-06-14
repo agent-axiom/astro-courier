@@ -96,6 +96,57 @@ describe("contract rotation", () => {
     expect(buildDailyDispatchAction(undefined, "asteroid-sprint")).toBeUndefined();
   });
 
+  it("turns the daily dispatch status into a concrete chase action", () => {
+    const dispatch = {
+      label: "Daily dispatch" as const,
+      value: "Asteroid Sprint",
+      contractId: "asteroid-sprint",
+      seed: "daily-2026-06-13-asteroid-sprint",
+      tone: "daily" as const
+    };
+
+    expect(
+      buildDailyDispatchAction(dispatch, "first-light-delivery", {
+        label: "Daily status",
+        value: "Push daily gold",
+        tone: "chase"
+      })
+    ).toEqual({
+      label: "Push daily gold",
+      contractId: "asteroid-sprint"
+    });
+    expect(
+      buildDailyDispatchAction(dispatch, "first-light-delivery", {
+        label: "Daily status",
+        value: "Gold PB 2960 / 25.8s",
+        tone: "chase"
+      })
+    ).toEqual({
+      label: "Chase daily comet",
+      contractId: "asteroid-sprint"
+    });
+    expect(
+      buildDailyDispatchAction(dispatch, "first-light-delivery", {
+        label: "Daily status",
+        value: "Ghost PB 2960 / 25.8s",
+        tone: "ghost"
+      })
+    ).toEqual({
+      label: "Race daily ghost",
+      contractId: "asteroid-sprint"
+    });
+    expect(
+      buildDailyDispatchAction(dispatch, "first-light-delivery", {
+        label: "Daily status",
+        value: "Comet PB 3260 / 27.4s",
+        tone: "comet"
+      })
+    ).toEqual({
+      label: "Defend daily comet",
+      contractId: "asteroid-sprint"
+    });
+  });
+
   it("marks the matching contract option as the daily route", () => {
     const dispatch = {
       label: "Daily dispatch" as const,
