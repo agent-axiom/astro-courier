@@ -533,6 +533,24 @@ describe("style target cue", () => {
     ).toBeUndefined();
   });
 
+  it("frames no-brake finesse as a chain target while a multiplier is live", () => {
+    expect(
+      buildStyleTargetCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        styleBonus: 180,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 0.8,
+        cargoDamage: 0,
+        manualBrakeUsed: false
+      })
+    ).toEqual({
+      label: "Style target",
+      value: "No brake line / +150 on clean dock / chain x1.50",
+      tone: "chain"
+    });
+  });
+
   it("keeps immediate hazard skim cues above the no-brake delivery target", () => {
     expect(
       buildStyleTargetCue({

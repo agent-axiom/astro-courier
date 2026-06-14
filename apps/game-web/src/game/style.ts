@@ -166,8 +166,8 @@ export function buildStyleTargetCue(input: StyleTargetCueInput): StyleTargetCue 
   if (input.objectivePhase === "delivery" && input.manualBrakeUsed === false && (input.cargoDamage ?? 0) <= 0.02) {
     return {
       label: "Style target",
-      value: `No brake line / +${NO_BRAKE_STYLE_BONUS} on clean dock`,
-      tone: "opportunity"
+      value: `No brake line / +${NO_BRAKE_STYLE_BONUS} on clean dock${chainSuffix}`,
+      tone: chainActive ? "chain" : "opportunity"
     };
   }
 
