@@ -4,6 +4,7 @@ const turnStep = 0.11;
 const pointerDeadZone = 10;
 const fullThrustDistance = 100;
 const gamepadStickDeadZone = 0.18;
+const gamepadTriggerDeadZone = 0.05;
 const gamepadBrakeButtonIndex = 6;
 const gamepadThrustButtonIndex = 7;
 const gamepadBoostButtonIndex = 0;
@@ -246,7 +247,8 @@ function gamepadButtonValue(button: GamepadButtonSnapshot | undefined): number {
     return 0;
   }
   if (button.value !== undefined) {
-    return Math.min(1, Math.max(0, button.value));
+    const value = Math.min(1, Math.max(0, button.value));
+    return value > gamepadTriggerDeadZone ? value : 0;
   }
   return button.pressed ? 1 : 0;
 }

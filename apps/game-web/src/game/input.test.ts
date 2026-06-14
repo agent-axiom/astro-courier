@@ -96,6 +96,39 @@ describe("gamepad input mapping", () => {
     ).toEqual([{ type: "THRUST", amount: 0.62 }]);
   });
 
+  it("ignores low analog trigger noise from gamepad thrust and brake controls", () => {
+    expect(
+      commandsFromGamepadState(
+        {
+          axes: [0, 0],
+          buttons: gamepadButtons({
+            6: { pressed: false, value: 0.04 },
+            7: { pressed: false, value: 0.03 }
+          })
+        },
+        0
+      )
+    ).toEqual([]);
+  });
+
+  it("keeps digital trigger buttons usable when no analog value is reported", () => {
+    expect(
+      commandsFromGamepadState(
+        {
+          axes: [0, 0],
+          buttons: gamepadButtons({
+            6: { pressed: true },
+            7: { pressed: true }
+          })
+        },
+        0
+      )
+    ).toEqual([
+      { type: "THRUST", amount: 1 },
+      { type: "BRAKE", amount: 1 }
+    ]);
+  });
+
   it("keeps stick aim while letting right trigger control stronger thrust", () => {
     expect(
       commandsFromGamepadState(
@@ -164,8 +197,8 @@ class FakeKeyboardTarget {
 }
 
 function gamepadButtons(
-  entries: Record<number, { pressed: boolean; value: number }>
-): Array<{ pressed: boolean; value: number }> {
+  entries: Record<number, { pressed: boolean; value?: number }>
+): Array<{ pressed: boolean; value?: number }> {
   const highestIndex = Math.max(...Object.keys(entries).map(Number));
   return Array.from({ length: highestIndex + 1 }, (_, index) => {
     return entries[index] ?? { pressed: false, value: 0 };
