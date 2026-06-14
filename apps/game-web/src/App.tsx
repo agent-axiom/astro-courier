@@ -529,7 +529,8 @@ export function App() {
     styleChainSecondsRemaining: hud.styleChainSecondsRemaining,
     gravitySlingReady: hud.gravitySlingReady,
     gravitySlingStyleBonus: hud.gravitySlingStyleBonus,
-    approachStreakSeconds: hud.approachStreakSeconds
+    approachStreakSeconds: hud.approachStreakSeconds,
+    manualBrakeUsed: hud.manualBrakeUsed
   });
   const flightDirector = buildFlightDirector({
     status: hud.status,

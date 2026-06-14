@@ -6,6 +6,7 @@ import {
   LAUNCH_BURST_STYLE_BONUS,
   LAST_DROP_FUEL_RATIO,
   LAST_DROP_STYLE_BONUS,
+  NO_BRAKE_STYLE_BONUS,
   PERFECT_APPROACH_STREAK_SECONDS,
   PERFECT_APPROACH_STYLE_BONUS
 } from "@astro-courier/simulation";
@@ -98,6 +99,7 @@ export type TacticalCueInput = {
   gravitySlingReady?: boolean;
   gravitySlingStyleBonus?: number;
   approachStreakSeconds?: number;
+  manualBrakeUsed?: boolean;
 };
 
 export type TacticalCue = {
@@ -500,6 +502,10 @@ function buildUrgentChainAction(input: TacticalCueInput): string {
 
   if ((input.launchBurstSecondsRemaining ?? 0) > 0) {
     return `Boost now / +${LAUNCH_BURST_STYLE_BONUS}`;
+  }
+
+  if (input.objectivePhase === "delivery" && input.landingStatus === "ready" && input.manualBrakeUsed === false && (input.cargoDamage ?? 0) <= 0.02) {
+    return `Finesse dock / +${NO_BRAKE_STYLE_BONUS}`;
   }
 
   if (input.contractId === "chain-relay" && input.objectivePhase === "delivery") {

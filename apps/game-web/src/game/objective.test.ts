@@ -457,6 +457,24 @@ describe("tactical cue", () => {
     });
   });
 
+  it("points urgent clean no-brake delivery chains at a finesse dock", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        landingStatus: "ready",
+        cargoDamage: 0,
+        manualBrakeUsed: false,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 0.8
+      })
+    ).toEqual({
+      label: "Tactical cue",
+      value: "Finesse dock / +150 / 0.8s",
+      tone: "urgent"
+    });
+  });
+
   it("surfaces a ready gravity sling payout as an immediate opportunity", () => {
     expect(
       buildTacticalCue({
