@@ -78,6 +78,23 @@ describe("screen feedback", () => {
     });
   });
 
+  it("maps close-range lineup events to quick success feedback", () => {
+    expect(buildScreenFeedback(["pickup-lineup"])).toEqual({
+      label: "Pickup lined",
+      value: "Load window",
+      tone: "success",
+      intensity: "light",
+      durationMs: 320
+    });
+    expect(buildScreenFeedback(["dock-lineup"])).toEqual({
+      label: "Dock lined",
+      value: "Commit approach",
+      tone: "success",
+      intensity: "light",
+      durationMs: 340
+    });
+  });
+
   it("maps hazard and fuel warnings to warning feedback", () => {
     expect(buildScreenFeedback(["fuel-critical"])).toEqual({
       label: "Fuel critical",

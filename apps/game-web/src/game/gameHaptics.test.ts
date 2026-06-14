@@ -17,6 +17,8 @@ describe("game haptics", () => {
     expect(hapticPatternForEvents(["comet-reserve-tight"])).toEqual([14, 22, 14]);
     expect(hapticPatternForEvents(["cargo-damage"])).toEqual([16, 24]);
     expect(hapticPatternForEvents(["cargo-loaded"])).toEqual([10, 12]);
+    expect(hapticPatternForEvents(["pickup-lineup"])).toEqual([8, 10]);
+    expect(hapticPatternForEvents(["dock-lineup"])).toEqual([9, 12]);
     expect(hapticPatternForEvents(["fuel-critical"])).toEqual([24, 30, 24]);
     expect(hapticPatternForEvents(["trajectory-warning"])).toEqual([18, 24, 18]);
     expect(hapticPatternForEvents(["hazard-contact"])).toEqual([30, 32, 36]);

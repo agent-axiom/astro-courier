@@ -48,6 +48,8 @@ const eventTones: Record<GameAudioEvent, { frequency: number; duration: number; 
   "style-hit": { frequency: 720, duration: 0.08, gain: 0.045 },
   "launch-burst": { frequency: 820, duration: 0.12, gain: 0.05 },
   "cargo-loaded": { frequency: 660, duration: 0.08, gain: 0.042 },
+  "pickup-lineup": { frequency: 740, duration: 0.07, gain: 0.042 },
+  "dock-lineup": { frequency: 780, duration: 0.08, gain: 0.044 },
   "pb-pressure": { frequency: 760, duration: 0.1, gain: 0.045 },
   "pb-lead": { frequency: 960, duration: 0.12, gain: 0.05 },
   "ghost-pressure": { frequency: 880, duration: 0.1, gain: 0.045 },

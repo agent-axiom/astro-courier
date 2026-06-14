@@ -8,6 +8,8 @@ export type GameAudioEvent =
   | "style-hit"
   | "launch-burst"
   | "cargo-loaded"
+  | "pickup-lineup"
+  | "dock-lineup"
   | "pb-pressure"
   | "pb-lead"
   | "ghost-pressure"
@@ -29,6 +31,7 @@ export type HudAudioSnapshot = {
   objectivePhase?: ObjectivePhase;
   lastMilestone?: string;
   score?: number;
+  targetDistance?: number;
   bestRunScore?: number;
   bestRunHasGhostTrail?: boolean;
   paceTier?: ContractPaceTier;
@@ -46,6 +49,7 @@ const criticalFuelRatio = 0.15;
 const cleanCargoDamageLimit = 0.02;
 const criticalStyleChainSeconds = 1;
 const bestRunPressureGap = 200;
+const closeTargetDistance = 90;
 const styleMilestones = new Set([
   "Clean Hazard Skim",
   "Needle Thread",
@@ -87,6 +91,11 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
 
   if (previous?.objectivePhase === "pickup" && current.objectivePhase === "delivery") {
     events.push("cargo-loaded");
+  }
+
+  const lineupEvent = buildTargetLineupEvent(previous, current);
+  if (lineupEvent) {
+    events.push(lineupEvent);
   }
 
   if (!isFuelCritical(previous) && isFuelCritical(current)) {
@@ -154,6 +163,22 @@ function hasCargoDamageCrossedCleanLimit(previous: HudAudioSnapshot | undefined,
     return false;
   }
   return (previous.cargoDamage ?? 0) <= cleanCargoDamageLimit && (current.cargoDamage ?? 0) > cleanCargoDamageLimit;
+}
+
+function buildTargetLineupEvent(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): GameAudioEvent | undefined {
+  if (!previous || current.status !== "flying" || current.targetDistance === undefined || current.objectivePhase === undefined) {
+    return undefined;
+  }
+  if (previous.objectivePhase !== current.objectivePhase) {
+    return undefined;
+  }
+
+  const previousDistance = previous.targetDistance ?? Number.POSITIVE_INFINITY;
+  if (previousDistance <= closeTargetDistance || current.targetDistance > closeTargetDistance) {
+    return undefined;
+  }
+
+  return current.objectivePhase === "pickup" ? "pickup-lineup" : "dock-lineup";
 }
 
 function hasCrossedBestRunScore(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {

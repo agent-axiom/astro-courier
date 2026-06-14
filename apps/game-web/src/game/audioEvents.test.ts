@@ -46,6 +46,27 @@ describe("HUD audio events", () => {
     ).toEqual([]);
   });
 
+  it("signals when the active target enters close-range lineup distance", () => {
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, objectivePhase: "pickup", targetDistance: 112 },
+        { ...baseSnapshot, objectivePhase: "pickup", targetDistance: 74 }
+      )
+    ).toEqual(["pickup-lineup"]);
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, objectivePhase: "delivery", targetDistance: 122 },
+        { ...baseSnapshot, objectivePhase: "delivery", targetDistance: 86 }
+      )
+    ).toEqual(["dock-lineup"]);
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, objectivePhase: "delivery", targetDistance: 86 },
+        { ...baseSnapshot, objectivePhase: "delivery", targetDistance: 42 }
+      )
+    ).toEqual([]);
+  });
+
   it("warns when fuel crosses into the critical band", () => {
     expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, fuel: 14 })).toEqual(["fuel-critical"]);
     expect(deriveHudAudioEvents({ ...baseSnapshot, fuel: 14 }, { ...baseSnapshot, fuel: 13 })).toEqual([]);

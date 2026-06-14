@@ -36,6 +36,12 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[], milestone
   if (events.includes("cargo-loaded")) {
     return { label: "Cargo secured", value: "Outbound line", tone: "success", intensity: "medium", durationMs: 360 };
   }
+  if (events.includes("dock-lineup")) {
+    return { label: "Dock lined", value: "Commit approach", tone: "success", intensity: "light", durationMs: 340 };
+  }
+  if (events.includes("pickup-lineup")) {
+    return { label: "Pickup lined", value: "Load window", tone: "success", intensity: "light", durationMs: 320 };
+  }
   if (events.includes("ghost-pass")) {
     return { label: "Ghost passed", value: "Keep it clean", tone: "success", intensity: "heavy", durationMs: 520 };
   }
