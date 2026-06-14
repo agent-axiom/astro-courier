@@ -3,7 +3,7 @@ import type { GameAudioEvent } from "./audioEvents";
 export type ScreenFeedback = {
   label?: string;
   value?: string;
-  accent?: "chain";
+  accent?: "chain" | "precision" | "rush" | "sling";
   tone: "style" | "success" | "warning" | "danger";
   intensity: "light" | "medium" | "heavy";
   durationMs: number;
@@ -111,13 +111,13 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[], milestone
 function buildStyleMilestoneFeedback(milestone: string | undefined): ScreenFeedback | undefined {
   switch (milestone) {
     case "Clean Hazard Skim":
-      return { label: "Clean skim", value: "Danger pay", tone: "style", intensity: "medium", durationMs: 440 };
+      return { label: "Clean skim", value: "Danger pay", accent: "precision", tone: "style", intensity: "medium", durationMs: 440 };
     case "Needle Thread":
-      return { label: "Needle thread", value: "Clean gap", tone: "style", intensity: "medium", durationMs: 440 };
+      return { label: "Needle thread", value: "Clean gap", accent: "precision", tone: "style", intensity: "medium", durationMs: 440 };
     case "Gravity Sling":
-      return { label: "Gravity sling", value: "Arc held", tone: "style", intensity: "medium", durationMs: 440 };
+      return { label: "Gravity sling", value: "Arc held", accent: "sling", tone: "style", intensity: "medium", durationMs: 440 };
     case "Quick Pickup":
-      return { label: "Quick pickup", value: "Rush banked", tone: "style", intensity: "medium", durationMs: 420 };
+      return { label: "Quick pickup", value: "Rush banked", accent: "rush", tone: "style", intensity: "medium", durationMs: 420 };
     case "Comet Finish":
       return { label: "Comet finish", value: "Perfect delivery", tone: "style", intensity: "heavy", durationMs: 560 };
     case "Perfect Approach":

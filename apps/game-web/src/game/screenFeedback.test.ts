@@ -51,9 +51,18 @@ describe("screen feedback", () => {
   });
 
   it("names high-skill style milestone hits when milestone context is available", () => {
+    expect(buildScreenFeedback(["style-hit"], "Clean Hazard Skim")).toEqual({
+      label: "Clean skim",
+      value: "Danger pay",
+      accent: "precision",
+      tone: "style",
+      intensity: "medium",
+      durationMs: 440
+    });
     expect(buildScreenFeedback(["style-hit"], "Needle Thread")).toEqual({
       label: "Needle thread",
       value: "Clean gap",
+      accent: "precision",
       tone: "style",
       intensity: "medium",
       durationMs: 440
@@ -61,9 +70,18 @@ describe("screen feedback", () => {
     expect(buildScreenFeedback(["style-hit"], "Gravity Sling")).toEqual({
       label: "Gravity sling",
       value: "Arc held",
+      accent: "sling",
       tone: "style",
       intensity: "medium",
       durationMs: 440
+    });
+    expect(buildScreenFeedback(["style-hit"], "Quick Pickup")).toEqual({
+      label: "Quick pickup",
+      value: "Rush banked",
+      accent: "rush",
+      tone: "style",
+      intensity: "medium",
+      durationMs: 420
     });
     expect(buildScreenFeedback(["style-hit"], "Chain Finish")).toEqual({
       label: "Chain finish",
@@ -245,6 +263,7 @@ describe("screen feedback", () => {
     expect(buildMilestoneScreenFeedback("Needle Thread")).toEqual({
       label: "Needle thread",
       value: "Clean gap",
+      accent: "precision",
       tone: "style",
       intensity: "medium",
       durationMs: 440
