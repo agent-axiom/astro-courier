@@ -561,6 +561,25 @@ describe("style target cue", () => {
     ).toBeUndefined();
   });
 
+  it("previews predicted clean hazard thread lines before entering the field", () => {
+    expect(
+      buildStyleTargetCue({
+        status: "flying",
+        styleBonus: 180,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 2.4,
+        trajectoryRiskLevel: "near",
+        trajectoryRiskSeconds: 0.8,
+        trajectoryRiskClearance: 4,
+        cargoDamage: 0
+      })
+    ).toEqual({
+      label: "Style target",
+      value: "Thread line / 0.8s / 4m clear / chain x1.50",
+      tone: "chain"
+    });
+  });
+
   it("teaches no-brake finesse while clean delivery is still alive", () => {
     expect(
       buildStyleTargetCue({

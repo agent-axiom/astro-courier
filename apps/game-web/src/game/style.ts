@@ -54,6 +54,9 @@ export type StyleTargetCueInput = {
   maxFuel?: number;
   cargoDamage?: number;
   hazardDangerLevel?: "near" | "inside";
+  trajectoryRiskLevel?: "near" | "inside";
+  trajectoryRiskSeconds?: number;
+  trajectoryRiskClearance?: number;
   gravitySlingReady?: boolean;
   gravitySlingStyleBonus?: number;
   manualBrakeUsed?: boolean;
@@ -160,6 +163,14 @@ export function buildStyleTargetCue(input: StyleTargetCueInput): StyleTargetCue 
     };
   }
 
+  if (input.trajectoryRiskLevel === "near" && (input.cargoDamage ?? 0) <= 0.02) {
+    return {
+      label: "Style target",
+      value: `Thread line / ${formatSeconds(input.trajectoryRiskSeconds)} / ${formatClearance(input.trajectoryRiskClearance)}${chainSuffix}`,
+      tone: chainActive ? "chain" : "risk"
+    };
+  }
+
   if (
     input.objectivePhase === "delivery" &&
     input.landingStatus === "ready" &&
@@ -206,6 +217,17 @@ function isLastDropStyleTarget(input: StyleTargetCueInput): boolean {
 
 function formatLastDropTargetPayout(input: StyleTargetCueInput): number {
   return Math.round(LAST_DROP_STYLE_BONUS * Math.max(1, input.styleMultiplier ?? 1));
+}
+
+function formatSeconds(seconds: number | undefined): string {
+  return `${Math.max(0, seconds ?? 0).toFixed(1)}s`;
+}
+
+function formatClearance(clearance: number | undefined): string {
+  if (clearance === undefined) {
+    return "clean vector";
+  }
+  return `${Math.max(0, Math.round(clearance))}m clear`;
 }
 
 function buildUrgentChainAction(input: LiveStyleRewardInput): string {
