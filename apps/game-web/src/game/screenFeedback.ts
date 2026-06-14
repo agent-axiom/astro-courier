@@ -53,10 +53,10 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[], milestone
     return { label: "PB lead", value: "Hold pace", tone: "success", intensity: "medium", durationMs: 420 };
   }
   if (events.includes("ghost-pressure")) {
-    return { tone: "style", intensity: "medium", durationMs: 420 };
+    return { label: "Ghost pressure", value: "Close the gap", tone: "style", intensity: "medium", durationMs: 420 };
   }
   if (events.includes("pb-pressure")) {
-    return { tone: "style", intensity: "medium", durationMs: 360 };
+    return { label: "PB pressure", value: "Close the gap", tone: "style", intensity: "medium", durationMs: 360 };
   }
   if (events.includes("comet-armed")) {
     return { label: "Comet dock", value: "Perfect line armed", tone: "style", intensity: "medium", durationMs: 460 };

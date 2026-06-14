@@ -314,6 +314,8 @@ describe("screen feedback", () => {
 
   it("maps personal-best pressure to an anticipatory style pulse", () => {
     expect(buildScreenFeedback(["pb-pressure"])).toEqual({
+      label: "PB pressure",
+      value: "Close the gap",
       tone: "style",
       intensity: "medium",
       durationMs: 360
@@ -326,6 +328,8 @@ describe("screen feedback", () => {
       durationMs: 420
     });
     expect(buildScreenFeedback(["ghost-pressure"])).toEqual({
+      label: "Ghost pressure",
+      value: "Close the gap",
       tone: "style",
       intensity: "medium",
       durationMs: 420
