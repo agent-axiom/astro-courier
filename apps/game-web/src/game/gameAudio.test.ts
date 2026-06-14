@@ -153,6 +153,17 @@ describe("game audio controller", () => {
     expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.11, 3);
   });
 
+  it("plays a clutch arming tone for last-drop dock windows", () => {
+    const context = new FakeAudioContext();
+    const controller = createGameAudioController({ createContext: () => context });
+
+    controller.play(["last-drop-armed"]);
+
+    expect(context.oscillators).toHaveLength(1);
+    expect(context.oscillators[0]?.frequencyValue).toBe(1020);
+    expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.14, 3);
+  });
+
   it("plays a pace warning tone when a medal window drops", () => {
     const context = new FakeAudioContext();
     const controller = createGameAudioController({ createContext: () => context });

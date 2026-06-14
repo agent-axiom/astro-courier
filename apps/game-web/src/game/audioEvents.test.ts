@@ -152,6 +152,30 @@ describe("HUD audio events", () => {
     ).toEqual([]);
   });
 
+  it("signals when a last-drop dock window becomes armed", () => {
+    const lastDropSnapshot = {
+      ...baseSnapshot,
+      objectivePhase: "delivery" as const,
+      landingStatus: "misaligned" as const,
+      fuel: 4,
+      maxFuel: 100,
+      cargoDamage: 0
+    };
+
+    expect(
+      deriveHudAudioEvents(lastDropSnapshot, {
+        ...lastDropSnapshot,
+        landingStatus: "ready"
+      })
+    ).toEqual(["last-drop-armed"]);
+    expect(
+      deriveHudAudioEvents(
+        { ...lastDropSnapshot, landingStatus: "ready" },
+        { ...lastDropSnapshot, landingStatus: "ready" }
+      )
+    ).toEqual([]);
+  });
+
   it("prefers the comet-specific armed cue over the generic perfect approach cue", () => {
     const cometDockSnapshot = {
       ...baseSnapshot,

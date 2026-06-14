@@ -12,6 +12,7 @@ describe("game haptics", () => {
     expect(hapticPatternForEvents(["ghost-pressure"])).toEqual([10, 14, 10, 14]);
     expect(hapticPatternForEvents(["ghost-pass"])).toEqual([18, 20, 18, 20]);
     expect(hapticPatternForEvents(["perfect-approach-ready"])).toEqual([10, 12, 10]);
+    expect(hapticPatternForEvents(["last-drop-armed"])).toEqual([18, 18, 28]);
     expect(hapticPatternForEvents(["chain-critical"])).toEqual([12, 24, 12, 24]);
     expect(hapticPatternForEvents(["chain-save"])).toEqual([12, 14, 12]);
     expect(hapticPatternForEvents(["medal-drop"])).toEqual([18, 28]);

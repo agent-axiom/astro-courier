@@ -1,4 +1,4 @@
-import { HAZARD_THREAD_SPEED_THRESHOLD, PERFECT_APPROACH_STREAK_SECONDS } from "@astro-courier/simulation";
+import { HAZARD_THREAD_SPEED_THRESHOLD, LAST_DROP_FUEL_RATIO, PERFECT_APPROACH_STREAK_SECONDS } from "@astro-courier/simulation";
 import type { LandingGuidanceStatus, ObjectivePhase, RunStatus } from "@astro-courier/shared";
 import { COMET_RESERVE_MIN_RATIO, COMET_RESERVE_WARNING_RATIO, isLiveCometDockArmed } from "./comet";
 import type { ContractPaceTier } from "./pace";
@@ -17,6 +17,7 @@ export type GameAudioEvent =
   | "ghost-pass"
   | "comet-armed"
   | "perfect-approach-ready"
+  | "last-drop-armed"
   | "comet-reserve-tight"
   | "comet-reserve-lost"
   | "chain-critical"
@@ -130,6 +131,8 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
   const cometDockArmed = hasArmedCometDock(previous, current);
   if (cometDockArmed) {
     events.push("comet-armed");
+  } else if (hasArmedLastDrop(previous, current)) {
+    events.push("last-drop-armed");
   } else if (hasArmedPerfectApproach(previous, current)) {
     events.push("perfect-approach-ready");
   }
@@ -244,6 +247,21 @@ function hasArmedPerfectApproach(previous: HudAudioSnapshot | undefined, current
     (current.cargoDamage ?? 0) <= cleanCargoDamageLimit &&
     (previous.approachStreakSeconds ?? 0) < PERFECT_APPROACH_STREAK_SECONDS &&
     (current.approachStreakSeconds ?? 0) >= PERFECT_APPROACH_STREAK_SECONDS
+  );
+}
+
+function hasArmedLastDrop(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {
+  return previous !== undefined && !isLastDropWindowOpen(previous) && isLastDropWindowOpen(current);
+}
+
+function isLastDropWindowOpen(snapshot: HudAudioSnapshot): boolean {
+  return (
+    snapshot.status === "flying" &&
+    snapshot.objectivePhase === "delivery" &&
+    snapshot.landingStatus === "ready" &&
+    (snapshot.cargoDamage ?? 0) <= cleanCargoDamageLimit &&
+    snapshot.maxFuel > 0 &&
+    snapshot.fuel / snapshot.maxFuel <= LAST_DROP_FUEL_RATIO
   );
 }
 

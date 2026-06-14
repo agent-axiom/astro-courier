@@ -48,6 +48,13 @@ describe("screen feedback", () => {
       intensity: "medium",
       durationMs: 420
     });
+    expect(buildScreenFeedback(["last-drop-armed"])).toEqual({
+      label: "Last drop",
+      value: "Dock empty",
+      tone: "style",
+      intensity: "heavy",
+      durationMs: 500
+    });
   });
 
   it("names high-skill style milestone hits when milestone context is available", () => {
