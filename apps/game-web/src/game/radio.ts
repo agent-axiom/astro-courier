@@ -44,6 +44,8 @@ export function buildRadioMessage(hud: HudState): string {
     if (hud.lastMilestone === "Damage Control") return "Damage control logged. Damaged cargo recovered with a soft dock.";
     if (hud.lastMilestone === "Last Drop") return "Last drop logged. Empty tanks, intact cargo, excellent nerve.";
     if (hud.lastMilestone === "No Brake Finesse") return "No-brake finesse logged. Clean cargo, no manual brake, smooth hands.";
+    if (hud.lastMilestone === "Assist Burn") return "Assist burn delivery logged. Soft contact saved the package.";
+    if (hud.lastMilestone === "Boost Burn") return "Boost burn delivery logged. Vector correction carried the line.";
     if (hud.medal === "comet") return "Comet Medal confirmed. That route is going on the office wall.";
     if (hud.medal === "gold") return "Gold delivery logged. Clean burn, clean dock.";
     if (hud.medal === "silver") return "Silver delivery logged. Reliable courier work.";

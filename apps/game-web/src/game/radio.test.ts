@@ -233,6 +233,26 @@ describe("radio feedback copy", () => {
     ).toContain("No-brake finesse");
   });
 
+  it("celebrates burn-control finishes before generic medal copy", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        status: "delivered",
+        medal: "silver",
+        lastMilestone: "Assist Burn"
+      })
+    ).toContain("Assist burn delivery");
+
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        status: "delivered",
+        medal: "silver",
+        lastMilestone: "Boost Burn"
+      })
+    ).toContain("Boost burn delivery");
+  });
+
   it("praises a held stable approach before generic landing guidance", () => {
     expect(buildRadioMessage({ ...baseHud, landingStatus: "ready", approachStreakSeconds: 1.4 })).toContain("Perfect setup");
     expect(buildRadioMessage({ ...baseHud, landingStatus: "ready", approachStreakSeconds: 1.4 })).toContain("+220");
