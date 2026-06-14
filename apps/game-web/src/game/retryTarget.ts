@@ -181,6 +181,10 @@ function buildRepeatableMilestoneTarget(lastMilestone?: string): RetryTarget | u
     case "Perfect Approach":
     case "Chain Finish":
     case "Launch Burst":
+    case "Quick Pickup":
+    case "Clean Hazard Skim":
+    case "Needle Thread":
+    case "Gravity Sling":
       return {
         label: "Retry target",
         value: `Repeat ${lastMilestone}`,

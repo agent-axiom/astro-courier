@@ -348,6 +348,76 @@ describe("result retry target", () => {
     });
   });
 
+  it("turns quick pickups into a repeatable fast-load target", () => {
+    expect(
+      buildRetryTarget({
+        status: "delivered",
+        medal: "silver",
+        lastMilestone: "Quick Pickup",
+        elapsedSeconds: 34.6,
+        goldSeconds: 30,
+        score: 2120,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Repeat Quick Pickup",
+      tone: "opportunity"
+    });
+  });
+
+  it("turns hazard and sling style hits into repeatable style targets", () => {
+    expect(
+      buildRetryTarget({
+        status: "delivered",
+        medal: "silver",
+        lastMilestone: "Clean Hazard Skim",
+        elapsedSeconds: 34.6,
+        goldSeconds: 30,
+        score: 2120,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Repeat Clean Hazard Skim",
+      tone: "opportunity"
+    });
+    expect(
+      buildRetryTarget({
+        status: "delivered",
+        medal: "gold",
+        lastMilestone: "Needle Thread",
+        elapsedSeconds: 28.4,
+        goldSeconds: 30,
+        score: 2860,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Repeat Needle Thread",
+      tone: "opportunity"
+    });
+    expect(
+      buildRetryTarget({
+        status: "delivered",
+        medal: "gold",
+        lastMilestone: "Gravity Sling",
+        elapsedSeconds: 28.4,
+        goldSeconds: 30,
+        score: 2860,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Repeat Gravity Sling",
+      tone: "opportunity"
+    });
+  });
+
   it("turns no-brake finesse finishes into a repeatable finesse target", () => {
     expect(
       buildRetryTarget({
