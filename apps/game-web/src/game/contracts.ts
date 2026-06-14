@@ -61,6 +61,12 @@ export type DailyDispatchProgressReceipt = {
   tone: "fresh" | "streak";
 };
 
+export type DailyDispatchProgressStatus = {
+  label: "Daily streak";
+  value: "Start streak" | "Streak banked" | `${number}-day streak banked` | `Keep ${number}-day streak` | "Rebuild streak";
+  tone: "open" | "banked" | "streak" | "reset";
+};
+
 export type DailyDispatchClearRecord = {
   progress: DailyDispatchProgress;
   receipt: DailyDispatchProgressReceipt;
@@ -196,6 +202,47 @@ export function recordDailyDispatchClear(storage: DailyDispatchProgressStorage, 
   return {
     progress,
     receipt: buildDailyDispatchProgressReceipt(streak)
+  };
+}
+
+export function buildDailyDispatchProgressStatus(
+  dispatch: DailyDispatch | undefined,
+  progress: DailyDispatchProgress | undefined
+): DailyDispatchProgressStatus | undefined {
+  if (!dispatch) {
+    return undefined;
+  }
+
+  const dayKey = extractDailyDispatchDayKey(dispatch.seed) ?? dispatch.seed;
+  if (!progress) {
+    return {
+      label: "Daily streak",
+      value: "Start streak",
+      tone: "open"
+    };
+  }
+
+  const streak = Math.max(1, Math.floor(progress.streak));
+  if (progress.dayKey === dayKey) {
+    return {
+      label: "Daily streak",
+      value: streak > 1 ? `${streak}-day streak banked` : "Streak banked",
+      tone: "banked"
+    };
+  }
+
+  if (isNextUtcDay(progress.dayKey, dayKey)) {
+    return {
+      label: "Daily streak",
+      value: `Keep ${streak}-day streak`,
+      tone: "streak"
+    };
+  }
+
+  return {
+    label: "Daily streak",
+    value: streak > 1 ? "Rebuild streak" : "Start streak",
+    tone: streak > 1 ? "reset" : "open"
   };
 }
 

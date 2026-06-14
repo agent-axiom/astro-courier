@@ -11,6 +11,7 @@ import {
   buildDailyDispatch,
   buildDailyDispatchAction,
   buildDailyDispatchBadge,
+  buildDailyDispatchProgressStatus,
   buildDailyDispatchPulse,
   buildDailyDispatchReset,
   buildDailyDispatchResult,
@@ -470,6 +471,43 @@ describe("contract rotation", () => {
       dayKey: "2026-06-13",
       lastContractId: "asteroid-sprint",
       streak: 1
+    });
+  });
+
+  it("summarizes daily dispatch streak motivation for the briefing", () => {
+    const dispatch = {
+      label: "Daily dispatch" as const,
+      value: "Asteroid Sprint",
+      contractId: "asteroid-sprint",
+      seed: "daily-2026-06-13-asteroid-sprint",
+      tone: "daily" as const
+    };
+
+    expect(buildDailyDispatchProgressStatus(undefined, undefined)).toBeUndefined();
+    expect(buildDailyDispatchProgressStatus(dispatch, undefined)).toEqual({
+      label: "Daily streak",
+      value: "Start streak",
+      tone: "open"
+    });
+    expect(buildDailyDispatchProgressStatus(dispatch, { dayKey: "2026-06-13", lastContractId: "asteroid-sprint", streak: 1 })).toEqual({
+      label: "Daily streak",
+      value: "Streak banked",
+      tone: "banked"
+    });
+    expect(buildDailyDispatchProgressStatus(dispatch, { dayKey: "2026-06-13", lastContractId: "asteroid-sprint", streak: 3 })).toEqual({
+      label: "Daily streak",
+      value: "3-day streak banked",
+      tone: "banked"
+    });
+    expect(buildDailyDispatchProgressStatus(dispatch, { dayKey: "2026-06-12", lastContractId: "return-leg", streak: 3 })).toEqual({
+      label: "Daily streak",
+      value: "Keep 3-day streak",
+      tone: "streak"
+    });
+    expect(buildDailyDispatchProgressStatus(dispatch, { dayKey: "2026-06-10", lastContractId: "return-leg", streak: 3 })).toEqual({
+      label: "Daily streak",
+      value: "Rebuild streak",
+      tone: "reset"
     });
   });
 

@@ -54,13 +54,16 @@ import {
   buildDailyDispatch,
   buildDailyDispatchAction,
   buildDailyDispatchBadge,
+  buildDailyDispatchProgressStatus,
   buildDailyDispatchPulse,
   buildDailyDispatchReset,
   buildDailyDispatchResult,
   buildDailyDispatchStatus,
   buildLaunchCommitment,
+  getDailyDispatchProgress,
   buildRoutePressureBriefing,
   recordDailyDispatchClear,
+  type DailyDispatchProgress,
   type DailyDispatchProgressReceipt
 } from "./game/contracts";
 import { buildRadioMessage } from "./game/radio";
@@ -206,6 +209,10 @@ export function App() {
   });
   const [bestRunsByContract, setBestRunsByContract] = useState<Record<string, BestRun | undefined>>({});
   const [newBest, setNewBest] = useState(false);
+  const [dailyProgress, setDailyProgress] = useState<DailyDispatchProgress | undefined>(() => {
+    const storage = getBestRunStorage();
+    return storage ? getDailyDispatchProgress(storage) : undefined;
+  });
   const [dailyProgressReceipt, setDailyProgressReceipt] = useState<DailyDispatchProgressReceipt | undefined>(undefined);
 
   useEffect(() => {
@@ -389,7 +396,9 @@ export function App() {
     setNewBest(result.isNewBest);
     const completedDailyDispatch = buildDailyDispatch({ contracts: hud.contractOptions, now: new Date() });
     if (completedDailyDispatch?.contractId === hud.contractId) {
-      setDailyProgressReceipt(recordDailyDispatchClear(storage, completedDailyDispatch).receipt);
+      const dailyClear = recordDailyDispatchClear(storage, completedDailyDispatch);
+      setDailyProgress(dailyClear.progress);
+      setDailyProgressReceipt(dailyClear.receipt);
     } else {
       setDailyProgressReceipt(undefined);
     }
@@ -626,6 +635,7 @@ export function App() {
     dailyDispatch,
     dailyDispatch ? bestRunsByContract[dailyDispatch.contractId] : undefined
   );
+  const dailyDispatchProgressStatus = buildDailyDispatchProgressStatus(dailyDispatch, dailyProgress);
   const dailyDispatchResult =
     hud.status === "delivered" || hud.status === "crashed"
       ? buildDailyDispatchResult({
@@ -1290,6 +1300,9 @@ export function App() {
                 <span>{dailyDispatch.label}</span>
                 <strong>{dailyDispatch.value}</strong>
                 <small>{dailyDispatchStatus ? `${dailyDispatchStatus.value} / ${dailyDispatchReset?.value ?? dailyDispatch.seed}` : dailyDispatch.seed}</small>
+                {dailyDispatchProgressStatus ? (
+                  <b className={`daily-progress daily-progress-${dailyDispatchProgressStatus.tone}`}>{dailyDispatchProgressStatus.value}</b>
+                ) : null}
                 {dailyDispatchPulse ? <b className={`daily-pulse daily-pulse-${dailyDispatchPulse.tone}`}>{dailyDispatchPulse.value}</b> : null}
               </button>
             ) : (
@@ -1303,6 +1316,9 @@ export function App() {
                 <span>{dailyDispatch.label}</span>
                 <strong>{dailyDispatch.value}</strong>
                 <small>{dailyDispatchStatus ? `${dailyDispatchStatus.value} / ${dailyDispatchReset?.value ?? dailyDispatch.seed}` : dailyDispatch.seed}</small>
+                {dailyDispatchProgressStatus ? (
+                  <b className={`daily-progress daily-progress-${dailyDispatchProgressStatus.tone}`}>{dailyDispatchProgressStatus.value}</b>
+                ) : null}
                 {dailyDispatchPulse ? <b className={`daily-pulse daily-pulse-${dailyDispatchPulse.tone}`}>{dailyDispatchPulse.value}</b> : null}
               </div>
             )
