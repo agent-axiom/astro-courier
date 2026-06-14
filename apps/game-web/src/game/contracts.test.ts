@@ -853,7 +853,19 @@ describe("contract rotation", () => {
     ).toEqual([
       { label: "Hazard", value: "1.45x field", tone: "danger" },
       { label: "Pace", value: "Gold 24s", tone: "speed" },
-      { label: "Cargo", value: "Stable load", tone: "cargo" }
+      { label: "Cargo", value: "Volatile load", tone: "cargo" }
+    ]);
+    expect(
+      buildContractModifiers({
+        cargoKind: "unstable",
+        cargoFragility: 0.95,
+        hazardSeverityMultiplier: 1,
+        goldSeconds: 28
+      })
+    ).toEqual([
+      { label: "Hazard", value: "Standard field", tone: "precision" },
+      { label: "Pace", value: "Gold 28s", tone: "speed" },
+      { label: "Cargo", value: "Brake sensitive", tone: "cargo" }
     ]);
   });
 });

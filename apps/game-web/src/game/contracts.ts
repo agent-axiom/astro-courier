@@ -952,8 +952,11 @@ function cargoModifierValue(input: ContractRoutePlanInput): string {
   if (input.cargoFragility < 0.9 || input.cargoKind === "fragile") {
     return "Fragile load";
   }
-  if (input.cargoKind === "volatile" || input.cargoKind === "unstable") {
-    return "Stable load";
+  if (input.cargoKind === "volatile") {
+    return "Volatile load";
+  }
+  if (input.cargoKind === "unstable") {
+    return "Brake sensitive";
   }
   return "Standard load";
 }
