@@ -2080,7 +2080,8 @@ button {
 
 .daily-dispatch-briefing span,
 .daily-dispatch-briefing strong,
-.daily-dispatch-briefing small {
+.daily-dispatch-briefing small,
+.daily-dispatch-briefing b {
   min-width: 0;
   overflow-wrap: anywhere;
   line-height: 1.15;
@@ -2101,6 +2102,30 @@ button {
   color: rgba(191, 247, 216, 0.72);
   font-size: 0.72rem;
   font-weight: 800;
+}
+
+.daily-dispatch-briefing b {
+  grid-column: 2 / 4;
+  justify-self: start;
+  padding: 3px 6px;
+  border-radius: 5px;
+  font-size: 0.64rem;
+  font-weight: 900;
+}
+
+.daily-pulse-hot {
+  background: rgba(255, 111, 145, 0.15);
+  color: #ffadc1;
+}
+
+.daily-pulse-soft {
+  background: rgba(142, 230, 184, 0.14);
+  color: #bff7d8;
+}
+
+.daily-pulse-steady {
+  background: rgba(160, 196, 255, 0.11);
+  color: #d8e6ff;
 }
 
 .daily-dispatch-open {

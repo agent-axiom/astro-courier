@@ -43,6 +43,12 @@ export type DailyDispatchReset = {
   tone: "steady" | "urgent";
 };
 
+export type DailyDispatchPulse = {
+  label: "Daily pulse";
+  value: string;
+  tone: "hot" | "soft" | "steady";
+};
+
 export type DailyDispatchResultInput = {
   dispatch: DailyDispatch | undefined;
   contractId: string;
@@ -243,6 +249,27 @@ export function buildDailyDispatchReset(dispatch: DailyDispatch | undefined, now
   };
 }
 
+export function buildDailyDispatchPulse(dispatch: DailyDispatch | undefined): DailyDispatchPulse | undefined {
+  if (!dispatch) {
+    return undefined;
+  }
+
+  const percent = Math.round((dailyHazardPulse(dispatch.seed) - 1) * 100);
+  if (Math.abs(percent) <= 3) {
+    return {
+      label: "Daily pulse",
+      value: "Hazards stable",
+      tone: "steady"
+    };
+  }
+
+  return {
+    label: "Daily pulse",
+    value: `Hazards ${percent > 0 ? "+" : ""}${percent}%`,
+    tone: percent > 0 ? "hot" : "soft"
+  };
+}
+
 export function buildDailyDispatchResult(input: DailyDispatchResultInput): DailyDispatchResult | undefined {
   if (!input.dispatch || input.dispatch.contractId !== input.contractId) {
     return undefined;
@@ -301,6 +328,19 @@ function formatResetTime(millisecondsRemaining: number): string {
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
   return `${hours}h ${minutes}m`;
+}
+
+function dailyHazardPulse(seed: string): number {
+  return 0.9 + deterministicUnit(`${seed}:daily-pulse`) * 0.2;
+}
+
+function deterministicUnit(value: string): number {
+  let hash = 2166136261;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0) / 0xffffffff;
 }
 
 export function buildContractHazardTrait(input: ContractHazardTraitInput): string | undefined {

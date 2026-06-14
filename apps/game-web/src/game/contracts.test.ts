@@ -10,6 +10,7 @@ import {
   buildDailyDispatch,
   buildDailyDispatchAction,
   buildDailyDispatchBadge,
+  buildDailyDispatchPulse,
   buildDailyDispatchReset,
   buildDailyDispatchResult,
   buildDailyDispatchStatus,
@@ -204,6 +205,49 @@ describe("contract rotation", () => {
       tone: "urgent"
     });
     expect(buildDailyDispatchReset(undefined, new Date("2026-06-13T18:30:00Z"))).toBeUndefined();
+  });
+
+  it("summarizes the deterministic daily hazard pulse from the dispatch seed", () => {
+    expect(buildDailyDispatchPulse(undefined)).toBeUndefined();
+    expect(
+      buildDailyDispatchPulse({
+        label: "Daily dispatch",
+        value: "First Light Delivery",
+        contractId: "first-light-delivery",
+        seed: "daily-2026-07-01-first-light-delivery",
+        tone: "daily"
+      })
+    ).toEqual({
+      label: "Daily pulse",
+      value: "Hazards +7%",
+      tone: "hot"
+    });
+    expect(
+      buildDailyDispatchPulse({
+        label: "Daily dispatch",
+        value: "Asteroid Sprint",
+        contractId: "asteroid-sprint",
+        seed: "daily-2026-06-13-asteroid-sprint",
+        tone: "daily"
+      })
+    ).toEqual({
+      label: "Daily pulse",
+      value: "Hazards -9%",
+      tone: "soft"
+    });
+    expect(
+      buildDailyDispatchPulse({
+        label: "Daily dispatch",
+        value: "Gravity Slingshot",
+        contractId: "gravity-slingshot",
+        seed: "daily-2026-06-14-gravity-slingshot",
+        tone: "daily"
+      })
+    ).toEqual({
+      label: "Daily pulse",
+      value: "Hazards stable",
+      tone: "steady"
+    });
   });
 
   it("summarizes daily dispatch outcomes for the result overlay", () => {

@@ -53,6 +53,7 @@ import {
   buildDailyDispatch,
   buildDailyDispatchAction,
   buildDailyDispatchBadge,
+  buildDailyDispatchPulse,
   buildDailyDispatchReset,
   buildDailyDispatchResult,
   buildDailyDispatchStatus,
@@ -608,6 +609,7 @@ export function App() {
   const dailyDispatch = buildDailyDispatch({ contracts: hud.contractOptions, now: currentDate });
   const dailyDispatchAction = buildDailyDispatchAction(dailyDispatch, hud.contractId);
   const dailyDispatchReset = buildDailyDispatchReset(dailyDispatch, currentDate);
+  const dailyDispatchPulse = buildDailyDispatchPulse(dailyDispatch);
   const dailyDispatchStatus = buildDailyDispatchStatus(
     dailyDispatch,
     dailyDispatch ? bestRunsByContract[dailyDispatch.contractId] : undefined
@@ -1265,6 +1267,7 @@ export function App() {
                 <span>{dailyDispatch.label}</span>
                 <strong>{dailyDispatch.value}</strong>
                 <small>{dailyDispatchStatus ? `${dailyDispatchStatus.value} / ${dailyDispatchReset?.value ?? dailyDispatch.seed}` : dailyDispatch.seed}</small>
+                {dailyDispatchPulse ? <b className={`daily-pulse daily-pulse-${dailyDispatchPulse.tone}`}>{dailyDispatchPulse.value}</b> : null}
               </button>
             ) : (
               <div
@@ -1277,6 +1280,7 @@ export function App() {
                 <span>{dailyDispatch.label}</span>
                 <strong>{dailyDispatch.value}</strong>
                 <small>{dailyDispatchStatus ? `${dailyDispatchStatus.value} / ${dailyDispatchReset?.value ?? dailyDispatch.seed}` : dailyDispatch.seed}</small>
+                {dailyDispatchPulse ? <b className={`daily-pulse daily-pulse-${dailyDispatchPulse.tone}`}>{dailyDispatchPulse.value}</b> : null}
               </div>
             )
           ) : null}
