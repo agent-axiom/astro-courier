@@ -36,6 +36,17 @@ export type GhostTrailReceipt = {
   tone: "saved";
 };
 
+export type DockGradeReceiptInput = {
+  status: Extract<RunStatus, "crashed" | "delivered">;
+  landingBonus: number;
+};
+
+export type DockGradeReceipt = {
+  label: "Dock grade";
+  value: "Perfect dock" | `Soft dock +${number}` | "Rough dock" | "Dock failed";
+  tone: "perfect" | "soft" | "rough" | "failed";
+};
+
 export type ResultOutcomePresentation = {
   icon: "alert" | "trophy";
   tone: "danger" | "success";
@@ -241,5 +252,37 @@ export function buildGhostTrailReceipt(input: GhostTrailReceiptInput): GhostTrai
     label: "Ghost trail",
     value: "Saved to route board",
     tone: "saved"
+  };
+}
+
+export function buildDockGradeReceipt(input: DockGradeReceiptInput): DockGradeReceipt {
+  if (input.status === "crashed") {
+    return {
+      label: "Dock grade",
+      value: "Dock failed",
+      tone: "failed"
+    };
+  }
+
+  if (input.landingBonus >= perfectLandingBonus) {
+    return {
+      label: "Dock grade",
+      value: "Perfect dock",
+      tone: "perfect"
+    };
+  }
+
+  if (input.landingBonus > 0) {
+    return {
+      label: "Dock grade",
+      value: `Soft dock +${Math.round(input.landingBonus)}`,
+      tone: "soft"
+    };
+  }
+
+  return {
+    label: "Dock grade",
+    value: "Rough dock",
+    tone: "rough"
   };
 }

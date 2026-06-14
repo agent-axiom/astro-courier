@@ -92,6 +92,7 @@ import { buildPreflightBonusObjectives, buildPreflightMasteryTargets } from "./g
 import { buildApproachRewardReadout, buildDockingSpeedReadout } from "./game/docking";
 import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./game/cargo";
 import {
+  buildDockGradeReceipt,
   buildGhostTrailReceipt,
   buildReplayReceipt,
   buildResultHighlight,
@@ -625,6 +626,10 @@ export function App() {
     hud.status === "delivered" || hud.status === "crashed" ? buildResultOutcomePresentation(hud.status) : undefined;
   const crashDebrief = hud.status === "crashed" ? buildCrashDebrief(hud) : undefined;
   const resultHighlight = buildResultHighlight(hud.scoreBreakdown, hud.lastMilestone);
+  const dockGradeReceipt =
+    hud.status === "delivered" || hud.status === "crashed"
+      ? buildDockGradeReceipt({ status: hud.status, landingBonus: hud.scoreBreakdown.landingBonus })
+      : undefined;
   const runIdentityReceipt =
     hud.status === "delivered" || hud.status === "crashed"
       ? buildRunIdentityReceipt({
@@ -1727,6 +1732,13 @@ export function App() {
               <Satellite size={18} />
               <span>{replayReceipt.label}</span>
               <strong>{replayReceipt.value}</strong>
+            </div>
+          ) : null}
+          {dockGradeReceipt ? (
+            <div className={`dock-grade-receipt dock-grade-${dockGradeReceipt.tone}`} aria-label={`${dockGradeReceipt.label}: ${dockGradeReceipt.value}`}>
+              <Gauge size={18} />
+              <span>{dockGradeReceipt.label}</span>
+              <strong>{dockGradeReceipt.value}</strong>
             </div>
           ) : null}
           {runIdentityReceipt ? (

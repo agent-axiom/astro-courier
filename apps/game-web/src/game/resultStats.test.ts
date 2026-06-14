@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildDockGradeReceipt,
   buildGhostTrailReceipt,
   buildReplayReceipt,
   buildResultHighlight,
@@ -104,6 +105,29 @@ describe("result stat formatting", () => {
       tone: "verified"
     });
     expect(buildReplayReceipt()).toBeUndefined();
+  });
+
+  it("summarizes final dock quality as a result receipt", () => {
+    expect(buildDockGradeReceipt({ status: "delivered", landingBonus: 300 })).toEqual({
+      label: "Dock grade",
+      value: "Perfect dock",
+      tone: "perfect"
+    });
+    expect(buildDockGradeReceipt({ status: "delivered", landingBonus: 120 })).toEqual({
+      label: "Dock grade",
+      value: "Soft dock +120",
+      tone: "soft"
+    });
+    expect(buildDockGradeReceipt({ status: "delivered", landingBonus: 0 })).toEqual({
+      label: "Dock grade",
+      value: "Rough dock",
+      tone: "rough"
+    });
+    expect(buildDockGradeReceipt({ status: "crashed", landingBonus: 0 })).toEqual({
+      label: "Dock grade",
+      value: "Dock failed",
+      tone: "failed"
+    });
   });
 
   it("marks new delivered personal bests as saved ghost trails", () => {

@@ -3607,6 +3607,63 @@ button {
   box-shadow: 0 0 26px rgba(255, 209, 102, 0.12);
 }
 
+.dock-grade-receipt {
+  display: grid;
+  grid-template-columns: 18px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 40px;
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 850;
+  text-align: left;
+}
+
+.dock-grade-receipt span,
+.dock-grade-receipt strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.dock-grade-receipt span {
+  color: rgba(255, 255, 255, 0.74);
+  text-transform: uppercase;
+}
+
+.dock-grade-receipt strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.dock-grade-perfect {
+  border-color: rgba(255, 209, 102, 0.36);
+  background: linear-gradient(90deg, rgba(255, 209, 102, 0.18), rgba(142, 230, 184, 0.15));
+  color: #fff1c7;
+  box-shadow: 0 0 24px rgba(255, 209, 102, 0.1);
+}
+
+.dock-grade-soft {
+  border-color: rgba(142, 230, 184, 0.3);
+  background: rgba(142, 230, 184, 0.14);
+  color: #bff7d8;
+}
+
+.dock-grade-rough {
+  border-color: rgba(255, 209, 102, 0.24);
+  background: rgba(255, 209, 102, 0.12);
+  color: #ffe19a;
+}
+
+.dock-grade-failed {
+  border-color: rgba(255, 111, 145, 0.34);
+  background: rgba(255, 111, 145, 0.18);
+  color: #ffadc1;
+}
+
 .run-identity-receipt {
   display: grid;
   grid-template-columns: 18px auto 1fr;
