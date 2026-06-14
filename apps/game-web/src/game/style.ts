@@ -23,6 +23,8 @@ export type LiveStyleRewardInput = {
   cargoDamage?: number;
   hazardDangerLevel?: "near" | "inside";
   gravitySlingReady?: boolean;
+  objectivePhase?: ObjectivePhase;
+  manualBrakeUsed?: boolean;
 };
 
 export type LiveStyleReward = {
@@ -186,6 +188,9 @@ function buildUrgentChainAction(input: LiveStyleRewardInput): string {
   }
   if ((input.quickPickupSecondsRemaining ?? 0) > 0) {
     return "Pickup now";
+  }
+  if (input.objectivePhase === "delivery" && input.manualBrakeUsed === false && (input.cargoDamage ?? 0) <= 0.02) {
+    return "Finesse dock";
   }
   if (input.contractId === "chain-relay") {
     return "Dock chain";

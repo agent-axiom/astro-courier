@@ -601,7 +601,9 @@ export function App() {
     quickPickupSecondsRemaining: hud.quickPickupSecondsRemaining,
     cargoDamage: hud.cargoDamage,
     hazardDangerLevel: hud.hazardDangerLevel,
-    gravitySlingReady: hud.gravitySlingReady
+    gravitySlingReady: hud.gravitySlingReady,
+    objectivePhase: hud.objectivePhase,
+    manualBrakeUsed: hud.manualBrakeUsed
   });
   const styleTargetCue = buildStyleTargetCue({
     status: hud.status,

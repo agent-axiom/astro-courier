@@ -359,6 +359,26 @@ describe("live style reward HUD copy", () => {
       chainProgress: 0.2
     });
   });
+
+  it("points urgent clean delivery chains at a no-brake finesse dock", () => {
+    expect(
+      buildLiveStyleReward({
+        styleBonus: 440,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 0.8,
+        objectivePhase: "delivery",
+        manualBrakeUsed: false,
+        cargoDamage: 0
+      })
+    ).toEqual({
+      label: "Style chain",
+      value: "Finesse dock / x1.50 / 0.8s",
+      action: "Finesse dock",
+      fresh: false,
+      tone: "urgent",
+      chainProgress: 0.2
+    });
+  });
 });
 
 describe("style target cue", () => {
