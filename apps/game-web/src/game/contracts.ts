@@ -126,6 +126,13 @@ export type LaunchCommitment = {
 
 export type ContractModifierTone = "cargo" | "danger" | "fuel" | "precision" | "speed" | "style";
 
+export type ContractSignatureManeuver = {
+  label: "Signature move";
+  value: string;
+  detail: string;
+  tone: ContractModifierTone;
+};
+
 export type ContractModifier = {
   label: string;
   value: string;
@@ -787,6 +794,96 @@ export function buildContractOptionHook(input: ContractRoutePlanInput): Contract
   return {
     label: "Pick for",
     value: "Clean PB setup",
+    tone: "cargo"
+  };
+}
+
+export function buildContractSignatureManeuver(input: ContractRoutePlanInput): ContractSignatureManeuver {
+  if (input.contractId === "gravity-slingshot") {
+    return {
+      label: "Signature move",
+      value: "Gravity Sling",
+      detail: "Ride the well, then brake the dock",
+      tone: "style"
+    };
+  }
+
+  if (input.contractId === "chain-relay") {
+    return {
+      label: "Signature move",
+      value: "Chain Finish",
+      detail: "Keep the combo alive to delivery",
+      tone: "style"
+    };
+  }
+
+  if (input.contractId === "last-drop-run") {
+    return {
+      label: "Signature move",
+      value: "Last Drop",
+      detail: "Arrive under 5% fuel",
+      tone: "fuel"
+    };
+  }
+
+  if (input.contractId === "asteroid-sprint") {
+    return {
+      label: "Signature move",
+      value: "Needle Thread",
+      detail: "Cross the field through a clean gap",
+      tone: "danger"
+    };
+  }
+
+  if (input.contractId === "return-leg") {
+    return {
+      label: "Signature move",
+      value: "No Brake Finesse",
+      detail: "Reverse the line, coast the dock",
+      tone: "precision"
+    };
+  }
+
+  if ((input.hazardSeverityMultiplier ?? 1) >= 1.25) {
+    return {
+      label: "Signature move",
+      value: "Clean Hazard Skim",
+      detail: "Brush danger, keep cargo clean",
+      tone: "danger"
+    };
+  }
+
+  if (input.cargoKind === "fragile" || input.cargoFragility < 0.9) {
+    return {
+      label: "Signature move",
+      value: "Perfect Approach",
+      detail: "Slow hands, soft dock",
+      tone: "precision"
+    };
+  }
+
+  if (input.cargoKind === "time-sensitive") {
+    return {
+      label: "Signature move",
+      value: "Quick Pickup",
+      detail: "Load fast, then protect the line",
+      tone: "speed"
+    };
+  }
+
+  if (input.goldSeconds <= 25) {
+    return {
+      label: "Signature move",
+      value: "Express Finish",
+      detail: "Fast line, clean stop",
+      tone: "speed"
+    };
+  }
+
+  return {
+    label: "Signature move",
+    value: "Eco Drift",
+    detail: "Spare fuel for a cleaner finish",
     tone: "cargo"
   };
 }

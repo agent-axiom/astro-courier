@@ -63,6 +63,7 @@ import {
   buildContractPreflightKicker,
   buildContractRoutePlan,
   buildContractSelectionBadge,
+  buildContractSignatureManeuver,
   buildDailyDispatch,
   buildDailyDispatchAction,
   buildDailyDispatchBadge,
@@ -773,6 +774,13 @@ export function App() {
     hazardSeverityMultiplier: hud.hazardSeverityMultiplier,
     goldSeconds: hud.paceSecondsRemaining
   });
+  const signatureManeuver = buildContractSignatureManeuver({
+    contractId: hud.contractId,
+    cargoKind: hud.cargoKind,
+    cargoFragility: hud.cargoFragility,
+    hazardSeverityMultiplier: hud.hazardSeverityMultiplier,
+    goldSeconds: hud.paceSecondsRemaining
+  });
   const launchCommitment = buildLaunchCommitment({
     contractId: hud.contractId,
     cargoKind: hud.cargoKind,
@@ -1284,6 +1292,27 @@ export function App() {
             )}
             <span>{routePressure.label}</span>
             <strong>{routePressure.value}</strong>
+          </div>
+          <div
+            className={`signature-maneuver-briefing signature-maneuver-${signatureManeuver.tone}`}
+            aria-label={`${signatureManeuver.label}: ${signatureManeuver.value}. ${signatureManeuver.detail}`}
+          >
+            {signatureManeuver.tone === "danger" ? (
+              <ShieldAlert size={18} />
+            ) : signatureManeuver.tone === "fuel" ? (
+              <Zap size={18} />
+            ) : signatureManeuver.tone === "style" ? (
+              <Star size={18} />
+            ) : signatureManeuver.tone === "speed" ? (
+              <Gauge size={18} />
+            ) : signatureManeuver.tone === "precision" ? (
+              <Target size={18} />
+            ) : (
+              <PackageCheck size={18} />
+            )}
+            <span>{signatureManeuver.label}</span>
+            <strong>{signatureManeuver.value}</strong>
+            <small>{signatureManeuver.detail}</small>
           </div>
           <div className="contract-modifiers" aria-label="Contract modifiers">
             {contractModifiers.map((modifier) => (

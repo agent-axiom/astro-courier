@@ -2089,6 +2089,70 @@ button {
   color: #bff7d8;
 }
 
+.signature-maneuver-briefing {
+  display: grid;
+  grid-template-columns: 18px auto 1fr;
+  align-items: center;
+  gap: 4px 8px;
+  min-height: 52px;
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.signature-maneuver-briefing span,
+.signature-maneuver-briefing strong,
+.signature-maneuver-briefing small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.12;
+}
+
+.signature-maneuver-briefing span {
+  color: rgba(255, 255, 255, 0.72);
+  text-transform: uppercase;
+}
+
+.signature-maneuver-briefing strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.signature-maneuver-briefing small {
+  grid-column: 2 / 4;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.72rem;
+  font-weight: 760;
+}
+
+.signature-maneuver-cargo {
+  background: rgba(142, 230, 184, 0.12);
+  color: #bff7d8;
+}
+
+.signature-maneuver-danger {
+  background: rgba(255, 111, 145, 0.14);
+  color: #ffadc1;
+}
+
+.signature-maneuver-fuel,
+.signature-maneuver-speed {
+  background: rgba(124, 225, 255, 0.14);
+  color: #c6f6ff;
+}
+
+.signature-maneuver-precision {
+  background: rgba(255, 209, 102, 0.15);
+  color: #ffe19a;
+}
+
+.signature-maneuver-style {
+  background: rgba(255, 209, 102, 0.17);
+  color: #ffe19a;
+}
+
 .contract-modifiers {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

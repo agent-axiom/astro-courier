@@ -9,6 +9,7 @@ import {
   buildContractHazardTrait,
   buildContractPreflightKicker,
   buildContractRoutePlan,
+  buildContractSignatureManeuver,
   buildDailyDispatch,
   buildDailyDispatchAction,
   buildDailyDispatchBadge,
@@ -728,6 +729,90 @@ describe("contract rotation", () => {
       label: "Route pressure",
       value: "Clean handling / soft dock",
       tone: "care"
+    });
+  });
+
+  it("gives special routes a signature maneuver for preflight identity", () => {
+    expect(
+      buildContractSignatureManeuver({
+        contractId: "gravity-slingshot",
+        cargoKind: "fragile",
+        cargoFragility: 0.8,
+        hazardSeverityMultiplier: 1.2,
+        goldSeconds: 26
+      })
+    ).toEqual({
+      label: "Signature move",
+      value: "Gravity Sling",
+      detail: "Ride the well, then brake the dock",
+      tone: "style"
+    });
+    expect(
+      buildContractSignatureManeuver({
+        contractId: "chain-relay",
+        cargoKind: "unstable",
+        cargoFragility: 1,
+        hazardSeverityMultiplier: 1.3,
+        goldSeconds: 22
+      })
+    ).toEqual({
+      label: "Signature move",
+      value: "Chain Finish",
+      detail: "Keep the combo alive to delivery",
+      tone: "style"
+    });
+    expect(
+      buildContractSignatureManeuver({
+        contractId: "last-drop-run",
+        cargoKind: "time-sensitive",
+        cargoFragility: 0.9,
+        goldSeconds: 27
+      })
+    ).toEqual({
+      label: "Signature move",
+      value: "Last Drop",
+      detail: "Arrive under 5% fuel",
+      tone: "fuel"
+    });
+  });
+
+  it("falls back to pressure-based signature maneuvers for generic routes", () => {
+    expect(
+      buildContractSignatureManeuver({
+        cargoKind: "volatile",
+        cargoFragility: 1,
+        hazardSeverityMultiplier: 1.45,
+        goldSeconds: 24
+      })
+    ).toEqual({
+      label: "Signature move",
+      value: "Clean Hazard Skim",
+      detail: "Brush danger, keep cargo clean",
+      tone: "danger"
+    });
+    expect(
+      buildContractSignatureManeuver({
+        cargoKind: "fragile",
+        cargoFragility: 0.8,
+        goldSeconds: 35
+      })
+    ).toEqual({
+      label: "Signature move",
+      value: "Perfect Approach",
+      detail: "Slow hands, soft dock",
+      tone: "precision"
+    });
+    expect(
+      buildContractSignatureManeuver({
+        cargoKind: "standard",
+        cargoFragility: 1,
+        goldSeconds: 24
+      })
+    ).toEqual({
+      label: "Signature move",
+      value: "Express Finish",
+      detail: "Fast line, clean stop",
+      tone: "speed"
     });
   });
 
