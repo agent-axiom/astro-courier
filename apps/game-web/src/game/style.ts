@@ -259,6 +259,9 @@ function buildUrgentChainAction(input: LiveStyleRewardInput): string {
     return "Pickup now";
   }
   if (input.objectivePhase === "delivery" && input.manualBrakeUsed === false && (input.cargoDamage ?? 0) <= 0.02) {
+    if (input.contractId === "antimatter-drift") {
+      return "Drift dock";
+    }
     return "Finesse dock";
   }
   if (input.contractId === "chain-relay") {

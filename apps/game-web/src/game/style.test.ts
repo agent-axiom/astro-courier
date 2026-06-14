@@ -450,6 +450,27 @@ describe("live style reward HUD copy", () => {
       chainProgress: 0.2
     });
   });
+
+  it("points urgent antimatter drift chains at the route-specific dock", () => {
+    expect(
+      buildLiveStyleReward({
+        contractId: "antimatter-drift",
+        styleBonus: 440,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 0.8,
+        objectivePhase: "delivery",
+        manualBrakeUsed: false,
+        cargoDamage: 0
+      })
+    ).toEqual({
+      label: "Style chain",
+      value: "Drift dock / x1.50 / 0.8s",
+      action: "Drift dock",
+      fresh: false,
+      tone: "urgent",
+      chainProgress: 0.2
+    });
+  });
 });
 
 describe("style target cue", () => {
