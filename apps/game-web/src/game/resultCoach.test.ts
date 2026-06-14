@@ -426,6 +426,25 @@ describe("result coach", () => {
     });
   });
 
+  it("coaches quick pickup runs toward repeating the fast load", () => {
+    expect(
+      buildResultCoach({
+        status: "delivered",
+        lastMilestone: "Quick Pickup",
+        medal: "silver",
+        grade: "B",
+        cargoDamage: 0,
+        fuel: 46,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 180 }
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Repeat the fast load",
+      tone: "success"
+    });
+  });
+
   it("coaches eco drift runs toward repeating the low-burn line", () => {
     expect(
       buildResultCoach({

@@ -250,6 +250,14 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
     };
   }
 
+  if (input.lastMilestone === "Quick Pickup") {
+    return {
+      label: "Next run",
+      value: "Repeat the fast load",
+      tone: "success"
+    };
+  }
+
   return {
     label: "Next run",
     value: "Tighten landing angle",
