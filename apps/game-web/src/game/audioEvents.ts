@@ -20,6 +20,7 @@ export type GameAudioEvent =
   | "comet-armed"
   | "perfect-approach-ready"
   | "last-drop-armed"
+  | "express-close"
   | "comet-reserve-tight"
   | "comet-reserve-lost"
   | "chain-critical"
@@ -48,6 +49,7 @@ export type HudAudioSnapshot = {
   bestRunScore?: number;
   bestRunHasGhostTrail?: boolean;
   paceTier?: ContractPaceTier;
+  paceSecondsRemaining?: number;
   perfectDockReady?: boolean;
   landingStatus?: LandingGuidanceStatus;
   approachStreakSeconds?: number;
@@ -65,6 +67,7 @@ export type HudAudioSnapshot = {
 const criticalFuelRatio = 0.15;
 const cleanCargoDamageLimit = 0.02;
 const criticalStyleChainSeconds = 1;
+const expressCloseSeconds = 4;
 const bestRunPressureGap = 200;
 const closeTargetDistance = 90;
 const styleMilestones = new Set([
@@ -133,6 +136,10 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
 
   if (hasDroppedMedalWindow(previous, current)) {
     events.push("medal-drop");
+  }
+
+  if (hasEnteredExpressCloseWindow(previous, current)) {
+    events.push("express-close");
   }
 
   if (hasCrossedBestRunScore(previous, current)) {
@@ -351,6 +358,22 @@ function hasDroppedMedalWindow(previous: HudAudioSnapshot | undefined, current: 
     return false;
   }
   return paceTierRank(current.paceTier) > paceTierRank(previous.paceTier);
+}
+
+function hasEnteredExpressCloseWindow(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {
+  if (!previous) {
+    return false;
+  }
+
+  return (
+    current.status === "flying" &&
+    current.objectivePhase === "delivery" &&
+    current.paceTier === "gold" &&
+    (current.cargoDamage ?? 0) <= cleanCargoDamageLimit &&
+    (previous.paceSecondsRemaining ?? 0) > expressCloseSeconds &&
+    (current.paceSecondsRemaining ?? 0) > 0 &&
+    (current.paceSecondsRemaining ?? 0) <= expressCloseSeconds
+  );
 }
 
 function hasStyleChainReachedCriticalWindow(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {

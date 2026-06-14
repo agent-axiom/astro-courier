@@ -290,6 +290,27 @@ describe("HUD audio events", () => {
     expect(deriveHudAudioEvents({ ...baseSnapshot, paceTier: "silver" }, { ...baseSnapshot, paceTier: "silver" })).toEqual([]);
   });
 
+  it("warns once when clean gold deliveries enter the closing express window", () => {
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, objectivePhase: "delivery", paceTier: "gold", paceSecondsRemaining: 4.4, cargoDamage: 0 },
+        { ...baseSnapshot, objectivePhase: "delivery", paceTier: "gold", paceSecondsRemaining: 3.8, cargoDamage: 0 }
+      )
+    ).toEqual(["express-close"]);
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, objectivePhase: "delivery", paceTier: "gold", paceSecondsRemaining: 3.8, cargoDamage: 0 },
+        { ...baseSnapshot, objectivePhase: "delivery", paceTier: "gold", paceSecondsRemaining: 3.2, cargoDamage: 0 }
+      )
+    ).toEqual([]);
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, objectivePhase: "delivery", paceTier: "gold", paceSecondsRemaining: 4.4, cargoDamage: 0.08 },
+        { ...baseSnapshot, objectivePhase: "delivery", paceTier: "gold", paceSecondsRemaining: 3.8, cargoDamage: 0.08 }
+      )
+    ).toEqual([]);
+  });
+
   it("warns when the ship enters a hazard", () => {
     expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, hazardDangerLevel: "inside" })).toEqual(["hazard-contact"]);
     expect(deriveHudAudioEvents({ ...baseSnapshot, hazardDangerLevel: "inside" }, { ...baseSnapshot, hazardDangerLevel: "inside" })).toEqual([]);

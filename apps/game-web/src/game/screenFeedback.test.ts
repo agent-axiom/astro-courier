@@ -168,6 +168,13 @@ describe("screen feedback", () => {
       intensity: "heavy",
       durationMs: 500
     });
+    expect(buildScreenFeedback(["express-close"])).toEqual({
+      label: "Express close",
+      value: "Dock now",
+      tone: "warning",
+      intensity: "medium",
+      durationMs: 400
+    });
     expect(buildScreenFeedback(["antimatter-armed"])).toEqual({
       label: "Drift armed",
       value: "No brake dock",

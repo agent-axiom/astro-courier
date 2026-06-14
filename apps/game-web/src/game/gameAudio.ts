@@ -59,6 +59,7 @@ const eventTones: Record<GameAudioEvent, { frequency: number; duration: number; 
   "comet-armed": { frequency: 1040, duration: 0.13, gain: 0.05 },
   "perfect-approach-ready": { frequency: 980, duration: 0.1, gain: 0.048 },
   "last-drop-armed": { frequency: 1020, duration: 0.14, gain: 0.052 },
+  "express-close": { frequency: 620, duration: 0.11, gain: 0.046 },
   "comet-reserve-tight": { frequency: 520, duration: 0.1, gain: 0.045 },
   "comet-reserve-lost": { frequency: 360, duration: 0.14, gain: 0.052 },
   "chain-critical": { frequency: 580, duration: 0.13, gain: 0.05 },
