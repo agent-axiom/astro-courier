@@ -5,6 +5,7 @@ import {
   buildContractBestRunTone,
   buildContractMasteryBadge,
   buildContractRouteMarkTarget,
+  buildContractRouteMarkBadge,
   buildContractBestRunLabel,
   buildRouteMarkLaunchCaption,
   buildLiveRouteMarkCue,
@@ -277,6 +278,31 @@ describe("current contract route mark target copy", () => {
     ).toEqual({
       label: "Next mark",
       value: "3/3 banked",
+      tone: "complete"
+    });
+  });
+});
+
+describe("contract card route mark badge copy", () => {
+  it("formats compact next-mark badges for contract cards", () => {
+    expect(buildContractRouteMarkBadge({ label: "Next mark", value: "Clear route", tone: "clear" })).toEqual({
+      label: "Mark",
+      value: "Clear",
+      tone: "clear"
+    });
+    expect(buildContractRouteMarkBadge({ label: "Next mark", value: "Bank comet", tone: "comet" })).toEqual({
+      label: "Mark",
+      value: "Comet",
+      tone: "comet"
+    });
+    expect(buildContractRouteMarkBadge({ label: "Next mark", value: "Capture ghost", tone: "ghost" })).toEqual({
+      label: "Mark",
+      value: "Ghost",
+      tone: "ghost"
+    });
+    expect(buildContractRouteMarkBadge({ label: "Next mark", value: "3/3 banked", tone: "complete" })).toEqual({
+      label: "Mark",
+      value: "Banked",
       tone: "complete"
     });
   });

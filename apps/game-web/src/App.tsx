@@ -29,6 +29,7 @@ import {
   buildContractMasteryBadge,
   buildContractBestRunLabel,
   buildContractBestRunTone,
+  buildContractRouteMarkBadge,
   buildLiveBestPace,
   buildContractRouteMarkTarget,
   buildLiveRouteMarkCue,
@@ -1467,6 +1468,7 @@ export function App() {
                 const contractBestRun = bestRunsByContract[contract.id];
                 const contractMasteryBadge = buildContractMasteryBadge(contractBestRun);
                 const contractMarks = buildRouteBoardContractMarks(contractBestRun);
+                const contractRouteMarkBadge = buildContractRouteMarkBadge(buildContractRouteMarkTarget(contractBestRun));
                 const contractRecommended = routeBoardTarget.contractId === contract.id;
                 const contractCargoRisk = buildCargoRiskReadout({
                   cargoKind: contract.cargoKind,
@@ -1534,6 +1536,12 @@ export function App() {
                         {contractMasteryBadge.value}
                       </em>
                       <em className={`contract-option-marks contract-option-marks-${contractMarks.tone}`}>{contractMarks.value}</em>
+                      <em
+                        className={`contract-option-route-mark contract-option-route-mark-${contractRouteMarkBadge.tone}`}
+                        aria-label={`${contractRouteMarkBadge.label}: ${contractRouteMarkBadge.value}`}
+                      >
+                        {contractRouteMarkBadge.value}
+                      </em>
                       {contractRecommendationBadge ? (
                         <em className={`contract-option-next contract-option-next-${routeBoardTarget.tone}`}>{contractRecommendationBadge}</em>
                       ) : null}

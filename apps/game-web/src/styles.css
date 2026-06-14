@@ -2868,6 +2868,30 @@ button {
   color: #bff7d8;
 }
 
+.contract-option-route-mark {
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.contract-option-route-mark-clear {
+  background: rgba(124, 225, 255, 0.14);
+  color: #c6f6ff;
+}
+
+.contract-option-route-mark-comet {
+  background: rgba(255, 209, 102, 0.18);
+  color: #ffe19a;
+}
+
+.contract-option-route-mark-ghost {
+  background: rgba(84, 241, 214, 0.15);
+  color: #c8fff6;
+}
+
+.contract-option-route-mark-complete {
+  background: rgba(142, 230, 184, 0.16);
+  color: #bff7d8;
+}
+
 .contract-option-next {
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
