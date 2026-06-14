@@ -132,6 +132,14 @@ export function buildBrakeControlPresentation(input: BrakeControlPresentationInp
     };
   }
 
+  if (isVolatileCargo(input.cargoKind)) {
+    return {
+      label: "Brake shock",
+      badge: "volatile",
+      tone: "stress"
+    };
+  }
+
   if (isBrakeSensitiveCargo(input.cargoKind)) {
     return {
       label: "Brake stress",
@@ -168,4 +176,8 @@ function round(value: number, digits: number): number {
 
 function isBrakeSensitiveCargo(cargoKind: string | undefined): boolean {
   return cargoKind === "unstable" || cargoKind === "volatile";
+}
+
+function isVolatileCargo(cargoKind: string | undefined): boolean {
+  return cargoKind === "volatile";
 }

@@ -142,6 +142,22 @@ describe("brake control presentation", () => {
     });
   });
 
+  it("calls out volatile brake shock separately from generic cargo stress", () => {
+    expect(
+      buildBrakeControlPresentation({
+        canBrake: true,
+        manualBrakeUsed: true,
+        objectivePhase: "delivery",
+        cargoDamage: 0,
+        cargoKind: "volatile"
+      })
+    ).toEqual({
+      label: "Brake shock",
+      badge: "volatile",
+      tone: "stress"
+    });
+  });
+
   it("keeps no-brake finesse above brake-sensitive stress while armed", () => {
     expect(
       buildBrakeControlPresentation({
