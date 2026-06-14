@@ -235,6 +235,12 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
       value: `${damagedCargo ? "Clear" : "Thread"} in ${formatSeconds(current.trajectoryRiskSeconds)}`,
       tone: "warning"
     });
+  } else if (hasClearedTrajectoryRisk(previous, current)) {
+    updates.push({
+      label: "Vector clear",
+      value: "Line recovered",
+      tone: "success"
+    });
   }
 
   return updates;
@@ -330,6 +336,13 @@ function hasSpentNoBrakeFinesse(previous: RunFeedSnapshot, current: RunFeedSnaps
     (current.cargoDamage ?? 0) <= cleanCargoDamageLimit &&
     previous.manualBrakeUsed === false &&
     current.manualBrakeUsed === true
+  );
+}
+
+function hasClearedTrajectoryRisk(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
+  return (
+    (previous.trajectoryRiskLevel === "inside" || previous.trajectoryRiskLevel === "near") &&
+    current.trajectoryRiskLevel === undefined
   );
 }
 

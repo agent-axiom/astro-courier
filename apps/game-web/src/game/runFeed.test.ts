@@ -147,6 +147,33 @@ describe("run action feed", () => {
     ]);
   });
 
+  it("announces when the projected trajectory clears hazard space", () => {
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, trajectoryRiskLevel: "inside", trajectoryRiskSeconds: 1.2 },
+        { ...baseSnapshot, trajectoryRiskLevel: undefined, trajectoryRiskSeconds: undefined }
+      )
+    ).toEqual([
+      {
+        label: "Vector clear",
+        value: "Line recovered",
+        tone: "success"
+      }
+    ]);
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, trajectoryRiskLevel: "near", trajectoryRiskSeconds: 1.8 },
+        { ...baseSnapshot, trajectoryRiskLevel: undefined, trajectoryRiskSeconds: undefined }
+      )
+    ).toEqual([
+      {
+        label: "Vector clear",
+        value: "Line recovered",
+        tone: "success"
+      }
+    ]);
+  });
+
   it("announces when a launch burst window opens after pickup", () => {
     expect(deriveRunFeedUpdates(baseSnapshot, { ...baseSnapshot, launchBurstSecondsRemaining: 2.4 })).toEqual([
       {
