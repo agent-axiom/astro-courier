@@ -3370,6 +3370,57 @@ button {
   box-shadow: 0 0 24px rgba(124, 225, 255, 0.1);
 }
 
+.campaign-milestone-receipt {
+  display: grid;
+  grid-template-columns: 18px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 209, 102, 0.32);
+  border-radius: 7px;
+  background: linear-gradient(90deg, rgba(255, 209, 102, 0.16), rgba(142, 230, 184, 0.1));
+  color: #fff1c7;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-align: left;
+}
+
+.campaign-milestone-receipt span,
+.campaign-milestone-receipt strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.campaign-milestone-receipt span {
+  color: rgba(255, 255, 255, 0.76);
+  text-transform: uppercase;
+}
+
+.campaign-milestone-receipt strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.campaign-milestone-quarter {
+  background: linear-gradient(90deg, rgba(142, 230, 184, 0.15), rgba(124, 225, 255, 0.09));
+  border-color: rgba(142, 230, 184, 0.32);
+  color: #bff7d8;
+}
+
+.campaign-milestone-half {
+  background: linear-gradient(90deg, rgba(124, 225, 255, 0.16), rgba(255, 209, 102, 0.1));
+  border-color: rgba(124, 225, 255, 0.34);
+  color: #d8fbff;
+}
+
+.campaign-milestone-mastery,
+.campaign-milestone-complete {
+  box-shadow: 0 0 26px rgba(255, 209, 102, 0.12);
+}
+
 .run-identity-receipt {
   display: grid;
   grid-template-columns: 18px auto 1fr;

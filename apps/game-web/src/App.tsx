@@ -31,6 +31,7 @@ import {
   buildContractBestRunTone,
   buildLiveBestPace,
   buildRouteBoardCampaignProgress,
+  buildRouteBoardCampaignMilestoneReceipt,
   buildRouteBoardContractMarks,
   buildRouteBoardMastery,
   buildRouteBoardRecommendationBadge,
@@ -41,6 +42,7 @@ import {
   getBestRun,
   recordBestRun,
   type BestRun,
+  type RouteBoardCampaignMilestoneReceipt,
   type RouteMarkReceipt
 } from "./game/bestRun";
 import { GameShell, type HudState } from "./game/GameShell";
@@ -215,6 +217,7 @@ export function App() {
   const [bestRunsByContract, setBestRunsByContract] = useState<Record<string, BestRun | undefined>>({});
   const [newBest, setNewBest] = useState(false);
   const [routeMarkReceipt, setRouteMarkReceipt] = useState<RouteMarkReceipt | undefined>(undefined);
+  const [campaignMilestoneReceipt, setCampaignMilestoneReceipt] = useState<RouteBoardCampaignMilestoneReceipt | undefined>(undefined);
   const [dailyProgress, setDailyProgress] = useState<DailyDispatchProgress | undefined>(() => {
     const storage = getBestRunStorage();
     return storage ? getDailyDispatchProgress(storage) : undefined;
@@ -284,6 +287,7 @@ export function App() {
     setBestRun(storage ? getBestRun(storage, hud.contractId) : undefined);
     setNewBest(false);
     setRouteMarkReceipt(undefined);
+    setCampaignMilestoneReceipt(undefined);
     recordedRunRef.current = null;
     previousRunFeedSnapshotRef.current = undefined;
     nextRunFeedIdRef.current = 1;
@@ -297,11 +301,7 @@ export function App() {
       return;
     }
 
-    const nextBestRuns: Record<string, BestRun | undefined> = {};
-    for (const contract of hud.contractOptions) {
-      nextBestRuns[contract.id] = getBestRun(storage, contract.id);
-    }
-    setBestRunsByContract(nextBestRuns);
+    setBestRunsByContract(readBestRunsByContract(storage, hud.contractOptions));
   }, [hud.contractOptions]);
 
   useEffect(() => {
@@ -375,6 +375,7 @@ export function App() {
         recordedRunRef.current = null;
         setNewBest(false);
         setRouteMarkReceipt(undefined);
+        setCampaignMilestoneReceipt(undefined);
       }
       return;
     }
@@ -388,9 +389,11 @@ export function App() {
     const storage = getBestRunStorage();
     if (!storage) {
       setRouteMarkReceipt(undefined);
+      setCampaignMilestoneReceipt(undefined);
       setDailyProgressReceipt(undefined);
       return;
     }
+    const previousBestRunsByContract = readBestRunsByContract(storage, hud.contractOptions);
     const previousBestRun = getBestRun(storage, hud.contractId);
     const result = recordBestRun(storage, hud.contractId, {
       score: hud.score,
@@ -398,12 +401,16 @@ export function App() {
       medal: hud.medal,
       ghostTrail: hud.runTrail
     });
-    setRouteMarkReceipt(buildRouteMarkReceipt(previousBestRun, result.best));
-    setBestRun(result.best);
-    setBestRunsByContract((current) => ({
-      ...current,
+    const nextBestRunsByContract = {
+      ...previousBestRunsByContract,
       [hud.contractId]: result.best
-    }));
+    };
+    setRouteMarkReceipt(buildRouteMarkReceipt(previousBestRun, result.best));
+    setCampaignMilestoneReceipt(
+      buildRouteBoardCampaignMilestoneReceipt(hud.contractOptions, previousBestRunsByContract, nextBestRunsByContract)
+    );
+    setBestRun(result.best);
+    setBestRunsByContract(nextBestRunsByContract);
     setNewBest(result.isNewBest);
     const completedDailyDispatch = buildDailyDispatch({ contracts: hud.contractOptions, now: new Date() });
     if (completedDailyDispatch?.contractId === hud.contractId) {
@@ -780,6 +787,7 @@ export function App() {
     setRunFeed([]);
     setNewBest(false);
     setRouteMarkReceipt(undefined);
+    setCampaignMilestoneReceipt(undefined);
     setDailyProgressReceipt(undefined);
     if (screenFeedbackTimerRef.current) {
       clearTimeout(screenFeedbackTimerRef.current);
@@ -1588,6 +1596,16 @@ export function App() {
               <strong>{routeMarkReceipt.value}</strong>
             </div>
           ) : null}
+          {hud.status === "delivered" && campaignMilestoneReceipt ? (
+            <div
+              className={`campaign-milestone-receipt campaign-milestone-${campaignMilestoneReceipt.tone}`}
+              aria-label={`${campaignMilestoneReceipt.label}: ${campaignMilestoneReceipt.value}`}
+            >
+              {campaignMilestoneReceipt.tone === "complete" ? <Trophy size={18} /> : <Star size={18} />}
+              <span>{campaignMilestoneReceipt.label}</span>
+              <strong>{campaignMilestoneReceipt.value}</strong>
+            </div>
+          ) : null}
           {ghostTrailReceipt ? (
             <div
               className={`ghost-trail-receipt ghost-trail-${ghostTrailReceipt.tone}`}
@@ -1861,4 +1879,15 @@ function getBestRunStorage(): Pick<Storage, "getItem" | "setItem"> | undefined {
   } catch {
     return undefined;
   }
+}
+
+function readBestRunsByContract(
+  storage: Pick<Storage, "getItem" | "setItem">,
+  contracts: HudState["contractOptions"]
+): Record<string, BestRun | undefined> {
+  const bestRuns: Record<string, BestRun | undefined> = {};
+  for (const contract of contracts) {
+    bestRuns[contract.id] = getBestRun(storage, contract.id);
+  }
+  return bestRuns;
 }

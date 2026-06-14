@@ -75,6 +75,12 @@ export type RouteBoardCampaignProgress = {
   progress: number;
 };
 
+export type RouteBoardCampaignMilestoneReceipt = {
+  label: "Campaign milestone";
+  value: "25% route board" | "50% route board" | "75% route board" | "Campaign mastered";
+  tone: "quarter" | "half" | "mastery" | "complete";
+};
+
 export type RouteBoardTarget = {
   label: "Next clear" | "Comet chase" | "Ghost chase" | "Board status";
   value: string;
@@ -294,6 +300,28 @@ export function buildRouteBoardCampaignProgress(
   };
 }
 
+export function buildRouteBoardCampaignMilestoneReceipt(
+  contracts: readonly RouteBoardContract[],
+  previousBestRunsByContract: Readonly<Record<string, BestRun | undefined>>,
+  nextBestRunsByContract: Readonly<Record<string, BestRun | undefined>>
+): RouteBoardCampaignMilestoneReceipt | undefined {
+  const totalMarks = contracts.length * 3;
+  if (totalMarks === 0) {
+    return undefined;
+  }
+
+  const previousMarks = contracts.reduce((total, contract) => total + routeMarks(previousBestRunsByContract[contract.id]), 0);
+  const nextMarks = contracts.reduce((total, contract) => total + routeMarks(nextBestRunsByContract[contract.id]), 0);
+  if (nextMarks <= previousMarks) {
+    return undefined;
+  }
+
+  const previousProgress = previousMarks / totalMarks;
+  const nextProgress = nextMarks / totalMarks;
+  const milestone = campaignMilestones.find((entry) => previousProgress < entry.progress && nextProgress >= entry.progress);
+  return milestone ? { label: milestone.label, value: milestone.value, tone: milestone.tone } : undefined;
+}
+
 export function buildRouteBoardTarget(
   contracts: readonly RouteBoardTargetContract[],
   bestRunsByContract: Readonly<Record<string, BestRun | undefined>>
@@ -502,6 +530,13 @@ function routeMarks(bestRun: BestRun | undefined): number {
 
   return 1 + (bestRun.medal === "comet" ? 1 : 0) + (hasReplayTrail(bestRun) ? 1 : 0);
 }
+
+const campaignMilestones: readonly (RouteBoardCampaignMilestoneReceipt & { progress: number })[] = [
+  { progress: 1, label: "Campaign milestone", value: "Campaign mastered", tone: "complete" },
+  { progress: 0.75, label: "Campaign milestone", value: "75% route board", tone: "mastery" },
+  { progress: 0.5, label: "Campaign milestone", value: "50% route board", tone: "half" },
+  { progress: 0.25, label: "Campaign milestone", value: "25% route board", tone: "quarter" }
+];
 
 function progressTone(count: number, total: number): RouteBoardProgress["tone"] {
   if (total > 0 && count === total) {

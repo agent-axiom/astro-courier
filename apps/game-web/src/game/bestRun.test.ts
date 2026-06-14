@@ -8,6 +8,7 @@ import {
   buildLiveBestPace,
   buildRouteBoardContractMarks,
   buildRouteBoardCampaignProgress,
+  buildRouteBoardCampaignMilestoneReceipt,
   buildRouteBoardMastery,
   buildRouteBoardRecommendationBadge,
   buildRouteBoardProgress,
@@ -438,6 +439,164 @@ describe("route board campaign progress copy", () => {
       tone: "complete",
       progress: 1
     });
+  });
+});
+
+describe("route board campaign milestone receipt copy", () => {
+  const contracts = [{ id: "first-light-delivery" }, { id: "return-leg" }, { id: "asteroid-sprint" }, { id: "gravity-slingshot" }];
+
+  it("celebrates the first quarter campaign milestone when route marks cross 25 percent", () => {
+    expect(
+      buildRouteBoardCampaignMilestoneReceipt(
+        contracts,
+        {
+          "first-light-delivery": { score: 1800, elapsedSeconds: 34.2, medal: "gold" },
+          "return-leg": { score: 1900, elapsedSeconds: 32.1, medal: "gold" }
+        },
+        {
+          "first-light-delivery": { score: 2600, elapsedSeconds: 27.1, medal: "comet" },
+          "return-leg": { score: 1900, elapsedSeconds: 32.1, medal: "gold" }
+        }
+      )
+    ).toEqual({
+      label: "Campaign milestone",
+      value: "25% route board",
+      tone: "quarter"
+    });
+  });
+
+  it("returns the highest crossed milestone when a run jumps multiple thresholds", () => {
+    expect(
+      buildRouteBoardCampaignMilestoneReceipt(
+        contracts,
+        {
+          "first-light-delivery": { score: 1800, elapsedSeconds: 34.2, medal: "gold" },
+          "return-leg": { score: 1900, elapsedSeconds: 32.1, medal: "gold" }
+        },
+        {
+          "first-light-delivery": {
+            score: 3200,
+            elapsedSeconds: 22.4,
+            medal: "comet",
+            ghostTrail: [
+              { x: 0, y: 0 },
+              { x: 12, y: 8 }
+            ]
+          },
+          "return-leg": {
+            score: 3100,
+            elapsedSeconds: 23.1,
+            medal: "comet",
+            ghostTrail: [
+              { x: 0, y: 0 },
+              { x: 18, y: -6 }
+            ]
+          },
+          "asteroid-sprint": { score: 2400, elapsedSeconds: 35.5, medal: "gold" }
+        }
+      )
+    ).toEqual({
+      label: "Campaign milestone",
+      value: "50% route board",
+      tone: "half"
+    });
+  });
+
+  it("celebrates full campaign mastery", () => {
+    expect(
+      buildRouteBoardCampaignMilestoneReceipt(
+        contracts,
+        {
+          "first-light-delivery": {
+            score: 3200,
+            elapsedSeconds: 22.4,
+            medal: "comet",
+            ghostTrail: [
+              { x: 0, y: 0 },
+              { x: 12, y: 8 }
+            ]
+          },
+          "return-leg": {
+            score: 3100,
+            elapsedSeconds: 23.1,
+            medal: "comet",
+            ghostTrail: [
+              { x: 0, y: 0 },
+              { x: 18, y: -6 }
+            ]
+          },
+          "asteroid-sprint": {
+            score: 3500,
+            elapsedSeconds: 21.8,
+            medal: "comet",
+            ghostTrail: [
+              { x: 0, y: 0 },
+              { x: 20, y: -10 }
+            ]
+          },
+          "gravity-slingshot": { score: 3300, elapsedSeconds: 20.9, medal: "comet" }
+        },
+        {
+          "first-light-delivery": {
+            score: 3200,
+            elapsedSeconds: 22.4,
+            medal: "comet",
+            ghostTrail: [
+              { x: 0, y: 0 },
+              { x: 12, y: 8 }
+            ]
+          },
+          "return-leg": {
+            score: 3100,
+            elapsedSeconds: 23.1,
+            medal: "comet",
+            ghostTrail: [
+              { x: 0, y: 0 },
+              { x: 18, y: -6 }
+            ]
+          },
+          "asteroid-sprint": {
+            score: 3500,
+            elapsedSeconds: 21.8,
+            medal: "comet",
+            ghostTrail: [
+              { x: 0, y: 0 },
+              { x: 20, y: -10 }
+            ]
+          },
+          "gravity-slingshot": {
+            score: 3400,
+            elapsedSeconds: 20.1,
+            medal: "comet",
+            ghostTrail: [
+              { x: 0, y: 0 },
+              { x: 16, y: 4 }
+            ]
+          }
+        }
+      )
+    ).toEqual({
+      label: "Campaign milestone",
+      value: "Campaign mastered",
+      tone: "complete"
+    });
+  });
+
+  it("stays hidden when no campaign milestone is crossed", () => {
+    expect(
+      buildRouteBoardCampaignMilestoneReceipt(
+        contracts,
+        {
+          "first-light-delivery": { score: 2600, elapsedSeconds: 27.1, medal: "comet" },
+          "return-leg": { score: 1900, elapsedSeconds: 32.1, medal: "gold" }
+        },
+        {
+          "first-light-delivery": { score: 2600, elapsedSeconds: 27.1, medal: "comet" },
+          "return-leg": { score: 1900, elapsedSeconds: 32.1, medal: "gold" },
+          "asteroid-sprint": { score: 2400, elapsedSeconds: 35.5, medal: "gold" }
+        }
+      )
+    ).toBeUndefined();
   });
 });
 
