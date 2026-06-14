@@ -1,4 +1,5 @@
 import type { CrashReason, RunGrade, RunMedal, RunStatus, ScoreBreakdown } from "@astro-courier/shared";
+import { COMET_RESERVE_MIN_RATIO } from "./comet";
 
 export type ResultStatsInput = {
   score: number;
@@ -74,6 +75,9 @@ const styleMilestones = new Set([
   "Last Drop",
   "No Brake Finesse"
 ]);
+const cleanCargoDamageLimit = 0.02;
+const cometReserveNearMissRatio = 0.6;
+const perfectLandingBonus = 300;
 
 export function buildResultStats(input: ResultStatsInput): ResultStat[] {
   return [
@@ -138,6 +142,11 @@ export function buildRunIdentityReceipt(input: RunIdentityReceiptInput): RunIden
     };
   }
 
+  const cometNearMissIdentity = buildCometNearMissIdentity(input);
+  if (cometNearMissIdentity) {
+    return cometNearMissIdentity;
+  }
+
   if (input.lastMilestone === "Last Drop") {
     return {
       label: "Run identity",
@@ -165,7 +174,7 @@ export function buildRunIdentityReceipt(input: RunIdentityReceiptInput): RunIden
     };
   }
 
-  if (input.cargoDamage <= 0.02) {
+  if (input.cargoDamage <= cleanCargoDamageLimit) {
     return {
       label: "Run identity",
       value: "Clean cargo clear",
@@ -178,6 +187,37 @@ export function buildRunIdentityReceipt(input: RunIdentityReceiptInput): RunIden
     value: "Delivery banked",
     tone: "clean"
   };
+}
+
+function buildCometNearMissIdentity(input: RunIdentityReceiptInput): RunIdentityReceipt | undefined {
+  if (
+    input.status !== "delivered" ||
+    input.medal !== "gold" ||
+    input.lastMilestone !== "Express Finish" ||
+    input.cargoDamage > cleanCargoDamageLimit ||
+    input.maxFuel <= 0
+  ) {
+    return undefined;
+  }
+
+  const fuelRatio = input.fuel / input.maxFuel;
+  if (fuelRatio >= cometReserveNearMissRatio && fuelRatio < COMET_RESERVE_MIN_RATIO) {
+    return {
+      label: "Run identity",
+      value: "Comet near-miss / reserve",
+      tone: "elite"
+    };
+  }
+
+  if (fuelRatio >= COMET_RESERVE_MIN_RATIO && input.scoreBreakdown.landingBonus < perfectLandingBonus) {
+    return {
+      label: "Run identity",
+      value: "Comet near-miss / dock",
+      tone: "elite"
+    };
+  }
+
+  return undefined;
 }
 
 export function buildReplayReceipt(replayChecksum?: string): ReplayReceipt | undefined {

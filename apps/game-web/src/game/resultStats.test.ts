@@ -168,4 +168,40 @@ describe("result stat formatting", () => {
       tone: "failure"
     });
   });
+
+  it("calls out gold express comet near-misses as elite result identities", () => {
+    expect(
+      buildRunIdentityReceipt({
+        status: "delivered",
+        lastMilestone: "Express Finish",
+        medal: "gold",
+        grade: "A",
+        cargoDamage: 0,
+        fuel: 72,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 405, landingBonus: 300 }
+      })
+    ).toEqual({
+      label: "Run identity",
+      value: "Comet near-miss / reserve",
+      tone: "elite"
+    });
+
+    expect(
+      buildRunIdentityReceipt({
+        status: "delivered",
+        lastMilestone: "Express Finish",
+        medal: "gold",
+        grade: "A",
+        cargoDamage: 0,
+        fuel: 82,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 405, landingBonus: 120 }
+      })
+    ).toEqual({
+      label: "Run identity",
+      value: "Comet near-miss / dock",
+      tone: "elite"
+    });
+  });
 });
