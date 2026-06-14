@@ -4015,6 +4015,7 @@ button {
   width: 100%;
   min-height: 42px;
   padding: 9px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 7px;
   font-size: 0.82rem;
   font-weight: 850;
@@ -4039,23 +4040,29 @@ button {
 }
 
 .result-coach-danger {
+  border-color: rgba(255, 111, 145, 0.36);
   background: rgba(255, 111, 145, 0.16);
   color: #ffadc1;
+  box-shadow: 0 0 24px rgba(255, 111, 145, 0.1);
 }
 
 .result-coach-warning {
+  border-color: rgba(255, 209, 102, 0.32);
   background: rgba(255, 209, 102, 0.16);
   color: #ffe19a;
 }
 
 .result-coach-opportunity {
+  border-color: rgba(124, 225, 255, 0.3);
   background: rgba(124, 225, 255, 0.14);
   color: #c6f6ff;
 }
 
 .result-coach-success {
+  border-color: rgba(142, 230, 184, 0.34);
   background: rgba(142, 230, 184, 0.16);
   color: #bff7d8;
+  box-shadow: 0 0 24px rgba(142, 230, 184, 0.1);
 }
 
 .retry-target {
