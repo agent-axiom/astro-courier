@@ -426,6 +426,42 @@ describe("result coach", () => {
     });
   });
 
+  it("coaches assist and boost burn runs toward repeating active throttle timing", () => {
+    expect(
+      buildResultCoach({
+        status: "delivered",
+        lastMilestone: "Assist Burn",
+        medal: "silver",
+        grade: "B",
+        cargoDamage: 0,
+        fuel: 44,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 190 }
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Repeat the assist burn",
+      tone: "success"
+    });
+
+    expect(
+      buildResultCoach({
+        status: "delivered",
+        lastMilestone: "Boost Burn",
+        medal: "silver",
+        grade: "B",
+        cargoDamage: 0,
+        fuel: 44,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 210 }
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Repeat the boost burn",
+      tone: "success"
+    });
+  });
+
   it("coaches quick pickup runs toward repeating the fast load", () => {
     expect(
       buildResultCoach({

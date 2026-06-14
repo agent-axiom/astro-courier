@@ -251,6 +251,22 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
     };
   }
 
+  if (input.lastMilestone === "Assist Burn") {
+    return {
+      label: "Next run",
+      value: "Repeat the assist burn",
+      tone: "success"
+    };
+  }
+
+  if (input.lastMilestone === "Boost Burn") {
+    return {
+      label: "Next run",
+      value: "Repeat the boost burn",
+      tone: "success"
+    };
+  }
+
   if (input.lastMilestone === "Quick Pickup") {
     return {
       label: "Next run",
