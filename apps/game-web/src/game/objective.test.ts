@@ -586,7 +586,7 @@ describe("tactical cue", () => {
     });
   });
 
-  it("does not warn for comet reserve after the reserve floor is already gone", () => {
+  it("calls out lost comet reserve with the fuel shortfall", () => {
     expect(
       buildTacticalCue({
         status: "flying",
@@ -597,7 +597,11 @@ describe("tactical cue", () => {
         fuel: 74,
         maxFuel: 100
       })
-    ).toBeUndefined();
+    ).toEqual({
+      label: "Tactical cue",
+      value: "Comet reserve lost / +1% fuel",
+      tone: "urgent"
+    });
   });
 
   it("surfaces eco drift when clean delivery is still fuel-efficient outside express pace", () => {

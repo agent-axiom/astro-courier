@@ -11,7 +11,7 @@ import {
   PERFECT_APPROACH_STYLE_BONUS
 } from "@astro-courier/simulation";
 import type { LandingGuidanceStatus, ObjectivePhase, RunStatus } from "@astro-courier/shared";
-import { COMET_RESERVE_MIN_RATIO, COMET_RESERVE_WARNING_RATIO } from "./comet";
+import { COMET_RESERVE_MIN_RATIO, COMET_RESERVE_WARNING_RATIO, formatCometReserveShortfallFuelGoal } from "./comet";
 import type { ContractPaceTier } from "./pace";
 
 const FUEL_CRITICAL_RATIO = 0.15;
@@ -394,6 +394,14 @@ export function buildTacticalCue(input: TacticalCueInput): TacticalCue | undefin
     };
   }
 
+  if (hasLostCometReserve(input)) {
+    return {
+      label: "Tactical cue",
+      value: `Comet reserve lost / ${formatCometReserveShortfallFuelGoal(fuelReserve(input))}`,
+      tone: "urgent"
+    };
+  }
+
   if (isRecoverableDamagedDelivery(input)) {
     return {
       label: "Tactical cue",
@@ -471,8 +479,16 @@ function isTightCometReserve(input: TacticalCueInput): boolean {
   );
 }
 
+function hasLostCometReserve(input: TacticalCueInput): boolean {
+  return hasFuelReserve(input) && isCleanGoldDelivery(input) && fuelReserve(input) < COMET_RESERVE_MIN_RATIO;
+}
+
 function fuelReserve(input: TacticalCueInput): number {
   return input.maxFuel !== undefined && input.maxFuel > 0 && input.fuel !== undefined ? input.fuel / input.maxFuel : 0;
+}
+
+function hasFuelReserve(input: TacticalCueInput): boolean {
+  return input.maxFuel !== undefined && input.maxFuel > 0 && input.fuel !== undefined;
 }
 
 function isFuelCritical(input: TacticalCueInput): boolean {
