@@ -902,7 +902,17 @@ describe("result retry action briefing", () => {
       )
     ).toEqual({
       label: "Next run",
-      value: "One condition from comet",
+      value: "Coast +3% fuel",
+      tone: "opportunity"
+    });
+    expect(
+      buildRetryActionBriefing(
+        { label: "Chase Comet", tone: "opportunity", mode: "restart-run" },
+        { label: "Retry target", value: "Perfect dock for comet", tone: "opportunity" }
+      )
+    ).toEqual({
+      label: "Next run",
+      value: "Perfect final dock",
       tone: "opportunity"
     });
   });

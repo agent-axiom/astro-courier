@@ -303,6 +303,23 @@ export function buildRetryActionBriefing(action: ResultRetryAction, target: Retr
     };
   }
   if (action.label === "Chase Comet") {
+    const fuelGoal = extractCometFuelGoal(target.value);
+    if (fuelGoal) {
+      return {
+        label: "Next run",
+        value: `Coast ${fuelGoal}`,
+        tone: "opportunity"
+      };
+    }
+
+    if (target.value === "Perfect dock for comet") {
+      return {
+        label: "Next run",
+        value: "Perfect final dock",
+        tone: "opportunity"
+      };
+    }
+
     return {
       label: "Next run",
       value: "One condition from comet",
@@ -417,4 +434,9 @@ function buildCometNearMissTarget(input: RetryTargetInput): RetryTarget | undefi
 
 function isCometRetryTarget(value: string): boolean {
   return value === "Perfect dock for comet" || (value.startsWith("Bank +") && value.endsWith("% fuel for comet"));
+}
+
+function extractCometFuelGoal(value: string): `+${number}% fuel` | undefined {
+  const match = /^Bank (\+\d+% fuel) for comet$/.exec(value);
+  return match ? (match[1] as `+${number}% fuel`) : undefined;
 }
