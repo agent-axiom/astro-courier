@@ -233,6 +233,19 @@ describe("GameShell lifecycle", () => {
         medalTimes: { bronze: 64, silver: 38, gold: 22 }
       },
       {
+        id: "antimatter-drift",
+        title: "Antimatter Drift",
+        briefing: "Carry an unstable antimatter vial on a lean tank. Brake taps rattle the containment, so coast the arc and dock clean.",
+        riskLabel: "Unstable Cargo",
+        rewardLabel: "Brake discipline",
+        pickupLabel: "Luma North Pad",
+        destinationLabel: "Tea Station Dock A",
+        cargoName: "Unstable Antimatter Vial",
+        cargoKind: "unstable",
+        cargoFragility: 0.95,
+        medalTimes: { bronze: 78, silver: 46, gold: 28 }
+      },
+      {
         id: "last-drop-run",
         title: "Last Drop Run",
         briefing: "Carry midnight medicine on a lean tank. Load cleanly, coast hard, and dock with just enough fuel to make the dispatcher smile.",

@@ -14,6 +14,7 @@ describe("content schemas", () => {
       "asteroid-sprint",
       "gravity-slingshot",
       "chain-relay",
+      "antimatter-drift",
       "last-drop-run"
     ]);
     expect(parsed.contracts.find((contract) => contract.id === "asteroid-sprint")?.briefing ?? "").toContain("asteroid");
@@ -42,6 +43,19 @@ describe("content schemas", () => {
       hazardSeverityMultiplier: 1.3,
       medalTimes: { bronze: 64, silver: 38, gold: 22 }
     });
+    expect(parsed.contracts.find((contract) => contract.id === "antimatter-drift")).toMatchObject({
+      title: "Antimatter Drift",
+      riskLabel: "Unstable Cargo",
+      rewardLabel: "Brake discipline",
+      cargoId: "unstable-antimatter-vial",
+      shipStart: {
+        position: [180, 20],
+        velocity: [0, 18],
+        rotation: 1.5707963267948966,
+        fuel: 72
+      },
+      medalTimes: { bronze: 78, silver: 46, gold: 28 }
+    });
     expect(parsed.contracts.find((contract) => contract.id === "last-drop-run")).toMatchObject({
       title: "Last Drop Run",
       riskLabel: "Low Fuel",
@@ -64,6 +78,11 @@ describe("content schemas", () => {
       name: "Midnight Medicine",
       kind: "time-sensitive",
       fragility: 0.9
+    });
+    expect(parsed.cargo.find((cargo) => cargo.id === "unstable-antimatter-vial")).toMatchObject({
+      name: "Unstable Antimatter Vial",
+      kind: "unstable",
+      fragility: 0.95
     });
     expect(parsed.contracts.find((contract) => contract.id === "return-leg")?.shipStart?.position).toEqual([360, -140]);
     expect(parsed.planets[0]?.landingPads[0]?.allowedApproachSpeed).toBeGreaterThan(0);

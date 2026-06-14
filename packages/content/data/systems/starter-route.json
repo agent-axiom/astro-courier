@@ -149,6 +149,27 @@
       }
     },
     {
+      "id": "antimatter-drift",
+      "title": "Antimatter Drift",
+      "briefing": "Carry an unstable antimatter vial on a lean tank. Brake taps rattle the containment, so coast the arc and dock clean.",
+      "riskLabel": "Unstable Cargo",
+      "rewardLabel": "Brake discipline",
+      "shipStart": {
+        "position": [180, 20],
+        "velocity": [0, 18],
+        "rotation": 1.5707963267948966,
+        "fuel": 72
+      },
+      "pickupId": "north-pad",
+      "destinationId": "dock-a",
+      "cargoId": "unstable-antimatter-vial",
+      "medalTimes": {
+        "bronze": 78,
+        "silver": 46,
+        "gold": 28
+      }
+    },
+    {
       "id": "last-drop-run",
       "title": "Last Drop Run",
       "briefing": "Carry midnight medicine on a lean tank. Load cleanly, coast hard, and dock with just enough fuel to make the dispatcher smile.",
@@ -188,6 +209,12 @@
       "name": "Midnight Medicine",
       "kind": "time-sensitive",
       "fragility": 0.9
+    },
+    {
+      "id": "unstable-antimatter-vial",
+      "name": "Unstable Antimatter Vial",
+      "kind": "unstable",
+      "fragility": 0.95
     }
   ]
 }
