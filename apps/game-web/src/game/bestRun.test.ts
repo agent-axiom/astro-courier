@@ -13,6 +13,7 @@ import {
   buildRouteBoardProgress,
   buildRouteBoardSelectionAction,
   buildRouteBoardTarget,
+  buildRouteMarkReceipt,
   getBestRun,
   recordBestRun
 } from "./bestRun";
@@ -74,6 +75,32 @@ describe("personal best run storage", () => {
         { x: 420, y: -140 }
       ]
     });
+  });
+
+  it("upgrades an exact personal best when the replay trail is newly captured", () => {
+    const storage = new MemoryStorage();
+
+    recordBestRun(storage, "starter", {
+      score: 1200,
+      elapsedSeconds: 42.4,
+      medal: "silver"
+    });
+
+    const result = recordBestRun(storage, "starter", {
+      score: 1200,
+      elapsedSeconds: 42.4,
+      medal: "silver",
+      ghostTrail: [
+        { x: 180, y: 20 },
+        { x: 220, y: -12 }
+      ]
+    });
+
+    expect(result.isNewBest).toBe(true);
+    expect(getBestRun(storage, "starter")?.ghostTrail).toEqual([
+      { x: 180, y: 20 },
+      { x: 220, y: -12 }
+    ]);
   });
 });
 
@@ -203,6 +230,83 @@ describe("contract option route marks copy", () => {
       label: "Marks",
       value: "3/3",
       tone: "complete"
+    });
+  });
+});
+
+describe("route mark result receipt copy", () => {
+  it("celebrates the first clear mark earned on a route", () => {
+    expect(buildRouteMarkReceipt(undefined, { score: 1800, elapsedSeconds: 34.2, medal: "gold" })).toEqual({
+      label: "Route mark",
+      value: "Clear mark banked",
+      tone: "clear"
+    });
+  });
+
+  it("celebrates the highest newly earned mark when one run adds multiple marks", () => {
+    expect(
+      buildRouteMarkReceipt(undefined, {
+        score: 3200,
+        elapsedSeconds: 22.4,
+        medal: "comet",
+        ghostTrail: [
+          { x: 0, y: 0 },
+          { x: 12, y: 8 }
+        ]
+      })
+    ).toEqual({
+      label: "Route mark",
+      value: "Ghost mark banked",
+      tone: "ghost"
+    });
+  });
+
+  it("stays hidden when the new personal best does not add a route mark", () => {
+    expect(
+      buildRouteMarkReceipt(
+        {
+          score: 2200,
+          elapsedSeconds: 28.4,
+          medal: "gold"
+        },
+        {
+          score: 2500,
+          elapsedSeconds: 27.1,
+          medal: "gold"
+        }
+      )
+    ).toBeUndefined();
+  });
+
+  it("celebrates comet and ghost upgrades separately", () => {
+    expect(
+      buildRouteMarkReceipt(
+        { score: 2200, elapsedSeconds: 28.4, medal: "gold" },
+        { score: 3100, elapsedSeconds: 24.1, medal: "comet" }
+      )
+    ).toEqual({
+      label: "Route mark",
+      value: "Comet mark banked",
+      tone: "comet"
+    });
+
+    expect(
+      buildRouteMarkReceipt(
+        { score: 3100, elapsedSeconds: 24.1, medal: "comet" },
+        {
+          score: 3300,
+          elapsedSeconds: 22.7,
+          medal: "comet",
+          ghostTrail: [
+            { x: 0, y: 0 },
+            { x: 18, y: -6 }
+          ]
+        }
+      )
+    ).toEqual({
+      label: "Route mark",
+      value: "Ghost mark banked",
+      tone: "ghost"
     });
   });
 });

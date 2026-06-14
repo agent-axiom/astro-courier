@@ -37,9 +37,11 @@ import {
   buildRouteBoardProgress,
   buildRouteBoardSelectionAction,
   buildRouteBoardTarget,
+  buildRouteMarkReceipt,
   getBestRun,
   recordBestRun,
-  type BestRun
+  type BestRun,
+  type RouteMarkReceipt
 } from "./game/bestRun";
 import { GameShell, type HudState } from "./game/GameShell";
 import { formatBearingGuidance } from "./game/bearing";
@@ -212,6 +214,7 @@ export function App() {
   });
   const [bestRunsByContract, setBestRunsByContract] = useState<Record<string, BestRun | undefined>>({});
   const [newBest, setNewBest] = useState(false);
+  const [routeMarkReceipt, setRouteMarkReceipt] = useState<RouteMarkReceipt | undefined>(undefined);
   const [dailyProgress, setDailyProgress] = useState<DailyDispatchProgress | undefined>(() => {
     const storage = getBestRunStorage();
     return storage ? getDailyDispatchProgress(storage) : undefined;
@@ -280,6 +283,7 @@ export function App() {
     const storage = getBestRunStorage();
     setBestRun(storage ? getBestRun(storage, hud.contractId) : undefined);
     setNewBest(false);
+    setRouteMarkReceipt(undefined);
     recordedRunRef.current = null;
     previousRunFeedSnapshotRef.current = undefined;
     nextRunFeedIdRef.current = 1;
@@ -370,6 +374,7 @@ export function App() {
       if (hud.status === "flying" || hud.status === "paused") {
         recordedRunRef.current = null;
         setNewBest(false);
+        setRouteMarkReceipt(undefined);
       }
       return;
     }
@@ -382,15 +387,18 @@ export function App() {
     recordedRunRef.current = runFingerprint;
     const storage = getBestRunStorage();
     if (!storage) {
+      setRouteMarkReceipt(undefined);
       setDailyProgressReceipt(undefined);
       return;
     }
+    const previousBestRun = getBestRun(storage, hud.contractId);
     const result = recordBestRun(storage, hud.contractId, {
       score: hud.score,
       elapsedSeconds: hud.elapsedSeconds,
       medal: hud.medal,
       ghostTrail: hud.runTrail
     });
+    setRouteMarkReceipt(buildRouteMarkReceipt(previousBestRun, result.best));
     setBestRun(result.best);
     setBestRunsByContract((current) => ({
       ...current,
@@ -771,6 +779,7 @@ export function App() {
     nextRunFeedIdRef.current = 1;
     setRunFeed([]);
     setNewBest(false);
+    setRouteMarkReceipt(undefined);
     setDailyProgressReceipt(undefined);
     if (screenFeedbackTimerRef.current) {
       clearTimeout(screenFeedbackTimerRef.current);
@@ -1567,6 +1576,16 @@ export function App() {
             <div className={`best-delta best-delta-${bestRunDelta.tone}`} aria-label={`${bestRunDelta.label}: ${bestRunDelta.value}`}>
               <span>{bestRunDelta.label}</span>
               <strong>{bestRunDelta.value}</strong>
+            </div>
+          ) : null}
+          {hud.status === "delivered" && routeMarkReceipt ? (
+            <div
+              className={`route-mark-receipt route-mark-${routeMarkReceipt.tone}`}
+              aria-label={`${routeMarkReceipt.label}: ${routeMarkReceipt.value}`}
+            >
+              {routeMarkReceipt.tone === "ghost" ? <Route size={18} /> : routeMarkReceipt.tone === "comet" ? <Star size={18} /> : <Trophy size={18} />}
+              <span>{routeMarkReceipt.label}</span>
+              <strong>{routeMarkReceipt.value}</strong>
             </div>
           ) : null}
           {ghostTrailReceipt ? (

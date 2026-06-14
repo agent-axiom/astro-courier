@@ -95,6 +95,12 @@ export type RouteBoardSelectionAction = {
 
 export type RouteBoardRecommendationBadge = "Next" | "Comet" | "Ghost" | "Relay";
 
+export type RouteMarkReceipt = {
+  label: "Route mark";
+  value: "Clear mark banked" | "Comet mark banked" | "Ghost mark banked";
+  tone: "clear" | "comet" | "ghost";
+};
+
 type BestRunStorage = Pick<Storage, "getItem" | "setItem">;
 
 export function getBestRun(storage: BestRunStorage, contractKey: string): BestRun | undefined {
@@ -187,6 +193,38 @@ export function buildRouteBoardContractMarks(bestRun: BestRun | undefined): Rout
     value: `${marks}/3`,
     tone: marks === 0 ? "open" : marks === 3 ? "complete" : marks === 2 ? "mastery" : "progress"
   };
+}
+
+export function buildRouteMarkReceipt(previousBestRun: BestRun | undefined, nextBestRun: BestRun | undefined): RouteMarkReceipt | undefined {
+  if (!nextBestRun || routeMarks(nextBestRun) <= routeMarks(previousBestRun)) {
+    return undefined;
+  }
+
+  if (!hasReplayTrail(previousBestRun) && hasReplayTrail(nextBestRun)) {
+    return {
+      label: "Route mark",
+      value: "Ghost mark banked",
+      tone: "ghost"
+    };
+  }
+
+  if (previousBestRun?.medal !== "comet" && nextBestRun.medal === "comet") {
+    return {
+      label: "Route mark",
+      value: "Comet mark banked",
+      tone: "comet"
+    };
+  }
+
+  if (!previousBestRun) {
+    return {
+      label: "Route mark",
+      value: "Clear mark banked",
+      tone: "clear"
+    };
+  }
+
+  return undefined;
 }
 
 export function buildRouteBoardProgress(
@@ -447,7 +485,10 @@ function isBetterRun(candidate: BestRun, current: BestRun): boolean {
   if (candidate.score !== current.score) {
     return candidate.score > current.score;
   }
-  return candidate.elapsedSeconds < current.elapsedSeconds;
+  if (candidate.elapsedSeconds !== current.elapsedSeconds) {
+    return candidate.elapsedSeconds < current.elapsedSeconds;
+  }
+  return hasReplayTrail(candidate) && !hasReplayTrail(current);
 }
 
 function hasReplayTrail(bestRun: BestRun | undefined): boolean {
