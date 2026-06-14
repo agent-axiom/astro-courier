@@ -60,9 +60,9 @@ export type RouteBoardProgress = {
 };
 
 export type RouteBoardTarget = {
-  label: "Next clear" | "Comet chase" | "Board status";
+  label: "Next clear" | "Comet chase" | "Ghost chase" | "Board status";
   value: string;
-  tone: "clear" | "comet" | "complete";
+  tone: "clear" | "comet" | "ghost" | "complete";
   contractId?: string;
 };
 
@@ -77,7 +77,7 @@ export type RouteBoardSelectionAction = {
   contractId: string;
 };
 
-export type RouteBoardRecommendationBadge = "Next" | "Comet" | "Relay";
+export type RouteBoardRecommendationBadge = "Next" | "Comet" | "Ghost" | "Relay";
 
 type BestRunStorage = Pick<Storage, "getItem" | "setItem">;
 
@@ -211,6 +211,16 @@ export function buildRouteBoardTarget(
     };
   }
 
+  const ghostContract = contracts.find((contract) => hasReplayTrail(bestRunsByContract[contract.id]));
+  if (ghostContract) {
+    return {
+      label: "Ghost chase",
+      value: `Race ${ghostContract.title}`,
+      tone: "ghost",
+      contractId: ghostContract.id
+    };
+  }
+
   return { label: "Board status", value: "Board mastered", tone: "complete" };
 }
 
@@ -268,6 +278,9 @@ export function buildRouteBoardRecommendationBadge(routeBoardTarget: RouteBoardT
   }
   if (routeBoardTarget.tone === "comet") {
     return "Comet";
+  }
+  if (routeBoardTarget.tone === "ghost") {
+    return "Ghost";
   }
   return undefined;
 }
@@ -365,8 +378,8 @@ function isBetterRun(candidate: BestRun, current: BestRun): boolean {
   return candidate.elapsedSeconds < current.elapsedSeconds;
 }
 
-function hasReplayTrail(bestRun: BestRun): boolean {
-  return (bestRun.ghostTrail?.length ?? 0) >= 2;
+function hasReplayTrail(bestRun: BestRun | undefined): boolean {
+  return (bestRun?.ghostTrail?.length ?? 0) >= 2;
 }
 
 function progressTone(count: number, total: number): RouteBoardProgress["tone"] {

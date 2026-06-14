@@ -2040,6 +2040,11 @@ button {
   color: #ffe19a;
 }
 
+.route-target-ghost {
+  background: rgba(124, 225, 255, 0.16);
+  color: #d8fbff;
+}
+
 .route-target-complete {
   background: rgba(142, 230, 184, 0.17);
   color: #bff7d8;
@@ -2514,6 +2519,11 @@ button {
 .contract-option-next-comet {
   background: rgba(255, 209, 102, 0.2);
   color: #ffe19a;
+}
+
+.contract-option-next-ghost {
+  background: rgba(124, 225, 255, 0.18);
+  color: #d8fbff;
 }
 
 .contract-option-daily {
@@ -3372,6 +3382,11 @@ button {
   color: #ffe19a;
 }
 
+.result-board-target-ghost {
+  background: rgba(124, 225, 255, 0.15);
+  color: #d8fbff;
+}
+
 .result-board-target-complete {
   background: rgba(142, 230, 184, 0.16);
   color: #bff7d8;
@@ -3495,6 +3510,12 @@ button {
   border-color: rgba(255, 209, 102, 0.7);
   background: rgba(255, 209, 102, 0.18);
   color: #fff5d0;
+}
+
+.result-button-board-ghost {
+  border-color: rgba(124, 225, 255, 0.7);
+  background: rgba(124, 225, 255, 0.17);
+  color: #d8fbff;
 }
 
 .result-button-board-complete {

@@ -1195,13 +1195,29 @@ export function App() {
                 aria-label={`${routeBoardTarget.label}: ${routeBoardTarget.value}. ${routeTargetSelectionAction.label}`}
                 onClick={selectRouteBoardTarget}
               >
-                {routeBoardTarget.tone === "complete" ? <Trophy size={18} /> : routeBoardTarget.tone === "comet" ? <Star size={18} /> : <Target size={18} />}
+                {routeBoardTarget.tone === "complete" ? (
+                  <Trophy size={18} />
+                ) : routeBoardTarget.tone === "comet" ? (
+                  <Star size={18} />
+                ) : routeBoardTarget.tone === "ghost" ? (
+                  <Route size={18} />
+                ) : (
+                  <Target size={18} />
+                )}
                 <span>{routeBoardTarget.label}</span>
                 <strong>{routeBoardTarget.value}</strong>
               </button>
             ) : (
               <div className={`route-target-briefing route-target-${routeBoardTarget.tone}`} aria-label={`${routeBoardTarget.label}: ${routeBoardTarget.value}`}>
-                {routeBoardTarget.tone === "complete" ? <Trophy size={18} /> : routeBoardTarget.tone === "comet" ? <Star size={18} /> : <Target size={18} />}
+                {routeBoardTarget.tone === "complete" ? (
+                  <Trophy size={18} />
+                ) : routeBoardTarget.tone === "comet" ? (
+                  <Star size={18} />
+                ) : routeBoardTarget.tone === "ghost" ? (
+                  <Route size={18} />
+                ) : (
+                  <Target size={18} />
+                )}
                 <span>{routeBoardTarget.label}</span>
                 <strong>{routeBoardTarget.value}</strong>
               </div>
@@ -1529,6 +1545,8 @@ export function App() {
                 <Trophy size={18} />
               ) : resultBoardPrompt.tone === "comet" ? (
                 <Star size={18} />
+              ) : resultBoardPrompt.tone === "ghost" ? (
+                <Route size={18} />
               ) : (
                 <Target size={18} />
               )}

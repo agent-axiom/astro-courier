@@ -517,6 +517,14 @@ describe("result board prompt", () => {
       tone: "comet"
     });
   });
+
+  it("surfaces ghost chases after mastered-board deliveries", () => {
+    expect(buildResultBoardPrompt({ status: "delivered", routeBoardTarget: { value: "Race Return Leg", tone: "ghost" } })).toEqual({
+      label: "Board target",
+      value: "Race Return Leg",
+      tone: "ghost"
+    });
+  });
 });
 
 describe("result board mastery prompt", () => {
@@ -604,6 +612,24 @@ describe("result board action", () => {
       label: "Defend Board",
       targetContractId: "gravity-slingshot",
       tone: "complete"
+    });
+  });
+
+  it("opens ghost replay targets once the board is mastered", () => {
+    expect(
+      buildResultBoardAction({
+        status: "delivered",
+        currentContractId: "gravity-slingshot",
+        routeBoardTarget: {
+          value: "Race Return Leg",
+          tone: "ghost",
+          contractId: "return-leg"
+        }
+      })
+    ).toEqual({
+      label: "Race Ghost",
+      targetContractId: "return-leg",
+      tone: "ghost"
     });
   });
 });
