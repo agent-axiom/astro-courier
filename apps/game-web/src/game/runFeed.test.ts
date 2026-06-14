@@ -422,6 +422,39 @@ describe("run action feed", () => {
     ).toEqual([]);
   });
 
+  it("announces when the active target enters close-range lineup distance", () => {
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, objectivePhase: "pickup", targetDistance: 112 } as RunFeedSnapshot,
+        { ...baseSnapshot, objectivePhase: "pickup", targetDistance: 74 } as RunFeedSnapshot
+      )
+    ).toEqual([
+      {
+        label: "Pickup lined",
+        value: "Pad 74m",
+        tone: "success"
+      }
+    ]);
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, objectivePhase: "delivery", targetDistance: 122 } as RunFeedSnapshot,
+        { ...baseSnapshot, objectivePhase: "delivery", targetDistance: 86 } as RunFeedSnapshot
+      )
+    ).toEqual([
+      {
+        label: "Dock lined",
+        value: "Dock 86m",
+        tone: "success"
+      }
+    ]);
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, objectivePhase: "delivery", targetDistance: 86 } as RunFeedSnapshot,
+        { ...baseSnapshot, objectivePhase: "delivery", targetDistance: 42 } as RunFeedSnapshot
+      )
+    ).toEqual([]);
+  });
+
   it("announces when the player spends the no-brake finesse line", () => {
     const cleanDeliverySnapshot = {
       ...baseSnapshot,

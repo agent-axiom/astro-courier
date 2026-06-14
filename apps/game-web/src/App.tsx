@@ -371,6 +371,7 @@ export function App() {
     hud.paceTier,
     hud.score,
     hud.status,
+    hud.targetDistance,
     hud.trajectoryRiskLevel,
     hud.trajectoryRiskSeconds,
     bestRun?.score
@@ -1889,6 +1890,7 @@ function toRunFeedSnapshot(hud: HudState, bestRun: BestRun | undefined): RunFeed
     lastMilestone: hud.lastMilestone,
     lastStyleAward: hud.lastStyleAward,
     score: hud.score,
+    targetDistance: hud.targetDistance,
     bestRunScore: bestRun?.score,
     bestRunHasGhostTrail: (bestRun?.ghostTrail?.length ?? 0) >= 2,
     paceTier: hud.paceTier,

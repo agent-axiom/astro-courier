@@ -12,6 +12,7 @@ export type RunFeedSnapshot = {
   lastMilestone?: string;
   lastStyleAward?: number;
   score?: number;
+  targetDistance?: number;
   bestRunScore?: number;
   bestRunHasGhostTrail?: boolean;
   paceTier?: ContractPaceTier;
@@ -49,6 +50,7 @@ const criticalFuelRatio = 0.15;
 const criticalStyleChainSeconds = 1;
 const bestRunPressureGap = 200;
 const cleanCargoDamageLimit = 0.02;
+const closeTargetDistance = 90;
 const feedMilestones = new Set([
   "Clean Hazard Skim",
   "Needle Thread",
@@ -103,6 +105,11 @@ export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, curr
       value: "Dock outbound",
       tone: "success"
     });
+  }
+
+  const targetLineup = buildTargetLineupUpdate(previous, current);
+  if (targetLineup) {
+    updates.push(targetLineup);
   }
 
   if (!isFuelCritical(previous) && isFuelCritical(current)) {
@@ -294,6 +301,27 @@ function isFuelCritical(snapshot: RunFeedSnapshot): boolean {
 
 function hasCargoDamageCrossedCleanLimit(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
   return (previous.cargoDamage ?? 0) <= cleanCargoDamageLimit && (current.cargoDamage ?? 0) > cleanCargoDamageLimit;
+}
+
+function buildTargetLineupUpdate(previous: RunFeedSnapshot, current: RunFeedSnapshot): RunFeedUpdate | undefined {
+  if (current.status !== "flying" || current.targetDistance === undefined || current.objectivePhase === undefined) {
+    return undefined;
+  }
+  if (previous.objectivePhase !== current.objectivePhase) {
+    return undefined;
+  }
+
+  const previousDistance = previous.targetDistance ?? Number.POSITIVE_INFINITY;
+  if (previousDistance <= closeTargetDistance || current.targetDistance > closeTargetDistance) {
+    return undefined;
+  }
+
+  const distance = Math.round(current.targetDistance);
+  if (current.objectivePhase === "pickup") {
+    return { label: "Pickup lined", value: `Pad ${distance}m`, tone: "success" };
+  }
+
+  return { label: "Dock lined", value: `Dock ${distance}m`, tone: "success" };
 }
 
 function hasSpentNoBrakeFinesse(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
