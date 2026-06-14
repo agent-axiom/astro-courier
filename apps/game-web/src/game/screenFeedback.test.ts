@@ -221,6 +221,17 @@ describe("screen feedback", () => {
     });
   });
 
+  it("turns a critical chain thread window into a high-impact risk reward pulse", () => {
+    expect(buildScreenFeedback(["thread-window", "chain-critical"])).toEqual({
+      label: "Thread chain",
+      value: "Cash the gap",
+      accent: "chain",
+      tone: "style",
+      intensity: "heavy",
+      durationMs: 500
+    });
+  });
+
   it("maps saved style chains to a visible combo restore pulse", () => {
     expect(buildScreenFeedback(["chain-save"])).toEqual({
       label: "Chain saved",
