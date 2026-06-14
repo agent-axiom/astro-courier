@@ -19,6 +19,10 @@ export function buildMilestoneScreenFeedback(milestone: string | undefined): Scr
     return buildScreenFeedback(["launch-burst"]);
   }
 
+  if (milestone === "Assist Burn") {
+    return buildScreenFeedback(["assist-burn"]);
+  }
+
   if (milestone === "Boost Burn") {
     return buildScreenFeedback(["boost-burn"]);
   }

@@ -255,6 +255,13 @@ describe("screen feedback", () => {
   });
 
   it("can fall back from visible boost and launch milestones when event timing is missed", () => {
+    expect(buildMilestoneScreenFeedback("Assist Burn")).toEqual({
+      label: "Assist burn",
+      value: "Vector trim",
+      tone: "style",
+      intensity: "light",
+      durationMs: 320
+    });
     expect(buildMilestoneScreenFeedback("Boost Burn")).toEqual({
       label: "Impulse burn",
       value: "Vector kick",
