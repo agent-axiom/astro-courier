@@ -127,7 +127,7 @@ export function buildBestRunChase(bestRun: BestRun | undefined): BestRunChase {
     };
   }
 
-  const hasGhostTrail = (bestRun.ghostTrail?.length ?? 0) >= 2;
+  const hasGhostTrail = hasReplayTrail(bestRun);
   return {
     label: hasGhostTrail ? "PB ghost" : "PB target",
     value: `${bestRun.score} / ${bestRun.elapsedSeconds.toFixed(1)}s${hasGhostTrail ? " trail" : ""}`,
@@ -140,7 +140,8 @@ export function buildContractBestRunLabel(bestRun: BestRun | undefined): string 
     return "PB open";
   }
 
-  return `PB ${bestRun.score} / ${bestRun.elapsedSeconds.toFixed(1)}s`;
+  const prefix = hasReplayTrail(bestRun) ? "Ghost" : "PB";
+  return `${prefix} ${bestRun.score} / ${bestRun.elapsedSeconds.toFixed(1)}s`;
 }
 
 export function buildContractMasteryBadge(bestRun: BestRun | undefined): ContractMasteryBadge {
@@ -308,7 +309,7 @@ export function buildLiveBestPace(input: LiveBestPaceInput): LiveBestPace | unde
     return undefined;
   }
 
-  const hasGhostTrail = (input.bestRun.ghostTrail?.length ?? 0) >= 2;
+  const hasGhostTrail = hasReplayTrail(input.bestRun);
   const chaseLabel = hasGhostTrail ? "Ghost chase" : "PB chase";
   const clutchLabel = hasGhostTrail ? "Ghost clutch" : "PB clutch";
   const scoreDelta = (input.score ?? 0) - input.bestRun.score;
@@ -356,6 +357,10 @@ function isBetterRun(candidate: BestRun, current: BestRun): boolean {
     return candidate.score > current.score;
   }
   return candidate.elapsedSeconds < current.elapsedSeconds;
+}
+
+function hasReplayTrail(bestRun: BestRun): boolean {
+  return (bestRun.ghostTrail?.length ?? 0) >= 2;
 }
 
 function progressTone(count: number, total: number): RouteBoardProgress["tone"] {

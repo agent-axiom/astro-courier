@@ -118,6 +118,20 @@ describe("contract option personal best copy", () => {
   it("formats saved contract personal bests compactly", () => {
     expect(buildContractBestRunLabel({ score: 3290, elapsedSeconds: 24.667, medal: "gold" })).toBe("PB 3290 / 24.7s");
   });
+
+  it("marks saved contract personal bests with replay trails as ghost routes", () => {
+    expect(
+      buildContractBestRunLabel({
+        score: 3290,
+        elapsedSeconds: 24.667,
+        medal: "gold",
+        ghostTrail: [
+          { x: 0, y: 0 },
+          { x: 12, y: -4 }
+        ]
+      })
+    ).toBe("Ghost 3290 / 24.7s");
+  });
 });
 
 describe("contract option mastery badge copy", () => {
