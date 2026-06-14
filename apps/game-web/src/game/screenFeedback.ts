@@ -1,5 +1,6 @@
 import type { GameAudioEvent } from "./audioEvents";
 import type { RouteMarkReceipt } from "./bestRun";
+import type { DailyDispatchProgressReceipt } from "./contracts";
 
 export type ScreenFeedback = {
   label?: string;
@@ -45,6 +46,30 @@ export function buildRouteMarkScreenFeedback(receipt: RouteMarkReceipt | undefin
   }
 
   return { label: "Route mark", value: "Clear banked", tone: "success", intensity: "medium", durationMs: 500 };
+}
+
+export function buildDailyDispatchScreenFeedback(receipt: DailyDispatchProgressReceipt | undefined): ScreenFeedback | undefined {
+  if (!receipt) {
+    return undefined;
+  }
+
+  if (receipt.tone === "streak") {
+    return {
+      label: receipt.label,
+      value: `${receipt.value} banked`,
+      tone: "style",
+      intensity: "heavy",
+      durationMs: 560
+    };
+  }
+
+  return {
+    label: receipt.label,
+    value: receipt.value,
+    tone: "success",
+    intensity: "medium",
+    durationMs: 500
+  };
 }
 
 export function buildScreenFeedback(events: readonly GameAudioEvent[], milestone?: string): ScreenFeedback | undefined {

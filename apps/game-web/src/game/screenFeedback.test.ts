@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { buildMilestoneScreenFeedback, buildRouteMarkScreenFeedback, buildScreenFeedback } from "./screenFeedback";
+import {
+  buildDailyDispatchScreenFeedback,
+  buildMilestoneScreenFeedback,
+  buildRouteMarkScreenFeedback,
+  buildScreenFeedback
+} from "./screenFeedback";
 
 describe("screen feedback", () => {
   it("turns banked route marks into high-impact result pulses", () => {
@@ -24,6 +29,24 @@ describe("screen feedback", () => {
       intensity: "heavy",
       durationMs: 600
     });
+  });
+
+  it("turns daily streak receipts into result screen pulses", () => {
+    expect(buildDailyDispatchScreenFeedback({ label: "Daily streak", value: "Daily clear banked", tone: "fresh" })).toEqual({
+      label: "Daily streak",
+      value: "Daily clear banked",
+      tone: "success",
+      intensity: "medium",
+      durationMs: 500
+    });
+    expect(buildDailyDispatchScreenFeedback({ label: "Daily streak", value: "4-day streak", tone: "streak" })).toEqual({
+      label: "Daily streak",
+      value: "4-day streak banked",
+      tone: "style",
+      intensity: "heavy",
+      durationMs: 560
+    });
+    expect(buildDailyDispatchScreenFeedback(undefined)).toBeUndefined();
   });
 
   it("prioritizes crash feedback over lower-impact events", () => {

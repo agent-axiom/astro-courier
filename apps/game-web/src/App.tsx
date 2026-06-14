@@ -123,7 +123,13 @@ import { createGameAudioController, type GameAudioController } from "./game/game
 import { createGameHapticsController, type GameHapticsController } from "./game/gameHaptics";
 import { buildAudioTogglePresentation } from "./game/audioControls";
 import { buildTouchFlightPadPresentation } from "./game/touchControls";
-import { buildMilestoneScreenFeedback, buildRouteMarkScreenFeedback, buildScreenFeedback, type ScreenFeedback } from "./game/screenFeedback";
+import {
+  buildDailyDispatchScreenFeedback,
+  buildMilestoneScreenFeedback,
+  buildRouteMarkScreenFeedback,
+  buildScreenFeedback,
+  type ScreenFeedback
+} from "./game/screenFeedback";
 import {
   appendRunFeedUpdates,
   buildProgressReceiptFeedUpdates,
@@ -433,7 +439,6 @@ export function App() {
     };
     const nextRouteMarkReceipt = buildRouteMarkReceipt(previousBestRun, result.best);
     setRouteMarkReceipt(nextRouteMarkReceipt);
-    pushScreenFeedback(buildRouteMarkScreenFeedback(nextRouteMarkReceipt));
     const nextCampaignMilestoneReceipt = buildRouteBoardCampaignMilestoneReceipt(
       hud.contractOptions,
       previousBestRunsByContract,
@@ -451,6 +456,9 @@ export function App() {
     } else {
       setDailyProgressReceipt(undefined);
     }
+    pushScreenFeedback(
+      buildRouteMarkScreenFeedback(nextRouteMarkReceipt) ?? buildDailyDispatchScreenFeedback(nextDailyClear?.receipt)
+    );
     const progressFeedUpdates = buildProgressReceiptFeedUpdates({
       routeMarkReceipt: nextRouteMarkReceipt,
       campaignMilestoneReceipt: nextCampaignMilestoneReceipt,
