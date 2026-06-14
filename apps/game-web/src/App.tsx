@@ -128,6 +128,7 @@ import { buildTouchFlightPadPresentation } from "./game/touchControls";
 import { buildPauseOverlayPresentation, type PauseOverlayActionId } from "./game/pauseOverlay";
 import {
   buildMilestoneScreenFeedback,
+  buildPauseResumeScreenFeedback,
   buildProgressReceiptScreenFeedback,
   buildScreenFeedback,
   type ScreenFeedback
@@ -940,6 +941,15 @@ export function App() {
 
   const setRunPaused = (next: boolean) => {
     audioRef.current?.unlock();
+    pushScreenFeedback(
+      buildPauseResumeScreenFeedback({
+        status: hud.status,
+        wasPaused: paused,
+        nextPaused: next,
+        preflightOpen: overlays.preflight,
+        resultOpen: overlays.result
+      })
+    );
     setPaused(next);
     shellRef.current?.setPaused(next);
   };

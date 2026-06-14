@@ -1,3 +1,4 @@
+import type { RunStatus } from "@astro-courier/shared";
 import type { GameAudioEvent } from "./audioEvents";
 import type { RouteBoardCampaignMilestoneReceipt, RouteMarkReceipt } from "./bestRun";
 import type { DailyDispatchProgressReceipt } from "./contracts";
@@ -15,6 +16,14 @@ export type ProgressReceiptScreenFeedbackInput = {
   campaignMilestoneReceipt?: RouteBoardCampaignMilestoneReceipt;
   routeMarkReceipt?: RouteMarkReceipt;
   dailyProgressReceipt?: DailyDispatchProgressReceipt;
+};
+
+export type PauseResumeScreenFeedbackInput = {
+  status: RunStatus;
+  wasPaused: boolean;
+  nextPaused: boolean;
+  preflightOpen: boolean;
+  resultOpen: boolean;
 };
 
 export function buildMilestoneScreenFeedback(milestone: string | undefined): ScreenFeedback | undefined {
@@ -121,6 +130,20 @@ export function buildDailyDispatchScreenFeedback(receipt: DailyDispatchProgressR
     tone: "success",
     intensity: "medium",
     durationMs: 500
+  };
+}
+
+export function buildPauseResumeScreenFeedback(input: PauseResumeScreenFeedbackInput): ScreenFeedback | undefined {
+  if (input.status !== "paused" || !input.wasPaused || input.nextPaused || input.preflightOpen || input.resultOpen) {
+    return undefined;
+  }
+
+  return {
+    label: "Route live",
+    value: "Controls armed",
+    tone: "success",
+    intensity: "light",
+    durationMs: 300
   };
 }
 

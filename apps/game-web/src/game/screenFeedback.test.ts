@@ -3,6 +3,7 @@ import {
   buildCampaignMilestoneScreenFeedback,
   buildDailyDispatchScreenFeedback,
   buildMilestoneScreenFeedback,
+  buildPauseResumeScreenFeedback,
   buildProgressReceiptScreenFeedback,
   buildRouteMarkScreenFeedback,
   buildScreenFeedback
@@ -122,6 +123,52 @@ describe("screen feedback", () => {
       intensity: "heavy",
       durationMs: 520
     });
+  });
+
+  it("adds a light route-live pulse only when resuming a paused live route", () => {
+    expect(
+      buildPauseResumeScreenFeedback({
+        status: "paused",
+        wasPaused: true,
+        nextPaused: false,
+        preflightOpen: false,
+        resultOpen: false
+      })
+    ).toEqual({
+      label: "Route live",
+      value: "Controls armed",
+      tone: "success",
+      intensity: "light",
+      durationMs: 300
+    });
+
+    expect(
+      buildPauseResumeScreenFeedback({
+        status: "paused",
+        wasPaused: false,
+        nextPaused: true,
+        preflightOpen: false,
+        resultOpen: false
+      })
+    ).toBeUndefined();
+    expect(
+      buildPauseResumeScreenFeedback({
+        status: "paused",
+        wasPaused: true,
+        nextPaused: false,
+        preflightOpen: true,
+        resultOpen: false
+      })
+    ).toBeUndefined();
+    expect(
+      buildPauseResumeScreenFeedback({
+        status: "crashed",
+        wasPaused: true,
+        nextPaused: false,
+        preflightOpen: false,
+        resultOpen: true
+      })
+    ).toBeUndefined();
   });
 
   it("maps delivery and style events to positive feedback", () => {
