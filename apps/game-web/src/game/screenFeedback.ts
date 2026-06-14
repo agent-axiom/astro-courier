@@ -1,4 +1,5 @@
 import type { GameAudioEvent } from "./audioEvents";
+import type { RouteMarkReceipt } from "./bestRun";
 
 export type ScreenFeedback = {
   label?: string;
@@ -28,6 +29,22 @@ export function buildMilestoneScreenFeedback(milestone: string | undefined): Scr
   }
 
   return undefined;
+}
+
+export function buildRouteMarkScreenFeedback(receipt: RouteMarkReceipt | undefined): ScreenFeedback | undefined {
+  if (!receipt) {
+    return undefined;
+  }
+
+  if (receipt.tone === "ghost") {
+    return { label: "Ghost mark", value: "PB trail captured", tone: "success", intensity: "heavy", durationMs: 600 };
+  }
+
+  if (receipt.tone === "comet") {
+    return { label: "Comet mark", value: "Route upgraded", tone: "style", intensity: "heavy", durationMs: 560 };
+  }
+
+  return { label: "Route mark", value: "Clear banked", tone: "success", intensity: "medium", durationMs: 500 };
 }
 
 export function buildScreenFeedback(events: readonly GameAudioEvent[], milestone?: string): ScreenFeedback | undefined {

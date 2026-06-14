@@ -123,7 +123,7 @@ import { createGameAudioController, type GameAudioController } from "./game/game
 import { createGameHapticsController, type GameHapticsController } from "./game/gameHaptics";
 import { buildAudioTogglePresentation } from "./game/audioControls";
 import { buildTouchFlightPadPresentation } from "./game/touchControls";
-import { buildMilestoneScreenFeedback, buildScreenFeedback, type ScreenFeedback } from "./game/screenFeedback";
+import { buildMilestoneScreenFeedback, buildRouteMarkScreenFeedback, buildScreenFeedback, type ScreenFeedback } from "./game/screenFeedback";
 import { appendRunFeedUpdates, deriveRunFeedUpdates, type RunFeedEntry, type RunFeedSnapshot } from "./game/runFeed";
 
 type GameStore = {
@@ -234,6 +234,23 @@ export function App() {
     return storage ? getDailyDispatchProgress(storage) : undefined;
   });
   const [dailyProgressReceipt, setDailyProgressReceipt] = useState<DailyDispatchProgressReceipt | undefined>(undefined);
+  const pushScreenFeedback = (feedback: ScreenFeedback | undefined) => {
+    if (!feedback) {
+      return;
+    }
+
+    if (screenFeedbackTimerRef.current) {
+      clearTimeout(screenFeedbackTimerRef.current);
+    }
+    setScreenFeedback((current) => ({
+      key: (current?.key ?? 0) + 1,
+      feedback
+    }));
+    screenFeedbackTimerRef.current = setTimeout(() => {
+      setScreenFeedback(undefined);
+      screenFeedbackTimerRef.current = undefined;
+    }, feedback.durationMs);
+  };
 
   useEffect(() => {
     if (!canvasMountRef.current) return undefined;
@@ -321,20 +338,7 @@ export function App() {
     previousAudioSnapshotRef.current = currentSnapshot;
     audioRef.current?.play(events);
     hapticsRef.current?.play(events);
-    const feedback = buildScreenFeedback(events, hud.lastMilestone);
-    if (feedback) {
-      if (screenFeedbackTimerRef.current) {
-        clearTimeout(screenFeedbackTimerRef.current);
-      }
-      setScreenFeedback((current) => ({
-        key: (current?.key ?? 0) + 1,
-        feedback
-      }));
-      screenFeedbackTimerRef.current = setTimeout(() => {
-        setScreenFeedback(undefined);
-        screenFeedbackTimerRef.current = undefined;
-      }, feedback.durationMs);
-    }
+    pushScreenFeedback(buildScreenFeedback(events, hud.lastMilestone));
   }, [
     hud.cargoDamage,
     hud.cargoKind,
@@ -421,7 +425,9 @@ export function App() {
       ...previousBestRunsByContract,
       [hud.contractId]: result.best
     };
-    setRouteMarkReceipt(buildRouteMarkReceipt(previousBestRun, result.best));
+    const nextRouteMarkReceipt = buildRouteMarkReceipt(previousBestRun, result.best);
+    setRouteMarkReceipt(nextRouteMarkReceipt);
+    pushScreenFeedback(buildRouteMarkScreenFeedback(nextRouteMarkReceipt));
     setCampaignMilestoneReceipt(
       buildRouteBoardCampaignMilestoneReceipt(hud.contractOptions, previousBestRunsByContract, nextBestRunsByContract)
     );

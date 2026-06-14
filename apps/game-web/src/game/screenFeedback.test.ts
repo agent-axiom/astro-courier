@@ -1,7 +1,31 @@
 import { describe, expect, it } from "vitest";
-import { buildMilestoneScreenFeedback, buildScreenFeedback } from "./screenFeedback";
+import { buildMilestoneScreenFeedback, buildRouteMarkScreenFeedback, buildScreenFeedback } from "./screenFeedback";
 
 describe("screen feedback", () => {
+  it("turns banked route marks into high-impact result pulses", () => {
+    expect(buildRouteMarkScreenFeedback({ label: "Route mark", value: "Clear mark banked", tone: "clear" })).toEqual({
+      label: "Route mark",
+      value: "Clear banked",
+      tone: "success",
+      intensity: "medium",
+      durationMs: 500
+    });
+    expect(buildRouteMarkScreenFeedback({ label: "Route mark", value: "Comet mark banked", tone: "comet" })).toEqual({
+      label: "Comet mark",
+      value: "Route upgraded",
+      tone: "style",
+      intensity: "heavy",
+      durationMs: 560
+    });
+    expect(buildRouteMarkScreenFeedback({ label: "Route mark", value: "Ghost mark banked", tone: "ghost" })).toEqual({
+      label: "Ghost mark",
+      value: "PB trail captured",
+      tone: "success",
+      intensity: "heavy",
+      durationMs: 600
+    });
+  });
+
   it("prioritizes crash feedback over lower-impact events", () => {
     expect(buildScreenFeedback(["style-hit", "ship-crash"])).toEqual({
       label: "Insurance event",
