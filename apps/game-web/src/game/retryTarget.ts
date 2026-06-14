@@ -186,8 +186,10 @@ function buildRepeatableMilestoneTarget(lastMilestone?: string): RetryTarget | u
   switch (lastMilestone) {
     case "Comet Finish":
     case "Damage Control":
+    case "Eco Drift":
     case "Last Drop":
     case "No Brake Finesse":
+    case "Antimatter Drift":
     case "Perfect Approach":
     case "Chain Finish":
     case "Launch Burst":

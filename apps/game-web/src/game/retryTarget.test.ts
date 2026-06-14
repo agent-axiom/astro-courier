@@ -267,6 +267,47 @@ describe("result retry target", () => {
     });
   });
 
+  it("turns route-specific mastery finishes into repeatable line targets", () => {
+    expect(
+      buildRetryTarget({
+        status: "delivered",
+        medal: "gold",
+        lastMilestone: "Eco Drift",
+        elapsedSeconds: 28.4,
+        goldSeconds: 30,
+        score: 2880,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Repeat Eco Drift",
+      tone: "opportunity"
+    });
+
+    const antimatterTarget = buildRetryTarget({
+      status: "delivered",
+      medal: "gold",
+      lastMilestone: "Antimatter Drift",
+      elapsedSeconds: 28.4,
+      goldSeconds: 30,
+      score: 3040,
+      isNewBest: false,
+      bestRun: undefined
+    });
+
+    expect(antimatterTarget).toEqual({
+      label: "Retry target",
+      value: "Repeat Antimatter Drift",
+      tone: "opportunity"
+    });
+    expect(buildResultRetryAction(antimatterTarget)).toEqual({
+      label: "Repeat Line",
+      tone: "opportunity",
+      mode: "restart-run"
+    });
+  });
+
   it("turns comet finishes into a repeatable elite target", () => {
     expect(
       buildRetryTarget({
@@ -587,7 +628,6 @@ describe("result retry target", () => {
       buildRetryTarget({
         status: "delivered",
         medal: "gold",
-        lastMilestone: "Eco Drift",
         elapsedSeconds: 28.4,
         goldSeconds: 30,
         score: 2520,
