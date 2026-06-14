@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildRouteTempo } from "./tempo";
+import { buildRouteTempo, buildRouteTempoShellClass } from "./tempo";
 
 describe("route tempo readout", () => {
   it("hides outside active live flight", () => {
@@ -136,6 +136,22 @@ describe("route tempo readout", () => {
 
     expect(buildRouteTempo({ status: "flying", preflightOpen: false, speed: 12, fuelRatio: 0.9 })?.value).toBe(
       "Build speed / 12"
+    );
+  });
+
+  it("maps route tempo tones into stable shell state classes", () => {
+    expect(buildRouteTempoShellClass(undefined)).toBe("app-route-tempo-none");
+    expect(buildRouteTempoShellClass({ label: "Route tempo", value: "ETA 10.0s / speed 30", tone: "push", progress: 0.5 })).toBe(
+      "app-route-tempo-push"
+    );
+    expect(buildRouteTempoShellClass({ label: "Route tempo", value: "Perfect flow / dock now", tone: "flow", progress: 1 })).toBe(
+      "app-route-tempo-flow"
+    );
+    expect(buildRouteTempoShellClass({ label: "Route tempo", value: "Gold close / 3.5s", tone: "clutch", progress: 0.13 })).toBe(
+      "app-route-tempo-clutch"
+    );
+    expect(buildRouteTempoShellClass({ label: "Route tempo", value: "Break vector", tone: "danger", progress: 1 })).toBe(
+      "app-route-tempo-danger"
     );
   });
 });

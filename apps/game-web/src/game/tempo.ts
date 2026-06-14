@@ -93,6 +93,10 @@ export function buildRouteTempo(input: RouteTempoInput): RouteTempoReadout | und
   return routeTempo(`Build speed / ${Math.round(input.speed)}`, "push", input.speed / speedProgressTarget);
 }
 
+export function buildRouteTempoShellClass(routeTempo: RouteTempoReadout | undefined): string {
+  return routeTempo ? `app-route-tempo-${routeTempo.tone}` : "app-route-tempo-none";
+}
+
 function routeTempo(value: string, tone: RouteTempoReadout["tone"], progress: number): RouteTempoReadout {
   return {
     label: "Route tempo",

@@ -116,7 +116,7 @@ import { getOverlayVisibility } from "./game/overlays";
 import { buildCometRunReadout } from "./game/comet";
 import { buildResultRetryAction, buildRetryActionBriefing, buildRetryTarget } from "./game/retryTarget";
 import { buildRunIntensity } from "./game/intensity";
-import { buildRouteTempo } from "./game/tempo";
+import { buildRouteTempo, buildRouteTempoShellClass } from "./game/tempo";
 import { buildRestartFlowTransition, type RestartFlowMode } from "./game/restartFlow";
 import { buildCrashDebrief, buildCrashReasonLabel } from "./game/crash";
 import { buildReplayCaptureReadout } from "./game/replayReadout";
@@ -643,6 +643,7 @@ export function App() {
     styleMultiplier: hud.styleMultiplier,
     styleChainSecondsRemaining: hud.styleChainSecondsRemaining
   });
+  const routeTempoShellClass = buildRouteTempoShellClass(routeTempo);
   const routeTempoStyle = { "--route-tempo-progress": routeTempo?.progress ?? 0 } as CSSProperties;
   const routeFocusReadout = buildRouteFocusReadout({
     status: hud.status,
@@ -1140,7 +1141,7 @@ export function App() {
   }, [hud.status, overlays.preflight, overlays.result, launchContract, paused, restartActiveRun, restartToBriefing]);
 
   return (
-    <main className={`app-shell app-intensity-${runIntensity}`}>
+    <main className={`app-shell app-intensity-${runIntensity} ${routeTempoShellClass}`}>
       <div ref={canvasMountRef} className="game-canvas" aria-label="Astro Courier gameplay canvas" />
       {activeScreenFeedback ? (
         <div
