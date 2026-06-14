@@ -135,7 +135,7 @@ describe("live comet run readout", () => {
     ).toEqual({
       label: "Comet run",
       value: "Coast for comet",
-      detail: "Reserve 78% / need 75%",
+      detail: "Reserve 78% / 3% burn buffer",
       tone: "warning"
     });
   });
