@@ -30,6 +30,7 @@ import {
   buildContractBestRunLabel,
   buildContractBestRunTone,
   buildLiveBestPace,
+  buildRouteBoardCampaignProgress,
   buildRouteBoardMastery,
   buildRouteBoardRecommendationBadge,
   buildRouteBoardProgress,
@@ -624,6 +625,7 @@ export function App() {
       : undefined;
   const bestRunChase = buildBestRunChase(bestRun);
   const routeBoardProgress = buildRouteBoardProgress(hud.contractOptions, bestRunsByContract);
+  const routeBoardCampaignProgress = buildRouteBoardCampaignProgress(hud.contractOptions, bestRunsByContract);
   const routeBoardMastery = buildRouteBoardMastery(hud.contractOptions, bestRunsByContract);
   const routeBoardTarget = buildRouteBoardTarget(hud.contractOptions, bestRunsByContract);
   const routeTargetSelectionAction = buildRouteBoardSelectionAction(routeBoardTarget, hud.contractId);
@@ -1261,6 +1263,16 @@ export function App() {
                 {routeBoardMastery.tone === "complete" ? <Trophy size={18} /> : <Route size={18} />}
                 <span>{routeBoardMastery.label}</span>
                 <strong>{routeBoardMastery.value}</strong>
+              </div>
+              <div
+                className={`route-campaign-briefing route-campaign-${routeBoardCampaignProgress.tone}`}
+                style={{ "--route-campaign-progress": routeBoardCampaignProgress.progress } as CSSProperties}
+                aria-label={`${routeBoardCampaignProgress.label}: ${routeBoardCampaignProgress.value}. ${routeBoardCampaignProgress.detail}`}
+              >
+                {routeBoardCampaignProgress.tone === "complete" ? <Trophy size={18} /> : <Activity size={18} />}
+                <span>{routeBoardCampaignProgress.label}</span>
+                <strong>{routeBoardCampaignProgress.value}</strong>
+                <small>{routeBoardCampaignProgress.detail}</small>
               </div>
             </>
           ) : null}

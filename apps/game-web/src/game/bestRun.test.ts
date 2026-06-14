@@ -6,6 +6,7 @@ import {
   buildContractMasteryBadge,
   buildContractBestRunLabel,
   buildLiveBestPace,
+  buildRouteBoardCampaignProgress,
   buildRouteBoardMastery,
   buildRouteBoardRecommendationBadge,
   buildRouteBoardProgress,
@@ -209,6 +210,94 @@ describe("route board progress copy", () => {
       { label: "Ghost routes", value: "0/4", tone: "open" },
       { label: "Comet clears", value: "4/4", tone: "complete" }
     ]);
+  });
+});
+
+describe("route board campaign progress copy", () => {
+  const contracts = [{ id: "first-light-delivery" }, { id: "return-leg" }, { id: "asteroid-sprint" }, { id: "gravity-slingshot" }];
+
+  it("summarizes clear, comet, and ghost route progress as one campaign percentage", () => {
+    expect(
+      buildRouteBoardCampaignProgress(contracts, {
+        "first-light-delivery": {
+          score: 1800,
+          elapsedSeconds: 34.2,
+          medal: "silver",
+          ghostTrail: [
+            { x: 0, y: 0 },
+            { x: 24, y: -8 }
+          ]
+        },
+        "return-leg": { score: 2600, elapsedSeconds: 27.1, medal: "comet" },
+        "asteroid-sprint": undefined,
+        "gravity-slingshot": undefined
+      })
+    ).toEqual({
+      label: "Campaign",
+      value: "33% mastered",
+      detail: "4/12 route marks",
+      tone: "progress",
+      progress: 0.33
+    });
+  });
+
+  it("calls out an untouched board as campaign launch", () => {
+    expect(buildRouteBoardCampaignProgress(contracts, {})).toEqual({
+      label: "Campaign",
+      value: "Launch campaign",
+      detail: "0/12 route marks",
+      tone: "open",
+      progress: 0
+    });
+  });
+
+  it("celebrates fully marked boards", () => {
+    expect(
+      buildRouteBoardCampaignProgress(contracts, {
+        "first-light-delivery": {
+          score: 3200,
+          elapsedSeconds: 22.4,
+          medal: "comet",
+          ghostTrail: [
+            { x: 0, y: 0 },
+            { x: 12, y: 8 }
+          ]
+        },
+        "return-leg": {
+          score: 3100,
+          elapsedSeconds: 23.1,
+          medal: "comet",
+          ghostTrail: [
+            { x: 0, y: 0 },
+            { x: 18, y: -6 }
+          ]
+        },
+        "asteroid-sprint": {
+          score: 3500,
+          elapsedSeconds: 21.8,
+          medal: "comet",
+          ghostTrail: [
+            { x: 0, y: 0 },
+            { x: 20, y: -10 }
+          ]
+        },
+        "gravity-slingshot": {
+          score: 3300,
+          elapsedSeconds: 20.9,
+          medal: "comet",
+          ghostTrail: [
+            { x: 0, y: 0 },
+            { x: 16, y: 4 }
+          ]
+        }
+      })
+    ).toEqual({
+      label: "Campaign",
+      value: "Campaign mastered",
+      detail: "12/12 route marks",
+      tone: "complete",
+      progress: 1
+    });
   });
 });
 

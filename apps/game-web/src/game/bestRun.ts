@@ -61,6 +61,14 @@ export type RouteBoardProgress = {
   tone: "open" | "progress" | "mastery" | "complete";
 };
 
+export type RouteBoardCampaignProgress = {
+  label: "Campaign";
+  value: "Launch campaign" | "Campaign mastered" | `${number}% mastered`;
+  detail: `${number}/${number} route marks`;
+  tone: "open" | "progress" | "mastery" | "complete";
+  progress: number;
+};
+
 export type RouteBoardTarget = {
   label: "Next clear" | "Comet chase" | "Ghost chase" | "Board status";
   value: string;
@@ -193,6 +201,44 @@ export function buildRouteBoardProgress(
       tone: comets === total && total > 0 ? "complete" : comets > 0 ? "mastery" : "open"
     }
   ];
+}
+
+export function buildRouteBoardCampaignProgress(
+  contracts: readonly RouteBoardContract[],
+  bestRunsByContract: Readonly<Record<string, BestRun | undefined>>
+): RouteBoardCampaignProgress {
+  const totalMarks = contracts.length * 3;
+  const earnedMarks = contracts.reduce((total, contract) => total + routeMarks(bestRunsByContract[contract.id]), 0);
+  const progress = totalMarks > 0 ? round(earnedMarks / totalMarks, 2) : 0;
+  const percent = Math.round(progress * 100);
+
+  if (earnedMarks === 0) {
+    return {
+      label: "Campaign",
+      value: "Launch campaign",
+      detail: `${earnedMarks}/${totalMarks} route marks`,
+      tone: "open",
+      progress
+    };
+  }
+
+  if (totalMarks > 0 && earnedMarks === totalMarks) {
+    return {
+      label: "Campaign",
+      value: "Campaign mastered",
+      detail: `${earnedMarks}/${totalMarks} route marks`,
+      tone: "complete",
+      progress
+    };
+  }
+
+  return {
+    label: "Campaign",
+    value: `${percent}% mastered`,
+    detail: `${earnedMarks}/${totalMarks} route marks`,
+    tone: progress >= 0.75 ? "mastery" : "progress",
+    progress
+  };
 }
 
 export function buildRouteBoardTarget(
@@ -393,6 +439,14 @@ function hasReplayTrail(bestRun: BestRun | undefined): boolean {
   return (bestRun?.ghostTrail?.length ?? 0) >= 2;
 }
 
+function routeMarks(bestRun: BestRun | undefined): number {
+  if (!bestRun) {
+    return 0;
+  }
+
+  return 1 + (bestRun.medal === "comet" ? 1 : 0) + (hasReplayTrail(bestRun) ? 1 : 0);
+}
+
 function progressTone(count: number, total: number): RouteBoardProgress["tone"] {
   if (total > 0 && count === total) {
     return "complete";
@@ -402,6 +456,11 @@ function progressTone(count: number, total: number): RouteBoardProgress["tone"] 
 
 function pluralize(count: number, word: string): string {
   return count === 1 ? word : `${word}s`;
+}
+
+function round(value: number, digits: number): number {
+  const scale = 10 ** digits;
+  return Math.round(value * scale) / scale;
 }
 
 function medalRank(medal: RunMedal | undefined): number {
