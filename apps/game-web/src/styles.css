@@ -3528,6 +3528,49 @@ button {
   color: #ffe19a;
 }
 
+.daily-streak-receipt {
+  display: grid;
+  grid-template-columns: 18px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 1px solid rgba(142, 230, 184, 0.28);
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 850;
+  text-align: left;
+}
+
+.daily-streak-receipt span,
+.daily-streak-receipt strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.daily-streak-receipt span {
+  color: rgba(255, 255, 255, 0.74);
+  text-transform: uppercase;
+}
+
+.daily-streak-receipt strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.daily-streak-fresh {
+  background: rgba(142, 230, 184, 0.14);
+  color: #bff7d8;
+}
+
+.daily-streak-streak {
+  border-color: rgba(255, 209, 102, 0.36);
+  background: linear-gradient(90deg, rgba(255, 209, 102, 0.16), rgba(142, 230, 184, 0.14));
+  color: #fff1c7;
+}
+
 .result-board-mastery {
   display: grid;
   grid-template-columns: 18px auto 1fr;

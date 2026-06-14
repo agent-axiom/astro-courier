@@ -59,7 +59,9 @@ import {
   buildDailyDispatchResult,
   buildDailyDispatchStatus,
   buildLaunchCommitment,
-  buildRoutePressureBriefing
+  buildRoutePressureBriefing,
+  recordDailyDispatchClear,
+  type DailyDispatchProgressReceipt
 } from "./game/contracts";
 import { buildRadioMessage } from "./game/radio";
 import { buildLiveStyleReward, buildStyleTargetCue } from "./game/style";
@@ -204,6 +206,7 @@ export function App() {
   });
   const [bestRunsByContract, setBestRunsByContract] = useState<Record<string, BestRun | undefined>>({});
   const [newBest, setNewBest] = useState(false);
+  const [dailyProgressReceipt, setDailyProgressReceipt] = useState<DailyDispatchProgressReceipt | undefined>(undefined);
 
   useEffect(() => {
     if (!canvasMountRef.current) return undefined;
@@ -369,6 +372,7 @@ export function App() {
     recordedRunRef.current = runFingerprint;
     const storage = getBestRunStorage();
     if (!storage) {
+      setDailyProgressReceipt(undefined);
       return;
     }
     const result = recordBestRun(storage, hud.contractId, {
@@ -383,7 +387,13 @@ export function App() {
       [hud.contractId]: result.best
     }));
     setNewBest(result.isNewBest);
-  }, [hud.contractId, hud.elapsedSeconds, hud.medal, hud.score, hud.status]);
+    const completedDailyDispatch = buildDailyDispatch({ contracts: hud.contractOptions, now: new Date() });
+    if (completedDailyDispatch?.contractId === hud.contractId) {
+      setDailyProgressReceipt(recordDailyDispatchClear(storage, completedDailyDispatch).receipt);
+    } else {
+      setDailyProgressReceipt(undefined);
+    }
+  }, [hud.contractId, hud.contractOptions, hud.elapsedSeconds, hud.medal, hud.score, hud.status]);
 
   const fuelRatio = hud.maxFuel > 0 ? hud.fuel / hud.maxFuel : 0;
   const cargoIntegrity = Math.max(0, 1 - hud.cargoDamage);
@@ -745,6 +755,7 @@ export function App() {
     nextRunFeedIdRef.current = 1;
     setRunFeed([]);
     setNewBest(false);
+    setDailyProgressReceipt(undefined);
     if (screenFeedbackTimerRef.current) {
       clearTimeout(screenFeedbackTimerRef.current);
       screenFeedbackTimerRef.current = undefined;
@@ -1531,6 +1542,16 @@ export function App() {
               <CalendarDays size={18} />
               <span>{dailyDispatchResult.label}</span>
               <strong>{dailyDispatchResult.value}</strong>
+            </div>
+          ) : null}
+          {dailyProgressReceipt ? (
+            <div
+              className={`daily-streak-receipt daily-streak-${dailyProgressReceipt.tone}`}
+              aria-label={`${dailyProgressReceipt.label}: ${dailyProgressReceipt.value}`}
+            >
+              <CalendarDays size={18} />
+              <span>{dailyProgressReceipt.label}</span>
+              <strong>{dailyProgressReceipt.value}</strong>
             </div>
           ) : null}
           <div className="result-stats">

@@ -17,8 +17,22 @@ import {
   buildDailyDispatchStatus,
   buildLaunchCommitment,
   buildRoutePressureBriefing,
-  getNextContractId
+  getDailyDispatchProgress,
+  getNextContractId,
+  recordDailyDispatchClear
 } from "./contracts";
+
+class MemoryStorage {
+  private readonly values = new Map<string, string>();
+
+  getItem(key: string): string | null {
+    return this.values.get(key) ?? null;
+  }
+
+  setItem(key: string, value: string): void {
+    this.values.set(key, value);
+  }
+}
 
 describe("contract rotation", () => {
   it("returns the next contract id and wraps at the end", () => {
@@ -335,6 +349,128 @@ describe("contract rotation", () => {
         isNewBest: true
       })
     ).toBeUndefined();
+  });
+
+  it("records a first daily dispatch clear", () => {
+    const storage = new MemoryStorage();
+    const dispatch = {
+      label: "Daily dispatch" as const,
+      value: "Asteroid Sprint",
+      contractId: "asteroid-sprint",
+      seed: "daily-2026-06-13-asteroid-sprint",
+      tone: "daily" as const
+    };
+
+    const result = recordDailyDispatchClear(storage, dispatch);
+
+    expect(result).toEqual({
+      progress: {
+        dayKey: "2026-06-13",
+        lastContractId: "asteroid-sprint",
+        streak: 1
+      },
+      receipt: {
+        label: "Daily streak",
+        value: "Daily clear banked",
+        tone: "fresh"
+      }
+    });
+    expect(getDailyDispatchProgress(storage)).toEqual(result.progress);
+  });
+
+  it("extends the daily dispatch streak on consecutive UTC days", () => {
+    const storage = new MemoryStorage();
+
+    recordDailyDispatchClear(storage, {
+      label: "Daily dispatch",
+      value: "Asteroid Sprint",
+      contractId: "asteroid-sprint",
+      seed: "daily-2026-06-13-asteroid-sprint",
+      tone: "daily"
+    });
+    const result = recordDailyDispatchClear(storage, {
+      label: "Daily dispatch",
+      value: "Gravity Slingshot",
+      contractId: "gravity-slingshot",
+      seed: "daily-2026-06-14-gravity-slingshot",
+      tone: "daily"
+    });
+
+    expect(result).toEqual({
+      progress: {
+        dayKey: "2026-06-14",
+        lastContractId: "gravity-slingshot",
+        streak: 2
+      },
+      receipt: {
+        label: "Daily streak",
+        value: "2-day streak",
+        tone: "streak"
+      }
+    });
+  });
+
+  it("keeps the daily dispatch streak idempotent for repeated clears on the same UTC day", () => {
+    const storage = new MemoryStorage();
+    const dispatch = {
+      label: "Daily dispatch" as const,
+      value: "Asteroid Sprint",
+      contractId: "asteroid-sprint",
+      seed: "daily-2026-06-13-asteroid-sprint",
+      tone: "daily" as const
+    };
+
+    recordDailyDispatchClear(storage, dispatch);
+    const result = recordDailyDispatchClear(storage, dispatch);
+
+    expect(result.progress.streak).toBe(1);
+    expect(result.receipt.value).toBe("Daily clear banked");
+  });
+
+  it("resets the daily dispatch streak after a missed UTC day", () => {
+    const storage = new MemoryStorage();
+
+    recordDailyDispatchClear(storage, {
+      label: "Daily dispatch",
+      value: "Asteroid Sprint",
+      contractId: "asteroid-sprint",
+      seed: "daily-2026-06-13-asteroid-sprint",
+      tone: "daily"
+    });
+    const result = recordDailyDispatchClear(storage, {
+      label: "Daily dispatch",
+      value: "Chain Relay",
+      contractId: "chain-relay",
+      seed: "daily-2026-06-15-chain-relay",
+      tone: "daily"
+    });
+
+    expect(result.progress.streak).toBe(1);
+    expect(result.receipt).toEqual({
+      label: "Daily streak",
+      value: "Daily clear banked",
+      tone: "fresh"
+    });
+  });
+
+  it("ignores malformed daily dispatch progress storage", () => {
+    const storage = new MemoryStorage();
+    storage.setItem("astro-courier:daily-progress", "{");
+
+    expect(getDailyDispatchProgress(storage)).toBeUndefined();
+    expect(
+      recordDailyDispatchClear(storage, {
+        label: "Daily dispatch",
+        value: "Asteroid Sprint",
+        contractId: "asteroid-sprint",
+        seed: "daily-2026-06-13-asteroid-sprint",
+        tone: "daily"
+      }).progress
+    ).toEqual({
+      dayKey: "2026-06-13",
+      lastContractId: "asteroid-sprint",
+      streak: 1
+    });
   });
 
   it("formats elevated contract hazard load for briefing cards", () => {

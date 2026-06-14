@@ -49,6 +49,25 @@ export type DailyDispatchPulse = {
   tone: "hot" | "soft" | "steady";
 };
 
+export type DailyDispatchProgress = {
+  dayKey: string;
+  lastContractId: string;
+  streak: number;
+};
+
+export type DailyDispatchProgressReceipt = {
+  label: "Daily streak";
+  value: "Daily clear banked" | `${number}-day streak`;
+  tone: "fresh" | "streak";
+};
+
+export type DailyDispatchClearRecord = {
+  progress: DailyDispatchProgress;
+  receipt: DailyDispatchProgressReceipt;
+};
+
+type DailyDispatchProgressStorage = Pick<Storage, "getItem" | "setItem">;
+
 export type DailyDispatchResultInput = {
   dispatch: DailyDispatch | undefined;
   contractId: string;
@@ -142,6 +161,116 @@ export function buildDailyDispatch(input: DailyDispatchInput): DailyDispatch | u
     seed: `daily-${dayKey}-${contract.id}`,
     tone: "daily"
   };
+}
+
+const DAILY_DISPATCH_PROGRESS_KEY = "astro-courier:daily-progress";
+const DAILY_DISPATCH_SEED_DAY_PATTERN = /^daily-(\d{4}-\d{2}-\d{2})-/;
+const UTC_DAY_MILLISECONDS = 86_400_000;
+
+export function getDailyDispatchProgress(storage: DailyDispatchProgressStorage): DailyDispatchProgress | undefined {
+  const rawProgress = storage.getItem(DAILY_DISPATCH_PROGRESS_KEY);
+  if (!rawProgress) {
+    return undefined;
+  }
+
+  try {
+    const parsedProgress: unknown = JSON.parse(rawProgress);
+    return isDailyDispatchProgress(parsedProgress) ? parsedProgress : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export function recordDailyDispatchClear(storage: DailyDispatchProgressStorage, dispatch: DailyDispatch): DailyDispatchClearRecord {
+  const dayKey = extractDailyDispatchDayKey(dispatch.seed) ?? dispatch.seed;
+  const previousProgress = getDailyDispatchProgress(storage);
+  const streak = buildDailyDispatchStreak(previousProgress, dayKey);
+  const progress = {
+    dayKey,
+    lastContractId: dispatch.contractId,
+    streak
+  };
+
+  storage.setItem(DAILY_DISPATCH_PROGRESS_KEY, JSON.stringify(progress));
+
+  return {
+    progress,
+    receipt: buildDailyDispatchProgressReceipt(streak)
+  };
+}
+
+function isDailyDispatchProgress(value: unknown): value is DailyDispatchProgress {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const candidate = value as Partial<DailyDispatchProgress>;
+  return (
+    typeof candidate.dayKey === "string" &&
+    typeof candidate.lastContractId === "string" &&
+    typeof candidate.streak === "number" &&
+    Number.isFinite(candidate.streak) &&
+    candidate.streak >= 1
+  );
+}
+
+function buildDailyDispatchStreak(previousProgress: DailyDispatchProgress | undefined, dayKey: string): number {
+  if (!previousProgress) {
+    return 1;
+  }
+
+  if (previousProgress.dayKey === dayKey) {
+    return Math.max(1, Math.floor(previousProgress.streak));
+  }
+
+  if (isNextUtcDay(previousProgress.dayKey, dayKey)) {
+    return Math.max(1, Math.floor(previousProgress.streak)) + 1;
+  }
+
+  return 1;
+}
+
+function buildDailyDispatchProgressReceipt(streak: number): DailyDispatchProgressReceipt {
+  if (streak <= 1) {
+    return {
+      label: "Daily streak",
+      value: "Daily clear banked",
+      tone: "fresh"
+    };
+  }
+
+  return {
+    label: "Daily streak",
+    value: `${streak}-day streak`,
+    tone: "streak"
+  };
+}
+
+function extractDailyDispatchDayKey(seed: string): string | undefined {
+  return DAILY_DISPATCH_SEED_DAY_PATTERN.exec(seed)?.[1];
+}
+
+function isNextUtcDay(previousDayKey: string, currentDayKey: string): boolean {
+  const previousDayNumber = parseUtcDayNumber(previousDayKey);
+  const currentDayNumber = parseUtcDayNumber(currentDayKey);
+  return previousDayNumber !== undefined && currentDayNumber !== undefined && currentDayNumber - previousDayNumber === 1;
+}
+
+function parseUtcDayNumber(dayKey: string): number | undefined {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dayKey);
+  if (!match) {
+    return undefined;
+  }
+
+  const year = Number(match[1]);
+  const month = Number(match[2]) - 1;
+  const day = Number(match[3]);
+  const date = new Date(Date.UTC(year, month, day));
+  if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month || date.getUTCDate() !== day) {
+    return undefined;
+  }
+
+  return Math.floor(date.getTime() / UTC_DAY_MILLISECONDS);
 }
 
 export function buildDailyDispatchAction(dispatch: DailyDispatch | undefined, currentContractId: string): DailyDispatchAction | undefined {
