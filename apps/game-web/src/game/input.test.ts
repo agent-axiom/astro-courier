@@ -84,6 +84,33 @@ describe("gamepad input mapping", () => {
     ]);
   });
 
+  it("maps right trigger pressure to analog thrust without requiring stick drift", () => {
+    expect(
+      commandsFromGamepadState(
+        {
+          axes: [0, 0],
+          buttons: gamepadButtons({ 7: { pressed: true, value: 0.62 } })
+        },
+        Math.PI / 2
+      )
+    ).toEqual([{ type: "THRUST", amount: 0.62 }]);
+  });
+
+  it("keeps stick aim while letting right trigger control stronger thrust", () => {
+    expect(
+      commandsFromGamepadState(
+        {
+          axes: [0, -0.32],
+          buttons: gamepadButtons({ 7: { pressed: true, value: 0.82 } })
+        },
+        0
+      )
+    ).toEqual([
+      { type: "AIM", angle: -Math.PI / 2 },
+      { type: "THRUST", amount: 0.82 }
+    ]);
+  });
+
   it("maps analog trigger pressure to brake strength", () => {
     expect(
       commandsFromGamepadState(

@@ -5,6 +5,7 @@ const pointerDeadZone = 10;
 const fullThrustDistance = 100;
 const gamepadStickDeadZone = 0.18;
 const gamepadBrakeButtonIndex = 6;
+const gamepadThrustButtonIndex = 7;
 const gamepadBoostButtonIndex = 0;
 
 export type ScreenPoint = {
@@ -75,10 +76,14 @@ export function commandsFromGamepadState(gamepad: GamepadCommandInput, _currentR
   const stickX = gamepad.axes[0] ?? 0;
   const stickY = gamepad.axes[1] ?? 0;
   const stickDistance = Math.hypot(stickX, stickY);
+  const thrustAmount = Math.max(stickDistance >= gamepadStickDeadZone ? stickDistance : 0, gamepadButtonValue(gamepad.buttons[gamepadThrustButtonIndex]));
 
   if (stickDistance >= gamepadStickDeadZone) {
     commands.push({ type: "AIM", angle: Math.atan2(stickY, stickX) });
-    commands.push({ type: "THRUST", amount: round(Math.min(1, stickDistance), 2) });
+  }
+
+  if (thrustAmount > 0) {
+    commands.push({ type: "THRUST", amount: round(Math.min(1, thrustAmount), 2) });
   }
 
   const brakeAmount = gamepadButtonValue(gamepad.buttons[gamepadBrakeButtonIndex]);
