@@ -200,6 +200,25 @@ describe("result coach", () => {
     });
   });
 
+  it("coaches scratched unstable cargo toward avoiding brake stress", () => {
+    expect(
+      buildResultCoach({
+        status: "delivered",
+        cargoKind: "unstable",
+        medal: "silver",
+        grade: "B",
+        cargoDamage: 0.05,
+        fuel: 40,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 180 }
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Avoid brake stress",
+      tone: "warning"
+    });
+  });
+
   it("nudges clean deliveries without style toward bonus play", () => {
     expect(
       buildResultCoach({

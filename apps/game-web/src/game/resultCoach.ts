@@ -183,6 +183,14 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
     };
   }
 
+  if (input.cargoKind === "unstable" && input.cargoDamage > cleanCargoDamageLimit) {
+    return {
+      label: "Next run",
+      value: "Avoid brake stress",
+      tone: "warning"
+    };
+  }
+
   if (input.cargoDamage >= 0.15) {
     return {
       label: "Next run",
