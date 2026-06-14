@@ -710,14 +710,14 @@ describe("result board prompt", () => {
         status: "delivered",
         routeBoardTarget: {
           value: "Capture Return Leg ghost",
-          detail: "Beat 3100 / 23.1s to save trail",
+          detail: "Match PB 3100 / 23.1s to save trail",
           tone: "ghost"
         }
       })
     ).toEqual({
       label: "Board target",
       value: "Capture Return Leg ghost",
-      detail: "Beat 3100 / 23.1s to save trail",
+      detail: "Match PB 3100 / 23.1s to save trail",
       tone: "ghost"
     });
   });

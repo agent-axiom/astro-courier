@@ -261,7 +261,7 @@ describe("current contract route mark target copy", () => {
     expect(buildContractRouteMarkTarget({ score: 2600, elapsedSeconds: 27.1, medal: "comet" })).toEqual({
       label: "Next mark",
       value: "Capture ghost",
-      detail: "Beat 2600 / 27.1s to save trail",
+      detail: "Match PB 2600 / 27.1s to save trail",
       tone: "ghost"
     });
   });
@@ -365,14 +365,14 @@ describe("live route mark cue copy", () => {
     });
     expect(
       buildLiveRouteMarkCue({
-        target: { label: "Next mark", value: "Capture ghost", detail: "Beat 3200 / 22.4s to save trail", tone: "ghost" },
+        target: { label: "Next mark", value: "Capture ghost", detail: "Match PB 3200 / 22.4s to save trail", tone: "ghost" },
         status: "paused",
         preflightOpen: false
       })
     ).toEqual({
       label: "Route mark",
       value: "Match PB ghost",
-      detail: "Beat 3200 / 22.4s to save trail",
+      detail: "Match PB 3200 / 22.4s to save trail",
       tone: "ghost"
     });
     expect(
@@ -1033,7 +1033,7 @@ describe("route board next target copy", () => {
     ).toEqual({
       label: "Ghost chase",
       value: "Capture First Light ghost",
-      detail: "Beat 3200 / 22.4s to save trail",
+      detail: "Match PB 3200 / 22.4s to save trail",
       tone: "ghost",
       contractId: "first-light-delivery"
     });
@@ -1058,7 +1058,7 @@ describe("route board next target copy", () => {
     ).toEqual({
       label: "Ghost chase",
       value: "Capture First Light ghost",
-      detail: "Beat 3200 / 22.4s to save trail",
+      detail: "Match PB 3200 / 22.4s to save trail",
       tone: "ghost",
       contractId: "first-light-delivery"
     });

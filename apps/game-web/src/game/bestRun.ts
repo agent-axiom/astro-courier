@@ -254,7 +254,7 @@ export function buildContractRouteMarkTarget(bestRun: BestRun | undefined): Cont
     return {
       label: "Next mark",
       value: "Capture ghost",
-      detail: `Beat ${bestRun.score} / ${bestRun.elapsedSeconds.toFixed(1)}s to save trail`,
+      detail: `Match PB ${bestRun.score} / ${bestRun.elapsedSeconds.toFixed(1)}s to save trail`,
       tone: "ghost"
     };
   }
@@ -499,7 +499,7 @@ export function buildRouteBoardTarget(
       label: "Ghost chase",
       value: `Capture ${ghostCaptureContract.title} ghost`,
       ...(ghostBestRun
-        ? { detail: `Beat ${ghostBestRun.score} / ${ghostBestRun.elapsedSeconds.toFixed(1)}s to save trail` }
+        ? { detail: `Match PB ${ghostBestRun.score} / ${ghostBestRun.elapsedSeconds.toFixed(1)}s to save trail` }
         : {}),
       tone: "ghost",
       contractId: ghostCaptureContract.id
