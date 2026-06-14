@@ -502,6 +502,14 @@ function buildCriticalStyleChainUpdate(current: RunFeedSnapshot): RunFeedUpdate 
     current.manualBrakeUsed === false &&
     (current.cargoDamage ?? 0) <= cleanCargoDamageLimit
   ) {
+    if (current.contractId === "antimatter-drift") {
+      return {
+        label: "Drift dock",
+        value: `+${ANTIMATTER_DRIFT_STYLE_BONUS} / chain x${(current.styleMultiplier ?? 1).toFixed(2)} / ${formatSeconds(current.styleChainSecondsRemaining)}`,
+        tone: "style"
+      };
+    }
+
     return {
       label: "Finesse dock",
       value: `+${NO_BRAKE_STYLE_BONUS} / chain x${(current.styleMultiplier ?? 1).toFixed(2)} / ${formatSeconds(current.styleChainSecondsRemaining)}`,

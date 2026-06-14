@@ -294,6 +294,39 @@ describe("run action feed", () => {
     ]);
   });
 
+  it("points critical antimatter drift chains at a drift dock", () => {
+    expect(
+      deriveRunFeedUpdates(
+        {
+          ...baseSnapshot,
+          contractId: "antimatter-drift",
+          objectivePhase: "delivery",
+          landingStatus: "ready",
+          cargoDamage: 0,
+          manualBrakeUsed: false,
+          styleMultiplier: 1.5,
+          styleChainSecondsRemaining: 1.4
+        },
+        {
+          ...baseSnapshot,
+          contractId: "antimatter-drift",
+          objectivePhase: "delivery",
+          landingStatus: "ready",
+          cargoDamage: 0,
+          manualBrakeUsed: false,
+          styleMultiplier: 1.5,
+          styleChainSecondsRemaining: 0.8
+        }
+      )
+    ).toEqual([
+      {
+        label: "Drift dock",
+        value: "+210 / chain x1.50 / 0.8s",
+        tone: "style"
+      }
+    ]);
+  });
+
   it("announces when a last-drop dock window becomes armed", () => {
     expect(
       deriveRunFeedUpdates(
