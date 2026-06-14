@@ -34,7 +34,7 @@ describe("cargo manifest HUD copy", () => {
   it("keeps brake-sensitive cargo stress visible after pickup", () => {
     expect(
       buildCargoRiskReadout({
-        cargoKind: "volatile",
+        cargoKind: "unstable",
         cargoFragility: 1,
         cargoDamage: 0,
         cargoOnboard: true
@@ -42,6 +42,33 @@ describe("cargo manifest HUD copy", () => {
     ).toEqual({
       label: "Cargo stress",
       value: "Brake sensitive / keep smooth",
+      tone: "warning"
+    });
+  });
+
+  it("gives volatile cargo distinct brake-shock copy", () => {
+    expect(
+      buildCargoRiskReadout({
+        cargoKind: "volatile",
+        cargoFragility: 1,
+        cargoDamage: 0,
+        cargoOnboard: false
+      })
+    ).toEqual({
+      label: "Cargo risk",
+      value: "Volatile brake shock / 1.00x",
+      tone: "warning"
+    });
+    expect(
+      buildCargoRiskReadout({
+        cargoKind: "volatile",
+        cargoFragility: 1,
+        cargoDamage: 0,
+        cargoOnboard: true
+      })
+    ).toEqual({
+      label: "Cargo stress",
+      value: "Brake shock / keep smooth",
       tone: "warning"
     });
   });
@@ -97,5 +124,6 @@ describe("cargo manifest HUD copy", () => {
   it("formats cargo risk for compact contract cards", () => {
     expect(buildContractCargoTrait({ cargoKind: "fragile", cargoFragility: 0.8 })).toBe("Fragile 0.80x");
     expect(buildContractCargoTrait({ cargoKind: "unstable", cargoFragility: 1 })).toBe("Brake sensitive / 1.00x");
+    expect(buildContractCargoTrait({ cargoKind: "volatile", cargoFragility: 1 })).toBe("Volatile brake shock / 1.00x");
   });
 });

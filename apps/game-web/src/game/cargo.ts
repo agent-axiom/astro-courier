@@ -54,6 +54,13 @@ export function buildCargoRiskReadout(input: CargoRiskReadoutInput): CargoRiskRe
         tone: input.cargoDamage >= 0.3 ? "danger" : "warning"
       };
     }
+    if (isVolatileCargo(input.cargoKind)) {
+      return {
+        label: "Cargo stress",
+        value: "Brake shock / keep smooth",
+        tone: "warning"
+      };
+    }
     if (isBrakeSensitiveCargo(input.cargoKind)) {
       return {
         label: "Cargo stress",
@@ -75,6 +82,14 @@ export function buildCargoRiskReadout(input: CargoRiskReadoutInput): CargoRiskRe
       label: "Cargo risk",
       value: `Rush cargo / ${formatRushSeconds(input.paceSecondsRemaining)} gold`,
       tone: getRushCargoTone(input.paceSecondsRemaining)
+    };
+  }
+
+  if (isVolatileCargo(input.cargoKind)) {
+    return {
+      label: "Cargo risk",
+      value: `Volatile brake shock / ${input.cargoFragility.toFixed(2)}x`,
+      tone: "warning"
     };
   }
 
@@ -115,6 +130,10 @@ function isRushCargo(input: CargoRiskReadoutInput): input is CargoRiskReadoutInp
 
 function isBrakeSensitiveCargo(cargoKind: string): boolean {
   return cargoKind === "unstable" || cargoKind === "volatile";
+}
+
+function isVolatileCargo(cargoKind: string): boolean {
+  return cargoKind === "volatile";
 }
 
 function getRushCargoTone(secondsRemaining: number): CargoRiskReadout["tone"] {
