@@ -134,6 +134,28 @@ describe("flight director", () => {
     });
   });
 
+  it("turns fading clean no-brake delivery chains into a finesse dock command", () => {
+    expect(
+      buildFlightDirector({
+        status: "flying",
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        landingStatus: "ready",
+        cargoDamage: 0,
+        manualBrakeUsed: false,
+        targetDistance: 18,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 0.8
+      })
+    ).toEqual({
+      label: "Flight director",
+      action: "Finesse dock",
+      detail: "+150 / x1.50 / 0.8s",
+      tone: "urgent",
+      progress: 0.33
+    });
+  });
+
   it("frames quick pickup as a chain load while a multiplier is live", () => {
     expect(
       buildFlightDirector({

@@ -74,6 +74,20 @@ export function buildFlightDirector(input: FlightDirectorInput): FlightDirector 
 
   const chainSeconds = input.styleChainSecondsRemaining ?? 0;
   if ((input.styleMultiplier ?? 1) > 1 && chainSeconds > 0 && chainSeconds <= CHAIN_CASHOUT_SECONDS) {
+    if (
+      input.objectivePhase === "delivery" &&
+      input.landingStatus === "ready" &&
+      input.manualBrakeUsed === false &&
+      (input.cargoDamage ?? 0) <= 0.02
+    ) {
+      return director(
+        "Finesse dock",
+        `+${NO_BRAKE_STYLE_BONUS} / x${(input.styleMultiplier ?? 1).toFixed(2)} / ${formatSeconds(chainSeconds)}`,
+        "urgent",
+        countdownProgress(chainSeconds, CHAIN_CASHOUT_SECONDS)
+      );
+    }
+
     return director(
       "Cash chain",
       `x${(input.styleMultiplier ?? 1).toFixed(2)} / ${formatSeconds(chainSeconds)}`,
