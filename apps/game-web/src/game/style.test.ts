@@ -661,6 +661,40 @@ describe("style target cue", () => {
     });
   });
 
+  it("previews the antimatter drift payoff instead of generic no-brake copy", () => {
+    expect(
+      buildStyleTargetCue({
+        status: "flying",
+        contractId: "antimatter-drift",
+        objectivePhase: "delivery",
+        styleBonus: 0,
+        cargoDamage: 0,
+        manualBrakeUsed: false
+      })
+    ).toEqual({
+      label: "Style target",
+      value: "Antimatter drift / +210 on clean dock",
+      tone: "opportunity"
+    });
+
+    expect(
+      buildStyleTargetCue({
+        status: "flying",
+        contractId: "antimatter-drift",
+        objectivePhase: "delivery",
+        styleBonus: 180,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 0.8,
+        cargoDamage: 0,
+        manualBrakeUsed: false
+      })
+    ).toEqual({
+      label: "Style target",
+      value: "Antimatter drift / +210 on clean dock / chain x1.50",
+      tone: "chain"
+    });
+  });
+
   it("surfaces last-drop docks as a clutch style target outside gold express pace", () => {
     expect(
       buildStyleTargetCue({

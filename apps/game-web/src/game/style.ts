@@ -1,4 +1,5 @@
 import {
+  ANTIMATTER_DRIFT_STYLE_BONUS,
   CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS,
   LAUNCH_BURST_STYLE_BONUS,
   LAST_DROP_FUEL_RATIO,
@@ -43,6 +44,7 @@ export type LiveStyleReward = {
 
 export type StyleTargetCueInput = {
   status: RunStatus;
+  contractId?: string;
   objectivePhase?: ObjectivePhase;
   styleBonus: number;
   paceTier?: ContractPaceTier;
@@ -195,6 +197,14 @@ export function buildStyleTargetCue(input: StyleTargetCueInput): StyleTargetCue 
   }
 
   if (input.objectivePhase === "delivery" && input.manualBrakeUsed === false && (input.cargoDamage ?? 0) <= 0.02) {
+    if (input.contractId === "antimatter-drift") {
+      return {
+        label: "Style target",
+        value: `Antimatter drift / +${ANTIMATTER_DRIFT_STYLE_BONUS} on clean dock${chainSuffix}`,
+        tone: chainActive ? "chain" : "opportunity"
+      };
+    }
+
     return {
       label: "Style target",
       value: `No brake line / +${NO_BRAKE_STYLE_BONUS} on clean dock${chainSuffix}`,

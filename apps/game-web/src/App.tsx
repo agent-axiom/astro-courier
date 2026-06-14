@@ -616,6 +616,7 @@ export function App() {
   });
   const styleTargetCue = buildStyleTargetCue({
     status: hud.status,
+    contractId: hud.contractId,
     objectivePhase: hud.objectivePhase,
     styleBonus: hud.scoreBreakdown.styleBonus,
     paceTier: hud.paceTier,
