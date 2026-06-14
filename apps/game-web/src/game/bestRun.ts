@@ -54,7 +54,7 @@ export type RouteBoardTargetContract = RouteBoardContract & {
 };
 
 export type RouteBoardProgress = {
-  label: "Routes cleared" | "Comet clears";
+  label: "Routes cleared" | "Ghost routes" | "Comet clears";
   value: string;
   tone: "open" | "progress" | "mastery" | "complete";
 };
@@ -163,6 +163,7 @@ export function buildRouteBoardProgress(
   const total = contracts.length;
   const bestRuns = contracts.map((contract) => bestRunsByContract[contract.id]);
   const cleared = bestRuns.filter(Boolean).length;
+  const ghostRoutes = bestRuns.filter((bestRun) => bestRun && hasReplayTrail(bestRun)).length;
   const comets = bestRuns.filter((bestRun) => bestRun?.medal === "comet").length;
 
   return [
@@ -170,6 +171,11 @@ export function buildRouteBoardProgress(
       label: "Routes cleared",
       value: `${cleared}/${total}`,
       tone: progressTone(cleared, total)
+    },
+    {
+      label: "Ghost routes",
+      value: `${ghostRoutes}/${total}`,
+      tone: progressTone(ghostRoutes, total)
     },
     {
       label: "Comet clears",

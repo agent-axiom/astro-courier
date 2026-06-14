@@ -1174,7 +1174,7 @@ export function App() {
               <div className="route-board" aria-label="Route board progress">
                 {routeBoardProgress.map((item) => (
                   <span key={item.label} className={`route-board-item route-board-${item.tone}`}>
-                    {item.label === "Comet clears" ? <Star size={17} /> : <Trophy size={17} />}
+                    {item.label === "Comet clears" ? <Star size={17} /> : item.label === "Ghost routes" ? <Route size={17} /> : <Trophy size={17} />}
                     <small>{item.label}</small>
                     <strong>{item.value}</strong>
                   </span>

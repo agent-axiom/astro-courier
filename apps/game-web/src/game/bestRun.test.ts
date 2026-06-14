@@ -159,16 +159,25 @@ describe("contract option mastery badge copy", () => {
 describe("route board progress copy", () => {
   const contracts = [{ id: "first-light-delivery" }, { id: "return-leg" }, { id: "asteroid-sprint" }, { id: "gravity-slingshot" }];
 
-  it("counts cleared routes and comet clears across the contract board", () => {
+  it("counts cleared routes, ghost routes, and comet clears across the contract board", () => {
     expect(
       buildRouteBoardProgress(contracts, {
-        "first-light-delivery": { score: 1800, elapsedSeconds: 34.2, medal: "silver" },
+        "first-light-delivery": {
+          score: 1800,
+          elapsedSeconds: 34.2,
+          medal: "silver",
+          ghostTrail: [
+            { x: 0, y: 0 },
+            { x: 24, y: -8 }
+          ]
+        },
         "return-leg": { score: 2600, elapsedSeconds: 27.1, medal: "comet" },
         "asteroid-sprint": undefined,
         "gravity-slingshot": undefined
       })
     ).toEqual([
       { label: "Routes cleared", value: "2/4", tone: "progress" },
+      { label: "Ghost routes", value: "1/4", tone: "progress" },
       { label: "Comet clears", value: "1/4", tone: "mastery" }
     ]);
   });
@@ -183,6 +192,7 @@ describe("route board progress copy", () => {
       })
     ).toEqual([
       { label: "Routes cleared", value: "4/4", tone: "complete" },
+      { label: "Ghost routes", value: "0/4", tone: "open" },
       { label: "Comet clears", value: "4/4", tone: "complete" }
     ]);
   });
