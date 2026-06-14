@@ -1938,6 +1938,7 @@ function statusLabel(status: HudState["status"]): string {
 function toHudAudioSnapshot(hud: HudState, bestRun: BestRun | undefined): HudAudioSnapshot {
   return {
     status: hud.status,
+    contractId: hud.contractId,
     objectivePhase: hud.objectivePhase,
     lastMilestone: hud.lastMilestone,
     score: hud.score,
@@ -1955,6 +1956,7 @@ function toHudAudioSnapshot(hud: HudState, bestRun: BestRun | undefined): HudAud
     maxFuel: hud.maxFuel,
     cargoKind: hud.cargoKind,
     cargoDamage: hud.cargoDamage,
+    manualBrakeUsed: hud.manualBrakeUsed,
     hazardDangerLevel: hud.hazardDangerLevel,
     trajectoryRiskLevel: hud.trajectoryRiskLevel
   };

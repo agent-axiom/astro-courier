@@ -64,6 +64,9 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[], milestone
   if (events.includes("last-drop-armed")) {
     return { label: "Last drop", value: "Dock empty", accent: "fuel", tone: "style", intensity: "heavy", durationMs: 500 };
   }
+  if (events.includes("antimatter-armed")) {
+    return { label: "Drift armed", value: "No brake dock", accent: "precision", tone: "style", intensity: "medium", durationMs: 420 };
+  }
   if (events.includes("perfect-approach-ready")) {
     return { label: "Perfect setup", value: "Soft dock armed", tone: "style", intensity: "medium", durationMs: 420 };
   }

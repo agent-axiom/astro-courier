@@ -56,6 +56,14 @@ describe("screen feedback", () => {
       intensity: "heavy",
       durationMs: 500
     });
+    expect(buildScreenFeedback(["antimatter-armed"])).toEqual({
+      label: "Drift armed",
+      value: "No brake dock",
+      accent: "precision",
+      tone: "style",
+      intensity: "medium",
+      durationMs: 420
+    });
   });
 
   it("names high-skill style milestone hits when milestone context is available", () => {

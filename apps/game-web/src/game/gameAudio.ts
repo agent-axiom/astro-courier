@@ -47,6 +47,7 @@ const eventTones: Record<GameAudioEvent, { frequency: number; duration: number; 
   "ship-crash": { frequency: 120, duration: 0.24, gain: 0.06 },
   "style-hit": { frequency: 720, duration: 0.08, gain: 0.045 },
   "antimatter-drift": { frequency: 1180, duration: 0.14, gain: 0.052 },
+  "antimatter-armed": { frequency: 1060, duration: 0.11, gain: 0.048 },
   "launch-burst": { frequency: 820, duration: 0.12, gain: 0.05 },
   "cargo-loaded": { frequency: 660, duration: 0.08, gain: 0.042 },
   "pickup-lineup": { frequency: 740, duration: 0.07, gain: 0.042 },

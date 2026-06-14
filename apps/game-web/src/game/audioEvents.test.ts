@@ -202,6 +202,37 @@ describe("HUD audio events", () => {
     ).toEqual([]);
   });
 
+  it("signals when an antimatter drift dock window becomes armed", () => {
+    const antimatterSnapshot = {
+      ...baseSnapshot,
+      contractId: "antimatter-drift",
+      objectivePhase: "delivery" as const,
+      landingStatus: "misaligned" as const,
+      manualBrakeUsed: false,
+      cargoDamage: 0
+    };
+
+    expect(
+      deriveHudAudioEvents(antimatterSnapshot, {
+        ...antimatterSnapshot,
+        landingStatus: "ready"
+      })
+    ).toEqual(["antimatter-armed"]);
+    expect(
+      deriveHudAudioEvents(
+        { ...antimatterSnapshot, landingStatus: "ready" },
+        { ...antimatterSnapshot, landingStatus: "ready" }
+      )
+    ).toEqual([]);
+    expect(
+      deriveHudAudioEvents(antimatterSnapshot, {
+        ...antimatterSnapshot,
+        landingStatus: "ready",
+        manualBrakeUsed: true
+      })
+    ).toEqual([]);
+  });
+
   it("prefers the comet-specific armed cue over the generic perfect approach cue", () => {
     const cometDockSnapshot = {
       ...baseSnapshot,

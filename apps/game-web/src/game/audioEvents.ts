@@ -8,6 +8,7 @@ export type GameAudioEvent =
   | "ship-crash"
   | "style-hit"
   | "antimatter-drift"
+  | "antimatter-armed"
   | "launch-burst"
   | "cargo-loaded"
   | "pickup-lineup"
@@ -38,6 +39,7 @@ export type GameAudioEvent =
 
 export type HudAudioSnapshot = {
   status: RunStatus;
+  contractId?: string;
   objectivePhase?: ObjectivePhase;
   lastMilestone?: string;
   score?: number;
@@ -55,6 +57,7 @@ export type HudAudioSnapshot = {
   maxFuel: number;
   cargoKind?: string;
   cargoDamage?: number;
+  manualBrakeUsed?: boolean;
   hazardDangerLevel?: "near" | "inside";
   trajectoryRiskLevel?: "near" | "inside";
 };
@@ -145,6 +148,8 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
     events.push("comet-armed");
   } else if (hasArmedLastDrop(previous, current)) {
     events.push("last-drop-armed");
+  } else if (hasArmedAntimatterDrift(previous, current)) {
+    events.push("antimatter-armed");
   } else if (hasArmedPerfectApproach(previous, current)) {
     events.push("perfect-approach-ready");
   }
@@ -283,6 +288,21 @@ function hasArmedPerfectApproach(previous: HudAudioSnapshot | undefined, current
 
 function hasArmedLastDrop(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {
   return previous !== undefined && !isLastDropWindowOpen(previous) && isLastDropWindowOpen(current);
+}
+
+function hasArmedAntimatterDrift(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {
+  return previous !== undefined && !isAntimatterDriftWindowOpen(previous) && isAntimatterDriftWindowOpen(current);
+}
+
+function isAntimatterDriftWindowOpen(snapshot: HudAudioSnapshot): boolean {
+  return (
+    snapshot.status === "flying" &&
+    snapshot.contractId === "antimatter-drift" &&
+    snapshot.objectivePhase === "delivery" &&
+    snapshot.landingStatus === "ready" &&
+    snapshot.manualBrakeUsed === false &&
+    (snapshot.cargoDamage ?? 0) <= cleanCargoDamageLimit
+  );
 }
 
 function isLastDropWindowOpen(snapshot: HudAudioSnapshot): boolean {
