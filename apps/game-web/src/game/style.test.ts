@@ -116,6 +116,40 @@ describe("live style reward HUD copy", () => {
     });
   });
 
+  it("treats assist and boost burns as fresh style moments", () => {
+    expect(
+      buildLiveStyleReward({
+        styleBonus: 190,
+        lastStyleAward: 70,
+        lastMilestone: "Assist Burn",
+        styleMultiplier: 1.25,
+        styleChainSecondsRemaining: 4
+      })
+    ).toEqual({
+      label: "Style hit",
+      value: "+70 hit / +190 bank / x1.25",
+      fresh: true,
+      tone: "fresh",
+      chainProgress: 1
+    });
+
+    expect(
+      buildLiveStyleReward({
+        styleBonus: 210,
+        lastStyleAward: 90,
+        lastMilestone: "Boost Burn",
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 4
+      })
+    ).toEqual({
+      label: "Style hit",
+      value: "+90 hit / +210 bank / x1.50",
+      fresh: true,
+      tone: "fresh",
+      chainProgress: 1
+    });
+  });
+
   it("treats express finish as a fresh style moment", () => {
     expect(
       buildLiveStyleReward({
