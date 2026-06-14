@@ -44,6 +44,21 @@ describe("boost control presentation", () => {
     });
   });
 
+  it("explains when boost is blocked by dry fuel instead of generic disabled copy", () => {
+    expect(buildBoostControlPresentation({ canBoost: false, boostCooldownSeconds: 0, fuel: 2 })).toEqual({
+      label: "Boost dry",
+      badge: "fuel",
+      tone: "fuel",
+      cooldownProgress: 0
+    });
+
+    expect(buildBoostControlPresentation({ canBoost: false, boostCooldownSeconds: 0, fuel: 12 })).toEqual({
+      label: "Boost",
+      tone: "disabled",
+      cooldownProgress: 0
+    });
+  });
+
   it("normalizes cooldown progress for a radial button treatment", () => {
     const presentation = buildBoostControlPresentation({ canBoost: false, boostCooldownSeconds: 0.58 });
 

@@ -102,6 +102,7 @@ import {
   buildRunIdentityReceipt
 } from "./game/resultStats";
 import { buildHazardPressureReadout } from "./game/hazard";
+import { buildResultOverlayDensity } from "./game/resultOverlay";
 import {
   buildResultActionsLayout,
   buildResultBoardAction,
@@ -554,6 +555,7 @@ export function App() {
   const boostPresentation = buildBoostControlPresentation({
     canBoost,
     boostCooldownSeconds: hud.boostCooldownSeconds,
+    fuel: hud.fuel,
     launchBurstSecondsRemaining: hud.launchBurstSecondsRemaining,
     styleMultiplier: hud.styleMultiplier,
     styleChainSecondsRemaining: hud.styleChainSecondsRemaining
@@ -744,6 +746,8 @@ export function App() {
   const resultStats = buildResultStats({ score: hud.score, elapsedSeconds: hud.elapsedSeconds, cargoIntegrity });
   const resultOutcomePresentation =
     hud.status === "delivered" || hud.status === "crashed" ? buildResultOutcomePresentation(hud.status) : undefined;
+  const resultOverlayDensity =
+    hud.status === "delivered" || hud.status === "crashed" ? buildResultOverlayDensity({ status: hud.status }) : undefined;
   const crashDebrief = hud.status === "crashed" ? buildCrashDebrief(hud) : undefined;
   const resultHighlight = buildResultHighlight(hud.scoreBreakdown, hud.lastMilestone);
   const dockGradeReceipt =
@@ -863,7 +867,7 @@ export function App() {
   const resultBoardActionBriefing = buildResultBoardActionBriefing(resultBoardAction);
   const resultActionsLayout =
     hud.status === "delivered" || hud.status === "crashed"
-      ? buildResultActionsLayout({ status: hud.status, hasBoardAction: Boolean(resultBoardAction) })
+      ? buildResultActionsLayout({ status: hud.status, hasBoardAction: Boolean(resultBoardAction) && Boolean(resultOverlayDensity?.showBoardAction) })
       : "solo";
   const retryTarget = buildRetryTarget({
     status: hud.status,
@@ -1954,7 +1958,10 @@ export function App() {
       ) : null}
 
       {overlays.result ? (
-        <section className={`result-overlay result-${hud.status}`} aria-label="Run result">
+        <section
+          className={`result-overlay result-${hud.status} result-overlay-${resultOverlayDensity?.showDetailedScore ? "rich" : "focused"}`}
+          aria-label="Run result"
+        >
           <span className={`result-icon result-icon-${resultOutcomePresentation?.tone ?? "success"}`} aria-hidden="true">
             {resultOutcomePresentation?.icon === "alert" ? <ShieldAlert size={28} /> : <Trophy size={28} />}
           </span>
@@ -2006,7 +2013,7 @@ export function App() {
               <strong>{campaignMilestoneReceipt.value}</strong>
             </div>
           ) : null}
-          {ghostTrailReceipt ? (
+          {resultOverlayDensity?.showRunReceipts && ghostTrailReceipt ? (
             <div
               className={`ghost-trail-receipt ghost-trail-${ghostTrailReceipt.tone}`}
               aria-label={`${ghostTrailReceipt.label}: ${ghostTrailReceipt.value}`}
@@ -2016,7 +2023,7 @@ export function App() {
               <strong>{ghostTrailReceipt.value}</strong>
             </div>
           ) : null}
-          {dailyDispatchResult ? (
+          {resultOverlayDensity?.showRouteProgress && dailyDispatchResult ? (
             <div
               className={`daily-result daily-result-${dailyDispatchResult.tone}`}
               aria-label={`${dailyDispatchResult.label}: ${dailyDispatchResult.value}`}
@@ -2026,7 +2033,7 @@ export function App() {
               <strong>{dailyDispatchResult.value}</strong>
             </div>
           ) : null}
-          {dailyProgressReceipt ? (
+          {resultOverlayDensity?.showRouteProgress && dailyProgressReceipt ? (
             <div
               className={`daily-streak-receipt daily-streak-${dailyProgressReceipt.tone}`}
               aria-label={`${dailyProgressReceipt.label}: ${dailyProgressReceipt.value}`}
@@ -2044,29 +2051,31 @@ export function App() {
               </span>
             ))}
           </div>
-          <div className="score-breakdown" aria-label="Score breakdown">
-            {scoreBreakdownRows(hud).map((row) => (
-              <div key={row.label} className={row.tone === "penalty" ? "score-row score-row-penalty" : "score-row"}>
-                <span>{row.label}</span>
-                <strong>{formatScoreValue(row.value, row.tone)}</strong>
-              </div>
-            ))}
-          </div>
-          {replayReceipt ? (
+          {resultOverlayDensity?.showDetailedScore ? (
+            <div className="score-breakdown" aria-label="Score breakdown">
+              {scoreBreakdownRows(hud).map((row) => (
+                <div key={row.label} className={row.tone === "penalty" ? "score-row score-row-penalty" : "score-row"}>
+                  <span>{row.label}</span>
+                  <strong>{formatScoreValue(row.value, row.tone)}</strong>
+                </div>
+              ))}
+            </div>
+          ) : null}
+          {resultOverlayDensity?.showRunReceipts && replayReceipt ? (
             <div className={`replay-receipt replay-receipt-${replayReceipt.tone}`} aria-label={`${replayReceipt.label}: ${replayReceipt.value}`}>
               <Satellite size={18} />
               <span>{replayReceipt.label}</span>
               <strong>{replayReceipt.value}</strong>
             </div>
           ) : null}
-          {dockGradeReceipt ? (
+          {resultOverlayDensity?.showRunReceipts && dockGradeReceipt ? (
             <div className={`dock-grade-receipt dock-grade-${dockGradeReceipt.tone}`} aria-label={`${dockGradeReceipt.label}: ${dockGradeReceipt.value}`}>
               <Gauge size={18} />
               <span>{dockGradeReceipt.label}</span>
               <strong>{dockGradeReceipt.value}</strong>
             </div>
           ) : null}
-          {runIdentityReceipt ? (
+          {resultOverlayDensity?.showRunReceipts && runIdentityReceipt ? (
             <div
               className={`run-identity-receipt run-identity-${runIdentityReceipt.tone}`}
               aria-label={`${runIdentityReceipt.label}: ${runIdentityReceipt.value}`}
@@ -2076,7 +2085,7 @@ export function App() {
               <strong>{runIdentityReceipt.value}</strong>
             </div>
           ) : null}
-          {resultHighlight ? (
+          {resultOverlayDensity?.showRunReceipts && resultHighlight ? (
             <div
               className={`result-highlight result-highlight-${resultHighlight.tone}`}
               aria-label={`${resultHighlight.label}: ${resultHighlight.value}`}
@@ -2091,25 +2100,31 @@ export function App() {
             <span>{resultCoach.label}</span>
             <strong>{resultCoach.value}</strong>
           </div>
-          <div className={`result-tempo-recap result-tempo-${resultTempoRecap.tone}`} aria-label={`${resultTempoRecap.label}: ${resultTempoRecap.value}`}>
-            <Gauge size={18} />
-            <span>{resultTempoRecap.label}</span>
-            <strong>{resultTempoRecap.value}</strong>
-          </div>
-          <div className={`retry-target retry-target-${retryTarget.tone}`} aria-label={`${retryTarget.label}: ${retryTarget.value}`}>
-            <Target size={18} />
-            <span>{retryTarget.label}</span>
-            <strong>{retryTarget.value}</strong>
-          </div>
-          <div
-            className={`retry-action-briefing retry-action-${retryActionBriefing.tone}`}
-            aria-label={`${retryActionBriefing.label}: ${retryActionBriefing.value}`}
-          >
-            <RotateCcw size={18} />
-            <span>{retryActionBriefing.label}</span>
-            <strong>{retryActionBriefing.value}</strong>
-          </div>
-          {resultBoardPrompt ? (
+          {resultOverlayDensity?.showTempoRecap ? (
+            <div className={`result-tempo-recap result-tempo-${resultTempoRecap.tone}`} aria-label={`${resultTempoRecap.label}: ${resultTempoRecap.value}`}>
+              <Gauge size={18} />
+              <span>{resultTempoRecap.label}</span>
+              <strong>{resultTempoRecap.value}</strong>
+            </div>
+          ) : null}
+          {resultOverlayDensity?.showRetryTarget ? (
+            <div className={`retry-target retry-target-${retryTarget.tone}`} aria-label={`${retryTarget.label}: ${retryTarget.value}`}>
+              <Target size={18} />
+              <span>{retryTarget.label}</span>
+              <strong>{retryTarget.value}</strong>
+            </div>
+          ) : null}
+          {resultOverlayDensity?.showRetryTarget ? (
+            <div
+              className={`retry-action-briefing retry-action-${retryActionBriefing.tone}`}
+              aria-label={`${retryActionBriefing.label}: ${retryActionBriefing.value}`}
+            >
+              <RotateCcw size={18} />
+              <span>{retryActionBriefing.label}</span>
+              <strong>{retryActionBriefing.value}</strong>
+            </div>
+          ) : null}
+          {resultOverlayDensity?.showRouteProgress && resultBoardPrompt ? (
             <div
               className={`result-board-target result-board-target-${resultBoardPrompt.tone}`}
               aria-label={`${resultBoardPrompt.label}: ${resultBoardPrompt.value}${resultBoardPrompt.detail ? `. ${resultBoardPrompt.detail}` : ""}`}
@@ -2130,7 +2145,7 @@ export function App() {
               {resultBoardPrompt.detail ? <small>{resultBoardPrompt.detail}</small> : null}
             </div>
           ) : null}
-          {resultBoardMasteryPrompt ? (
+          {resultOverlayDensity?.showRouteProgress && resultBoardMasteryPrompt ? (
             <div
               className={`result-board-mastery result-board-mastery-${resultBoardMasteryPrompt.tone}`}
               aria-label={`${resultBoardMasteryPrompt.label}: ${resultBoardMasteryPrompt.value}`}
@@ -2140,7 +2155,7 @@ export function App() {
               <strong>{resultBoardMasteryPrompt.value}</strong>
             </div>
           ) : null}
-          {resultCampaignPrompt ? (
+          {resultOverlayDensity?.showRouteProgress && resultCampaignPrompt ? (
             <div
               className={`result-campaign-status result-campaign-${resultCampaignPrompt.tone}`}
               style={{ "--result-campaign-progress": resultCampaignPrompt.progress } as CSSProperties}
@@ -2152,7 +2167,7 @@ export function App() {
               <small>{resultCampaignPrompt.detail}</small>
             </div>
           ) : null}
-          {resultCampaignMilestonePrompt ? (
+          {resultOverlayDensity?.showRouteProgress && resultCampaignMilestonePrompt ? (
             <div
               className={`result-campaign-milestone result-campaign-target-${resultCampaignMilestonePrompt.tone}`}
               aria-label={`${resultCampaignMilestonePrompt.label}: ${resultCampaignMilestonePrompt.value}. ${resultCampaignMilestonePrompt.detail}`}
@@ -2172,7 +2187,7 @@ export function App() {
               <RotateCcw size={18} />
               {resultRetryAction.label}
             </button>
-            {hud.status === "delivered" && resultBoardAction ? (
+            {hud.status === "delivered" && resultOverlayDensity?.showBoardAction && resultBoardAction ? (
               <button
                 type="button"
                 className={`result-button result-button-primary result-button-board result-button-board-${resultBoardAction.tone}`}

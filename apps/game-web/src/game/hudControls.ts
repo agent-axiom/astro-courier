@@ -15,6 +15,7 @@ export type ImpulseControlState = {
 export type BoostControlPresentationInput = {
   canBoost: boolean;
   boostCooldownSeconds: number;
+  fuel?: number;
   launchBurstSecondsRemaining?: number;
   styleMultiplier?: number;
   styleChainSecondsRemaining?: number;
@@ -23,7 +24,7 @@ export type BoostControlPresentationInput = {
 export type BoostControlPresentation = {
   label: string;
   badge?: string;
-  tone: "ready" | "burst" | "chain" | "cooldown" | "disabled";
+  tone: "ready" | "burst" | "chain" | "cooldown" | "fuel" | "disabled";
   cooldownProgress: number;
 };
 
@@ -76,6 +77,15 @@ export function buildBoostControlPresentation(input: BoostControlPresentationInp
       label: `Boost ${input.boostCooldownSeconds.toFixed(1)}s`,
       tone: "cooldown",
       cooldownProgress: round(clamp(input.boostCooldownSeconds / BOOST_COOLDOWN_SECONDS, 0, 1), 2)
+    };
+  }
+
+  if (!input.canBoost && input.fuel !== undefined && input.fuel <= 2) {
+    return {
+      label: "Boost dry",
+      badge: "fuel",
+      tone: "fuel",
+      cooldownProgress: 0
     };
   }
 

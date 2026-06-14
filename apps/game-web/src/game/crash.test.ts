@@ -3,31 +3,23 @@ import { buildCrashDebrief, buildCrashReasonLabel } from "./crash";
 
 describe("crash reason labels", () => {
   it("keeps hard landing advice direct", () => {
-    expect(buildCrashReasonLabel({ crashReason: "Hard Landing" })).toBe("Hard landing: slow and align before contact");
+    expect(buildCrashReasonLabel({ crashReason: "Hard Landing" })).toBe("Landed too fast");
   });
 
   it("points asteroid sprint hull collisions at asteroid clearance", () => {
-    expect(buildCrashReasonLabel({ contractId: "asteroid-sprint", crashReason: "Hull Collision" })).toBe(
-      "Hull collision: widen asteroid clearance"
-    );
+    expect(buildCrashReasonLabel({ contractId: "asteroid-sprint", crashReason: "Hull Collision" })).toBe("Clipped asteroid field");
   });
 
   it("points chain relay hull collisions at relay clearance", () => {
-    expect(buildCrashReasonLabel({ contractId: "chain-relay", crashReason: "Hull Collision" })).toBe(
-      "Hull collision: widen relay clearance"
-    );
+    expect(buildCrashReasonLabel({ contractId: "chain-relay", crashReason: "Hull Collision" })).toBe("Clipped relay lane");
   });
 
   it("points return-leg hull collisions at the reverse approach arc", () => {
-    expect(buildCrashReasonLabel({ contractId: "return-leg", crashReason: "Hull Collision" })).toBe(
-      "Hull collision: widen reverse arc"
-    );
+    expect(buildCrashReasonLabel({ contractId: "return-leg", crashReason: "Hull Collision" })).toBe("Clipped return arc");
   });
 
   it("points gravity route hull collisions at gravity wells", () => {
-    expect(buildCrashReasonLabel({ contractId: "gravity-slingshot", crashReason: "Hull Collision" })).toBe(
-      "Hull collision: stay outside gravity wells"
-    );
+    expect(buildCrashReasonLabel({ contractId: "gravity-slingshot", crashReason: "Hull Collision" })).toBe("Clipped gravity well");
   });
 
   it("falls back to landing rating before the insurance event label", () => {
@@ -39,29 +31,29 @@ describe("crash reason labels", () => {
 describe("crash debrief badge", () => {
   it("turns hard landings into a docking recovery badge", () => {
     expect(buildCrashDebrief({ crashReason: "Hard Landing" })).toEqual({
-      label: "Failure debrief",
-      value: "Brake window missed",
+      label: "Cause",
+      value: "Too fast",
       tone: "dock"
     });
   });
 
   it("turns route hull collisions into lane-specific debrief badges", () => {
     expect(buildCrashDebrief({ contractId: "chain-relay", crashReason: "Hull Collision" })).toEqual({
-      label: "Failure debrief",
-      value: "Relay lane clipped",
+      label: "Cause",
+      value: "Relay lane",
       tone: "impact"
     });
     expect(buildCrashDebrief({ contractId: "asteroid-sprint", crashReason: "Hull Collision" })).toEqual({
-      label: "Failure debrief",
-      value: "Asteroid field clipped",
+      label: "Cause",
+      value: "Asteroid field",
       tone: "impact"
     });
   });
 
   it("falls back to an insurance review debrief", () => {
     expect(buildCrashDebrief({})).toEqual({
-      label: "Failure debrief",
-      value: "Insurance review",
+      label: "Cause",
+      value: "Review",
       tone: "review"
     });
   });

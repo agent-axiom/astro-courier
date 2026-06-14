@@ -889,6 +889,19 @@ button {
   opacity: 0.95;
 }
 
+.boost-button-fuel:disabled {
+  border-color: rgba(255, 111, 145, 0.5);
+  background: rgba(58, 22, 38, 0.62);
+  color: rgba(255, 212, 223, 0.82);
+  box-shadow:
+    0 0 0 1px rgba(255, 111, 145, 0.12) inset,
+    0 0 18px rgba(255, 111, 145, 0.12);
+}
+
+.boost-button-fuel[data-boost-badge]::after {
+  color: #ffd4df;
+}
+
 .brake-button {
   position: relative;
   isolation: isolate;
@@ -3862,6 +3875,27 @@ button {
 
 .result-overlay p {
   color: #c9d8f2;
+}
+
+.result-overlay-focused {
+  width: min(340px, calc(100vw - 32px));
+  gap: 10px;
+  padding: 18px;
+}
+
+.result-overlay-focused .result-coach {
+  grid-template-columns: 18px 1fr;
+  min-height: 44px;
+  padding: 10px 12px;
+}
+
+.result-overlay-focused .result-coach span {
+  display: none;
+}
+
+.result-overlay-focused .result-coach strong {
+  font-size: 0.95rem;
+  text-align: left;
 }
 
 .result-icon {

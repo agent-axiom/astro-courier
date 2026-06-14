@@ -7,24 +7,24 @@ export type CrashReasonLabelInput = {
 };
 
 export type CrashDebrief = {
-  label: "Failure debrief";
+  label: "Cause";
   value: string;
   tone: "dock" | "impact" | "review";
 };
 
 export function buildCrashReasonLabel(input: CrashReasonLabelInput): string {
   if (input.crashReason === "Hard Landing") {
-    return "Hard landing: slow and align before contact";
+    return "Landed too fast";
   }
 
   if (input.crashReason === "Hull Collision") {
     return input.contractId === "chain-relay"
-      ? "Hull collision: widen relay clearance"
+      ? "Clipped relay lane"
       : input.contractId === "asteroid-sprint"
-      ? "Hull collision: widen asteroid clearance"
+      ? "Clipped asteroid field"
       : input.contractId === "return-leg"
-      ? "Hull collision: widen reverse arc"
-      : "Hull collision: stay outside gravity wells";
+      ? "Clipped return arc"
+      : "Clipped gravity well";
   }
 
   return input.landingRating ?? "Insurance Event";
@@ -33,30 +33,30 @@ export function buildCrashReasonLabel(input: CrashReasonLabelInput): string {
 export function buildCrashDebrief(input: CrashReasonLabelInput): CrashDebrief {
   if (input.crashReason === "Hard Landing") {
     return {
-      label: "Failure debrief",
-      value: "Brake window missed",
+      label: "Cause",
+      value: "Too fast",
       tone: "dock"
     };
   }
 
   if (input.crashReason === "Hull Collision") {
     return {
-      label: "Failure debrief",
+      label: "Cause",
       value:
         input.contractId === "chain-relay"
-          ? "Relay lane clipped"
+          ? "Relay lane"
           : input.contractId === "asteroid-sprint"
-          ? "Asteroid field clipped"
+          ? "Asteroid field"
           : input.contractId === "return-leg"
-          ? "Reverse arc clipped"
-          : "Gravity well clipped",
+          ? "Return arc"
+          : "Gravity well",
       tone: "impact"
     };
   }
 
   return {
-    label: "Failure debrief",
-    value: "Insurance review",
+    label: "Cause",
+    value: "Review",
     tone: "review"
   };
 }

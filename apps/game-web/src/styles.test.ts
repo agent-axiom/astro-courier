@@ -17,6 +17,12 @@ describe("responsive game layout CSS", () => {
     expect(styles).toMatch(/\.result-coach-success\s*\{[\s\S]*box-shadow: 0 0 24px rgba\(142, 230, 184, 0\.1\);/);
   });
 
+  it("defines a compact focused result overlay for crash lessons", () => {
+    expect(styles).toContain(".result-overlay-focused");
+    expect(styles).toMatch(/\.result-overlay-focused[\s\S]*width: min\(340px, calc\(100vw - 32px\)\);/);
+    expect(styles).toMatch(/\.result-overlay-focused \.result-coach[\s\S]*grid-template-columns: 18px 1fr;/);
+  });
+
   it("defines a dedicated fuel-clutch screen feedback accent", () => {
     expect(styles).toContain(".screen-feedback-accent-fuel");
     expect(styles).toContain("screen-feedback-fuel-surge");
@@ -33,6 +39,11 @@ describe("responsive game layout CSS", () => {
 
   it("defines a dedicated brake stress control tone", () => {
     expect(styles).toContain(".brake-button-stress");
+    expect(styles).toContain("rgba(255, 111, 145");
+  });
+
+  it("defines a dedicated dry-fuel boost control tone", () => {
+    expect(styles).toContain(".boost-button-fuel");
     expect(styles).toContain("rgba(255, 111, 145");
   });
 
