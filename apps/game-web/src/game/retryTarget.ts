@@ -1,5 +1,6 @@
 import type { CrashReason, RunMedal, RunStatus, ScoreBreakdown } from "@astro-courier/shared";
 import type { BestRun } from "./bestRun";
+import { COMET_RESERVE_MIN_RATIO, formatCometReserveShortfallFuelGoal } from "./comet";
 
 export type RetryTargetInput = {
   status: RunStatus;
@@ -53,7 +54,6 @@ export type RetryActionBriefing = {
 };
 
 const cleanCargoDamageLimit = 0.02;
-const cometReserveMinRatio = 0.75;
 const cometReserveNearMissRatio = 0.6;
 const dangerPayMinBonus = 300;
 const perfectLandingBonus = 300;
@@ -226,7 +226,7 @@ export function buildResultRetryAction(target: RetryTarget): ResultRetryAction {
   if (target.value.startsWith("Repeat ")) {
     return { label: "Repeat Line", tone: "opportunity", mode: "restart-run" };
   }
-  if (target.value === "Bank 75% fuel for comet" || target.value === "Perfect dock for comet") {
+  if (isCometRetryTarget(target.value)) {
     return { label: "Chase Comet", tone: "opportunity", mode: "restart-run" };
   }
   if (target.value === "Restore clean cargo") {
@@ -396,15 +396,15 @@ function buildCometNearMissTarget(input: RetryTargetInput): RetryTarget | undefi
   }
 
   const fuelRatio = input.fuel / input.maxFuel;
-  if (fuelRatio >= cometReserveNearMissRatio && fuelRatio < cometReserveMinRatio) {
+  if (fuelRatio >= cometReserveNearMissRatio && fuelRatio < COMET_RESERVE_MIN_RATIO) {
     return {
       label: "Retry target",
-      value: "Bank 75% fuel for comet",
+      value: `Bank ${formatCometReserveShortfallFuelGoal(fuelRatio)} for comet`,
       tone: "opportunity"
     };
   }
 
-  if (fuelRatio >= cometReserveMinRatio && (input.landingBonus ?? 0) < perfectLandingBonus) {
+  if (fuelRatio >= COMET_RESERVE_MIN_RATIO && (input.landingBonus ?? 0) < perfectLandingBonus) {
     return {
       label: "Retry target",
       value: "Perfect dock for comet",
@@ -413,4 +413,8 @@ function buildCometNearMissTarget(input: RetryTargetInput): RetryTarget | undefi
   }
 
   return undefined;
+}
+
+function isCometRetryTarget(value: string): boolean {
+  return value === "Perfect dock for comet" || (value.startsWith("Bank +") && value.endsWith("% fuel for comet"));
 }

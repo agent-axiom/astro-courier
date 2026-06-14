@@ -6,7 +6,12 @@ import {
   PERFECT_APPROACH_STYLE_BONUS
 } from "@astro-courier/simulation";
 import type { HudState } from "./GameShell";
-import { COMET_RESERVE_MIN_RATIO, COMET_RESERVE_WARNING_RATIO, isLiveCometDockArmed } from "./comet";
+import {
+  COMET_RESERVE_MIN_RATIO,
+  COMET_RESERVE_WARNING_RATIO,
+  formatCometReserveShortfallFuelGoal,
+  isLiveCometDockArmed
+} from "./comet";
 import { STYLE_CHAIN_URGENT_SECONDS } from "./style";
 
 const cometReserveNearMissRatio = 0.6;
@@ -260,7 +265,7 @@ function buildDeliveredCometNearMissMessage(hud: HudState): string | undefined {
 
   const reserveRatio = hud.fuel / hud.maxFuel;
   if (reserveRatio >= cometReserveNearMissRatio && reserveRatio < COMET_RESERVE_MIN_RATIO) {
-    return "Express finish logged. Bank 75% fuel next run to convert it into a comet finish.";
+    return `Express finish logged. Bank ${formatCometReserveShortfallFuelGoal(reserveRatio)} next run to convert it into a comet finish.`;
   }
 
   if (reserveRatio >= COMET_RESERVE_MIN_RATIO && hud.scoreBreakdown.landingBonus < perfectLandingBonus) {

@@ -345,7 +345,7 @@ describe("result coach", () => {
       })
     ).toEqual({
       label: "Next run",
-      value: "Bank 75% fuel for comet",
+      value: "Bank +3% fuel for comet",
       tone: "opportunity"
     });
   });

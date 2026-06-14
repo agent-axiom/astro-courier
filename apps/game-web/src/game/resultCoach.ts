@@ -1,4 +1,5 @@
 import type { CrashReason, ObjectivePhase, RunGrade, RunMedal, RunStatus, ScoreBreakdown } from "@astro-courier/shared";
+import { COMET_RESERVE_MIN_RATIO, formatCometReserveShortfallFuelGoal } from "./comet";
 
 export type ResultCoachInput = {
   status: RunStatus;
@@ -100,7 +101,6 @@ export type ResultActionsLayoutInput = {
 export type ResultActionsLayout = "solo" | "pair";
 
 const cleanCargoDamageLimit = 0.02;
-const cometReserveMinRatio = 0.75;
 const cometReserveNearMissRatio = 0.6;
 const dangerPayMinBonus = 300;
 const perfectLandingBonus = 300;
@@ -332,15 +332,15 @@ function buildCometNearMissCoach(input: ResultCoachInput, fuelRatio: number): Re
     return undefined;
   }
 
-  if (fuelRatio >= cometReserveNearMissRatio && fuelRatio < cometReserveMinRatio) {
+  if (fuelRatio >= cometReserveNearMissRatio && fuelRatio < COMET_RESERVE_MIN_RATIO) {
     return {
       label: "Next run",
-      value: "Bank 75% fuel for comet",
+      value: `Bank ${formatCometReserveShortfallFuelGoal(fuelRatio)} for comet`,
       tone: "opportunity"
     };
   }
 
-  if (fuelRatio >= cometReserveMinRatio && input.scoreBreakdown.landingBonus < perfectLandingBonus) {
+  if (fuelRatio >= COMET_RESERVE_MIN_RATIO && input.scoreBreakdown.landingBonus < perfectLandingBonus) {
     return {
       label: "Next run",
       value: "Perfect dock for comet",

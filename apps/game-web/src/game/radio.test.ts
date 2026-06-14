@@ -530,7 +530,7 @@ describe("radio feedback copy", () => {
         cargoDamage: 0,
         scoreBreakdown: { ...baseHud.scoreBreakdown, styleBonus: 180, landingBonus: 300 }
       })
-    ).toContain("Bank 75% fuel");
+    ).toContain("Bank +3% fuel");
     expect(
       buildRadioMessage({
         ...baseHud,

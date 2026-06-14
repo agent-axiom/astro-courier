@@ -304,7 +304,7 @@ describe("result retry target", () => {
       })
     ).toEqual({
       label: "Retry target",
-      value: "Bank 75% fuel for comet",
+      value: "Bank +3% fuel for comet",
       tone: "opportunity"
     });
     expect(
@@ -735,7 +735,7 @@ describe("result retry action copy", () => {
   });
 
   it("turns comet near-miss targets into a comet chase call to action", () => {
-    expect(buildResultRetryAction({ label: "Retry target", value: "Bank 75% fuel for comet", tone: "opportunity" })).toEqual({
+    expect(buildResultRetryAction({ label: "Retry target", value: "Bank +3% fuel for comet", tone: "opportunity" })).toEqual({
       label: "Chase Comet",
       tone: "opportunity",
       mode: "restart-run"
@@ -898,7 +898,7 @@ describe("result retry action briefing", () => {
     expect(
       buildRetryActionBriefing(
         { label: "Chase Comet", tone: "opportunity", mode: "restart-run" },
-        { label: "Retry target", value: "Bank 75% fuel for comet", tone: "opportunity" }
+        { label: "Retry target", value: "Bank +3% fuel for comet", tone: "opportunity" }
       )
     ).toEqual({
       label: "Next run",
