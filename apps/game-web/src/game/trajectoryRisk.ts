@@ -7,6 +7,7 @@ export type TrajectoryRiskForecast = {
   level: TrajectoryRiskLevel;
   seconds: number;
   distance: number;
+  clearance: number;
   radius: number;
 };
 
@@ -52,6 +53,7 @@ function forecastFor(
     level,
     seconds: round((sampleIndex + 1) * Math.max(0, sampleIntervalSeconds), 1),
     distance: round(distance, 3),
+    clearance: round(distance - radius, 3),
     radius
   };
 }

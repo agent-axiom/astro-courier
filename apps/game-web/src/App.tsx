@@ -192,6 +192,7 @@ const initialHud: HudState = {
   hazardSeverity: undefined,
   trajectoryRiskLevel: undefined,
   trajectoryRiskSeconds: undefined,
+  trajectoryRiskClearance: undefined,
   runTrail: [],
   replayFrameCount: 0,
   replayChecksum: undefined
@@ -829,6 +830,7 @@ export function App() {
     speed: hud.speed,
     trajectoryRiskLevel: hud.trajectoryRiskLevel,
     trajectoryRiskSeconds: hud.trajectoryRiskSeconds,
+    trajectoryRiskClearance: hud.trajectoryRiskClearance,
     gravitySlingDistance: hud.gravitySlingDistance,
     gravitySlingReady: hud.gravitySlingReady,
     gravitySlingSpeedThreshold: hud.gravitySlingSpeedThreshold,

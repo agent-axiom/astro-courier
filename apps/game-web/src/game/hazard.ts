@@ -12,6 +12,7 @@ export type HazardPressureInput = {
   speed?: number;
   trajectoryRiskLevel?: "near" | "inside";
   trajectoryRiskSeconds?: number;
+  trajectoryRiskClearance?: number;
   gravitySlingDistance?: number;
   gravitySlingReady?: boolean;
   gravitySlingSpeedThreshold?: number;
@@ -102,10 +103,11 @@ function buildTrajectoryRiskPressureReadout(input: HazardPressureInput): HazardP
   }
 
   const eta = input.trajectoryRiskSeconds === undefined ? "soon" : `${input.trajectoryRiskSeconds.toFixed(1)}s`;
+  const clearance = formatTrajectoryClearance(input.trajectoryRiskClearance);
   if (input.trajectoryRiskLevel === "inside") {
     return {
       label: "Risk pulse",
-      value: `Collision vector ${eta}`,
+      value: `Collision vector ${eta}${clearance}`,
       tone: "danger"
     };
   }
@@ -114,7 +116,16 @@ function buildTrajectoryRiskPressureReadout(input: HazardPressureInput): HazardP
   const fastThread = (input.speed ?? 0) >= HAZARD_THREAD_SPEED_THRESHOLD;
   return {
     label: "Risk pulse",
-    value: cargoDamage <= 0.02 ? `${fastThread ? "Thread" : "Skim"} vector ${eta}` : `Hazard vector ${eta}`,
+    value: cargoDamage <= 0.02 ? `${fastThread ? "Thread" : "Skim"} vector ${eta}${clearance}` : `Hazard vector ${eta}${clearance}`,
     tone: cargoDamage <= 0.02 ? "opportunity" : "warning"
   };
+}
+
+function formatTrajectoryClearance(clearance: number | undefined): string {
+  if (clearance === undefined) {
+    return "";
+  }
+
+  const meters = Math.round(Math.abs(clearance));
+  return clearance < 0 ? ` / breach ${meters}m` : ` / margin ${meters}m`;
 }

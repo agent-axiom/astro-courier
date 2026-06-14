@@ -40,6 +40,7 @@ describe("trajectory hazard risk forecast", () => {
       level: "inside",
       seconds: 0.3,
       distance: 8,
+      clearance: -2,
       radius: 10
     });
   });
@@ -61,6 +62,7 @@ describe("trajectory hazard risk forecast", () => {
       level: "near",
       seconds: 0.2,
       distance: 14,
+      clearance: 4,
       radius: 10
     });
   });

@@ -98,6 +98,33 @@ describe("hazard pressure readout", () => {
     });
   });
 
+  it("adds projected hazard clearance when the forecast has a margin", () => {
+    expect(
+      buildHazardPressureReadout({
+        trajectoryRiskLevel: "inside",
+        trajectoryRiskSeconds: 1.2,
+        trajectoryRiskClearance: -7.4,
+        cargoDamage: 0
+      })
+    ).toEqual({
+      label: "Risk pulse",
+      value: "Collision vector 1.2s / breach 7m",
+      tone: "danger"
+    });
+    expect(
+      buildHazardPressureReadout({
+        trajectoryRiskLevel: "near",
+        trajectoryRiskSeconds: 0.8,
+        trajectoryRiskClearance: 4.3,
+        cargoDamage: 0
+      })
+    ).toEqual({
+      label: "Risk pulse",
+      value: "Skim vector 0.8s / margin 4m",
+      tone: "opportunity"
+    });
+  });
+
   it("turns a clean near-field forecast into a skim vector", () => {
     expect(
       buildHazardPressureReadout({

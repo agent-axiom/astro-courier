@@ -394,6 +394,7 @@ describe("GameShell lifecycle", () => {
     expect(onHud.mock.calls.at(-1)?.[0].hazardDangerLevel).toBeUndefined();
     expect(onHud.mock.calls.at(-1)?.[0].trajectoryRiskLevel).toBe("inside");
     expect(onHud.mock.calls.at(-1)?.[0].trajectoryRiskSeconds).toBeGreaterThan(0);
+    expect(onHud.mock.calls.at(-1)?.[0].trajectoryRiskClearance).toBeLessThan(0);
   });
 
   it("publishes contract-specific briefing copy for preflight selection", async () => {

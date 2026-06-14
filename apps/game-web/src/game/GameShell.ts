@@ -86,6 +86,7 @@ export type HudState = {
   hazardSeverity?: number;
   trajectoryRiskLevel?: TrajectoryRiskLevel;
   trajectoryRiskSeconds?: number;
+  trajectoryRiskClearance?: number;
   runTrail: Vec2[];
   gravitySlingDistance?: number;
   gravitySlingReady?: boolean;
@@ -431,6 +432,7 @@ export class GameShell {
       gravitySlingStyleBonus: snapshot.gravitySlingOpportunity?.styleBonus,
       trajectoryRiskLevel: trajectoryRisk?.level,
       trajectoryRiskSeconds: trajectoryRisk?.seconds,
+      trajectoryRiskClearance: trajectoryRisk?.clearance,
       runTrail: this.runTrail.map((point) => ({ ...point })),
       replayFrameCount: this.inputFrames.length,
       replayChecksum
