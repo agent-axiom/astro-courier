@@ -45,6 +45,12 @@ function formatCometReserveBufferDetail(fuelReserve: number): string {
   return `Reserve ${reservePercent}% / ${bufferPercent}% burn buffer`;
 }
 
+function formatCometReserveShortfallDetail(fuelReserve: number): string {
+  const reservePercent = Math.max(0, Math.round(fuelReserve * 100));
+  const shortPercent = Math.max(0, Math.round((COMET_RESERVE_MIN_RATIO - fuelReserve) * 100));
+  return `Reserve ${reservePercent}% / ${shortPercent}% short`;
+}
+
 export function isLiveCometDockArmed(input: LiveCometDockInput): boolean {
   const fuelReserve = input.maxFuel > 0 ? input.fuel / input.maxFuel : 0;
   return (
@@ -83,8 +89,8 @@ export function buildCometRunReadout(input: CometRunReadoutInput): CometRunReado
   if (fuelReserve < COMET_RESERVE_MIN_RATIO) {
     return {
       label: "Comet run",
-      value: "Reserve low",
-      detail: reserveDetail,
+      value: "Reserve short",
+      detail: formatCometReserveShortfallDetail(fuelReserve),
       tone: "lost"
     };
   }

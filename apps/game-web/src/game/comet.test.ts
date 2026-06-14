@@ -174,7 +174,7 @@ describe("live comet run readout", () => {
     });
   });
 
-  it("calls out low reserve after pace and cargo stay clean", () => {
+  it("shows the exact reserve shortfall after pace and cargo stay clean", () => {
     expect(
       buildCometRunReadout({
         status: "flying",
@@ -186,8 +186,8 @@ describe("live comet run readout", () => {
       })
     ).toEqual({
       label: "Comet run",
-      value: "Reserve low",
-      detail: "Reserve 74% / need 75%",
+      value: "Reserve short",
+      detail: "Reserve 74% / 1% short",
       tone: "lost"
     });
   });
