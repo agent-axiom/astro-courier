@@ -175,6 +175,9 @@ export function buildRadioMessage(hud: HudState): string {
     hud.maxFuel > 0
   ) {
     const fuelReserve = hud.fuel / hud.maxFuel;
+    if (fuelReserve < COMET_RESERVE_MIN_RATIO) {
+      return `Comet reserve lost. Bank ${formatCometReserveShortfallFuelGoal(fuelReserve)} on retry and finish clean.`;
+    }
     if (fuelReserve >= COMET_RESERVE_MIN_RATIO && fuelReserve < COMET_RESERVE_WARNING_RATIO) {
       return "Comet reserve tight. Coast the line and save one clean dock burn.";
     }

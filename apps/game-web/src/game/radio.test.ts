@@ -321,6 +321,21 @@ describe("radio feedback copy", () => {
     ).toContain("Comet reserve tight");
   });
 
+  it("calls out lost comet reserve before generic delivery guidance", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        paceTier: "gold",
+        fuel: 74,
+        maxFuel: 100,
+        cargoDamage: 0,
+        landingStatus: "approach"
+      })
+    ).toContain("Comet reserve lost. Bank +1% fuel");
+  });
+
   it("celebrates an armed comet dock before generic landing guidance", () => {
     expect(
       buildRadioMessage({
