@@ -28,6 +28,7 @@ describe("game haptics", () => {
     expect(hapticPatternForEvents(["thread-window"])).toEqual([10, 10]);
     expect(hapticPatternForEvents(["trajectory-clear"])).toEqual([8, 8]);
     expect(hapticPatternForEvents(["hazard-contact"])).toEqual([30, 32, 36]);
+    expect(hapticPatternForEvents(["thread-window", "chain-critical"])).toEqual([12, 24, 12, 24]);
     expect(hapticPatternForEvents(["style-hit", "ship-crash"])).toEqual([45, 45, 65]);
     expect(hapticPatternForEvents([])).toBeUndefined();
   });

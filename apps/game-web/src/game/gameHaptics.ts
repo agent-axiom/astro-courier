@@ -26,6 +26,9 @@ export function hapticPatternForEvents(events: readonly GameAudioEvent[]): Hapti
   if (events.includes("trajectory-warning")) {
     return [18, 24, 18];
   }
+  if (events.includes("chain-critical")) {
+    return [12, 24, 12, 24];
+  }
   if (events.includes("trajectory-caution")) {
     return [8, 12];
   }
@@ -76,9 +79,6 @@ export function hapticPatternForEvents(events: readonly GameAudioEvent[]): Hapti
   }
   if (events.includes("pb-pressure")) {
     return [12, 18, 12];
-  }
-  if (events.includes("chain-critical")) {
-    return [12, 24, 12, 24];
   }
   if (events.includes("chain-save")) {
     return [12, 14, 12];
