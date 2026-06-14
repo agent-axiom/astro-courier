@@ -229,6 +229,34 @@ describe("run action feed", () => {
     ).toEqual([]);
   });
 
+  it("announces early clutch tempo actions before the critical chain warning", () => {
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, styleMultiplier: 1.5, styleChainSecondsRemaining: 1.4 },
+        { ...baseSnapshot, styleMultiplier: 1.5, styleChainSecondsRemaining: 1.1 }
+      )
+    ).toEqual([
+      {
+        label: "Tempo action",
+        value: "Cash chain",
+        tone: "warning"
+      }
+    ]);
+
+    expect(
+      deriveRunFeedUpdates(
+        { ...baseSnapshot, styleMultiplier: 1.5, styleChainSecondsRemaining: 1.4 },
+        { ...baseSnapshot, styleMultiplier: 1.5, styleChainSecondsRemaining: 0.8 }
+      )
+    ).toEqual([
+      {
+        label: "Chain fading",
+        value: "Save in 0.8s",
+        tone: "warning"
+      }
+    ]);
+  });
+
   it("derives medal-aware terminal updates for strong deliveries", () => {
     expect(deriveRunFeedUpdates(baseSnapshot, { ...baseSnapshot, status: "delivered", medal: "comet" })).toEqual([
       {

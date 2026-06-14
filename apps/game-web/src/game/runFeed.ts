@@ -481,16 +481,20 @@ function buildRouteTempoShiftUpdate(previous: RunFeedSnapshot, current: RunFeedS
   if (
     !previousAction ||
     !currentAction ||
-    currentAction.tone !== "flow" ||
     (previousAction.tone === currentAction.tone && previousAction.value === currentAction.value)
   ) {
+    return undefined;
+  }
+
+  const feedTone = buildRouteTempoActionFeedTone(currentAction.tone);
+  if (!feedTone) {
     return undefined;
   }
 
   return {
     label: "Tempo action",
     value: currentAction.value,
-    tone: "success"
+    tone: feedTone
   };
 }
 
@@ -513,6 +517,18 @@ function buildRouteTempoFromSnapshot(snapshot: RunFeedSnapshot) {
     styleMultiplier: snapshot.styleMultiplier,
     styleChainSecondsRemaining: snapshot.styleChainSecondsRemaining
   });
+}
+
+function buildRouteTempoActionFeedTone(tone: NonNullable<ReturnType<typeof buildRouteTempoAction>>["tone"]): RunFeedTone | undefined {
+  if (tone === "flow") {
+    return "success";
+  }
+
+  if (tone === "clutch") {
+    return "warning";
+  }
+
+  return undefined;
 }
 
 function hasSpentNoBrakeFinesse(previous: RunFeedSnapshot, current: RunFeedSnapshot): boolean {
