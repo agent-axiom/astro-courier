@@ -361,6 +361,40 @@ describe("run action feed", () => {
     ).toEqual([]);
   });
 
+  it("announces tight comet reserve with the remaining burn buffer", () => {
+    const cometReserveSnapshot = {
+      ...baseSnapshot,
+      paceTier: "gold" as const,
+      fuel: 90,
+      maxFuel: 100,
+      cargoDamage: 0
+    };
+
+    expect(deriveRunFeedUpdates(cometReserveSnapshot, { ...cometReserveSnapshot, fuel: 78 })).toEqual([
+      {
+        label: "Comet reserve",
+        value: "3% burn buffer",
+        tone: "warning"
+      }
+    ]);
+    expect(deriveRunFeedUpdates({ ...cometReserveSnapshot, fuel: 78 }, { ...cometReserveSnapshot, fuel: 77 })).toEqual([]);
+    expect(deriveRunFeedUpdates(cometReserveSnapshot, { ...cometReserveSnapshot, fuel: 74 })).toEqual([]);
+    expect(deriveRunFeedUpdates(cometReserveSnapshot, { ...cometReserveSnapshot, paceTier: "silver", fuel: 78 })).toEqual([
+      {
+        label: "Gold missed",
+        value: "Silver window live",
+        tone: "warning"
+      }
+    ]);
+    expect(deriveRunFeedUpdates(cometReserveSnapshot, { ...cometReserveSnapshot, cargoDamage: 0.05, fuel: 78 })).toEqual([
+      {
+        label: "Cargo exposed",
+        value: "Protect the load",
+        tone: "warning"
+      }
+    ]);
+  });
+
   it("announces when a perfect approach setup becomes ready outside comet conditions", () => {
     const setupSnapshot = {
       ...baseSnapshot,
