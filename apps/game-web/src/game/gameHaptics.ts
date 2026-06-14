@@ -86,6 +86,9 @@ export function hapticPatternForEvents(events: readonly GameAudioEvent[]): Hapti
   if (events.includes("route-resume")) {
     return [8, 10];
   }
+  if (events.includes("tempo-flow")) {
+    return [8, 8, 12];
+  }
   if (events.includes("last-drop-armed")) {
     return [18, 18, 28];
   }

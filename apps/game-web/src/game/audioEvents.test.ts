@@ -533,4 +533,32 @@ describe("HUD audio events", () => {
       )
     ).toEqual([]);
   });
+
+  it("adds a light tempo-flow cue only when no sharper event owns the frame", () => {
+    expect(
+      deriveHudAudioEvents(
+        { ...baseSnapshot, speed: 30, targetDistance: 300 },
+        { ...baseSnapshot, speed: 36, styleMultiplier: 1.5, styleChainSecondsRemaining: 2.4 }
+      )
+    ).toEqual(["tempo-flow"]);
+
+    expect(
+      deriveHudAudioEvents(
+        {
+          ...baseSnapshot,
+          objectivePhase: "delivery",
+          landingStatus: "ready",
+          cargoDamage: 0,
+          approachStreakSeconds: 0.8
+        },
+        {
+          ...baseSnapshot,
+          objectivePhase: "delivery",
+          landingStatus: "ready",
+          cargoDamage: 0,
+          approachStreakSeconds: 1.2
+        }
+      )
+    ).toEqual(["perfect-approach-ready"]);
+  });
 });

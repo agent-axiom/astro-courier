@@ -50,6 +50,7 @@ const eventTones: Record<GameAudioEvent, { frequency: number; duration: number; 
   "antimatter-armed": { frequency: 1060, duration: 0.11, gain: 0.048 },
   "route-launch": { frequency: 640, duration: 0.15, gain: 0.048 },
   "route-resume": { frequency: 760, duration: 0.09, gain: 0.04 },
+  "tempo-flow": { frequency: 920, duration: 0.08, gain: 0.04 },
   "launch-burst": { frequency: 820, duration: 0.12, gain: 0.05 },
   "cargo-loaded": { frequency: 660, duration: 0.08, gain: 0.042 },
   "pickup-lineup": { frequency: 740, duration: 0.07, gain: 0.042 },

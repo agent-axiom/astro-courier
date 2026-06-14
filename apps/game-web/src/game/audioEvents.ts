@@ -2,6 +2,7 @@ import { HAZARD_THREAD_SPEED_THRESHOLD, LAST_DROP_FUEL_RATIO, PERFECT_APPROACH_S
 import type { LandingGuidanceStatus, ObjectivePhase, RunStatus } from "@astro-courier/shared";
 import { COMET_RESERVE_MIN_RATIO, COMET_RESERVE_WARNING_RATIO, isLiveCometDockArmed } from "./comet";
 import type { ContractPaceTier } from "./pace";
+import { buildRouteTempo } from "./tempo";
 
 export type GameAudioEvent =
   | "delivery-complete"
@@ -11,6 +12,7 @@ export type GameAudioEvent =
   | "antimatter-armed"
   | "route-launch"
   | "route-resume"
+  | "tempo-flow"
   | "launch-burst"
   | "cargo-loaded"
   | "pickup-lineup"
@@ -231,7 +233,42 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
     events.push("trajectory-clear");
   }
 
+  if (events.length === 0 && hasEnteredRouteTempoFlow(previous, current)) {
+    events.push("tempo-flow");
+  }
+
   return events;
+}
+
+function hasEnteredRouteTempoFlow(previous: HudAudioSnapshot | undefined, current: HudAudioSnapshot): boolean {
+  if (!previous) {
+    return false;
+  }
+
+  const previousTempo = buildRouteTempo(toRouteTempoAudioInput(previous));
+  const currentTempo = buildRouteTempo(toRouteTempoAudioInput(current));
+  return previousTempo?.tone !== "flow" && currentTempo?.tone === "flow";
+}
+
+function toRouteTempoAudioInput(snapshot: HudAudioSnapshot): Parameters<typeof buildRouteTempo>[0] {
+  return {
+    status: snapshot.status,
+    preflightOpen: false,
+    speed: snapshot.speed ?? 0,
+    fuelRatio: snapshot.maxFuel > 0 ? snapshot.fuel / snapshot.maxFuel : 0,
+    targetDistance: snapshot.targetDistance,
+    objectivePhase: snapshot.objectivePhase,
+    paceTier: snapshot.paceTier,
+    paceSecondsRemaining: snapshot.paceSecondsRemaining,
+    cargoDamage: snapshot.cargoDamage,
+    landingStatus: snapshot.landingStatus,
+    perfectDockReady: snapshot.perfectDockReady,
+    approachStreakSeconds: snapshot.approachStreakSeconds,
+    hazardDangerLevel: snapshot.hazardDangerLevel,
+    trajectoryRiskLevel: snapshot.trajectoryRiskLevel,
+    styleMultiplier: snapshot.styleMultiplier,
+    styleChainSecondsRemaining: snapshot.styleChainSecondsRemaining
+  };
 }
 
 function isThreadWindowOpen(snapshot: HudAudioSnapshot | undefined): boolean {
