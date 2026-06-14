@@ -10,6 +10,8 @@ export type ReplayCaptureReadoutInput = {
   status: RunStatus;
   replayFrameCount: number;
   hasGhostTrail?: boolean;
+  score?: number;
+  bestRunScore?: number;
 };
 
 export function buildReplayCaptureReadout(input: ReplayCaptureReadoutInput): ReplayCaptureReadout | undefined {
@@ -18,9 +20,11 @@ export function buildReplayCaptureReadout(input: ReplayCaptureReadoutInput): Rep
   }
 
   if (input.hasGhostTrail) {
+    const ghostPressure = buildGhostPressureCopy(input);
+    const inputCopy = `${input.replayFrameCount} ${input.replayFrameCount === 1 ? "input" : "inputs"}`;
     return {
       label: "Ghost REC",
-      value: `${input.replayFrameCount} chase ${input.replayFrameCount === 1 ? "input" : "inputs"}`,
+      value: ghostPressure ? `${ghostPressure} / ${inputCopy}` : `${input.replayFrameCount} chase ${input.replayFrameCount === 1 ? "input" : "inputs"}`,
       tone: "ghost"
     };
   }
@@ -30,4 +34,17 @@ export function buildReplayCaptureReadout(input: ReplayCaptureReadoutInput): Rep
     value: `${input.replayFrameCount} ${input.replayFrameCount === 1 ? "input" : "inputs"}`,
     tone: "live"
   };
+}
+
+function buildGhostPressureCopy(input: ReplayCaptureReadoutInput): string | undefined {
+  if (input.score === undefined || input.bestRunScore === undefined) {
+    return undefined;
+  }
+
+  const scoreDelta = Math.round(input.score - input.bestRunScore);
+  if (scoreDelta >= 0) {
+    return `+${scoreDelta} ghost lead`;
+  }
+
+  return `${Math.abs(scoreDelta)} behind ghost`;
 }

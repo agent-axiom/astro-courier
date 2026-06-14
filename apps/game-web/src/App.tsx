@@ -578,7 +578,9 @@ export function App() {
   const replayCaptureReadout = buildReplayCaptureReadout({
     status: hud.status,
     replayFrameCount: hud.replayFrameCount,
-    hasGhostTrail: (bestRun?.ghostTrail?.length ?? 0) >= 2
+    hasGhostTrail: (bestRun?.ghostTrail?.length ?? 0) >= 2,
+    score: hud.score,
+    bestRunScore: bestRun?.score
   });
   const audioTogglePresentation = buildAudioTogglePresentation(audioMuted);
   const cometRunReadout = buildCometRunReadout({

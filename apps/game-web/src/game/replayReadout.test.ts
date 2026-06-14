@@ -22,6 +22,36 @@ describe("replay capture readout", () => {
     });
   });
 
+  it("adds live ghost score pressure when a saved trail is loaded", () => {
+    expect(
+      buildReplayCaptureReadout({
+        status: "flying",
+        replayFrameCount: 3,
+        hasGhostTrail: true,
+        score: 3440,
+        bestRunScore: 3290
+      })
+    ).toEqual({
+      label: "Ghost REC",
+      value: "+150 ghost lead / 3 inputs",
+      tone: "ghost"
+    });
+
+    expect(
+      buildReplayCaptureReadout({
+        status: "flying",
+        replayFrameCount: 3,
+        hasGhostTrail: true,
+        score: 3105,
+        bestRunScore: 3290
+      })
+    ).toEqual({
+      label: "Ghost REC",
+      value: "185 behind ghost / 3 inputs",
+      tone: "ghost"
+    });
+  });
+
   it("stays hidden before meaningful replay input exists", () => {
     expect(buildReplayCaptureReadout({ status: "flying", replayFrameCount: 0 })).toBeUndefined();
     expect(buildReplayCaptureReadout({ status: "paused", replayFrameCount: 4 })).toBeUndefined();
