@@ -169,7 +169,7 @@ describe("contract rotation", () => {
     ).toEqual({
       label: "Daily status",
       value: "Ghost PB 2960 / 25.8s",
-      tone: "chase"
+      tone: "ghost"
     });
     expect(buildDailyDispatchStatus(dispatch, { medal: "comet", score: 3260, elapsedSeconds: 27.4 })).toEqual({
       label: "Daily status",

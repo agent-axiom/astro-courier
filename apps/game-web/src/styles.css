@@ -2113,6 +2113,11 @@ button {
   color: #ffe19a;
 }
 
+.daily-dispatch-ghost {
+  background: rgba(124, 225, 255, 0.15);
+  color: #d8fbff;
+}
+
 .daily-dispatch-comet {
   background: rgba(255, 209, 102, 0.16);
   color: #ffe19a;

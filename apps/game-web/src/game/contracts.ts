@@ -34,7 +34,7 @@ export type DailyDispatchBestRun = {
 export type DailyDispatchStatus = {
   label: "Daily status";
   value: string;
-  tone: "open" | "chase" | "comet";
+  tone: "open" | "chase" | "ghost" | "comet";
 };
 
 export type DailyDispatchReset = {
@@ -164,7 +164,7 @@ export function buildDailyDispatchStatus(
     return {
       label: "Daily status",
       value: dailyBest,
-      tone: bestRun.medal === "comet" ? "comet" : "chase"
+      tone: bestRun.medal === "comet" ? "comet" : hasReplayTrail(bestRun) ? "ghost" : "chase"
     };
   }
 
@@ -200,13 +200,17 @@ function formatDailyBestRun(bestRun: DailyDispatchBestRun): string | undefined {
   if (bestRun.medal === "comet") {
     return `Comet PB ${result}`;
   }
-  if ((bestRun.ghostTrail?.length ?? 0) >= 2) {
+  if (hasReplayTrail(bestRun)) {
     return `Ghost PB ${result}`;
   }
   if (bestRun.medal === "gold") {
     return `Gold PB ${result}`;
   }
   return `PB ${result}`;
+}
+
+function hasReplayTrail(bestRun: DailyDispatchBestRun): boolean {
+  return (bestRun.ghostTrail?.length ?? 0) >= 2;
 }
 
 export function buildDailyDispatchReset(dispatch: DailyDispatch | undefined, now: Date): DailyDispatchReset | undefined {
