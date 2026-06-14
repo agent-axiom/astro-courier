@@ -1553,6 +1553,15 @@ button {
   color: #ffe19a;
 }
 
+.style-target-clutch {
+  border: 1px solid rgba(255, 209, 102, 0.28);
+  background:
+    linear-gradient(90deg, rgba(255, 77, 109, 0.14), rgba(255, 209, 102, 0.16)),
+    rgba(28, 16, 18, 0.34);
+  color: #fff1c7;
+  box-shadow: inset 0 0 22px rgba(255, 77, 109, 0.08);
+}
+
 .style-target-opportunity {
   background: rgba(142, 230, 184, 0.14);
   color: #bff7d8;

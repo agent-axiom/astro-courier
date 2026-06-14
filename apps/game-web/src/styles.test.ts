@@ -21,4 +21,8 @@ describe("responsive game layout CSS", () => {
     expect(styles).toContain(".screen-feedback-accent-fuel");
     expect(styles).toContain("screen-feedback-fuel-surge");
   });
+
+  it("defines a dedicated clutch tone for low-fuel style targets", () => {
+    expect(styles).toContain(".style-target-clutch");
+  });
 });

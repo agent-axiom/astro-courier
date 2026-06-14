@@ -64,7 +64,7 @@ export type StyleTargetCueInput = {
 export type StyleTargetCue = {
   label: "Style target";
   value: string;
-  tone: "chain" | "opportunity" | "risk";
+  tone: "chain" | "clutch" | "opportunity" | "risk";
 };
 
 const styleMilestones = new Set([
@@ -177,7 +177,7 @@ export function buildStyleTargetCue(input: StyleTargetCueInput): StyleTargetCue 
     return {
       label: "Style target",
       value: `Last drop / +${formatLastDropTargetPayout(input)}${chainSuffix}`,
-      tone: chainActive ? "chain" : "opportunity"
+      tone: "clutch"
     };
   }
 

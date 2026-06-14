@@ -620,7 +620,7 @@ describe("style target cue", () => {
     ).toEqual({
       label: "Style target",
       value: "Last drop / +170",
-      tone: "opportunity"
+      tone: "clutch"
     });
 
     expect(
@@ -639,7 +639,7 @@ describe("style target cue", () => {
     ).toEqual({
       label: "Style target",
       value: "Last drop / +255 / chain x1.50",
-      tone: "chain"
+      tone: "clutch"
     });
 
     expect(
