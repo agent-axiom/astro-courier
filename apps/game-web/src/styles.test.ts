@@ -12,7 +12,7 @@ describe("responsive game layout CSS", () => {
   });
 
   it("frames result coach cards with tone-aware post-run emphasis", () => {
-    expect(styles).toMatch(/\.result-coach\s*\{[\s\S]*border: 1px solid rgba\(255, 255, 255, 0\.1\);/);
+    expect(styles).toMatch(/\.result-coach[\s\S]*\{[\s\S]*border: 1px solid rgba\(255, 255, 255, 0\.1\);/);
     expect(styles).toMatch(/\.result-coach-danger\s*\{[\s\S]*border-color: rgba\(255, 111, 145, 0\.36\);/);
     expect(styles).toMatch(/\.result-coach-success\s*\{[\s\S]*box-shadow: 0 0 24px rgba\(142, 230, 184, 0\.1\);/);
   });
@@ -43,5 +43,12 @@ describe("responsive game layout CSS", () => {
     expect(styles).toContain(".app-route-tempo-clutch::before");
     expect(styles).toContain(".app-route-tempo-danger::before");
     expect(styles).toContain("route-tempo-flow");
+  });
+
+  it("defines tone-aware result tempo recap chips", () => {
+    expect(styles).toContain(".result-tempo-recap");
+    expect(styles).toContain(".result-tempo-flow");
+    expect(styles).toContain(".result-tempo-clutch");
+    expect(styles).toContain(".result-tempo-danger");
   });
 });

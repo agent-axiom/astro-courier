@@ -23,6 +23,23 @@ export type ResultCoach = {
   tone: "danger" | "warning" | "opportunity" | "success";
 };
 
+export type ResultTempoRecapInput = {
+  status: RunStatus;
+  lastMilestone?: string;
+  medal: RunMedal;
+  grade: RunGrade;
+  cargoDamage: number;
+  fuel: number;
+  maxFuel: number;
+  scoreBreakdown: ScoreBreakdown;
+};
+
+export type ResultTempoRecap = {
+  label: "Tempo recap";
+  value: string;
+  tone: "clutch" | "danger" | "flow" | "push";
+};
+
 export type ResultBoardPromptInput = {
   status: Extract<RunStatus, "delivered" | "crashed">;
   routeBoardTarget: {
@@ -119,6 +136,7 @@ const cleanCargoDamageLimit = 0.02;
 const cometReserveNearMissRatio = 0.6;
 const dangerPayMinBonus = 300;
 const perfectLandingBonus = 300;
+const flowFinishMilestones = new Set(["Comet Finish", "Perfect Approach", "Chain Finish", "Express Finish"]);
 
 export function buildResultCoach(input: ResultCoachInput): ResultCoach {
   if (input.status === "crashed") {
@@ -350,6 +368,47 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
     label: "Next run",
     value: "Tighten landing angle",
     tone: "opportunity"
+  };
+}
+
+export function buildResultTempoRecap(input: ResultTempoRecapInput): ResultTempoRecap {
+  if (input.status === "crashed") {
+    return {
+      label: "Tempo recap",
+      value: "Tempo broke",
+      tone: "danger"
+    };
+  }
+
+  const fuelRatio = input.maxFuel > 0 ? input.fuel / input.maxFuel : 0;
+  if (flowFinishMilestones.has(input.lastMilestone ?? "") || input.medal === "comet" || input.grade === "S") {
+    return {
+      label: "Tempo recap",
+      value: "Flow finish",
+      tone: "flow"
+    };
+  }
+
+  if (fuelRatio <= 0.15 || input.cargoDamage > cleanCargoDamageLimit || input.lastMilestone === "Damage Control" || input.lastMilestone === "Last Drop") {
+    return {
+      label: "Tempo recap",
+      value: "Clutch clear",
+      tone: "clutch"
+    };
+  }
+
+  if (input.scoreBreakdown.styleBonus <= 0 || input.medal === "bronze" || input.medal === "none") {
+    return {
+      label: "Tempo recap",
+      value: "Push harder",
+      tone: "push"
+    };
+  }
+
+  return {
+    label: "Tempo recap",
+    value: "Tempo held",
+    tone: "flow"
   };
 }
 

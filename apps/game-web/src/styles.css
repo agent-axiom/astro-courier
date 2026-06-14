@@ -4390,7 +4390,8 @@ button {
   color: #c6f6ff;
 }
 
-.result-coach {
+.result-coach,
+.result-tempo-recap {
   display: grid;
   grid-template-columns: 18px auto 1fr;
   align-items: center;
@@ -4406,18 +4407,22 @@ button {
 }
 
 .result-coach span,
-.result-coach strong {
+.result-coach strong,
+.result-tempo-recap span,
+.result-tempo-recap strong {
   min-width: 0;
   overflow-wrap: anywhere;
   line-height: 1.15;
 }
 
-.result-coach span {
+.result-coach span,
+.result-tempo-recap span {
   color: rgba(255, 255, 255, 0.74);
   text-transform: uppercase;
 }
 
-.result-coach strong {
+.result-coach strong,
+.result-tempo-recap strong {
   color: #ffffff;
   text-align: right;
 }
@@ -4446,6 +4451,30 @@ button {
   background: rgba(142, 230, 184, 0.16);
   color: #bff7d8;
   box-shadow: 0 0 24px rgba(142, 230, 184, 0.1);
+}
+
+.result-tempo-push {
+  border-color: rgba(124, 225, 255, 0.3);
+  background: rgba(124, 225, 255, 0.13);
+  color: #c6f6ff;
+}
+
+.result-tempo-flow {
+  border-color: rgba(142, 230, 184, 0.34);
+  background: rgba(142, 230, 184, 0.16);
+  color: #bff7d8;
+}
+
+.result-tempo-clutch {
+  border-color: rgba(255, 209, 102, 0.36);
+  background: rgba(255, 209, 102, 0.17);
+  color: #ffe19a;
+}
+
+.result-tempo-danger {
+  border-color: rgba(255, 111, 145, 0.36);
+  background: rgba(255, 111, 145, 0.16);
+  color: #ffadc1;
 }
 
 .retry-target {

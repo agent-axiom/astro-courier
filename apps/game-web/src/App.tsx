@@ -110,7 +110,8 @@ import {
   buildResultBoardPrompt,
   buildResultCampaignMilestonePrompt,
   buildResultCampaignPrompt,
-  buildResultCoach
+  buildResultCoach,
+  buildResultTempoRecap
 } from "./game/resultCoach";
 import { getOverlayVisibility } from "./game/overlays";
 import { buildCometRunReadout } from "./game/comet";
@@ -820,6 +821,16 @@ export function App() {
     fuel: hud.fuel,
     maxFuel: hud.maxFuel,
     targetDistance: hud.targetDistance,
+    scoreBreakdown: hud.scoreBreakdown
+  });
+  const resultTempoRecap = buildResultTempoRecap({
+    status: hud.status,
+    lastMilestone: hud.lastMilestone,
+    medal: hud.medal,
+    grade: hud.grade,
+    cargoDamage: hud.cargoDamage,
+    fuel: hud.fuel,
+    maxFuel: hud.maxFuel,
     scoreBreakdown: hud.scoreBreakdown
   });
   const resultBoardPrompt =
@@ -2065,6 +2076,11 @@ export function App() {
             <Flag size={18} />
             <span>{resultCoach.label}</span>
             <strong>{resultCoach.value}</strong>
+          </div>
+          <div className={`result-tempo-recap result-tempo-${resultTempoRecap.tone}`} aria-label={`${resultTempoRecap.label}: ${resultTempoRecap.value}`}>
+            <Gauge size={18} />
+            <span>{resultTempoRecap.label}</span>
+            <strong>{resultTempoRecap.value}</strong>
           </div>
           <div className={`retry-target retry-target-${retryTarget.tone}`} aria-label={`${retryTarget.label}: ${retryTarget.value}`}>
             <Target size={18} />

@@ -7,7 +7,8 @@ import {
   buildResultCampaignMilestonePrompt,
   buildResultBoardMasteryPrompt,
   buildResultBoardPrompt,
-  buildResultCoach
+  buildResultCoach,
+  buildResultTempoRecap
 } from "./resultCoach";
 
 const baseBreakdown = {
@@ -972,5 +973,77 @@ describe("result action layout", () => {
 
   it("uses a paired action row only when delivery can open a board target", () => {
     expect(buildResultActionsLayout({ status: "delivered", hasBoardAction: true })).toBe("pair");
+  });
+});
+
+describe("result tempo recap", () => {
+  it("summarizes the completed route tempo for the result screen", () => {
+    expect(
+      buildResultTempoRecap({
+        status: "crashed",
+        medal: "none",
+        grade: "F",
+        lastMilestone: undefined,
+        cargoDamage: 1,
+        fuel: 24,
+        maxFuel: 100,
+        scoreBreakdown: baseBreakdown
+      })
+    ).toEqual({
+      label: "Tempo recap",
+      value: "Tempo broke",
+      tone: "danger"
+    });
+
+    expect(
+      buildResultTempoRecap({
+        status: "delivered",
+        medal: "gold",
+        grade: "A",
+        lastMilestone: "Perfect Approach",
+        cargoDamage: 0,
+        fuel: 52,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 420 }
+      })
+    ).toEqual({
+      label: "Tempo recap",
+      value: "Flow finish",
+      tone: "flow"
+    });
+
+    expect(
+      buildResultTempoRecap({
+        status: "delivered",
+        medal: "silver",
+        grade: "B",
+        lastMilestone: undefined,
+        cargoDamage: 0.08,
+        fuel: 8,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 160 }
+      })
+    ).toEqual({
+      label: "Tempo recap",
+      value: "Clutch clear",
+      tone: "clutch"
+    });
+
+    expect(
+      buildResultTempoRecap({
+        status: "delivered",
+        medal: "bronze",
+        grade: "C",
+        lastMilestone: undefined,
+        cargoDamage: 0,
+        fuel: 46,
+        maxFuel: 100,
+        scoreBreakdown: baseBreakdown
+      })
+    ).toEqual({
+      label: "Tempo recap",
+      value: "Push harder",
+      tone: "push"
+    });
   });
 });
