@@ -50,6 +50,32 @@ describe("run action feed", () => {
     ]);
   });
 
+  it("turns daily dispatch streak receipts into terminal feed updates", () => {
+    expect(
+      buildProgressReceiptFeedUpdates({
+        dailyProgressReceipt: { label: "Daily streak", value: "Daily clear banked", tone: "fresh" }
+      })
+    ).toEqual([
+      {
+        label: "Daily streak",
+        value: "Daily clear banked",
+        tone: "success"
+      }
+    ]);
+
+    expect(
+      buildProgressReceiptFeedUpdates({
+        dailyProgressReceipt: { label: "Daily streak", value: "4-day streak", tone: "streak" }
+      })
+    ).toEqual([
+      {
+        label: "Daily streak",
+        value: "4-day streak banked",
+        tone: "style"
+      }
+    ]);
+  });
+
   it("derives expressive updates from fresh run events", () => {
     expect(deriveRunFeedUpdates(baseSnapshot, { ...baseSnapshot, lastMilestone: "Gravity Sling", lastStyleAward: 240 })).toEqual([
       {

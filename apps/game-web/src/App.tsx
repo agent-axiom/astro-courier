@@ -440,9 +440,21 @@ export function App() {
       nextBestRunsByContract
     );
     setCampaignMilestoneReceipt(nextCampaignMilestoneReceipt);
+    const completedDailyDispatch = buildDailyDispatch({ contracts: hud.contractOptions, now: new Date() });
+    const nextDailyClear =
+      completedDailyDispatch?.contractId === hud.contractId
+        ? recordDailyDispatchClear(storage, completedDailyDispatch)
+        : undefined;
+    if (nextDailyClear) {
+      setDailyProgress(nextDailyClear.progress);
+      setDailyProgressReceipt(nextDailyClear.receipt);
+    } else {
+      setDailyProgressReceipt(undefined);
+    }
     const progressFeedUpdates = buildProgressReceiptFeedUpdates({
       routeMarkReceipt: nextRouteMarkReceipt,
-      campaignMilestoneReceipt: nextCampaignMilestoneReceipt
+      campaignMilestoneReceipt: nextCampaignMilestoneReceipt,
+      dailyProgressReceipt: nextDailyClear?.receipt
     });
     if (progressFeedUpdates.length > 0) {
       setRunFeed((currentEntries) => {
@@ -454,14 +466,6 @@ export function App() {
     setBestRun(result.best);
     setBestRunsByContract(nextBestRunsByContract);
     setNewBest(result.isNewBest);
-    const completedDailyDispatch = buildDailyDispatch({ contracts: hud.contractOptions, now: new Date() });
-    if (completedDailyDispatch?.contractId === hud.contractId) {
-      const dailyClear = recordDailyDispatchClear(storage, completedDailyDispatch);
-      setDailyProgress(dailyClear.progress);
-      setDailyProgressReceipt(dailyClear.receipt);
-    } else {
-      setDailyProgressReceipt(undefined);
-    }
   }, [hud.contractId, hud.contractOptions, hud.elapsedSeconds, hud.medal, hud.score, hud.status]);
 
   const fuelRatio = hud.maxFuel > 0 ? hud.fuel / hud.maxFuel : 0;

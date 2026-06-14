@@ -15,6 +15,7 @@ import {
   formatCometReserveShortfallFuelGoal,
   isLiveCometDockArmed
 } from "./comet";
+import type { DailyDispatchProgressReceipt } from "./contracts";
 import type { ContractPaceTier } from "./pace";
 
 export type RunFeedTone = "neutral" | "style" | "success" | "warning" | "danger";
@@ -66,6 +67,7 @@ export type AppendRunFeedResult = {
 export type ProgressReceiptFeedInput = {
   routeMarkReceipt?: RouteMarkReceipt;
   campaignMilestoneReceipt?: RouteBoardCampaignMilestoneReceipt;
+  dailyProgressReceipt?: DailyDispatchProgressReceipt;
 };
 
 const criticalFuelRatio = 0.15;
@@ -359,6 +361,17 @@ export function buildProgressReceiptFeedUpdates(input: ProgressReceiptFeedInput)
 
   if (input.campaignMilestoneReceipt) {
     updates.push({ label: input.campaignMilestoneReceipt.value, value: "Campaign milestone", tone: "success" });
+  }
+
+  if (input.dailyProgressReceipt) {
+    updates.push({
+      label: input.dailyProgressReceipt.label,
+      value:
+        input.dailyProgressReceipt.tone === "streak"
+          ? `${input.dailyProgressReceipt.value} banked`
+          : input.dailyProgressReceipt.value,
+      tone: input.dailyProgressReceipt.tone === "streak" ? "style" : "success"
+    });
   }
 
   return updates;
