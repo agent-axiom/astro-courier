@@ -104,6 +104,7 @@ import {
   buildResultBoardAction,
   buildResultBoardMasteryPrompt,
   buildResultBoardPrompt,
+  buildResultCampaignPrompt,
   buildResultCoach
 } from "./game/resultCoach";
 import { getOverlayVisibility } from "./game/overlays";
@@ -704,6 +705,10 @@ export function App() {
   const resultBoardMasteryPrompt =
     hud.status === "delivered" || hud.status === "crashed"
       ? buildResultBoardMasteryPrompt({ status: hud.status, routeBoardMastery })
+      : undefined;
+  const resultCampaignPrompt =
+    hud.status === "delivered" || hud.status === "crashed"
+      ? buildResultCampaignPrompt({ status: hud.status, routeBoardCampaignProgress })
       : undefined;
   const resultBoardAction =
     hud.status === "delivered" || hud.status === "crashed"
@@ -1763,6 +1768,18 @@ export function App() {
               {resultBoardMasteryPrompt.tone === "complete" ? <Trophy size={18} /> : <Route size={18} />}
               <span>{resultBoardMasteryPrompt.label}</span>
               <strong>{resultBoardMasteryPrompt.value}</strong>
+            </div>
+          ) : null}
+          {resultCampaignPrompt ? (
+            <div
+              className={`result-campaign-status result-campaign-${resultCampaignPrompt.tone}`}
+              style={{ "--result-campaign-progress": resultCampaignPrompt.progress } as CSSProperties}
+              aria-label={`${resultCampaignPrompt.label}: ${resultCampaignPrompt.value}. ${resultCampaignPrompt.detail}`}
+            >
+              {resultCampaignPrompt.tone === "complete" ? <Trophy size={18} /> : <Activity size={18} />}
+              <span>{resultCampaignPrompt.label}</span>
+              <strong>{resultCampaignPrompt.value}</strong>
+              <small>{resultCampaignPrompt.detail}</small>
             </div>
           ) : null}
           <div className={`result-actions result-actions-${resultActionsLayout}`}>

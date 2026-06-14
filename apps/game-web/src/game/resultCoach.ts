@@ -51,6 +51,19 @@ export type ResultBoardMasteryPrompt = {
   tone: "open" | "progress" | "mastery" | "complete";
 };
 
+export type ResultCampaignPromptInput = {
+  status: Extract<RunStatus, "delivered" | "crashed">;
+  routeBoardCampaignProgress: {
+    label: "Campaign";
+    value: "Launch campaign" | "Campaign mastered" | `${number}% mastered`;
+    detail: `${number}/${number} route marks`;
+    tone: "open" | "progress" | "mastery" | "complete";
+    progress: number;
+  };
+};
+
+export type ResultCampaignPrompt = ResultCampaignPromptInput["routeBoardCampaignProgress"];
+
 export type ResultBoardActionInput = {
   status: Extract<RunStatus, "delivered" | "crashed">;
   currentContractId: string;
@@ -291,6 +304,14 @@ export function buildResultBoardMasteryPrompt(input: ResultBoardMasteryPromptInp
   }
 
   return input.routeBoardMastery;
+}
+
+export function buildResultCampaignPrompt(input: ResultCampaignPromptInput): ResultCampaignPrompt | undefined {
+  if (input.status === "crashed") {
+    return undefined;
+  }
+
+  return input.routeBoardCampaignProgress;
 }
 
 export function buildResultBoardAction(input: ResultBoardActionInput): ResultBoardAction {

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildResultActionsLayout,
   buildResultBoardAction,
+  buildResultCampaignPrompt,
   buildResultBoardMasteryPrompt,
   buildResultBoardPrompt,
   buildResultCoach
@@ -556,6 +557,44 @@ describe("result board mastery prompt", () => {
       buildResultBoardMasteryPrompt({
         status: "crashed",
         routeBoardMastery: { label: "Board mastery", value: "3 routes to clear", tone: "progress" }
+      })
+    ).toBeUndefined();
+  });
+});
+
+describe("result campaign prompt", () => {
+  it("surfaces campaign route-mark progress after successful deliveries", () => {
+    expect(
+      buildResultCampaignPrompt({
+        status: "delivered",
+        routeBoardCampaignProgress: {
+          label: "Campaign",
+          value: "33% mastered",
+          detail: "4/12 route marks",
+          tone: "progress",
+          progress: 0.33
+        }
+      })
+    ).toEqual({
+      label: "Campaign",
+      value: "33% mastered",
+      detail: "4/12 route marks",
+      tone: "progress",
+      progress: 0.33
+    });
+  });
+
+  it("stays hidden after crashes so retry guidance stays primary", () => {
+    expect(
+      buildResultCampaignPrompt({
+        status: "crashed",
+        routeBoardCampaignProgress: {
+          label: "Campaign",
+          value: "33% mastered",
+          detail: "4/12 route marks",
+          tone: "progress",
+          progress: 0.33
+        }
       })
     ).toBeUndefined();
   });
