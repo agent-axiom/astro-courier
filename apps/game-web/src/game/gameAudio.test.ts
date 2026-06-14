@@ -43,6 +43,17 @@ describe("game audio controller", () => {
     expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.08, 3);
   });
 
+  it("plays a bright thread-window tone when a fast clean hazard line opens", () => {
+    const context = new FakeAudioContext();
+    const controller = createGameAudioController({ createContext: () => context });
+
+    controller.play(["thread-window"]);
+
+    expect(context.oscillators).toHaveLength(1);
+    expect(context.oscillators[0]?.frequencyValue).toBe(860);
+    expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.09, 3);
+  });
+
   it("plays a quick release tone when projected trajectory danger clears", () => {
     const context = new FakeAudioContext();
     const controller = createGameAudioController({ createContext: () => context });

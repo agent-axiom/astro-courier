@@ -72,6 +72,9 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[], milestone
   if (events.includes("trajectory-caution")) {
     return { label: "Vector caution", value: "Thread line", tone: "warning", intensity: "light", durationMs: 300 };
   }
+  if (events.includes("thread-window")) {
+    return { label: "Thread window", value: "Needle gap", accent: "precision", tone: "style", intensity: "medium", durationMs: 420 };
+  }
   if (events.includes("trajectory-clear")) {
     return { label: "Vector clear", value: "Line recovered", tone: "success", intensity: "light", durationMs: 300 };
   }

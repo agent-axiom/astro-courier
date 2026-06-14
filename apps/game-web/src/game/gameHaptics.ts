@@ -29,6 +29,9 @@ export function hapticPatternForEvents(events: readonly GameAudioEvent[]): Hapti
   if (events.includes("trajectory-caution")) {
     return [8, 12];
   }
+  if (events.includes("thread-window")) {
+    return [10, 10];
+  }
   if (events.includes("trajectory-clear")) {
     return [8, 8];
   }

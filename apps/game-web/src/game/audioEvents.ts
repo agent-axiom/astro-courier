@@ -1,4 +1,4 @@
-import { PERFECT_APPROACH_STREAK_SECONDS } from "@astro-courier/simulation";
+import { HAZARD_THREAD_SPEED_THRESHOLD, PERFECT_APPROACH_STREAK_SECONDS } from "@astro-courier/simulation";
 import type { LandingGuidanceStatus, ObjectivePhase, RunStatus } from "@astro-courier/shared";
 import { COMET_RESERVE_MIN_RATIO, COMET_RESERVE_WARNING_RATIO, isLiveCometDockArmed } from "./comet";
 import type { ContractPaceTier } from "./pace";
@@ -26,6 +26,7 @@ export type GameAudioEvent =
   | "fuel-critical"
   | "cargo-damage"
   | "hazard-contact"
+  | "thread-window"
   | "trajectory-warning"
   | "trajectory-caution"
   | "trajectory-clear";
@@ -35,6 +36,7 @@ export type HudAudioSnapshot = {
   objectivePhase?: ObjectivePhase;
   lastMilestone?: string;
   score?: number;
+  speed?: number;
   targetDistance?: number;
   bestRunScore?: number;
   bestRunHasGhostTrail?: boolean;
@@ -150,7 +152,14 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
   if (previous?.trajectoryRiskLevel !== current.trajectoryRiskLevel && current.trajectoryRiskLevel === "inside") {
     events.push("trajectory-warning");
   } else if (previous?.trajectoryRiskLevel !== current.trajectoryRiskLevel && current.trajectoryRiskLevel === "near") {
-    events.push((current.cargoDamage ?? 0) > cleanCargoDamageLimit ? "trajectory-warning" : "trajectory-caution");
+    const damagedCargo = (current.cargoDamage ?? 0) > cleanCargoDamageLimit;
+    if (damagedCargo) {
+      events.push("trajectory-warning");
+    } else if ((current.speed ?? 0) >= HAZARD_THREAD_SPEED_THRESHOLD) {
+      events.push("thread-window");
+    } else {
+      events.push("trajectory-caution");
+    }
   } else if (hasClearedTrajectoryRisk(previous, current)) {
     events.push("trajectory-clear");
   }

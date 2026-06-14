@@ -172,6 +172,14 @@ describe("screen feedback", () => {
       intensity: "light",
       durationMs: 300
     });
+    expect(buildScreenFeedback(["thread-window"])).toEqual({
+      label: "Thread window",
+      value: "Needle gap",
+      accent: "precision",
+      tone: "style",
+      intensity: "medium",
+      durationMs: 420
+    });
   });
 
   it("maps trajectory clears to quick success feedback", () => {

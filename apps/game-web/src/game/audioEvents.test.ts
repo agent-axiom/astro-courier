@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { HAZARD_THREAD_SPEED_THRESHOLD } from "@astro-courier/simulation";
 import { deriveHudAudioEvents, type HudAudioSnapshot } from "./audioEvents";
 
 const baseSnapshot: HudAudioSnapshot = {
@@ -215,6 +216,13 @@ describe("HUD audio events", () => {
 
   it("signals a light caution when clean cargo enters a predicted hazard vector", () => {
     expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, trajectoryRiskLevel: "near" })).toEqual(["trajectory-caution"]);
+    expect(
+      deriveHudAudioEvents(baseSnapshot, {
+        ...baseSnapshot,
+        speed: HAZARD_THREAD_SPEED_THRESHOLD,
+        trajectoryRiskLevel: "near"
+      })
+    ).toEqual(["thread-window"]);
     expect(
       deriveHudAudioEvents(
         { ...baseSnapshot, trajectoryRiskLevel: "near" },
