@@ -177,6 +177,30 @@ export function buildRunIdentityReceipt(input: RunIdentityReceiptInput): RunIden
     };
   }
 
+  if (input.lastMilestone === "Needle Thread") {
+    return {
+      label: "Run identity",
+      value: "Needle-thread route",
+      tone: "danger"
+    };
+  }
+
+  if (input.lastMilestone === "Gravity Sling") {
+    return {
+      label: "Run identity",
+      value: "Gravity sling route",
+      tone: "style"
+    };
+  }
+
+  if (input.lastMilestone === "Quick Pickup") {
+    return {
+      label: "Run identity",
+      value: "Fast-load courier line",
+      tone: "style"
+    };
+  }
+
   if (input.scoreBreakdown.dangerBonus > input.scoreBreakdown.styleBonus && input.scoreBreakdown.dangerBonus >= 300) {
     return {
       label: "Run identity",

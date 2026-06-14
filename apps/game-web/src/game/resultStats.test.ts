@@ -228,4 +228,57 @@ describe("result stat formatting", () => {
       tone: "elite"
     });
   });
+
+  it("summarizes signature skill milestones as distinct run identities", () => {
+    expect(
+      buildRunIdentityReceipt({
+        status: "delivered",
+        lastMilestone: "Needle Thread",
+        medal: "gold",
+        grade: "A",
+        cargoDamage: 0,
+        fuel: 44,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 240, dangerBonus: 180 }
+      })
+    ).toEqual({
+      label: "Run identity",
+      value: "Needle-thread route",
+      tone: "danger"
+    });
+
+    expect(
+      buildRunIdentityReceipt({
+        status: "delivered",
+        lastMilestone: "Gravity Sling",
+        medal: "gold",
+        grade: "A",
+        cargoDamage: 0,
+        fuel: 44,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 240 }
+      })
+    ).toEqual({
+      label: "Run identity",
+      value: "Gravity sling route",
+      tone: "style"
+    });
+
+    expect(
+      buildRunIdentityReceipt({
+        status: "delivered",
+        lastMilestone: "Quick Pickup",
+        medal: "silver",
+        grade: "B",
+        cargoDamage: 0,
+        fuel: 44,
+        maxFuel: 100,
+        scoreBreakdown: { ...baseBreakdown, styleBonus: 180 }
+      })
+    ).toEqual({
+      label: "Run identity",
+      value: "Fast-load courier line",
+      tone: "style"
+    });
+  });
 });
