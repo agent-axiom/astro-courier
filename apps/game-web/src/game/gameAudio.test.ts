@@ -131,15 +131,15 @@ describe("game audio controller", () => {
     expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.1, 3);
   });
 
-  it("plays a short alert tone for critical style chains", () => {
+  it("plays a stronger deadline tone for critical style chains", () => {
     const context = new FakeAudioContext();
     const controller = createGameAudioController({ createContext: () => context });
 
     controller.play(["chain-critical"]);
 
     expect(context.oscillators).toHaveLength(1);
-    expect(context.oscillators[0]?.frequencyValue).toBe(640);
-    expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.09, 3);
+    expect(context.oscillators[0]?.frequencyValue).toBe(580);
+    expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.13, 3);
   });
 
   it("plays a bright restore tone when a style chain is saved", () => {
