@@ -566,6 +566,7 @@ describe("contract rotation", () => {
     expect(buildContractPreflightKicker({ contractId: "chain-relay", goldSeconds: 22, hazardSeverityMultiplier: 1.3 })).toBe(
       "Chain Contract"
     );
+    expect(buildContractPreflightKicker({ contractId: "antimatter-drift", goldSeconds: 28 })).toBe("Antimatter Contract");
     expect(buildContractPreflightKicker({ contractId: "last-drop-run", goldSeconds: 27 })).toBe("Last Drop Contract");
   });
 
@@ -662,6 +663,21 @@ describe("contract rotation", () => {
     });
   });
 
+  it("calls out antimatter drift before generic unstable cargo handling", () => {
+    expect(
+      buildContractRoutePlan({
+        contractId: "antimatter-drift",
+        cargoKind: "unstable",
+        cargoFragility: 0.95,
+        goldSeconds: 28
+      })
+    ).toEqual({
+      label: "Route plan",
+      value: "Coast arc, no brake",
+      tone: "careful"
+    });
+  });
+
   it("calls out careful handling for fragile low-hazard cargo", () => {
     expect(
       buildContractRoutePlan({
@@ -730,6 +746,18 @@ describe("contract rotation", () => {
       value: "Clean handling / soft dock",
       tone: "care"
     });
+    expect(
+      buildRoutePressureBriefing({
+        contractId: "antimatter-drift",
+        cargoKind: "unstable",
+        cargoFragility: 0.95,
+        goldSeconds: 28
+      })
+    ).toEqual({
+      label: "Route pressure",
+      value: "Brake stress / clean dock",
+      tone: "care"
+    });
   });
 
   it("gives special routes a signature maneuver for preflight identity", () => {
@@ -773,6 +801,19 @@ describe("contract rotation", () => {
       value: "Last Drop",
       detail: "Arrive under 5% fuel",
       tone: "fuel"
+    });
+    expect(
+      buildContractSignatureManeuver({
+        contractId: "antimatter-drift",
+        cargoKind: "unstable",
+        cargoFragility: 0.95,
+        goldSeconds: 28
+      })
+    ).toEqual({
+      label: "Signature move",
+      value: "Antimatter Drift",
+      detail: "Coast clean; brake rattles cargo",
+      tone: "precision"
     });
   });
 
@@ -840,6 +881,19 @@ describe("contract rotation", () => {
 
     expect(lastDropModifiers[0]).toEqual({ label: "Fuel", value: "Below 5%", tone: "fuel" });
     expect(lastDropModifiers[2]).toEqual({ label: "Cargo", value: "Rush cargo", tone: "speed" });
+
+    expect(
+      buildContractModifiers({
+        contractId: "antimatter-drift",
+        cargoKind: "unstable",
+        cargoFragility: 0.95,
+        goldSeconds: 28
+      })
+    ).toEqual([
+      { label: "Drift", value: "+210 style", tone: "style" },
+      { label: "Brake", value: "No taps", tone: "precision" },
+      { label: "Cargo", value: "Brake sensitive", tone: "cargo" }
+    ]);
   });
 
   it("falls back to pressure-based modifier chips for generic routes", () => {
@@ -909,6 +963,18 @@ describe("contract option hooks", () => {
       label: "Pick for",
       value: "Fuel clutch finish",
       tone: "fuel"
+    });
+    expect(
+      buildContractOptionHook({
+        contractId: "antimatter-drift",
+        cargoKind: "unstable",
+        cargoFragility: 0.95,
+        goldSeconds: 28
+      })
+    ).toEqual({
+      label: "Pick for",
+      value: "No-brake drift mastery",
+      tone: "precision"
     });
   });
 
@@ -997,6 +1063,18 @@ describe("launch commitment", () => {
     ).toEqual({
       label: "Launch intent",
       value: "Commit clean cargo",
+      tone: "care"
+    });
+    expect(
+      buildLaunchCommitment({
+        contractId: "antimatter-drift",
+        cargoKind: "unstable",
+        cargoFragility: 0.95,
+        goldSeconds: 28
+      })
+    ).toEqual({
+      label: "Launch intent",
+      value: "Commit no-brake drift",
       tone: "care"
     });
     expect(

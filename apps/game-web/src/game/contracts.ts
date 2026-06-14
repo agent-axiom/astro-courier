@@ -581,6 +581,10 @@ export function buildContractPreflightKicker(input: ContractPreflightKickerInput
     return "Chain Contract";
   }
 
+  if (input.contractId === "antimatter-drift") {
+    return "Antimatter Contract";
+  }
+
   if (input.contractId === "last-drop-run") {
     return "Last Drop Contract";
   }
@@ -637,6 +641,14 @@ export function buildContractRoutePlan(input: ContractRoutePlanInput): ContractR
     };
   }
 
+  if (input.contractId === "antimatter-drift") {
+    return {
+      label: "Route plan",
+      value: "Coast arc, no brake",
+      tone: "careful"
+    };
+  }
+
   if ((input.hazardSeverityMultiplier ?? 1) >= 1.25) {
     return {
       label: "Route plan",
@@ -686,6 +698,14 @@ export function buildRoutePressureBriefing(input: ContractRoutePlanInput): Route
     };
   }
 
+  if (input.contractId === "antimatter-drift") {
+    return {
+      label: "Route pressure",
+      value: "Brake stress / clean dock",
+      tone: "care"
+    };
+  }
+
   if (input.cargoKind === "fragile" || input.cargoFragility < 0.9) {
     return {
       label: "Route pressure",
@@ -702,6 +722,14 @@ export function buildRoutePressureBriefing(input: ContractRoutePlanInput): Route
 }
 
 export function buildLaunchCommitment(input: ContractRoutePlanInput): LaunchCommitment {
+  if (input.contractId === "antimatter-drift") {
+    return {
+      label: "Launch intent",
+      value: "Commit no-brake drift",
+      tone: "care"
+    };
+  }
+
   const pressure = buildRoutePressureBriefing(input);
   if (pressure.tone === "hot") {
     return {
@@ -756,6 +784,14 @@ export function buildContractOptionHook(input: ContractRoutePlanInput): Contract
       label: "Pick for",
       value: "Fuel clutch finish",
       tone: "fuel"
+    };
+  }
+
+  if (input.contractId === "antimatter-drift") {
+    return {
+      label: "Pick for",
+      value: "No-brake drift mastery",
+      tone: "precision"
     };
   }
 
@@ -831,6 +867,15 @@ export function buildContractSignatureManeuver(input: ContractRoutePlanInput): C
       value: "Last Drop",
       detail: "Arrive under 5% fuel",
       tone: "fuel"
+    };
+  }
+
+  if (input.contractId === "antimatter-drift") {
+    return {
+      label: "Signature move",
+      value: "Antimatter Drift",
+      detail: "Coast clean; brake rattles cargo",
+      tone: "precision"
     };
   }
 
@@ -925,6 +970,14 @@ export function buildContractModifiers(input: ContractRoutePlanInput): ContractM
     return [
       { label: "Fuel", value: "Below 5%", tone: "fuel" },
       { label: "Burns", value: "Minimal", tone: "speed" },
+      { label: "Cargo", value: cargoModifierValue(input), tone: cargoModifierTone(input) }
+    ];
+  }
+
+  if (input.contractId === "antimatter-drift") {
+    return [
+      { label: "Drift", value: "+210 style", tone: "style" },
+      { label: "Brake", value: "No taps", tone: "precision" },
       { label: "Cargo", value: cargoModifierValue(input), tone: cargoModifierTone(input) }
     ];
   }
