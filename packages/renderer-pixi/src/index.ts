@@ -358,6 +358,7 @@ export type LandingPadVisual = {
   strokeWidth: number;
   alpha: number;
   haloAlpha: number;
+  haloRadiusMultiplier: number;
   beaconAlpha: number;
 };
 
@@ -385,6 +386,7 @@ export function landingPadVisual(pad: LandingPadVisualInput): LandingPadVisual {
       strokeWidth: 4,
       alpha: 1,
       haloAlpha: 0.18,
+      haloRadiusMultiplier: 2.25,
       beaconAlpha: 0.82
     };
   }
@@ -394,6 +396,7 @@ export function landingPadVisual(pad: LandingPadVisualInput): LandingPadVisual {
       strokeWidth: 3,
       alpha: 0.68,
       haloAlpha: 0.08,
+      haloRadiusMultiplier: 1.7,
       beaconAlpha: 0
     };
   }
@@ -402,6 +405,7 @@ export function landingPadVisual(pad: LandingPadVisualInput): LandingPadVisual {
     strokeWidth: 2,
     alpha: 0.38,
     haloAlpha: 0,
+    haloRadiusMultiplier: 1,
     beaconAlpha: 0
   };
 }
@@ -1231,8 +1235,9 @@ class PixiRenderer implements AstroPixiRenderer {
         }
       }
       if (visual.haloAlpha > 0) {
-        this.world.circle(center.x, center.y, pad.radius + 12).fill({ color: visual.color, alpha: visual.haloAlpha * 0.58 });
-        this.world.circle(center.x, center.y, pad.radius + 16).stroke({
+        const haloRadius = pad.radius * visual.haloRadiusMultiplier;
+        this.world.circle(center.x, center.y, haloRadius).fill({ color: visual.color, alpha: visual.haloAlpha * 0.48 });
+        this.world.circle(center.x, center.y, haloRadius + 4).stroke({
           color: visual.color,
           width: 1,
           alpha: visual.haloAlpha

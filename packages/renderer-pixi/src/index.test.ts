@@ -372,9 +372,11 @@ describe("landing pad visual state", () => {
       color: 0x8ee6b8,
       strokeWidth: 4,
       haloAlpha: 0.18,
+      haloRadiusMultiplier: 2.25,
       beaconAlpha: 0.82
     });
     expect(destination.color).toBe(0xffd166);
+    expect(destination.haloRadiusMultiplier).toBeGreaterThan(1);
     expect(destination.strokeWidth).toBeGreaterThan(neutral.strokeWidth);
     expect(destination.alpha).toBeGreaterThan(neutral.alpha);
     expect(neutral.haloAlpha).toBe(0);
