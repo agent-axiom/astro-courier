@@ -26,6 +26,15 @@ describe("crash reason labels", () => {
     expect(buildCrashReasonLabel({ contractId: "gravity-slingshot", crashReason: "Hull Collision" })).toBe("Clipped gravity well");
   });
 
+  it("labels close target hull collisions as missed pad approaches", () => {
+    expect(buildCrashReasonLabel({ contractId: "gravity-slingshot", crashReason: "Hull Collision", targetDistance: 54 })).toBe("Missed landing pad");
+    expect(buildCrashDebrief({ contractId: "gravity-slingshot", crashReason: "Hull Collision", targetDistance: 54 })).toEqual({
+      label: "Cause",
+      value: "Pad approach",
+      tone: "dock"
+    });
+  });
+
   it("falls back to landing rating before the insurance event label", () => {
     expect(buildCrashReasonLabel({ landingRating: "Rough dock" })).toBe("Rough dock");
     expect(buildCrashReasonLabel({})).toBe("Insurance Event");

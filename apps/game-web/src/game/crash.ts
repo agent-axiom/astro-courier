@@ -4,6 +4,7 @@ export type CrashReasonLabelInput = {
   contractId?: string;
   crashReason?: CrashReason;
   landingRating?: string;
+  targetDistance?: number;
 };
 
 export type CrashDebrief = {
@@ -22,6 +23,10 @@ export function buildCrashReasonLabel(input: CrashReasonLabelInput): string {
   }
 
   if (input.crashReason === "Hull Collision") {
+    if (isCloseTargetHullCollision(input)) {
+      return "Missed landing pad";
+    }
+
     return input.contractId === "chain-relay"
       ? "Clipped relay lane"
       : input.contractId === "asteroid-sprint"
@@ -52,6 +57,14 @@ export function buildCrashDebrief(input: CrashReasonLabelInput): CrashDebrief {
   }
 
   if (input.crashReason === "Hull Collision") {
+    if (isCloseTargetHullCollision(input)) {
+      return {
+        label: "Cause",
+        value: "Pad approach",
+        tone: "dock"
+      };
+    }
+
     return {
       label: "Cause",
       value:
@@ -71,4 +84,8 @@ export function buildCrashDebrief(input: CrashReasonLabelInput): CrashDebrief {
     value: "Review",
     tone: "review"
   };
+}
+
+function isCloseTargetHullCollision(input: CrashReasonLabelInput): boolean {
+  return input.crashReason === "Hull Collision" && input.targetDistance !== undefined && input.targetDistance <= 90;
 }
