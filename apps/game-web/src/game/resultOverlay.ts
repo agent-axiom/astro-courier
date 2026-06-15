@@ -20,7 +20,7 @@ export function buildResultOverlayDensity(input: ResultOverlayDensityInput): Res
     showDetailedScore: richResult,
     showRunReceipts: richResult,
     showTempoRecap: richResult,
-    showRetryTarget: richResult,
+    showRetryTarget: true,
     showRouteProgress: richResult,
     showBoardAction: richResult
   };
