@@ -1989,7 +1989,7 @@ export function App() {
             <strong>{hud.grade}</strong>
           </div>
           {hud.medal !== "none" ? <div className={`medal-banner medal-${hud.medal}`}>{medalLabel(hud.medal)}</div> : null}
-          {hud.status === "delivered" && bestRun ? (
+          {hud.status === "delivered" && resultOverlayDensity?.showRunReceipts && bestRun ? (
             <div className={`best-run ${newBest ? "best-run-new" : ""}`}>
               <span>{newBest ? "New best" : "Personal best"}</span>
               <strong>
@@ -1997,13 +1997,13 @@ export function App() {
               </strong>
             </div>
           ) : null}
-          {hud.status === "delivered" && bestRunDelta ? (
+          {hud.status === "delivered" && resultOverlayDensity?.showRunReceipts && bestRunDelta ? (
             <div className={`best-delta best-delta-${bestRunDelta.tone}`} aria-label={`${bestRunDelta.label}: ${bestRunDelta.value}`}>
               <span>{bestRunDelta.label}</span>
               <strong>{bestRunDelta.value}</strong>
             </div>
           ) : null}
-          {hud.status === "delivered" && routeMarkReceipt ? (
+          {hud.status === "delivered" && resultOverlayDensity?.showRouteProgress && routeMarkReceipt ? (
             <div
               className={`route-mark-receipt route-mark-${routeMarkReceipt.tone}`}
               aria-label={`${routeMarkReceipt.label}: ${routeMarkReceipt.value}`}
@@ -2013,7 +2013,7 @@ export function App() {
               <strong>{routeMarkReceipt.value}</strong>
             </div>
           ) : null}
-          {hud.status === "delivered" && campaignMilestoneReceipt ? (
+          {hud.status === "delivered" && resultOverlayDensity?.showRouteProgress && campaignMilestoneReceipt ? (
             <div
               className={`campaign-milestone-receipt campaign-milestone-${campaignMilestoneReceipt.tone}`}
               aria-label={`${campaignMilestoneReceipt.label}: ${campaignMilestoneReceipt.value}`}

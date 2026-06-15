@@ -240,6 +240,7 @@ export const STYLE_CHAIN_WINDOW_SECONDS = 4;
 export const CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS = 5.5;
 const STYLE_CHAIN_MULTIPLIER_STEP = 0.25;
 const STYLE_CHAIN_MAX_COUNT = 4;
+const DOCK_CAPTURE_RADIUS_MULTIPLIER = 1.7;
 
 export function calculateHazardSkimStyleBonus(severity: number): number {
   return Math.round(HAZARD_SKIM_BASE_BONUS + clamp(severity, 0, 1) * HAZARD_SKIM_SEVERITY_BONUS);
@@ -549,7 +550,7 @@ function classifyLandingGuidance(
   angleError: number,
   pad: LandingPadState
 ): LandingGuidanceStatus {
-  if (distance > pad.radius * 1.35) {
+  if (!isWithinDockCaptureRadius(distance, pad)) {
     return "approach";
   }
   if (speed > pad.allowedApproachSpeed) {
@@ -827,7 +828,7 @@ function updateApproachStreak(world: SimulationWorld, fixedDt: number): void {
 }
 
 function canLandingAssist(distance: number, speed: number, angleError: number, pad: LandingPadState): boolean {
-  const closeEnough = distance <= pad.radius * 1.35;
+  const closeEnough = isWithinDockCaptureRadius(distance, pad);
   const moderatelyFast = speed > pad.allowedApproachSpeed && speed <= pad.allowedApproachSpeed * 1.3;
   const nearlyAligned = angleError <= pad.requiredAngleTolerance * 1.25;
   return closeEnough && moderatelyFast && nearlyAligned;
@@ -867,6 +868,12 @@ function canAwardAntimatterDrift(world: SimulationWorld): boolean {
 }
 
 function resolveLandingOrCrash(world: SimulationWorld): void {
+  const capturedActivePad = findActiveDockCapturePad(world);
+  if (capturedActivePad) {
+    resolvePadContact(world, capturedActivePad);
+    return;
+  }
+
   const touchedPad = world.landingPads.find((pad) => distanceBetween(world.ship.position, pad.position) <= pad.radius);
   if (touchedPad) {
     resolvePadContact(world, touchedPad);
@@ -875,9 +882,7 @@ function resolveLandingOrCrash(world: SimulationWorld): void {
 
   const hitGravitySource = world.gravitySources.find((source) => distanceBetween(world.ship.position, source.position) <= source.radius);
   if (hitGravitySource) {
-    const activeApproachPad = world.landingPads.find(
-      (pad) => pad.active && distanceBetween(world.ship.position, pad.position) <= pad.radius * 1.35
-    );
+    const activeApproachPad = findActiveDockCapturePad(world);
     if (activeApproachPad) {
       resolvePadContact(world, activeApproachPad);
       return;
@@ -888,6 +893,14 @@ function resolveLandingOrCrash(world: SimulationWorld): void {
     world.crashReason = "Hull Collision";
     world.ship.cargoDamage = 1;
   }
+}
+
+function findActiveDockCapturePad(world: SimulationWorld): LandingPadState | undefined {
+  return world.landingPads.find((pad) => pad.active && isWithinDockCaptureRadius(distanceBetween(world.ship.position, pad.position), pad));
+}
+
+function isWithinDockCaptureRadius(distance: number, pad: LandingPadState): boolean {
+  return distance <= pad.radius * DOCK_CAPTURE_RADIUS_MULTIPLIER;
 }
 
 function resolvePadContact(world: SimulationWorld, touchedPad: LandingPadState): void {
