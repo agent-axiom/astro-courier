@@ -105,6 +105,7 @@ import { buildHazardPressureReadout } from "./game/hazard";
 import { buildResultOverlayDensity } from "./game/resultOverlay";
 import { buildLiveHudDensity } from "./game/liveHudDensity";
 import { buildPreflightOverlayDensity } from "./game/preflightOverlay";
+import { buildTopHudDensity } from "./game/topHudDensity";
 import {
   buildResultActionsLayout,
   buildResultBoardAction,
@@ -507,6 +508,11 @@ export function App() {
   const activeScreenFeedback =
     screenFeedback ?? (!runFinished && milestoneScreenFeedback ? { key: -1, feedback: milestoneScreenFeedback } : undefined);
   const overlays = getOverlayVisibility({ status: hud.status, preflightOpen, resultDismissed });
+  const topHudDensity = buildTopHudDensity({
+    status: hud.status,
+    preflightOpen: overlays.preflight,
+    resultOpen: overlays.result
+  });
   const preflightOverlayDensity = buildPreflightOverlayDensity({
     status: hud.status,
     preflightOpen: overlays.preflight,
@@ -1226,13 +1232,15 @@ export function App() {
         </div>
       ) : null}
 
-      <header className="top-hud">
+      <header className={`top-hud top-hud-${topHudDensity.mode}`}>
         <div className="brand-lockup">
           <Satellite aria-hidden="true" size={22} />
-          <div>
-            <h1>Astro Courier</h1>
-            <p>{hud.contractTitle}</p>
-          </div>
+          {topHudDensity.showBrandCopy ? (
+            <div>
+              <h1>Astro Courier</h1>
+              <p>{hud.contractTitle}</p>
+            </div>
+          ) : null}
         </div>
 
         <div className="hud-metrics" aria-label="Run metrics">

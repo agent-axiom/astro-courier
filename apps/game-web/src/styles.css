@@ -706,6 +706,10 @@ button {
   pointer-events: none;
 }
 
+.top-hud-compact {
+  grid-template-columns: auto 1fr auto;
+}
+
 .brand-lockup,
 .hud-metrics,
 .hud-actions,
@@ -717,8 +721,18 @@ button {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-height: 40px;
   min-width: 0;
   color: #eaf9ff;
+}
+
+.top-hud-compact .brand-lockup {
+  width: 40px;
+  justify-content: center;
+  border: 1px solid rgba(160, 196, 255, 0.18);
+  border-radius: 8px;
+  background: rgba(8, 13, 28, 0.5);
+  backdrop-filter: blur(14px);
 }
 
 .brand-lockup h1 {
@@ -5344,6 +5358,10 @@ button {
 @media (max-width: 760px) {
   .top-hud {
     grid-template-columns: 1fr auto;
+  }
+
+  .top-hud-compact {
+    grid-template-columns: auto 1fr auto;
   }
 
   .hud-metrics {
