@@ -105,7 +105,7 @@ import { buildHazardPressureReadout } from "./game/hazard";
 import { buildResultOverlayDensity } from "./game/resultOverlay";
 import { buildLiveHudDensity } from "./game/liveHudDensity";
 import { buildPreflightOverlayDensity } from "./game/preflightOverlay";
-import { buildTopHudDensity } from "./game/topHudDensity";
+import { buildTopHudDensity, buildTopHudSpeedTone } from "./game/topHudDensity";
 import {
   buildResultActionsLayout,
   buildResultBoardAction,
@@ -512,6 +512,10 @@ export function App() {
     status: hud.status,
     preflightOpen: overlays.preflight,
     resultOpen: overlays.result
+  });
+  const topHudSpeedTone = buildTopHudSpeedTone({
+    speed: hud.speed,
+    landingStatus: hud.landingStatus
   });
   const preflightOverlayDensity = buildPreflightOverlayDensity({
     status: hud.status,
@@ -1255,7 +1259,7 @@ export function App() {
             icon={<Gauge size={18} />}
             label="Speed"
             value={hud.speed.toFixed(1)}
-            tone={hud.speed > 45 ? "warning" : "normal"}
+            tone={topHudSpeedTone}
             showLabel={topHudDensity.showMetricLabels}
           />
           <Metric

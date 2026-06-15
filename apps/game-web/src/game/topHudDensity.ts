@@ -1,4 +1,4 @@
-import type { RunStatus } from "@astro-courier/shared";
+import type { LandingGuidanceStatus, RunStatus } from "@astro-courier/shared";
 
 export type TopHudDensityInput = {
   status: RunStatus;
@@ -12,6 +12,13 @@ export type TopHudDensity = {
   showMetricLabels: boolean;
 };
 
+export type TopHudSpeedToneInput = {
+  speed: number;
+  landingStatus?: LandingGuidanceStatus;
+};
+
+export type TopHudSpeedTone = "normal" | "warning";
+
 export function buildTopHudDensity(input: TopHudDensityInput): TopHudDensity {
   const compact = input.status === "flying" && !input.preflightOpen && !input.resultOpen;
 
@@ -20,4 +27,8 @@ export function buildTopHudDensity(input: TopHudDensityInput): TopHudDensity {
     showBrandCopy: !compact,
     showMetricLabels: !compact
   };
+}
+
+export function buildTopHudSpeedTone(input: TopHudSpeedToneInput): TopHudSpeedTone {
+  return input.landingStatus === "too-fast" ? "warning" : "normal";
 }

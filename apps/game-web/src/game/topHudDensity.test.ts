@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildTopHudDensity } from "./topHudDensity";
+import { buildTopHudDensity, buildTopHudSpeedTone } from "./topHudDensity";
 
 describe("top HUD density", () => {
   it("compacts brand copy during active flight", () => {
@@ -26,5 +26,16 @@ describe("top HUD density", () => {
       showBrandCopy: true,
       showMetricLabels: true
     });
+  });
+});
+
+describe("top HUD speed tone", () => {
+  it("keeps fast cruise neutral until landing guidance calls it too fast", () => {
+    expect(buildTopHudSpeedTone({ speed: 58, landingStatus: "approach" })).toBe("normal");
+    expect(buildTopHudSpeedTone({ speed: 38, landingStatus: "ready" })).toBe("normal");
+  });
+
+  it("warns only when the current target approach is actually too fast", () => {
+    expect(buildTopHudSpeedTone({ speed: 43, landingStatus: "too-fast" })).toBe("warning");
   });
 });
