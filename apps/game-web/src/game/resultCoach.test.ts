@@ -124,6 +124,28 @@ describe("result coach", () => {
     });
   });
 
+  it("coaches close target hull collisions as pad misses instead of route clearance", () => {
+    expect(
+      buildResultCoach({
+        status: "crashed",
+        objectivePhase: "pickup",
+        contractId: "gravity-slingshot",
+        targetDistance: 21,
+        crashReason: "Hull Collision",
+        medal: "none",
+        grade: "F",
+        cargoDamage: 1,
+        fuel: 40,
+        maxFuel: 100,
+        scoreBreakdown: baseBreakdown
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Cross the pad ring",
+      tone: "danger"
+    });
+  });
+
   it("coaches asteroid sprint hull collisions toward wider field clearance", () => {
     expect(
       buildResultCoach({

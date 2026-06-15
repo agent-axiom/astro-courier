@@ -149,6 +149,14 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
       };
     }
 
+    if (isCloseTargetHullCollision(input)) {
+      return {
+        label: "Next run",
+        value: "Cross the pad ring",
+        tone: "danger"
+      };
+    }
+
     if (isDeliveryNearMiss(input)) {
       return {
         label: "Next run",
@@ -434,6 +442,10 @@ export function buildResultActionsLayout(input: ResultActionsLayoutInput): Resul
 
 function isDeliveryNearMiss(input: ResultCoachInput): boolean {
   return input.objectivePhase === "delivery" && input.targetDistance !== undefined && input.targetDistance <= 60;
+}
+
+function isCloseTargetHullCollision(input: ResultCoachInput): boolean {
+  return input.crashReason === "Hull Collision" && input.targetDistance !== undefined && input.targetDistance <= 90;
 }
 
 function buildCometNearMissCoach(input: ResultCoachInput, fuelRatio: number): ResultCoach | undefined {
