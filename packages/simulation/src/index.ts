@@ -236,6 +236,9 @@ export const LAST_DROP_FUEL_RATIO = 0.05;
 export const NO_BRAKE_STYLE_BONUS = 150;
 export const ANTIMATTER_DRIFT_STYLE_BONUS = 210;
 export const CONTROLLED_DOCK_SPEED_RATIO = 0.7;
+const CATASTROPHIC_DOCK_SPEED_RATIO = 1.85;
+const ROUGH_DOCK_SPEED_DAMAGE = 0.18;
+const ROUGH_DOCK_ALIGNMENT_DAMAGE = 0.08;
 export const STYLE_CHAIN_WINDOW_SECONDS = 4;
 export const CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS = 5.5;
 const STYLE_CHAIN_MULTIPLIER_STEP = 0.25;
@@ -911,17 +914,22 @@ function resolvePadContact(world: SimulationWorld, touchedPad: LandingPadState):
   const isSafeDocking = isSoftEnough && (isAligned || isControlledDockSpeed(speed, touchedPad));
 
   if (!isSafeDocking) {
-    world.status = "crashed";
-    world.landingRating = "Insurance Event";
-    world.crashReason = isSoftEnough ? "Misaligned Dock" : "Hard Landing";
-    world.ship.cargoDamage = 1;
-    return;
+    const activeObjectiveContact = isActiveObjectiveContact(world, touchedPad);
+    if (!activeObjectiveContact || isCatastrophicDockImpact(speed, touchedPad)) {
+      world.status = "crashed";
+      world.landingRating = "Insurance Event";
+      world.crashReason = isSoftEnough ? "Misaligned Dock" : "Hard Landing";
+      world.ship.cargoDamage = 1;
+      return;
+    }
+
+    applyRoughDockDamage(world, speed, angleDiff, touchedPad);
   }
 
   if (touchedPad.role === "pickup" && world.objectivePhase === "pickup") {
     world.cargoOnboard = true;
     world.objectivePhase = "delivery";
-    if (world.elapsedSeconds <= QUICK_PICKUP_WINDOW_SECONDS) {
+    if (world.elapsedSeconds <= QUICK_PICKUP_WINDOW_SECONDS && world.ship.cargoDamage <= 0.02) {
       awardStyle(world, QUICK_PICKUP_STYLE_BONUS, world.lastMilestone === "Assist Burn" ? "Assist Burn" : "Quick Pickup");
     } else {
       world.lastMilestone = "Cargo Loaded";
@@ -976,6 +984,34 @@ function resolvePadContact(world: SimulationWorld, touchedPad: LandingPadState):
   if (!departingUsedPickup) {
     world.ship.velocity = scale(world.ship.velocity, 0.25);
   }
+}
+
+function isActiveObjectiveContact(world: SimulationWorld, touchedPad: LandingPadState): boolean {
+  if (!touchedPad.active) {
+    return false;
+  }
+
+  if (touchedPad.role === "pickup" && world.objectivePhase === "pickup") {
+    return true;
+  }
+
+  return touchedPad.role === "destination" && world.cargoOnboard;
+}
+
+function isCatastrophicDockImpact(speed: number, pad: LandingPadState): boolean {
+  return speed > pad.allowedApproachSpeed * CATASTROPHIC_DOCK_SPEED_RATIO;
+}
+
+function applyRoughDockDamage(world: SimulationWorld, speed: number, angleDiff: number, pad: LandingPadState): void {
+  const speedOverage = Math.max(0, speed / pad.allowedApproachSpeed - 1);
+  const alignmentOverage = Math.max(0, angleDiff / pad.requiredAngleTolerance - 1);
+  const roughness = speedOverage * ROUGH_DOCK_SPEED_DAMAGE + alignmentOverage * ROUGH_DOCK_ALIGNMENT_DAMAGE;
+  if (roughness <= 0) {
+    return;
+  }
+
+  const fragilityMultiplier = Math.max(0.25, world.activeCargo.fragility);
+  world.ship.cargoDamage = clamp(world.ship.cargoDamage + roughness * fragilityMultiplier, 0, 0.95);
 }
 
 function updateScore(world: SimulationWorld): void {

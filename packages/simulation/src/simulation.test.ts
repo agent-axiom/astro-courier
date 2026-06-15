@@ -222,7 +222,7 @@ describe("deterministic Astro Courier simulation", () => {
     });
   });
 
-  it("does not award gravity sling style for a near-surface hard landing", () => {
+  it("does not award gravity sling style for a rough near-surface pickup", () => {
     const world = createWorldFromSystem(starterSystem, "gravity-sling-crash-seed");
     world.ship.position = { x: 0, y: -74 };
     world.ship.velocity = { x: 58, y: 0 };
@@ -231,8 +231,9 @@ describe("deterministic Astro Courier simulation", () => {
 
     stepWorld(world, 1 / 60, []);
 
-    expect(world.status).toBe("crashed");
-    expect(world.lastMilestone).toBeUndefined();
+    expect(world.status).toBe("flying");
+    expect(world.objectivePhase).toBe("delivery");
+    expect(world.cargoOnboard).toBe(true);
     expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(0);
   });
 
@@ -356,6 +357,30 @@ describe("deterministic Astro Courier simulation", () => {
     expect(soft.landingRating).toBe("Perfect Landing");
     expect(harsh.status).toBe("crashed");
     expect(harsh.landingRating).toBe("Insurance Event");
+  });
+
+  it("counts rough active target arrivals as deliveries instead of false crashes", () => {
+    const world = createWorldFromSystem(starterSystem, "rough-target-arrival-seed");
+    world.cargoOnboard = true;
+    world.objectivePhase = "delivery";
+    for (const pad of world.landingPads) {
+      pad.active = pad.role === "destination";
+    }
+    world.ship.position = { x: 260, y: -80 };
+    world.ship.velocity = { x: 52, y: 0 };
+    world.ship.rotation = 0;
+
+    expect(snapshotWorld(world).objectiveTarget).toMatchObject({
+      id: "dock-a",
+      landingStatus: "too-fast"
+    });
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("delivered");
+    expect(world.landingRating).toBe("Spicy Landing");
+    expect(world.crashReason).toBeUndefined();
+    expect(world.ship.cargoDamage).toBeGreaterThan(0);
   });
 
   it("reports objective telemetry for pickup and delivery guidance", () => {
@@ -1208,7 +1233,7 @@ describe("deterministic Astro Courier simulation", () => {
     expect(reckless.landingRating).toBe("Insurance Event");
   });
 
-  it("does not spend assist burn or save a fast pad contact without enough fuel", () => {
+  it("does not spend assist burn when a slightly fast target contact can rough dock", () => {
     const emptyAssist = createWorldFromSystem(starterSystem, "empty-assist-seed");
     emptyAssist.ship.position = { x: 0, y: -74 };
     emptyAssist.ship.velocity = { x: 43, y: 0 };
@@ -1217,9 +1242,12 @@ describe("deterministic Astro Courier simulation", () => {
 
     stepWorld(emptyAssist, 1 / 60, []);
 
-    expect(emptyAssist.status).toBe("crashed");
+    expect(emptyAssist.status).toBe("flying");
+    expect(emptyAssist.objectivePhase).toBe("delivery");
+    expect(emptyAssist.cargoOnboard).toBe(true);
     expect(emptyAssist.ship.fuel).toBe(LANDING_ASSIST_FUEL_COST);
     expect(emptyAssist.fuelUsed).toBe(0);
+    expect(emptyAssist.ship.cargoDamage).toBeGreaterThan(0);
   });
 
   it("explains crash causes for hard landings, misaligned docks, and direct collisions", () => {
@@ -1230,9 +1258,9 @@ describe("deterministic Astro Courier simulation", () => {
     stepWorld(hardLanding, 1 / 60, []);
 
     const misalignedDock = createWorldFromSystem(starterSystem, "misaligned-dock-seed");
-    misalignedDock.ship.position = { x: 0, y: -74 };
+    misalignedDock.ship.position = { x: 260, y: -80 };
     misalignedDock.ship.velocity = { x: 35, y: 0 };
-    misalignedDock.ship.rotation = 0;
+    misalignedDock.ship.rotation = Math.PI;
     stepWorld(misalignedDock, 1 / 60, []);
 
     const collision = createWorldFromSystem(starterSystem, "crash-seed");
@@ -1245,7 +1273,7 @@ describe("deterministic Astro Courier simulation", () => {
     expect(summarizeRun(collision).crashReason).toBe("Hull Collision");
   });
 
-  it("treats fast near-target planet-side approach misses as dock failures rather than gravity collisions", () => {
+  it("counts rough near-target planet-side arrivals as deliveries rather than gravity collisions", () => {
     const returnLegSystem: SystemContent = {
       ...starterSystem,
       contracts: [
@@ -1292,8 +1320,10 @@ describe("deterministic Astro Courier simulation", () => {
 
     stepWorld(world, 1 / 60, []);
 
-    expect(world.status).toBe("crashed");
-    expect(summarizeRun(world).crashReason).toBe("Misaligned Dock");
+    expect(world.status).toBe("delivered");
+    expect(world.landingRating).toBe("Spicy Landing");
+    expect(summarizeRun(world).crashReason).toBeUndefined();
+    expect(world.ship.cargoDamage).toBeGreaterThan(0);
   });
 
   it("lets slow near-target planet-side arrivals dock instead of crashing", () => {
