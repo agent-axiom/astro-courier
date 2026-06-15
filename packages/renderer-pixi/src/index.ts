@@ -379,6 +379,24 @@ export type LandingCorridorVisual = {
   width: number;
 };
 
+export type ApproachLockVisualInput = Pick<SimulationSnapshot, "objectivePhase" | "status"> & {
+  objectiveTarget?: Pick<NonNullable<SimulationSnapshot["objectiveTarget"]>, "distance" | "landingStatus" | "role">;
+  cargoDamage: number;
+  approachStreakSeconds: number;
+};
+
+export type ApproachLockVisual = {
+  color: number;
+  tone: "armed" | "charging";
+  progress: number;
+  radius: number;
+  alpha: number;
+  width: number;
+};
+
+const APPROACH_LOCK_ARM_SECONDS = 1;
+const APPROACH_LOCK_MIN_SECONDS = 0.25;
+
 export function landingPadVisual(pad: LandingPadVisualInput): LandingPadVisual {
   const color = pad.role === "destination" ? 0xffd166 : pad.role === "pickup" ? 0x8ee6b8 : 0xa0c4ff;
   if (pad.active) {
@@ -441,6 +459,33 @@ export function landingCorridorVisual(input: LandingCorridorVisualInput): Landin
     length: round(34 + proximity * 32 + precisionBoost * 8, 2),
     alpha: round(clamp(0.2 + proximity * 0.34 + precisionBoost * 0.12 + unsafeBoost * 0.1, 0.2, 0.78), 2),
     width: round(1.2 + proximity * 1.1 + precisionBoost * 0.6 + unsafeBoost * 0.35, 2)
+  };
+}
+
+export function approachLockVisual(input: ApproachLockVisualInput): ApproachLockVisual | undefined {
+  const target = input.objectiveTarget;
+  if (
+    input.status !== "flying" ||
+    input.objectivePhase !== "delivery" ||
+    !target ||
+    target.role !== "destination" ||
+    target.landingStatus !== "ready" ||
+    input.cargoDamage > 0.02 ||
+    input.approachStreakSeconds < APPROACH_LOCK_MIN_SECONDS
+  ) {
+    return undefined;
+  }
+
+  const progress = clamp(input.approachStreakSeconds / APPROACH_LOCK_ARM_SECONDS, 0, 1);
+  const armed = progress >= 1;
+  const proximity = 1 - clamp((target.distance - 24) / 96, 0, 1);
+  return {
+    color: armed ? 0xf8e59a : 0x8ee6b8,
+    tone: armed ? "armed" : "charging",
+    progress: round(progress, 2),
+    radius: round(48 + proximity * 10 + progress * 8, 2),
+    alpha: round(0.24 + proximity * 0.08 + progress * 0.24 + (armed ? 0.08 : 0), 2),
+    width: round(1.4 + progress * 1.6 + (armed ? 0.5 : 0), 2)
   };
 }
 
@@ -1127,6 +1172,13 @@ class PixiRenderer implements AstroPixiRenderer {
       landingStatus: target.landingStatus,
       assistAvailable: target.assistAvailable
     });
+    const approachLock = approachLockVisual({
+      status: snapshot.status,
+      objectivePhase: snapshot.objectivePhase,
+      objectiveTarget: target,
+      cargoDamage: snapshot.ship.cargoDamage,
+      approachStreakSeconds: snapshot.approachStreakSeconds
+    });
     const targetOnScreen =
       targetPoint.x >= 0 && targetPoint.x <= viewport.width && targetPoint.y >= 0 && targetPoint.y <= viewport.height;
 
@@ -1137,6 +1189,20 @@ class PixiRenderer implements AstroPixiRenderer {
     });
 
     if (targetOnScreen) {
+      if (approachLock) {
+        this.guidance.circle(targetPoint.x, targetPoint.y, approachLock.radius).stroke({
+          color: approachLock.color,
+          width: approachLock.width,
+          alpha: approachLock.alpha
+        });
+        if (approachLock.tone === "armed") {
+          this.guidance.circle(targetPoint.x, targetPoint.y, approachLock.radius - 9).stroke({
+            color: 0xffffff,
+            width: 1,
+            alpha: approachLock.alpha * 0.34
+          });
+        }
+      }
       this.guidance.circle(targetPoint.x, targetPoint.y, (pulse.radius + 12) * visual.markerScale).stroke({
         color,
         width: 1,

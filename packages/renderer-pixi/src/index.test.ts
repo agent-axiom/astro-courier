@@ -14,6 +14,7 @@ import {
   landingPadVisual,
   objectiveBeaconPulse,
   objectiveGuidanceVisual,
+  approachLockVisual,
   screenShakeOffset,
   shipTrailVisual,
   trajectoryHazardDanger,
@@ -465,6 +466,107 @@ describe("landing corridor visual", () => {
     expect(tooFast?.width).toBeGreaterThan(approach?.width ?? 0);
     expect(tooFast?.alpha).toBeGreaterThan(approach?.alpha ?? 0);
     expect(misaligned?.width).toBeGreaterThan(approach?.width ?? 0);
+  });
+});
+
+describe("approach lock visual", () => {
+  it("stays hidden unless a clean delivery dock is charging", () => {
+    expect(
+      approachLockVisual({
+        status: "paused",
+        objectivePhase: "delivery",
+        objectiveTarget: {
+          role: "destination",
+          landingStatus: "ready",
+          distance: 24
+        },
+        cargoDamage: 0,
+        approachStreakSeconds: 0.6
+      })
+    ).toBeUndefined();
+    expect(
+      approachLockVisual({
+        status: "flying",
+        objectivePhase: "pickup",
+        objectiveTarget: {
+          role: "pickup",
+          landingStatus: "ready",
+          distance: 24
+        },
+        cargoDamage: 0,
+        approachStreakSeconds: 0.6
+      })
+    ).toBeUndefined();
+    expect(
+      approachLockVisual({
+        status: "flying",
+        objectivePhase: "delivery",
+        objectiveTarget: {
+          role: "destination",
+          landingStatus: "too-fast",
+          distance: 24
+        },
+        cargoDamage: 0,
+        approachStreakSeconds: 0.6
+      })
+    ).toBeUndefined();
+    expect(
+      approachLockVisual({
+        status: "flying",
+        objectivePhase: "delivery",
+        objectiveTarget: {
+          role: "destination",
+          landingStatus: "ready",
+          distance: 24
+        },
+        cargoDamage: 0.08,
+        approachStreakSeconds: 0.6
+      })
+    ).toBeUndefined();
+    expect(
+      approachLockVisual({
+        status: "flying",
+        objectivePhase: "delivery",
+        objectiveTarget: {
+          role: "destination",
+          landingStatus: "ready",
+          distance: 24
+        },
+        cargoDamage: 0,
+        approachStreakSeconds: 0.1
+      })
+    ).toBeUndefined();
+  });
+
+  it("charges from setup to armed as the clean ready approach is held", () => {
+    const charging = approachLockVisual({
+      status: "flying",
+      objectivePhase: "delivery",
+      objectiveTarget: {
+        role: "destination",
+        landingStatus: "ready",
+        distance: 24
+      },
+      cargoDamage: 0,
+      approachStreakSeconds: 0.45
+    });
+    const armed = approachLockVisual({
+      status: "flying",
+      objectivePhase: "delivery",
+      objectiveTarget: {
+        role: "destination",
+        landingStatus: "ready",
+        distance: 24
+      },
+      cargoDamage: 0,
+      approachStreakSeconds: 1.2
+    });
+
+    expect(charging).toMatchObject({ color: 0x8ee6b8, tone: "charging", progress: 0.45 });
+    expect(armed).toMatchObject({ color: 0xf8e59a, tone: "armed", progress: 1 });
+    expect(armed?.alpha).toBeGreaterThan(charging?.alpha ?? 0);
+    expect(armed?.width).toBeGreaterThan(charging?.width ?? 0);
+    expect(armed?.radius).toBeGreaterThan(charging?.radius ?? 0);
   });
 });
 
