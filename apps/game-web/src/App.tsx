@@ -2033,17 +2033,19 @@ export function App() {
           </span>
           <h2>{hud.status === "delivered" ? "Delivery Complete" : "Delivery Failed"}</h2>
           <p>{hud.status === "crashed" ? buildCrashReasonLabel(hud) : hud.landingRating ?? statusLabel(hud.status)}</p>
-          {crashDebrief ? (
+          {resultOverlayDensity?.showCrashDebrief && crashDebrief ? (
             <div className={`crash-debrief crash-debrief-${crashDebrief.tone}`} aria-label={`${crashDebrief.label}: ${crashDebrief.value}`}>
               <ShieldAlert size={16} />
               <span>{crashDebrief.label}</span>
               <strong>{crashDebrief.value}</strong>
             </div>
           ) : null}
-          <div className={`grade-badge grade-${hud.grade.toLowerCase()}`} aria-label={`Run grade ${hud.grade}`}>
-            <span>Rank</span>
-            <strong>{hud.grade}</strong>
-          </div>
+          {resultOverlayDensity?.showRunGrade ? (
+            <div className={`grade-badge grade-${hud.grade.toLowerCase()}`} aria-label={`Run grade ${hud.grade}`}>
+              <span>Rank</span>
+              <strong>{hud.grade}</strong>
+            </div>
+          ) : null}
           {hud.medal !== "none" ? <div className={`medal-banner medal-${hud.medal}`}>{medalLabel(hud.medal)}</div> : null}
           {hud.status === "delivered" && resultOverlayDensity?.showRunReceipts && bestRun ? (
             <div className={`best-run ${newBest ? "best-run-new" : ""}`}>
@@ -2109,14 +2111,16 @@ export function App() {
               <strong>{dailyProgressReceipt.value}</strong>
             </div>
           ) : null}
-          <div className="result-stats">
-            {resultStats.map((stat) => (
-              <span key={stat.label}>
-                <small>{stat.label}</small>
-                <strong>{stat.value}</strong>
-              </span>
-            ))}
-          </div>
+          {resultOverlayDensity?.showQuickStats ? (
+            <div className="result-stats">
+              {resultStats.map((stat) => (
+                <span key={stat.label}>
+                  <small>{stat.label}</small>
+                  <strong>{stat.value}</strong>
+                </span>
+              ))}
+            </div>
+          ) : null}
           {resultOverlayDensity?.showDetailedScore ? (
             <div className="score-breakdown" aria-label="Score breakdown">
               {scoreBreakdownRows(hud).map((row) => (
@@ -2161,11 +2165,13 @@ export function App() {
               <strong>{resultHighlight.value}</strong>
             </div>
           ) : null}
-          <div className={`result-coach result-coach-${resultCoach.tone}`} aria-label={`${resultCoach.label}: ${resultCoach.value}`}>
-            <Flag size={18} />
-            <span>{resultCoach.label}</span>
-            <strong>{resultCoach.value}</strong>
-          </div>
+          {resultOverlayDensity?.showCoach ? (
+            <div className={`result-coach result-coach-${resultCoach.tone}`} aria-label={`${resultCoach.label}: ${resultCoach.value}`}>
+              <Flag size={18} />
+              <span>{resultCoach.label}</span>
+              <strong>{resultCoach.value}</strong>
+            </div>
+          ) : null}
           {resultOverlayDensity?.showTempoRecap ? (
             <div className={`result-tempo-recap result-tempo-${resultTempoRecap.tone}`} aria-label={`${resultTempoRecap.label}: ${resultTempoRecap.value}`}>
               <Gauge size={18} />
@@ -2180,7 +2186,7 @@ export function App() {
               <strong>{retryTarget.value}</strong>
             </div>
           ) : null}
-          {resultOverlayDensity?.showRetryTarget ? (
+          {resultOverlayDensity?.showRetryActionBriefing ? (
             <div
               className={`retry-action-briefing retry-action-${retryActionBriefing.tone}`}
               aria-label={`${retryActionBriefing.label}: ${retryActionBriefing.value}`}

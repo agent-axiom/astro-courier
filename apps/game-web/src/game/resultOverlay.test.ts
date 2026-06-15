@@ -5,9 +5,14 @@ describe("result overlay density", () => {
   it("keeps crash results focused while showing the next retry target", () => {
     expect(buildResultOverlayDensity({ status: "crashed" })).toEqual({
       showDetailedScore: false,
+      showCrashDebrief: false,
+      showRunGrade: false,
+      showQuickStats: false,
       showRunReceipts: false,
+      showCoach: false,
       showTempoRecap: false,
       showRetryTarget: true,
+      showRetryActionBriefing: false,
       showRouteProgress: false,
       showBoardAction: false
     });
@@ -16,9 +21,14 @@ describe("result overlay density", () => {
   it("keeps ordinary delivered results focused enough for fast retries", () => {
     expect(buildResultOverlayDensity({ status: "delivered", medal: "none", grade: "D" })).toEqual({
       showDetailedScore: false,
+      showCrashDebrief: false,
+      showRunGrade: true,
+      showQuickStats: true,
       showRunReceipts: false,
+      showCoach: true,
       showTempoRecap: false,
       showRetryTarget: true,
+      showRetryActionBriefing: true,
       showRouteProgress: false,
       showBoardAction: false
     });
@@ -27,9 +37,14 @@ describe("result overlay density", () => {
   it("keeps strong delivered results rich enough to celebrate progress", () => {
     expect(buildResultOverlayDensity({ status: "delivered", medal: "gold", grade: "A" })).toEqual({
       showDetailedScore: true,
+      showCrashDebrief: false,
+      showRunGrade: true,
+      showQuickStats: true,
       showRunReceipts: true,
+      showCoach: true,
       showTempoRecap: true,
       showRetryTarget: true,
+      showRetryActionBriefing: true,
       showRouteProgress: true,
       showBoardAction: true
     });

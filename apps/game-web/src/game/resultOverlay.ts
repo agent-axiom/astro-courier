@@ -8,9 +8,14 @@ export type ResultOverlayDensityInput = {
 
 export type ResultOverlayDensity = {
   showDetailedScore: boolean;
+  showCrashDebrief: boolean;
+  showRunGrade: boolean;
+  showQuickStats: boolean;
   showRunReceipts: boolean;
+  showCoach: boolean;
   showTempoRecap: boolean;
   showRetryTarget: boolean;
+  showRetryActionBriefing: boolean;
   showRouteProgress: boolean;
   showBoardAction: boolean;
 };
@@ -22,9 +27,14 @@ export function buildResultOverlayDensity(input: ResultOverlayDensityInput): Res
 
   return {
     showDetailedScore: richResult,
+    showCrashDebrief: false,
+    showRunGrade: input.status === "delivered",
+    showQuickStats: input.status === "delivered",
     showRunReceipts: richResult,
+    showCoach: input.status === "delivered",
     showTempoRecap: richResult,
     showRetryTarget: true,
+    showRetryActionBriefing: input.status === "delivered",
     showRouteProgress: richResult,
     showBoardAction: richResult
   };
