@@ -7,6 +7,12 @@ describe("run shell hotkeys", () => {
     expect(resolveRunHotkeyAction({ code: "Enter", preflightOpen: false, resultOpen: false })).toBeUndefined();
   });
 
+  it("launches from preflight with Space without affecting live or result screens", () => {
+    expect(resolveRunHotkeyAction({ code: "Space", preflightOpen: true, resultOpen: false })).toBe("launch");
+    expect(resolveRunHotkeyAction({ code: "Space", preflightOpen: false, resultOpen: false, canTogglePause: true })).toBeUndefined();
+    expect(resolveRunHotkeyAction({ code: "Space", preflightOpen: false, resultOpen: true })).toBeUndefined();
+  });
+
   it("maps result overlay hotkeys to fast retry actions", () => {
     expect(resolveRunHotkeyAction({ code: "KeyR", preflightOpen: false, resultOpen: true })).toBe("restart-run");
     expect(resolveRunHotkeyAction({ code: "KeyB", preflightOpen: false, resultOpen: true })).toBe("restart-briefing");

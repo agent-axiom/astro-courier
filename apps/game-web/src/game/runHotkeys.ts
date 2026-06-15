@@ -30,7 +30,7 @@ export function resolveRunHotkeyAction(input: RunHotkeyInput): RunHotkeyAction |
     return undefined;
   }
 
-  if (input.preflightOpen && input.code === "Enter") {
+  if (input.preflightOpen && (input.code === "Enter" || input.code === "Space")) {
     return "launch";
   }
 
