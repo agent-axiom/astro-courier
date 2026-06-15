@@ -83,6 +83,6 @@ export function buildLiveHudDensity(input: LiveHudDensityInput): LiveHudDensity 
     showPrimaryStatusRows: false,
     showActionChips: finalApproach || dangerPressure || activeOpportunity,
     showTelemetryChips: expanded,
-    showRunFeed: expanded
+    showRunFeed: false
   };
 }

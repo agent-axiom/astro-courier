@@ -75,7 +75,7 @@ describe("live HUD density", () => {
     expect(finalApproachDensity.showRadioMessage).toBe(true);
     expect(finalApproachDensity.showRouteTempo).toBe(true);
     expect(finalApproachDensity.showPrimaryStatusRows).toBe(false);
-    expect(finalApproachDensity.showRunFeed).toBe(true);
+    expect(finalApproachDensity.showRunFeed).toBe(false);
 
     expect(
       buildLiveHudDensity({
@@ -104,17 +104,32 @@ describe("live HUD density", () => {
   });
 
   it("keeps paused route review expanded with status rows", () => {
+    const density = buildLiveHudDensity({
+      status: "paused",
+      preflightOpen: false,
+      objectivePhase: "delivery",
+      targetDistance: 86,
+      cargoDamage: 0,
+      fuelRatio: 0.72,
+      paceTier: "silver"
+    });
+
+    expect(density.showPrimaryStatusRows).toBe(true);
+    expect(density.showRunFeed).toBe(true);
+  });
+
+  it("keeps the event feed out of active flight even when the panel expands", () => {
     expect(
       buildLiveHudDensity({
-        status: "paused",
+        status: "flying",
         preflightOpen: false,
         objectivePhase: "delivery",
-        targetDistance: 86,
+        targetDistance: 48,
         cargoDamage: 0,
         fuelRatio: 0.72,
         paceTier: "silver"
-      }).showPrimaryStatusRows
-    ).toBe(true);
+      }).showRunFeed
+    ).toBe(false);
   });
 
   it("expands for active bonus windows and fragile run state", () => {
