@@ -235,6 +235,7 @@ export const LAST_DROP_STYLE_BONUS = 170;
 export const LAST_DROP_FUEL_RATIO = 0.05;
 export const NO_BRAKE_STYLE_BONUS = 150;
 export const ANTIMATTER_DRIFT_STYLE_BONUS = 210;
+export const CONTROLLED_DOCK_SPEED_RATIO = 0.7;
 export const STYLE_CHAIN_WINDOW_SECONDS = 4;
 export const CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS = 5.5;
 const STYLE_CHAIN_MULTIPLIER_STEP = 0.25;
@@ -1099,7 +1100,7 @@ function rateLanding(
 }
 
 function isControlledDockSpeed(speed: number, pad: LandingPadState): boolean {
-  return speed <= pad.allowedApproachSpeed * 0.7;
+  return speed <= pad.allowedApproachSpeed * CONTROLLED_DOCK_SPEED_RATIO;
 }
 
 function rotateTowardTarget(ship: ShipState, fixedDt: number): void {

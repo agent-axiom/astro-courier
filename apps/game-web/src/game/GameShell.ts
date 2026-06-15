@@ -60,6 +60,8 @@ export type HudState = {
   speed: number;
   targetDistance?: number;
   targetAllowedSpeed?: number;
+  targetAngleError?: number;
+  targetRequiredAngleTolerance?: number;
   targetRelativeBearing?: number;
   landingStatus?: LandingGuidanceStatus;
   perfectDockReady?: boolean;
@@ -401,6 +403,8 @@ export class GameShell {
       speed: Math.hypot(this.world.ship.velocity.x, this.world.ship.velocity.y),
       targetDistance: snapshot.objectiveTarget?.distance,
       targetAllowedSpeed: snapshot.objectiveTarget?.allowedApproachSpeed,
+      targetAngleError: snapshot.objectiveTarget?.angleError,
+      targetRequiredAngleTolerance: snapshot.objectiveTarget?.requiredAngleTolerance,
       targetRelativeBearing:
         snapshot.objectiveTarget === undefined ? undefined : normalizeAngle(snapshot.objectiveTarget.bearing - this.world.ship.rotation),
       landingStatus: snapshot.objectiveTarget?.landingStatus,

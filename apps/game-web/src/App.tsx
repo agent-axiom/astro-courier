@@ -1491,7 +1491,14 @@ export function App() {
         </div>
         {hud.landingStatus ? (
           <div className={`guidance-chip guidance-${hud.assistAvailable ? "assist" : hud.landingStatus}`}>
-            {buildLandingGuidanceLabel({ status: hud.landingStatus, assistAvailable: Boolean(hud.assistAvailable) })}
+            {buildLandingGuidanceLabel({
+              status: hud.landingStatus,
+              assistAvailable: Boolean(hud.assistAvailable),
+              speed: hud.speed,
+              allowedSpeed: hud.targetAllowedSpeed,
+              angleError: hud.targetAngleError,
+              requiredAngleTolerance: hud.targetRequiredAngleTolerance
+            })}
           </div>
         ) : null}
         {approachRewardReadout ? (

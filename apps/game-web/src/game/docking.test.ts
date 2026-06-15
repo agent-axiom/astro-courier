@@ -71,6 +71,18 @@ describe("landing guidance label", () => {
     expect(buildLandingGuidanceLabel({ status: "ready" })).toBe("Dock ready");
   });
 
+  it("names slow off-angle ready contacts as soft docks", () => {
+    expect(
+      buildLandingGuidanceLabel({
+        status: "ready",
+        speed: 24,
+        allowedSpeed: 42,
+        angleError: 1,
+        requiredAngleTolerance: 0.75
+      })
+    ).toBe("Soft dock");
+  });
+
   it("keeps assist availability above ordinary landing guidance", () => {
     expect(buildLandingGuidanceLabel({ status: "too-fast", assistAvailable: true })).toBe("Assist ready");
   });

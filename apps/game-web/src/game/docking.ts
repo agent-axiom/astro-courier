@@ -1,4 +1,4 @@
-import { PERFECT_APPROACH_STREAK_SECONDS, PERFECT_APPROACH_STYLE_BONUS } from "@astro-courier/simulation";
+import { CONTROLLED_DOCK_SPEED_RATIO, PERFECT_APPROACH_STREAK_SECONDS, PERFECT_APPROACH_STYLE_BONUS } from "@astro-courier/simulation";
 import type { LandingGuidanceStatus } from "@astro-courier/shared";
 
 export type DockingSpeedReadoutInput = {
@@ -27,16 +27,31 @@ export type ApproachRewardReadout = {
 export type LandingGuidanceLabelInput = {
   status: LandingGuidanceStatus;
   assistAvailable?: boolean;
+  speed?: number;
+  allowedSpeed?: number;
+  angleError?: number;
+  requiredAngleTolerance?: number;
 };
 
 const FINAL_APPROACH_BRAKE_DISTANCE = 70;
 
 export function buildLandingGuidanceLabel(input: LandingGuidanceLabelInput): string {
   if (input.assistAvailable) return "Assist ready";
-  if (input.status === "ready") return "Dock ready";
+  if (input.status === "ready") return isSoftDockReady(input) ? "Soft dock" : "Dock ready";
   if (input.status === "too-fast") return "Brake";
   if (input.status === "misaligned") return "Align nose";
   return "Line up";
+}
+
+function isSoftDockReady(input: LandingGuidanceLabelInput): boolean {
+  return (
+    input.speed !== undefined &&
+    input.allowedSpeed !== undefined &&
+    input.angleError !== undefined &&
+    input.requiredAngleTolerance !== undefined &&
+    input.speed <= input.allowedSpeed * CONTROLLED_DOCK_SPEED_RATIO &&
+    input.angleError > input.requiredAngleTolerance
+  );
 }
 
 export function buildDockingSpeedReadout(input: DockingSpeedReadoutInput): DockingSpeedReadout | undefined {
