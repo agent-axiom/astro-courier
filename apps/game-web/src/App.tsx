@@ -90,7 +90,7 @@ import {
 } from "./game/objective";
 import { buildFlightDirector } from "./game/flightDirector";
 import { buildPreflightBonusObjectives, buildPreflightMasteryTargets } from "./game/mastery";
-import { buildApproachRewardReadout, buildDockingSpeedReadout } from "./game/docking";
+import { buildApproachRewardReadout, buildDockingSpeedReadout, buildLandingGuidanceLabel } from "./game/docking";
 import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./game/cargo";
 import {
   buildDockGradeReceipt,
@@ -1491,7 +1491,7 @@ export function App() {
         </div>
         {hud.landingStatus ? (
           <div className={`guidance-chip guidance-${hud.assistAvailable ? "assist" : hud.landingStatus}`}>
-            {guidanceLabel(hud.landingStatus, Boolean(hud.assistAvailable))}
+            {buildLandingGuidanceLabel({ status: hud.landingStatus, assistAvailable: Boolean(hud.assistAvailable) })}
           </div>
         ) : null}
         {approachRewardReadout ? (
@@ -2289,14 +2289,6 @@ function toRunFeedSnapshot(hud: HudState, bestRun: BestRun | undefined): RunFeed
     styleMultiplier: hud.styleMultiplier,
     styleChainSecondsRemaining: hud.styleChainSecondsRemaining
   };
-}
-
-function guidanceLabel(status: NonNullable<HudState["landingStatus"]>, assistAvailable: boolean): string {
-  if (assistAvailable) return "Assist burn ready";
-  if (status === "ready") return "Ready to dock";
-  if (status === "too-fast") return "Slow down";
-  if (status === "misaligned") return "Align ship";
-  return "Approach target";
 }
 
 function medalLabel(medal: HudState["medal"]): string {

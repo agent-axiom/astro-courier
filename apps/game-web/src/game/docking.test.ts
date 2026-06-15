@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildApproachRewardReadout, buildDockingSpeedReadout } from "./docking";
+import { buildApproachRewardReadout, buildDockingSpeedReadout, buildLandingGuidanceLabel } from "./docking";
 
 describe("docking speed readout", () => {
   it("stays hidden until a target speed limit is known", () => {
@@ -60,5 +60,18 @@ describe("approach reward readout", () => {
       tone: "ready",
       progress: 1
     });
+  });
+});
+
+describe("landing guidance label", () => {
+  it("keeps live dock guidance short and action-led", () => {
+    expect(buildLandingGuidanceLabel({ status: "approach" })).toBe("Line up");
+    expect(buildLandingGuidanceLabel({ status: "too-fast" })).toBe("Brake");
+    expect(buildLandingGuidanceLabel({ status: "misaligned" })).toBe("Align nose");
+    expect(buildLandingGuidanceLabel({ status: "ready" })).toBe("Dock ready");
+  });
+
+  it("keeps assist availability above ordinary landing guidance", () => {
+    expect(buildLandingGuidanceLabel({ status: "too-fast", assistAvailable: true })).toBe("Assist ready");
   });
 });

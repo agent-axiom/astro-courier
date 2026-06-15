@@ -1,4 +1,5 @@
 import { PERFECT_APPROACH_STREAK_SECONDS, PERFECT_APPROACH_STYLE_BONUS } from "@astro-courier/simulation";
+import type { LandingGuidanceStatus } from "@astro-courier/shared";
 
 export type DockingSpeedReadoutInput = {
   speed: number;
@@ -23,7 +24,20 @@ export type ApproachRewardReadout = {
   progress: number;
 };
 
+export type LandingGuidanceLabelInput = {
+  status: LandingGuidanceStatus;
+  assistAvailable?: boolean;
+};
+
 const FINAL_APPROACH_BRAKE_DISTANCE = 70;
+
+export function buildLandingGuidanceLabel(input: LandingGuidanceLabelInput): string {
+  if (input.assistAvailable) return "Assist ready";
+  if (input.status === "ready") return "Dock ready";
+  if (input.status === "too-fast") return "Brake";
+  if (input.status === "misaligned") return "Align nose";
+  return "Line up";
+}
 
 export function buildDockingSpeedReadout(input: DockingSpeedReadoutInput): DockingSpeedReadout | undefined {
   if (input.allowedSpeed === undefined) {
