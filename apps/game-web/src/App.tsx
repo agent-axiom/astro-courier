@@ -757,7 +757,9 @@ export function App() {
   const resultOutcomePresentation =
     hud.status === "delivered" || hud.status === "crashed" ? buildResultOutcomePresentation(hud.status) : undefined;
   const resultOverlayDensity =
-    hud.status === "delivered" || hud.status === "crashed" ? buildResultOverlayDensity({ status: hud.status }) : undefined;
+    hud.status === "delivered" || hud.status === "crashed"
+      ? buildResultOverlayDensity({ status: hud.status, medal: hud.medal, grade: hud.grade })
+      : undefined;
   const crashDebrief = hud.status === "crashed" ? buildCrashDebrief(hud) : undefined;
   const resultHighlight = buildResultHighlight(hud.scoreBreakdown, hud.lastMilestone);
   const dockGradeReceipt =

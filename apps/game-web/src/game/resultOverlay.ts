@@ -1,7 +1,9 @@
-import type { RunStatus } from "@astro-courier/shared";
+import type { RunGrade, RunMedal, RunStatus } from "@astro-courier/shared";
 
 export type ResultOverlayDensityInput = {
   status: Extract<RunStatus, "delivered" | "crashed">;
+  medal?: RunMedal;
+  grade?: RunGrade;
 };
 
 export type ResultOverlayDensity = {
@@ -14,7 +16,9 @@ export type ResultOverlayDensity = {
 };
 
 export function buildResultOverlayDensity(input: ResultOverlayDensityInput): ResultOverlayDensity {
-  const richResult = input.status === "delivered";
+  const richResult =
+    input.status === "delivered" &&
+    (input.medal === "gold" || input.medal === "comet" || input.grade === "A" || input.grade === "S");
 
   return {
     showDetailedScore: richResult,
