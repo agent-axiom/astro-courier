@@ -15,7 +15,7 @@ export function hapticPatternForEvents(events: readonly GameAudioEvent[]): Hapti
     return [45, 45, 65];
   }
   if (events.includes("delivery-complete")) {
-    return [20, 30, 20];
+    return [16, 18, 34, 18];
   }
   if (events.includes("hazard-contact")) {
     return [30, 32, 36];
