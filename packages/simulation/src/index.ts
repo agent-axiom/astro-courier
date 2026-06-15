@@ -249,7 +249,7 @@ const DOCK_SETTLED_RADIUS_MULTIPLIER = 2.6;
 const DOCK_SETTLED_MAX_SPEED = 0.5;
 const DOCK_HALO_APPROACH_MIN_CLOSING_SPEED = 3;
 const DOCK_HALO_SIDE_ON_MIN_SPEED = 12;
-const GRAVITY_DOCK_APPROACH_RADIUS_MULTIPLIER = ACTIVE_DOCK_HALO_RADIUS_MULTIPLIER;
+const GRAVITY_DOCK_CONTACT_GRACE_RADIUS_MULTIPLIER = 4;
 
 export function calculateHazardSkimStyleBonus(severity: number): number {
   return Math.round(HAZARD_SKIM_BASE_BONUS + clamp(severity, 0, 1) * HAZARD_SKIM_SEVERITY_BONUS);
@@ -956,7 +956,11 @@ function isControlledActiveDockHaloArrival(world: SimulationWorld, pad: LandingP
 function findActiveGravityDockApproachPad(world: SimulationWorld, source: GravitySourceState): LandingPadState | undefined {
   return world.landingPads.find((pad) => {
     const shipPadDistance = distanceBetween(world.ship.position, pad.position);
-    return pad.active && isPadOnGravitySource(pad, source) && shipPadDistance <= pad.radius * GRAVITY_DOCK_APPROACH_RADIUS_MULTIPLIER;
+    return (
+      pad.active &&
+      isPadOnGravitySource(pad, source) &&
+      shipPadDistance <= pad.radius * GRAVITY_DOCK_CONTACT_GRACE_RADIUS_MULTIPLIER
+    );
   });
 }
 

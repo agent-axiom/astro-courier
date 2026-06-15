@@ -10,6 +10,7 @@ export type RetryTargetInput = {
   medal: RunMedal;
   elapsedSeconds: number;
   goldSeconds: number;
+  targetDistance?: number;
   targetAllowedSpeed?: number;
   cargoDamage?: number;
   fuel?: number;
@@ -58,6 +59,7 @@ const cleanCargoDamageLimit = 0.02;
 const cometReserveNearMissRatio = 0.6;
 const dangerPayMinBonus = 300;
 const perfectLandingBonus = 300;
+const closeTargetHullCollisionDistance = 90;
 
 export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
   if (input.status === "crashed") {
@@ -78,6 +80,14 @@ export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
     }
 
     if (input.crashReason === "Hull Collision") {
+      if (input.targetDistance !== undefined && input.targetDistance <= closeTargetHullCollisionDistance) {
+        return {
+          label: "Retry target",
+          value: "Re-enter dock ring",
+          tone: "danger"
+        };
+      }
+
       return {
         label: "Retry target",
         value:
@@ -221,7 +231,7 @@ function buildRepeatableMilestoneTarget(lastMilestone?: string): RetryTarget | u
 
 export function buildResultRetryAction(target: RetryTarget): ResultRetryAction {
   if (target.tone === "danger") {
-    if (target.value.startsWith("Dock under ")) {
+    if (target.value.startsWith("Dock under ") || target.value === "Re-enter dock ring") {
       return { label: "Fix Dock", tone: "danger", mode: "restart-run" };
     }
     if (isLaneRepairTarget(target.value)) {

@@ -932,6 +932,7 @@ export function App() {
     medal: hud.medal,
     elapsedSeconds: hud.elapsedSeconds,
     goldSeconds: hud.paceSecondsRemaining,
+    targetDistance: hud.targetDistance,
     targetAllowedSpeed: hud.targetAllowedSpeed,
     cargoDamage: hud.cargoDamage,
     fuel: hud.fuel,

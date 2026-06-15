@@ -98,6 +98,37 @@ describe("result retry target", () => {
     });
   });
 
+  it("turns close target hull collisions into a dock retry target", () => {
+    const target = buildRetryTarget({
+      status: "crashed",
+      contractId: "gravity-slingshot",
+      crashReason: "Hull Collision",
+      targetDistance: 54,
+      medal: "none",
+      elapsedSeconds: 14.2,
+      goldSeconds: 30,
+      score: 0,
+      isNewBest: false,
+      bestRun: undefined
+    });
+
+    expect(target).toEqual({
+      label: "Retry target",
+      value: "Re-enter dock ring",
+      tone: "danger"
+    });
+    expect(buildResultRetryAction(target)).toEqual({
+      label: "Fix Dock",
+      tone: "danger",
+      mode: "restart-run"
+    });
+    expect(buildRetryActionBriefing(buildResultRetryAction(target), target)).toEqual({
+      label: "Next run",
+      value: "Feather final brake",
+      tone: "danger"
+    });
+  });
+
   it("turns asteroid sprint hull collisions into an asteroid-field target", () => {
     expect(
       buildRetryTarget({
