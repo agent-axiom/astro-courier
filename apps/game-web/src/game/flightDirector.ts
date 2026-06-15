@@ -130,6 +130,15 @@ export function buildFlightDirector(input: FlightDirectorInput): FlightDirector 
     return director("Dock now", (input.cargoDamage ?? 0) <= 0.02 ? "Clean cargo" : "Salvage cargo", "approach", 1);
   }
 
+  if (input.landingStatus === "misaligned") {
+    return director(
+      "Align nose",
+      input.objectivePhase === "pickup" ? "Pad angle" : "Dock angle",
+      "approach",
+      targetProgress(input)
+    );
+  }
+
   const quickPickupSeconds = input.quickPickupSecondsRemaining ?? 0;
   if (input.objectivePhase === "pickup" && quickPickupSeconds > 0 && (input.quickPickupBonus ?? 0) > 0) {
     const chainActive = (input.styleMultiplier ?? 1) > 1 && (input.styleChainSecondsRemaining ?? 0) > 0;

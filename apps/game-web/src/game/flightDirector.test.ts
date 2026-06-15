@@ -251,6 +251,24 @@ describe("flight director", () => {
     });
   });
 
+  it("turns misaligned final dock approaches into a direct attitude command", () => {
+    expect(
+      buildFlightDirector({
+        status: "flying",
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        landingStatus: "misaligned",
+        targetDistance: 24
+      })
+    ).toEqual({
+      label: "Flight director",
+      action: "Align nose",
+      detail: "Dock angle",
+      tone: "approach",
+      progress: 0.94
+    });
+  });
+
   it("keeps ordinary flight focused on the active objective", () => {
     expect(
       buildFlightDirector({
