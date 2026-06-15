@@ -199,11 +199,11 @@ export function buildRadioMessage(hud: HudState, context: RadioMessageContext = 
   }
 
   if (hud.landingStatus === "too-fast") {
-    return "Slow your approach. Cargo prefers gentle physics.";
+    return "Too fast for a clean dock. Slow down to protect the cargo, or take a rough handoff.";
   }
 
   if (hud.landingStatus === "misaligned") {
-    return "Align ship attitude before contact. Landing pads are picky.";
+    return "Off-angle dock. It will be rough; align the nose for a clean handoff.";
   }
 
   if (hud.approachStreakSeconds >= PERFECT_APPROACH_STREAK_SECONDS) {

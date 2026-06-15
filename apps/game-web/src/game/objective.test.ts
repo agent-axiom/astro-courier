@@ -99,13 +99,13 @@ describe("objective intercept readout", () => {
   it("turns failed approach states into short correction calls", () => {
     expect(buildObjectiveInterceptReadout({ status: "flying", targetDistance: 18, speed: 48, landingStatus: "too-fast" })).toEqual({
       label: "Intercept",
-      value: "Brake",
+      value: "Slow for clean",
       tone: "hold"
     });
 
     expect(buildObjectiveInterceptReadout({ status: "flying", targetDistance: 18, speed: 12, landingStatus: "misaligned" })).toEqual({
       label: "Intercept",
-      value: "Align nose",
+      value: "Align for clean",
       tone: "steady"
     });
   });

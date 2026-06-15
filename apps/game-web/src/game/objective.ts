@@ -181,7 +181,7 @@ export function buildObjectiveInterceptReadout(
   if (input.landingStatus === "too-fast") {
     return {
       label: "Intercept",
-      value: "Brake",
+      value: "Slow for clean",
       tone: "hold"
     };
   }
@@ -189,7 +189,7 @@ export function buildObjectiveInterceptReadout(
   if (input.landingStatus === "misaligned") {
     return {
       label: "Intercept",
-      value: "Align nose",
+      value: "Align for clean",
       tone: "steady"
     };
   }

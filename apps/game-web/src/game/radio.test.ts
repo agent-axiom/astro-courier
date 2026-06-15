@@ -94,7 +94,15 @@ describe("radio feedback copy", () => {
 
   it("surfaces landing assist before generic speed warnings", () => {
     expect(buildRadioMessage({ ...baseHud, landingStatus: "too-fast", assistAvailable: true })).toContain("Assist");
-    expect(buildRadioMessage({ ...baseHud, landingStatus: "too-fast", assistAvailable: false })).toContain("Slow");
+    expect(buildRadioMessage({ ...baseHud, landingStatus: "too-fast", assistAvailable: false })).toBe(
+      "Too fast for a clean dock. Slow down to protect the cargo, or take a rough handoff."
+    );
+  });
+
+  it("frames off-angle dock guidance as a rough handoff, not a hidden failure", () => {
+    expect(buildRadioMessage({ ...baseHud, landingStatus: "misaligned" })).toBe(
+      "Off-angle dock. It will be rough; align the nose for a clean handoff."
+    );
   });
 
   it("confirms assist burns before generic landing guidance", () => {

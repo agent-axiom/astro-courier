@@ -48,8 +48,8 @@ export function buildLandingGuidancePresentation(input: LandingGuidanceLabelInpu
   if (input.assistAvailable) return { label: "Assist ready", tone: "assist" };
   if (input.status === "ready" && isSoftDockReady(input)) return { label: "Soft dock", tone: "soft" };
   if (input.status === "ready") return { label: "Dock ready", tone: "ready" };
-  if (input.status === "too-fast") return { label: "Brake", tone: "too-fast" };
-  if (input.status === "misaligned") return { label: "Align nose", tone: "misaligned" };
+  if (input.status === "too-fast") return { label: "Slow for clean", tone: "too-fast" };
+  if (input.status === "misaligned") return { label: "Align for clean", tone: "misaligned" };
   return { label: "Line up", tone: "approach" };
 }
 
@@ -75,7 +75,7 @@ export function buildDockingSpeedReadout(input: DockingSpeedReadoutInput): Docki
 
   return {
     label: "Dock speed",
-    value: overLimit && finalApproach ? `Brake now ${speedValue}` : speedValue,
+    value: overLimit && finalApproach ? `Slow for clean ${speedValue}` : speedValue,
     tone: overLimit ? "over-limit" : "normal"
   };
 }

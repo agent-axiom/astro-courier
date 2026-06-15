@@ -25,7 +25,7 @@ describe("docking speed readout", () => {
   it("commands braking when the ship is over limit on final approach", () => {
     expect(buildDockingSpeedReadout({ speed: 44, allowedSpeed: 42, targetDistance: 54 })).toEqual({
       label: "Dock speed",
-      value: "Brake now 44.0 / 42.0",
+      value: "Slow for clean 44.0 / 42.0",
       tone: "over-limit"
     });
   });
@@ -66,8 +66,8 @@ describe("approach reward readout", () => {
 describe("landing guidance label", () => {
   it("keeps live dock guidance short and action-led", () => {
     expect(buildLandingGuidanceLabel({ status: "approach" })).toBe("Line up");
-    expect(buildLandingGuidanceLabel({ status: "too-fast" })).toBe("Brake");
-    expect(buildLandingGuidanceLabel({ status: "misaligned" })).toBe("Align nose");
+    expect(buildLandingGuidanceLabel({ status: "too-fast" })).toBe("Slow for clean");
+    expect(buildLandingGuidanceLabel({ status: "misaligned" })).toBe("Align for clean");
     expect(buildLandingGuidanceLabel({ status: "ready" })).toBe("Dock ready");
   });
 
