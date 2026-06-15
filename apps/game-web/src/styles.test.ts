@@ -29,6 +29,11 @@ describe("responsive game layout CSS", () => {
     expect(styles).toMatch(/\.run-panel-focused \.radio-message[\s\S]*display: none;/);
   });
 
+  it("defines compact active-flight metrics without text labels", () => {
+    expect(styles).toMatch(/\.top-hud-compact \.metric[\s\S]*grid-template-columns: 18px auto;/);
+    expect(styles).toMatch(/\.top-hud-compact \.metric strong[\s\S]*min-width: 0;/);
+  });
+
   it("defines a focused preflight mode that trims route-selection text", () => {
     expect(styles).toContain(".preflight-overlay-focused");
     expect(styles).toMatch(/\.preflight-overlay-focused[\s\S]*width: min\(420px, calc\(100vw - 32px\)\);/);

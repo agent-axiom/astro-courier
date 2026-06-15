@@ -1244,13 +1244,26 @@ export function App() {
         </div>
 
         <div className="hud-metrics" aria-label="Run metrics">
-          <Metric icon={<Zap size={18} />} label="Fuel" value={`${Math.round(fuelRatio * 100)}%`} tone={fuelRatio < 0.25 ? "danger" : "normal"} />
-          <Metric icon={<Gauge size={18} />} label="Speed" value={hud.speed.toFixed(1)} tone={hud.speed > 45 ? "warning" : "normal"} />
+          <Metric
+            icon={<Zap size={18} />}
+            label="Fuel"
+            value={`${Math.round(fuelRatio * 100)}%`}
+            tone={fuelRatio < 0.25 ? "danger" : "normal"}
+            showLabel={topHudDensity.showMetricLabels}
+          />
+          <Metric
+            icon={<Gauge size={18} />}
+            label="Speed"
+            value={hud.speed.toFixed(1)}
+            tone={hud.speed > 45 ? "warning" : "normal"}
+            showLabel={topHudDensity.showMetricLabels}
+          />
           <Metric
             icon={<PackageCheck size={18} />}
             label="Cargo"
             value={hud.cargoOnboard ? `${Math.round(cargoIntegrity * 100)}%` : "Empty"}
             tone={cargoIntegrity < 0.7 ? "warning" : "normal"}
+            showLabel={topHudDensity.showMetricLabels}
           />
         </div>
 
@@ -2318,13 +2331,14 @@ type MetricProps = {
   label: string;
   value: string;
   tone: "normal" | "warning" | "danger";
+  showLabel: boolean;
 };
 
-function Metric({ icon, label, value, tone }: MetricProps) {
+function Metric({ icon, label, value, tone, showLabel }: MetricProps) {
   return (
-    <div className={`metric metric-${tone}`}>
+    <div className={`metric metric-${tone}`} aria-label={`${label}: ${value}`}>
       {icon}
-      <span>{label}</span>
+      {showLabel ? <span>{label}</span> : null}
       <strong>{value}</strong>
     </div>
   );

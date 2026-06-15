@@ -781,6 +781,15 @@ button {
   text-align: right;
 }
 
+.top-hud-compact .metric {
+  grid-template-columns: 18px auto;
+  gap: 6px;
+}
+
+.top-hud-compact .metric strong {
+  min-width: 0;
+}
+
 .metric-warning strong {
   color: #ffd166;
 }

@@ -9,6 +9,7 @@ export type TopHudDensityInput = {
 export type TopHudDensity = {
   mode: "compact" | "full";
   showBrandCopy: boolean;
+  showMetricLabels: boolean;
 };
 
 export function buildTopHudDensity(input: TopHudDensityInput): TopHudDensity {
@@ -16,6 +17,7 @@ export function buildTopHudDensity(input: TopHudDensityInput): TopHudDensity {
 
   return {
     mode: compact ? "compact" : "full",
-    showBrandCopy: !compact
+    showBrandCopy: !compact,
+    showMetricLabels: !compact
   };
 }

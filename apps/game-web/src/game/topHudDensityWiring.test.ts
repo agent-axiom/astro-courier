@@ -9,5 +9,9 @@ describe("top HUD density wiring", () => {
     expect(appSource).toContain("const topHudDensity = buildTopHudDensity({");
     expect(appSource).toContain('top-hud top-hud-${topHudDensity.mode}');
     expect(appSource).toMatch(/topHudDensity\.showBrandCopy \? \(\s*<div>/);
+    expect(appSource).toContain("showLabel={topHudDensity.showMetricLabels}");
+    expect(appSource).toMatch(/type MetricProps = \{[\s\S]*showLabel: boolean;/);
+    expect(appSource).toMatch(/aria-label=\{`\$\{label\}: \$\{value\}`\}/);
+    expect(appSource).toMatch(/showLabel \? <span>\{label\}<\/span> : null/);
   });
 });
