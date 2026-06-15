@@ -29,7 +29,6 @@ export type LiveHudDensity = {
   showRunFeed: boolean;
 };
 
-const FINAL_APPROACH_DISTANCE = 95;
 const LOW_FUEL_RATIO = 0.18;
 const CARGO_DAMAGE_WARNING = 0.02;
 
@@ -60,8 +59,8 @@ export function buildLiveHudDensity(input: LiveHudDensityInput): LiveHudDensity 
     };
   }
 
-  const finalApproach = input.targetDistance !== undefined && input.targetDistance <= FINAL_APPROACH_DISTANCE;
-  const dangerPressure = input.hazardDangerLevel !== undefined || input.trajectoryRiskLevel !== undefined || input.landingStatus === "too-fast";
+  const approachProblem = input.landingStatus === "too-fast" || input.landingStatus === "misaligned";
+  const dangerPressure = input.hazardDangerLevel !== undefined || input.trajectoryRiskLevel !== undefined || approachProblem;
   const pickupRushActive = input.objectivePhase === "pickup" && (input.quickPickupSecondsRemaining ?? 0) > 0;
   const readyDockFocus = input.objectivePhase === "delivery" && input.landingStatus === "ready";
   const activeOpportunity =
@@ -74,7 +73,7 @@ export function buildLiveHudDensity(input: LiveHudDensityInput): LiveHudDensity 
     (input.cargoDamage ?? 0) > CARGO_DAMAGE_WARNING ||
     (input.fuelRatio ?? 1) <= LOW_FUEL_RATIO ||
     input.paceTier === "overtime";
-  const expanded = finalApproach || dangerPressure || activeOpportunity || fragileState;
+  const expanded = dangerPressure || activeOpportunity || fragileState;
 
   return {
     visible: true,
@@ -82,7 +81,7 @@ export function buildLiveHudDensity(input: LiveHudDensityInput): LiveHudDensity 
     showRadioMessage: expanded && !readyDockFocus,
     showRouteTempo: expanded && !readyDockFocus,
     showPrimaryStatusRows: false,
-    showActionChips: (finalApproach || dangerPressure || activeOpportunity) && !readyDockFocus,
+    showActionChips: (dangerPressure || activeOpportunity) && !readyDockFocus,
     showTelemetryChips: dangerPressure || fragileState,
     showRunFeed: false
   };

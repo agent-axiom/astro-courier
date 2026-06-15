@@ -60,7 +60,7 @@ describe("live HUD density", () => {
     ).toBe(false);
   });
 
-  it("expands during final approach and danger pressure", () => {
+  it("keeps routine final approach quiet until the approach actually needs help", () => {
     expect(
       buildLiveHudDensity({
         status: "flying",
@@ -88,9 +88,9 @@ describe("live HUD density", () => {
       paceTier: "silver"
     });
 
-    expect(finalApproachDensity.expanded).toBe(true);
-    expect(finalApproachDensity.showRadioMessage).toBe(true);
-    expect(finalApproachDensity.showRouteTempo).toBe(true);
+    expect(finalApproachDensity.expanded).toBe(false);
+    expect(finalApproachDensity.showRadioMessage).toBe(false);
+    expect(finalApproachDensity.showRouteTempo).toBe(false);
     expect(finalApproachDensity.showPrimaryStatusRows).toBe(false);
     expect(finalApproachDensity.showTelemetryChips).toBe(false);
     expect(finalApproachDensity.showRunFeed).toBe(false);
@@ -103,9 +103,35 @@ describe("live HUD density", () => {
         targetDistance: 86,
         cargoDamage: 0,
         fuelRatio: 0.72,
-        paceTier: "silver"
-      }).expanded
-    ).toBe(true);
+        paceTier: "silver",
+        landingStatus: "approach"
+      })
+    ).toMatchObject({
+      expanded: false,
+      showRadioMessage: false,
+      showRouteTempo: false,
+      showActionChips: false,
+      showTelemetryChips: false
+    });
+
+    expect(
+      buildLiveHudDensity({
+        status: "flying",
+        preflightOpen: false,
+        objectivePhase: "delivery",
+        targetDistance: 86,
+        cargoDamage: 0,
+        fuelRatio: 0.72,
+        paceTier: "silver",
+        landingStatus: "misaligned"
+      })
+    ).toMatchObject({
+      expanded: true,
+      showRadioMessage: true,
+      showRouteTempo: true,
+      showActionChips: true,
+      showTelemetryChips: true
+    });
 
     expect(
       buildLiveHudDensity({
