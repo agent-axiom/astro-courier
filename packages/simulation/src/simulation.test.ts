@@ -383,6 +383,32 @@ describe("deterministic Astro Courier simulation", () => {
     expect(world.ship.cargoDamage).toBeGreaterThan(0);
   });
 
+  it("captures controlled arrivals across the full visible active dock halo", () => {
+    const world = createWorldFromSystem(starterSystem, "wide-visible-target-seed");
+    world.cargoOnboard = true;
+    world.objectivePhase = "delivery";
+    for (const pad of world.landingPads) {
+      pad.active = pad.role === "destination";
+    }
+    world.ship.position = { x: 205, y: -80 };
+    world.ship.velocity = { x: 8, y: 0 };
+    world.ship.rotation = 0;
+
+    const target = snapshotWorld(world).objectiveTarget;
+    expect(target).toMatchObject({
+      id: "dock-a",
+      landingStatus: "ready"
+    });
+    expect(target?.distance).toBeGreaterThan(22 * 1.7);
+    expect(target?.distance).toBeLessThan(22 * 3);
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("delivered");
+    expect(world.landingRating).toBe("Perfect Landing");
+    expect(world.crashReason).toBeUndefined();
+  });
+
   it("counts near active planet-pad arrivals as pickups instead of hull collisions", () => {
     const world = createWorldFromSystem(starterSystem, "near-planet-pad-seed");
     world.ship.position = { x: 30, y: -56 };
@@ -406,7 +432,7 @@ describe("deterministic Astro Courier simulation", () => {
 
     expect(snapshotWorld(world).objectiveTarget).toMatchObject({
       id: "north-pad",
-      landingStatus: "approach"
+      landingStatus: "ready"
     });
     expect(snapshotWorld(world).objectiveTarget?.distance).toBeGreaterThan(18 * 2.25);
 
@@ -1224,7 +1250,7 @@ describe("deterministic Astro Courier simulation", () => {
     expect(snapshotWorld(world).objectiveTarget?.landingStatus).toBe("ready");
   });
 
-  it("warns about rough planet-pad approaches before the narrow dock ring", () => {
+  it("marks controlled planet-pad approaches inside the visible dock halo as ready", () => {
     const world = createWorldFromSystem(starterSystem, "wide-guide-seed");
     world.ship.position = { x: 30, y: -56 };
     world.ship.rotation = -Math.PI / 2;
@@ -1238,7 +1264,7 @@ describe("deterministic Astro Courier simulation", () => {
 
     world.ship.velocity = { x: 30, y: 0 };
     world.ship.rotation = -Math.PI / 2;
-    expect(snapshotWorld(world).objectiveTarget?.landingStatus).toBe("approach");
+    expect(snapshotWorld(world).objectiveTarget?.landingStatus).toBe("ready");
   });
 
   it("builds and preserves a stable approach streak near the active pad", () => {

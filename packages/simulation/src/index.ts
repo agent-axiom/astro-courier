@@ -243,8 +243,9 @@ export const STYLE_CHAIN_WINDOW_SECONDS = 4;
 export const CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS = 5.5;
 const STYLE_CHAIN_MULTIPLIER_STEP = 0.25;
 const STYLE_CHAIN_MAX_COUNT = 4;
+const ACTIVE_DOCK_HALO_RADIUS_MULTIPLIER = 3;
 const DOCK_CAPTURE_RADIUS_MULTIPLIER = 1.7;
-const GRAVITY_DOCK_APPROACH_RADIUS_MULTIPLIER = 3;
+const GRAVITY_DOCK_APPROACH_RADIUS_MULTIPLIER = ACTIVE_DOCK_HALO_RADIUS_MULTIPLIER;
 
 export function calculateHazardSkimStyleBonus(severity: number): number {
   return Math.round(HAZARD_SKIM_BASE_BONUS + clamp(severity, 0, 1) * HAZARD_SKIM_SEVERITY_BONUS);
@@ -554,8 +555,8 @@ function classifyLandingGuidance(
   angleError: number,
   pad: LandingPadState
 ): LandingGuidanceStatus {
-  const withinDockCapture = isWithinDockCaptureRadius(distance, pad);
-  const withinDockGuidance = distance <= pad.radius * GRAVITY_DOCK_APPROACH_RADIUS_MULTIPLIER;
+  const withinDockReady = distance <= pad.radius * ACTIVE_DOCK_HALO_RADIUS_MULTIPLIER;
+  const withinDockGuidance = distance <= pad.radius * ACTIVE_DOCK_HALO_RADIUS_MULTIPLIER;
   if (!withinDockGuidance) {
     return "approach";
   }
@@ -565,7 +566,7 @@ function classifyLandingGuidance(
   if (angleError > pad.requiredAngleTolerance && !isControlledDockSpeed(speed, pad)) {
     return "misaligned";
   }
-  return withinDockCapture ? "ready" : "approach";
+  return withinDockReady ? "ready" : "approach";
 }
 
 function getNearestHazard(world: SimulationWorld): SimulationSnapshot["nearestHazard"] {
@@ -902,16 +903,53 @@ function resolveLandingOrCrash(world: SimulationWorld): void {
 }
 
 function findActiveDockCapturePad(world: SimulationWorld): LandingPadState | undefined {
-  return world.landingPads.find((pad) => pad.active && isWithinDockCaptureRadius(distanceBetween(world.ship.position, pad.position), pad));
+  return world.landingPads.find((pad) => {
+    if (!pad.active) {
+      return false;
+    }
+
+    const distance = distanceBetween(world.ship.position, pad.position);
+    return isWithinDockCaptureRadius(distance, pad) || isControlledActiveDockHaloArrival(world, pad, distance);
+  });
+}
+
+function isControlledActiveDockHaloArrival(world: SimulationWorld, pad: LandingPadState, distance: number): boolean {
+  if (distance <= 0 || distance > pad.radius * ACTIVE_DOCK_HALO_RADIUS_MULTIPLIER) {
+    return false;
+  }
+  if (isPlanetSidePad(world, pad)) {
+    return false;
+  }
+
+  const speed = magnitude(world.ship.velocity);
+  if (speed <= 0.5 || speed > pad.allowedApproachSpeed) {
+    return false;
+  }
+
+  const angleDiff = Math.abs(shortestAngleDelta(world.ship.rotation, pad.normalAngle));
+  const alignedEnough = angleDiff <= pad.requiredAngleTolerance || isControlledDockSpeed(speed, pad);
+  if (!alignedEnough) {
+    return false;
+  }
+
+  const toPad = subtract(pad.position, world.ship.position);
+  const closingSpeed = dot(world.ship.velocity, toPad) / distance;
+  return closingSpeed > Math.max(0.5, speed * 0.3);
+}
+
+function isPlanetSidePad(world: SimulationWorld, pad: LandingPadState): boolean {
+  return world.gravitySources.some((source) => distanceBetween(pad.position, source.position) <= source.radius + pad.radius);
 }
 
 function findActiveGravityDockApproachPad(world: SimulationWorld, source: GravitySourceState): LandingPadState | undefined {
   return world.landingPads.find((pad) => {
-    const padSurfaceDistance = distanceBetween(pad.position, source.position);
-    const belongsToGravitySource = padSurfaceDistance <= source.radius + pad.radius;
     const shipPadDistance = distanceBetween(world.ship.position, pad.position);
-    return pad.active && belongsToGravitySource && shipPadDistance <= pad.radius * GRAVITY_DOCK_APPROACH_RADIUS_MULTIPLIER;
+    return pad.active && isPadOnGravitySource(pad, source) && shipPadDistance <= pad.radius * GRAVITY_DOCK_APPROACH_RADIUS_MULTIPLIER;
   });
+}
+
+function isPadOnGravitySource(pad: LandingPadState, source: GravitySourceState): boolean {
+  return distanceBetween(pad.position, source.position) <= source.radius + pad.radius;
 }
 
 function isWithinDockCaptureRadius(distance: number, pad: LandingPadState): boolean {
@@ -1204,6 +1242,10 @@ function scale(value: Vec2, amount: number): Vec2 {
 
 function magnitude(value: Vec2): number {
   return Math.hypot(value.x, value.y);
+}
+
+function dot(left: Vec2, right: Vec2): number {
+  return left.x * right.x + left.y * right.y;
 }
 
 function distanceBetween(left: Vec2, right: Vec2): number {
