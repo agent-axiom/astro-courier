@@ -244,6 +244,7 @@ export const CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS = 5.5;
 const STYLE_CHAIN_MULTIPLIER_STEP = 0.25;
 const STYLE_CHAIN_MAX_COUNT = 4;
 const DOCK_CAPTURE_RADIUS_MULTIPLIER = 1.7;
+const GRAVITY_DOCK_APPROACH_RADIUS_MULTIPLIER = 2.25;
 
 export function calculateHazardSkimStyleBonus(severity: number): number {
   return Math.round(HAZARD_SKIM_BASE_BONUS + clamp(severity, 0, 1) * HAZARD_SKIM_SEVERITY_BONUS);
@@ -885,7 +886,7 @@ function resolveLandingOrCrash(world: SimulationWorld): void {
 
   const hitGravitySource = world.gravitySources.find((source) => distanceBetween(world.ship.position, source.position) <= source.radius);
   if (hitGravitySource) {
-    const activeApproachPad = findActiveDockCapturePad(world);
+    const activeApproachPad = findActiveGravityDockApproachPad(world, hitGravitySource);
     if (activeApproachPad) {
       resolvePadContact(world, activeApproachPad);
       return;
@@ -900,6 +901,15 @@ function resolveLandingOrCrash(world: SimulationWorld): void {
 
 function findActiveDockCapturePad(world: SimulationWorld): LandingPadState | undefined {
   return world.landingPads.find((pad) => pad.active && isWithinDockCaptureRadius(distanceBetween(world.ship.position, pad.position), pad));
+}
+
+function findActiveGravityDockApproachPad(world: SimulationWorld, source: GravitySourceState): LandingPadState | undefined {
+  return world.landingPads.find((pad) => {
+    const padSurfaceDistance = distanceBetween(pad.position, source.position);
+    const belongsToGravitySource = padSurfaceDistance <= source.radius + pad.radius;
+    const shipPadDistance = distanceBetween(world.ship.position, pad.position);
+    return pad.active && belongsToGravitySource && shipPadDistance <= pad.radius * GRAVITY_DOCK_APPROACH_RADIUS_MULTIPLIER;
+  });
 }
 
 function isWithinDockCaptureRadius(distance: number, pad: LandingPadState): boolean {

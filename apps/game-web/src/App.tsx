@@ -1318,7 +1318,8 @@ export function App() {
         </div>
       ) : null}
 
-      <aside className={`run-panel run-panel-${liveHudDensity.expanded ? "expanded" : "focused"}`} aria-label="Delivery status">
+      {liveHudDensity.visible ? (
+        <aside className={`run-panel run-panel-${liveHudDensity.expanded ? "expanded" : "focused"}`} aria-label="Delivery status">
         <div className="radio-message">{radioMessage}</div>
         {flightDirector ? (
           <div
@@ -1558,7 +1559,8 @@ export function App() {
         ) : null}
         {hud.lastMilestone && !runFinished ? <div className="milestone">{hud.lastMilestone}</div> : null}
         {hud.landingRating ? <div className="landing-rating">{hud.landingRating}</div> : null}
-      </aside>
+        </aside>
+      ) : null}
 
       {overlays.preflight ? (
         <section className={`preflight-overlay preflight-overlay-${preflightOverlayDensity.mode}`} aria-label="Launch briefing">

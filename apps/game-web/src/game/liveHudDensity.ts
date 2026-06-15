@@ -19,6 +19,7 @@ export type LiveHudDensityInput = {
 };
 
 export type LiveHudDensity = {
+  visible: boolean;
   expanded: boolean;
   showActionChips: boolean;
   showTelemetryChips: boolean;
@@ -29,8 +30,18 @@ const LOW_FUEL_RATIO = 0.18;
 const CARGO_DAMAGE_WARNING = 0.02;
 
 export function buildLiveHudDensity(input: LiveHudDensityInput): LiveHudDensity {
-  if (input.preflightOpen || input.status !== "flying") {
+  if (input.preflightOpen || input.status === "delivered" || input.status === "crashed") {
     return {
+      visible: false,
+      expanded: false,
+      showActionChips: false,
+      showTelemetryChips: false
+    };
+  }
+
+  if (input.status !== "flying") {
+    return {
+      visible: true,
       expanded: true,
       showActionChips: true,
       showTelemetryChips: true
@@ -53,6 +64,7 @@ export function buildLiveHudDensity(input: LiveHudDensityInput): LiveHudDensity 
   const expanded = finalApproach || dangerPressure || activeOpportunity || fragileState;
 
   return {
+    visible: true,
     expanded,
     showActionChips: finalApproach || dangerPressure || activeOpportunity,
     showTelemetryChips: expanded

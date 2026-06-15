@@ -14,10 +14,42 @@ describe("live HUD density", () => {
         paceTier: "silver"
       })
     ).toEqual({
+      visible: true,
       expanded: false,
       showActionChips: false,
       showTelemetryChips: false
     });
+  });
+
+  it("hides the live run panel while overlays own the screen", () => {
+    expect(
+      buildLiveHudDensity({
+        status: "paused",
+        preflightOpen: true,
+        objectivePhase: "pickup"
+      })
+    ).toEqual({
+      visible: false,
+      expanded: false,
+      showActionChips: false,
+      showTelemetryChips: false
+    });
+
+    expect(
+      buildLiveHudDensity({
+        status: "delivered",
+        preflightOpen: false,
+        objectivePhase: "complete"
+      }).visible
+    ).toBe(false);
+
+    expect(
+      buildLiveHudDensity({
+        status: "crashed",
+        preflightOpen: false,
+        objectivePhase: "delivery"
+      }).visible
+    ).toBe(false);
   });
 
   it("expands during final approach and danger pressure", () => {
@@ -87,6 +119,7 @@ describe("live HUD density", () => {
         quickPickupSecondsRemaining: 4.5
       })
     ).toEqual({
+      visible: true,
       expanded: false,
       showActionChips: false,
       showTelemetryChips: false

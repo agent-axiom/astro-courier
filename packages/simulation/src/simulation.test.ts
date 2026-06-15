@@ -383,6 +383,21 @@ describe("deterministic Astro Courier simulation", () => {
     expect(world.ship.cargoDamage).toBeGreaterThan(0);
   });
 
+  it("counts near active planet-pad arrivals as pickups instead of hull collisions", () => {
+    const world = createWorldFromSystem(starterSystem, "near-planet-pad-seed");
+    world.ship.position = { x: 30, y: -56 };
+    world.ship.velocity = { x: 45, y: 0 };
+    world.ship.rotation = -Math.PI / 2;
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("flying");
+    expect(world.objectivePhase).toBe("delivery");
+    expect(world.cargoOnboard).toBe(true);
+    expect(world.crashReason).toBeUndefined();
+    expect(world.ship.cargoDamage).toBeGreaterThan(0);
+  });
+
   it("reports objective telemetry for pickup and delivery guidance", () => {
     const world = createWorldFromSystem(starterSystem, "guide-seed");
     let snapshot = snapshotWorld(world);

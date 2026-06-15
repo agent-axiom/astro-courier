@@ -7,6 +7,7 @@ describe("live HUD density wiring", () => {
   it("wires focused and expanded live HUD modes into the run panel", () => {
     expect(appSource).toContain('import { buildLiveHudDensity } from "./game/liveHudDensity";');
     expect(appSource).toContain("const liveHudDensity = buildLiveHudDensity({");
+    expect(appSource).toContain("liveHudDensity.visible ? (");
     expect(appSource).toContain('run-panel-${liveHudDensity.expanded ? "expanded" : "focused"}');
   });
 
