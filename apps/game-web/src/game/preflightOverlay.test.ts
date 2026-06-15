@@ -11,6 +11,7 @@ describe("preflight overlay density", () => {
       })
     ).toEqual({
       mode: "focused",
+      showContractBriefing: true,
       showControlPrimer: true,
       showProgressMeta: false,
       showRouteBoardStack: false,
@@ -31,15 +32,16 @@ describe("preflight overlay density", () => {
         savedRouteCount: 1
       })
     ).toEqual({
-      mode: "expanded",
+      mode: "focused",
+      showContractBriefing: false,
       showControlPrimer: false,
       showProgressMeta: true,
       showRouteBoardStack: false,
-      showDailyDispatch: true,
-      showContractSelector: true,
+      showDailyDispatch: false,
+      showContractSelector: false,
       showContractDetails: false,
-      showRoutePressure: true,
-      showSignatureManeuver: true,
+      showRoutePressure: false,
+      showSignatureManeuver: false,
       showBonusStack: false
     });
   });
@@ -53,6 +55,7 @@ describe("preflight overlay density", () => {
       })
     ).toEqual({
       mode: "expanded",
+      showContractBriefing: false,
       showControlPrimer: false,
       showProgressMeta: true,
       showRouteBoardStack: true,

@@ -1607,7 +1607,7 @@ export function App() {
         <section className={`preflight-overlay preflight-overlay-${preflightOverlayDensity.mode}`} aria-label="Launch briefing">
           <div className="preflight-kicker">{preflightKicker}</div>
           <h2>{hud.contractTitle}</h2>
-          <p>{hud.contractBriefing}</p>
+          {preflightOverlayDensity.showContractBriefing ? <p>{hud.contractBriefing}</p> : null}
           <div className="cargo-manifest" aria-label="Cargo manifest">
             <PackageCheck size={18} />
             <span>{cargoManifest.label}</span>
