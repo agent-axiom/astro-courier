@@ -444,6 +444,35 @@ describe("deterministic Astro Courier simulation", () => {
     expect(world.crashReason).toBeUndefined();
   });
 
+  it("delivers controlled planet-pad arrivals at the visible active halo", () => {
+    const world = createWorldFromSystem(starterSystem, "planet-pad-visible-halo-seed");
+    world.cargoOnboard = true;
+    world.objectivePhase = "delivery";
+    for (const pad of world.landingPads) {
+      pad.role = pad.id === "north-pad" ? "destination" : "neutral";
+      pad.active = pad.id === "north-pad";
+      pad.destination = pad.id === "north-pad";
+    }
+    world.ship.position = { x: 50, y: -74 };
+    world.ship.velocity = { x: -4, y: 0 };
+    world.ship.rotation = -Math.PI / 2;
+
+    const target = snapshotWorld(world).objectiveTarget;
+    expect(target).toMatchObject({
+      id: "north-pad",
+      landingStatus: "ready"
+    });
+    expect(target?.distance).toBeGreaterThan(18 * 1.7);
+    expect(target?.distance).toBeLessThanOrEqual(18 * 3);
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("delivered");
+    expect(world.objectivePhase).toBe("complete");
+    expect(world.cargoOnboard).toBe(true);
+    expect(world.crashReason).toBeUndefined();
+  });
+
   it("reports objective telemetry for pickup and delivery guidance", () => {
     const world = createWorldFromSystem(starterSystem, "guide-seed");
     let snapshot = snapshotWorld(world);

@@ -917,7 +917,7 @@ function isControlledActiveDockHaloArrival(world: SimulationWorld, pad: LandingP
   if (distance <= 0 || distance > pad.radius * ACTIVE_DOCK_HALO_RADIUS_MULTIPLIER) {
     return false;
   }
-  if (isPlanetSidePad(world, pad)) {
+  if (isPlanetSidePad(world, pad) && !world.cargoOnboard) {
     return false;
   }
 
