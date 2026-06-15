@@ -251,6 +251,8 @@ const DOCK_SETTLED_MAX_SPEED = 0.5;
 const DOCK_HALO_APPROACH_MIN_CLOSING_SPEED = 3;
 const DOCK_HALO_SIDE_ON_MIN_SPEED = 12;
 const GRAVITY_DOCK_CONTACT_GRACE_RADIUS_MULTIPLIER = 4;
+const GRAVITY_DOCK_TARGET_SIDE_GRACE_RADIUS_MULTIPLIER = 4.5;
+const GRAVITY_DOCK_TARGET_SIDE_MIN_SOURCE_DISTANCE_RATIO = 0.45;
 
 export function calculateHazardSkimStyleBonus(severity: number): number {
   return Math.round(HAZARD_SKIM_BASE_BONUS + clamp(severity, 0, 1) * HAZARD_SKIM_SEVERITY_BONUS);
@@ -977,9 +979,36 @@ function findActiveGravityDockApproachPad(world: SimulationWorld, source: Gravit
     return (
       pad.active &&
       isPadOnGravitySource(pad, source) &&
-      shipPadDistance <= pad.radius * GRAVITY_DOCK_CONTACT_GRACE_RADIUS_MULTIPLIER
+      (shipPadDistance <= pad.radius * GRAVITY_DOCK_CONTACT_GRACE_RADIUS_MULTIPLIER ||
+        isControlledTargetSideGravityDockGraze(world, pad, source, shipPadDistance))
     );
   });
+}
+
+function isControlledTargetSideGravityDockGraze(
+  world: SimulationWorld,
+  pad: LandingPadState,
+  source: GravitySourceState,
+  shipPadDistance: number
+): boolean {
+  if (shipPadDistance > pad.radius * GRAVITY_DOCK_TARGET_SIDE_GRACE_RADIUS_MULTIPLIER) {
+    return false;
+  }
+
+  if (magnitude(world.ship.velocity) > pad.allowedApproachSpeed) {
+    return false;
+  }
+
+  const shipSourceOffset = subtract(world.ship.position, source.position);
+  if (magnitude(shipSourceOffset) < source.radius * GRAVITY_DOCK_TARGET_SIDE_MIN_SOURCE_DISTANCE_RATIO) {
+    return false;
+  }
+
+  const padNormal = {
+    x: Math.cos(pad.normalAngle),
+    y: Math.sin(pad.normalAngle)
+  };
+  return dot(shipSourceOffset, padNormal) > 0;
 }
 
 function isPadOnGravitySource(pad: LandingPadState, source: GravitySourceState): boolean {

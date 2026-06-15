@@ -60,11 +60,10 @@ export function buildLiveHudDensity(input: LiveHudDensityInput): LiveHudDensity 
   }
 
   const approachProblem = input.landingStatus === "too-fast" || input.landingStatus === "misaligned";
-  const dangerPressure = input.hazardDangerLevel !== undefined || input.trajectoryRiskLevel !== undefined || approachProblem;
-  const pickupRushActive = input.objectivePhase === "pickup" && (input.quickPickupSecondsRemaining ?? 0) > 0;
+  const hazardContactPressure = input.hazardDangerLevel === "inside";
+  const dangerPressure = hazardContactPressure || input.trajectoryRiskLevel !== undefined || approachProblem;
   const readyDockFocus = input.objectivePhase === "delivery" && input.landingStatus === "ready";
   const activeOpportunity =
-    pickupRushActive ||
     (input.styleMultiplier ?? 1) > 1 ||
     (input.styleChainSecondsRemaining ?? 0) > 0 ||
     input.gravitySlingReady === true ||

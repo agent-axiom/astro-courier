@@ -213,7 +213,7 @@ describe("live HUD density", () => {
         cargoDamage: 0,
         fuelRatio: 0.72,
         paceTier: "gold",
-        quickPickupSecondsRemaining: 4.5
+        styleMultiplier: 1.25
       }).showActionChips
     ).toBe(true);
 
@@ -228,6 +228,53 @@ describe("live HUD density", () => {
         paceTier: "silver"
       }).showTelemetryChips
     ).toBe(true);
+  });
+
+  it("keeps early pickup rush focused when a hazard is only nearby", () => {
+    expect(
+      buildLiveHudDensity({
+        status: "flying",
+        preflightOpen: false,
+        objectivePhase: "pickup",
+        targetDistance: 141,
+        cargoDamage: 0,
+        fuelRatio: 1,
+        paceTier: "gold",
+        hazardDangerLevel: "near",
+        quickPickupSecondsRemaining: 12,
+        styleMultiplier: 1
+      })
+    ).toEqual({
+      visible: true,
+      expanded: false,
+      showRadioMessage: false,
+      showRouteTempo: false,
+      showPrimaryStatusRows: false,
+      showActionChips: false,
+      showTelemetryChips: false,
+      showRunFeed: false
+    });
+  });
+
+  it("still expands early pickup rush when the ship is inside a hazard", () => {
+    expect(
+      buildLiveHudDensity({
+        status: "flying",
+        preflightOpen: false,
+        objectivePhase: "pickup",
+        targetDistance: 80,
+        cargoDamage: 0,
+        fuelRatio: 1,
+        paceTier: "gold",
+        hazardDangerLevel: "inside",
+        quickPickupSecondsRemaining: 8
+      })
+    ).toMatchObject({
+      expanded: true,
+      showRadioMessage: true,
+      showActionChips: true,
+      showTelemetryChips: true
+    });
   });
 
   it("ignores pickup rush timers after cargo is already loaded", () => {
