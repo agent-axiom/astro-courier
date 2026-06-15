@@ -1614,6 +1614,22 @@ export function App() {
             <strong>{signatureManeuver.value}</strong>
             <small>{signatureManeuver.detail}</small>
           </div>
+          {preflightOverlayDensity.showControlPrimer ? (
+            <div className="control-primer" aria-label="Flight controls">
+              <span aria-label="Aim" title="Aim">
+                <Target size={18} />
+              </span>
+              <span aria-label="Thrust" title="Thrust">
+                <ArrowRight size={18} />
+              </span>
+              <span aria-label="Brake" title="Brake">
+                <OctagonMinus size={18} />
+              </span>
+              <span aria-label="Boost" title="Boost">
+                <Zap size={18} />
+              </span>
+            </div>
+          ) : null}
           {preflightOverlayDensity.showBonusStack ? (
             <div className="contract-modifiers" aria-label="Contract modifiers">
               {contractModifiers.map((modifier) => (

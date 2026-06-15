@@ -36,6 +36,12 @@ describe("responsive game layout CSS", () => {
     expect(styles).toMatch(/\.preflight-overlay-focused \.contract-option-traits[\s\S]*display: none;/);
   });
 
+  it("defines an icon-only first launch control primer", () => {
+    expect(styles).toContain(".control-primer");
+    expect(styles).toMatch(/\.control-primer[\s\S]*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/);
+    expect(styles).toMatch(/\.control-primer span[\s\S]*aspect-ratio: 1;/);
+  });
+
   it("defines a dedicated fuel-clutch screen feedback accent", () => {
     expect(styles).toContain(".screen-feedback-accent-fuel");
     expect(styles).toContain("screen-feedback-fuel-surge");

@@ -9,6 +9,7 @@ export type PreflightOverlayDensityInput = {
 
 export type PreflightOverlayDensity = {
   mode: "focused" | "expanded";
+  showControlPrimer: boolean;
   showProgressMeta: boolean;
   showRouteBoardStack: boolean;
   showDailyDispatch: boolean;
@@ -25,6 +26,7 @@ export function buildPreflightOverlayDensity(input: PreflightOverlayDensityInput
   if (!expanded) {
     return {
       mode: "focused",
+      showControlPrimer: input.preflightOpen && input.status === "paused",
       showProgressMeta: false,
       showRouteBoardStack: false,
       showDailyDispatch: false,
@@ -35,6 +37,7 @@ export function buildPreflightOverlayDensity(input: PreflightOverlayDensityInput
 
   return {
     mode: "expanded",
+    showControlPrimer: false,
     showProgressMeta: true,
     showRouteBoardStack: richHistory,
     showDailyDispatch: true,

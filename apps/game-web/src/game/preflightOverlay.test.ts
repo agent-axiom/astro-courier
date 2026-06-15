@@ -11,6 +11,7 @@ describe("preflight overlay density", () => {
       })
     ).toEqual({
       mode: "focused",
+      showControlPrimer: true,
       showProgressMeta: false,
       showRouteBoardStack: false,
       showDailyDispatch: false,
@@ -28,6 +29,7 @@ describe("preflight overlay density", () => {
       })
     ).toEqual({
       mode: "expanded",
+      showControlPrimer: false,
       showProgressMeta: true,
       showRouteBoardStack: false,
       showDailyDispatch: true,
@@ -45,6 +47,7 @@ describe("preflight overlay density", () => {
       })
     ).toEqual({
       mode: "expanded",
+      showControlPrimer: false,
       showProgressMeta: true,
       showRouteBoardStack: true,
       showDailyDispatch: true,

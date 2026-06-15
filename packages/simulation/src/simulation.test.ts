@@ -398,6 +398,26 @@ describe("deterministic Astro Courier simulation", () => {
     expect(world.ship.cargoDamage).toBeGreaterThan(0);
   });
 
+  it("forgives safe close active planet-pad approaches before reporting hull collisions", () => {
+    const world = createWorldFromSystem(starterSystem, "wide-planet-pad-seed");
+    world.ship.position = { x: 40, y: -45 };
+    world.ship.velocity = { x: 20, y: 11 };
+    world.ship.rotation = -Math.PI / 2;
+
+    expect(snapshotWorld(world).objectiveTarget).toMatchObject({
+      id: "north-pad",
+      landingStatus: "approach"
+    });
+    expect(snapshotWorld(world).objectiveTarget?.distance).toBeGreaterThan(18 * 2.25);
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("flying");
+    expect(world.objectivePhase).toBe("delivery");
+    expect(world.cargoOnboard).toBe(true);
+    expect(world.crashReason).toBeUndefined();
+  });
+
   it("reports objective telemetry for pickup and delivery guidance", () => {
     const world = createWorldFromSystem(starterSystem, "guide-seed");
     let snapshot = snapshotWorld(world);

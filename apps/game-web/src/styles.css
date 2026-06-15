@@ -2455,6 +2455,35 @@ button {
   color: #bff7d8;
 }
 
+.control-primer {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.control-primer span {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  min-width: 0;
+  border: 1px solid rgba(124, 225, 255, 0.18);
+  border-radius: 7px;
+  background: rgba(124, 225, 255, 0.1);
+  color: #d8fbff;
+}
+
+.control-primer span:nth-child(3) {
+  border-color: rgba(255, 173, 193, 0.24);
+  background: rgba(255, 111, 145, 0.1);
+  color: #ffc8d6;
+}
+
+.control-primer span:nth-child(4) {
+  border-color: rgba(255, 209, 102, 0.24);
+  background: rgba(255, 209, 102, 0.12);
+  color: #ffe19a;
+}
+
 .route-pressure-briefing {
   display: grid;
   grid-template-columns: 18px auto 1fr;
@@ -5266,6 +5295,7 @@ button {
   .preflight-overlay h2,
   .preflight-overlay p,
   .cargo-manifest,
+  .control-primer,
   .contract-modifiers,
   .route-board,
   .route-mastery-briefing,
