@@ -104,6 +104,7 @@ import {
 import { buildHazardPressureReadout } from "./game/hazard";
 import { buildResultOverlayDensity } from "./game/resultOverlay";
 import { buildLiveHudDensity } from "./game/liveHudDensity";
+import { buildPreflightOverlayDensity } from "./game/preflightOverlay";
 import {
   buildResultActionsLayout,
   buildResultBoardAction,
@@ -506,6 +507,12 @@ export function App() {
   const activeScreenFeedback =
     screenFeedback ?? (!runFinished && milestoneScreenFeedback ? { key: -1, feedback: milestoneScreenFeedback } : undefined);
   const overlays = getOverlayVisibility({ status: hud.status, preflightOpen, resultDismissed });
+  const preflightOverlayDensity = buildPreflightOverlayDensity({
+    status: hud.status,
+    preflightOpen: overlays.preflight,
+    savedRouteCount: Object.values(bestRunsByContract).filter(Boolean).length,
+    dailyStreak: dailyProgress?.streak
+  });
   const pauseOverlay = buildPauseOverlayPresentation({
     status: hud.status,
     preflightOpen: overlays.preflight,
@@ -1554,7 +1561,7 @@ export function App() {
       </aside>
 
       {overlays.preflight ? (
-        <section className="preflight-overlay" aria-label="Launch briefing">
+        <section className={`preflight-overlay preflight-overlay-${preflightOverlayDensity.mode}`} aria-label="Launch briefing">
           <div className="preflight-kicker">{preflightKicker}</div>
           <h2>{hud.contractTitle}</h2>
           <p>{hud.contractBriefing}</p>
@@ -1605,52 +1612,58 @@ export function App() {
             <strong>{signatureManeuver.value}</strong>
             <small>{signatureManeuver.detail}</small>
           </div>
-          <div className="contract-modifiers" aria-label="Contract modifiers">
-            {contractModifiers.map((modifier) => (
-              <span key={`${modifier.label}-${modifier.value}`} className={`contract-modifier contract-modifier-${modifier.tone}`}>
-                {modifier.tone === "danger" ? (
-                  <ShieldAlert size={17} />
-                ) : modifier.tone === "fuel" ? (
-                  <Zap size={17} />
-                ) : modifier.tone === "style" ? (
-                  <Star size={17} />
-                ) : modifier.tone === "speed" ? (
-                  <Gauge size={17} />
-                ) : modifier.tone === "precision" ? (
-                  <Target size={17} />
-                ) : (
-                  <PackageCheck size={17} />
-                )}
-                <small>{modifier.label}</small>
-                <strong>{modifier.value}</strong>
-              </span>
-            ))}
-          </div>
-          <div className={`best-chase-briefing best-chase-${bestRunChase.tone}`} aria-label={`${bestRunChase.label}: ${bestRunChase.value}`}>
-            {bestRunChase.label === "PB ghost" ? <Route size={18} /> : <Trophy size={18} />}
-            <span>{bestRunChase.label}</span>
-            <strong>{bestRunChase.value}</strong>
-          </div>
-          <div
-            className={`route-mark-target-briefing route-mark-target-${contractRouteMarkTarget.tone}`}
-            aria-label={`${contractRouteMarkTarget.label}: ${contractRouteMarkTarget.value}${
-              contractRouteMarkTarget.detail ? `. ${contractRouteMarkTarget.detail}` : ""
-            }`}
-          >
-            {contractRouteMarkTarget.tone === "complete" ? (
-              <Trophy size={18} />
-            ) : contractRouteMarkTarget.tone === "comet" ? (
-              <Star size={18} />
-            ) : contractRouteMarkTarget.tone === "ghost" ? (
-              <Route size={18} />
-            ) : (
-              <Target size={18} />
-            )}
-            <span>{contractRouteMarkTarget.label}</span>
-            <strong>{contractRouteMarkTarget.value}</strong>
-            {contractRouteMarkTarget.detail ? <small>{contractRouteMarkTarget.detail}</small> : null}
-          </div>
-          {hud.contractOptions.length > 0 ? (
+          {preflightOverlayDensity.showBonusStack ? (
+            <div className="contract-modifiers" aria-label="Contract modifiers">
+              {contractModifiers.map((modifier) => (
+                <span key={`${modifier.label}-${modifier.value}`} className={`contract-modifier contract-modifier-${modifier.tone}`}>
+                  {modifier.tone === "danger" ? (
+                    <ShieldAlert size={17} />
+                  ) : modifier.tone === "fuel" ? (
+                    <Zap size={17} />
+                  ) : modifier.tone === "style" ? (
+                    <Star size={17} />
+                  ) : modifier.tone === "speed" ? (
+                    <Gauge size={17} />
+                  ) : modifier.tone === "precision" ? (
+                    <Target size={17} />
+                  ) : (
+                    <PackageCheck size={17} />
+                  )}
+                  <small>{modifier.label}</small>
+                  <strong>{modifier.value}</strong>
+                </span>
+              ))}
+            </div>
+          ) : null}
+          {preflightOverlayDensity.showProgressMeta ? (
+            <div className={`best-chase-briefing best-chase-${bestRunChase.tone}`} aria-label={`${bestRunChase.label}: ${bestRunChase.value}`}>
+              {bestRunChase.label === "PB ghost" ? <Route size={18} /> : <Trophy size={18} />}
+              <span>{bestRunChase.label}</span>
+              <strong>{bestRunChase.value}</strong>
+            </div>
+          ) : null}
+          {preflightOverlayDensity.showProgressMeta ? (
+            <div
+              className={`route-mark-target-briefing route-mark-target-${contractRouteMarkTarget.tone}`}
+              aria-label={`${contractRouteMarkTarget.label}: ${contractRouteMarkTarget.value}${
+                contractRouteMarkTarget.detail ? `. ${contractRouteMarkTarget.detail}` : ""
+              }`}
+            >
+              {contractRouteMarkTarget.tone === "complete" ? (
+                <Trophy size={18} />
+              ) : contractRouteMarkTarget.tone === "comet" ? (
+                <Star size={18} />
+              ) : contractRouteMarkTarget.tone === "ghost" ? (
+                <Route size={18} />
+              ) : (
+                <Target size={18} />
+              )}
+              <span>{contractRouteMarkTarget.label}</span>
+              <strong>{contractRouteMarkTarget.value}</strong>
+              {contractRouteMarkTarget.detail ? <small>{contractRouteMarkTarget.detail}</small> : null}
+            </div>
+          ) : null}
+          {preflightOverlayDensity.showProgressMeta && hud.contractOptions.length > 0 ? (
             <>
               <div className="route-board" aria-label="Route board progress">
                 {routeBoardProgress.map((item) => (
@@ -1689,7 +1702,7 @@ export function App() {
               ) : null}
             </>
           ) : null}
-          {hud.contractOptions.length > 0 ? (
+          {preflightOverlayDensity.showProgressMeta && hud.contractOptions.length > 0 ? (
             routeTargetSelectionAction ? (
               <button
                 type="button"
@@ -1732,7 +1745,7 @@ export function App() {
               </div>
             )
           ) : null}
-          {dailyDispatch ? (
+          {preflightOverlayDensity.showDailyDispatch && dailyDispatch ? (
             dailyDispatchAction ? (
               <button
                 type="button"
@@ -1770,38 +1783,42 @@ export function App() {
               </div>
             )
           ) : null}
-          <div className={`cargo-risk-briefing cargo-risk-${cargoRiskReadout.tone}`} aria-label={`${cargoRiskReadout.label}: ${cargoRiskReadout.value}`}>
-            <ShieldAlert size={18} />
-            <span>{cargoRiskReadout.label}</span>
-            <strong>{cargoRiskReadout.value}</strong>
-          </div>
-          {hazardLoadTrait ? (
+          {preflightOverlayDensity.showBonusStack ? (
+            <div className={`cargo-risk-briefing cargo-risk-${cargoRiskReadout.tone}`} aria-label={`${cargoRiskReadout.label}: ${cargoRiskReadout.value}`}>
+              <ShieldAlert size={18} />
+              <span>{cargoRiskReadout.label}</span>
+              <strong>{cargoRiskReadout.value}</strong>
+            </div>
+          ) : null}
+          {preflightOverlayDensity.showBonusStack && hazardLoadTrait ? (
             <div className="hazard-load-briefing" aria-label={`Hazard load: ${hazardLoadTrait}`}>
               <OctagonMinus size={18} />
               <span>Hazard load</span>
               <strong>{hazardLoadTrait}</strong>
             </div>
           ) : null}
-          {dangerPayTrait ? (
+          {preflightOverlayDensity.showBonusStack && dangerPayTrait ? (
             <div className="danger-pay-briefing" aria-label={dangerPayTrait}>
               <Trophy size={18} />
               <span>Danger pay</span>
               <strong>{dangerPayAmount}</strong>
             </div>
           ) : null}
-          <div className="contract-traits" aria-label="Contract risk and reward">
-            <span>
-              <Gauge size={17} />
-              <small>Risk</small>
-              <strong>{hud.contractRiskLabel}</strong>
-            </span>
-            <span>
-              <Trophy size={17} />
-              <small>Reward</small>
-              <strong>{hud.contractRewardLabel}</strong>
-            </span>
-          </div>
-          {pickupRushActive ? (
+          {preflightOverlayDensity.showBonusStack ? (
+            <div className="contract-traits" aria-label="Contract risk and reward">
+              <span>
+                <Gauge size={17} />
+                <small>Risk</small>
+                <strong>{hud.contractRiskLabel}</strong>
+              </span>
+              <span>
+                <Trophy size={17} />
+                <small>Reward</small>
+                <strong>{hud.contractRewardLabel}</strong>
+              </span>
+            </div>
+          ) : null}
+          {preflightOverlayDensity.showBonusStack && pickupRushActive ? (
             <div className="rush-briefing">
               <TimerReset size={18} />
               <span>Pickup rush</span>
@@ -1810,27 +1827,29 @@ export function App() {
               </strong>
             </div>
           ) : null}
-          <div className="bonus-objectives" aria-label="Bonus objectives">
-            {preflightBonusObjectives.map((objective) => (
-              <span key={objective.label}>
-                {objective.label === "Rush pickup" ? (
-                  <TimerReset size={17} />
-                ) : objective.label === "Launch burst" ? (
-                  <Zap size={17} />
-                ) : objective.label === "Clean skim" || objective.label === "Needle thread" || objective.label === "Danger pay" ? (
-                  <ShieldAlert size={17} />
-                ) : objective.label === "Chain finish" || objective.label === "Comet finish" ? (
-                  <Star size={17} />
-                ) : objective.label === "Last Drop" ? (
-                  <Zap size={17} />
-                ) : (
-                  <Flag size={17} />
-                )}
-                <small>{objective.label}</small>
-                <strong>{objective.value}</strong>
-              </span>
-            ))}
-          </div>
+          {preflightOverlayDensity.showBonusStack ? (
+            <div className="bonus-objectives" aria-label="Bonus objectives">
+              {preflightBonusObjectives.map((objective) => (
+                <span key={objective.label}>
+                  {objective.label === "Rush pickup" ? (
+                    <TimerReset size={17} />
+                  ) : objective.label === "Launch burst" ? (
+                    <Zap size={17} />
+                  ) : objective.label === "Clean skim" || objective.label === "Needle thread" || objective.label === "Danger pay" ? (
+                    <ShieldAlert size={17} />
+                  ) : objective.label === "Chain finish" || objective.label === "Comet finish" ? (
+                    <Star size={17} />
+                  ) : objective.label === "Last Drop" ? (
+                    <Zap size={17} />
+                  ) : (
+                    <Flag size={17} />
+                  )}
+                  <small>{objective.label}</small>
+                  <strong>{objective.value}</strong>
+                </span>
+              ))}
+            </div>
+          ) : null}
           {hud.contractOptions.length > 1 ? (
             <div className="contract-selector" aria-label="Contract selection">
               {hud.contractOptions.map((contract) => {
@@ -1875,57 +1894,63 @@ export function App() {
                     }}
                   >
                     <span>{contract.title}</span>
-                    <small>
-                      {contract.pickupLabel} -&gt; {contract.destinationLabel}
-                    </small>
-                    <div
-                      className={`contract-option-hook contract-option-hook-${contractOptionHook.tone}`}
-                      aria-label={`${contractOptionHook.label}: ${contractOptionHook.value}`}
-                    >
-                      {contractOptionHook.tone === "danger" ? (
-                        <ShieldAlert size={15} />
-                      ) : contractOptionHook.tone === "fuel" ? (
-                        <Zap size={15} />
-                      ) : contractOptionHook.tone === "style" ? (
-                        <Star size={15} />
-                      ) : contractOptionHook.tone === "speed" ? (
-                        <Gauge size={15} />
-                      ) : contractOptionHook.tone === "precision" ? (
-                        <Target size={15} />
-                      ) : (
-                        <PackageCheck size={15} />
-                      )}
-                      <small>{contractOptionHook.label}</small>
-                      <b>{contractOptionHook.value}</b>
-                    </div>
-                    <div className="contract-option-traits">
-                      <em>{contract.riskLabel}</em>
-                      <em>{contract.rewardLabel}</em>
-                      <em className={`contract-option-mastery contract-option-mastery-${contractMasteryBadge.tone}`}>
-                        {contractMasteryBadge.value}
-                      </em>
-                      <em className={`contract-option-marks contract-option-marks-${contractMarks.tone}`}>{contractMarks.value}</em>
-                      <em
-                        className={`contract-option-route-mark contract-option-route-mark-${contractRouteMarkBadge.tone}`}
-                        aria-label={`${contractRouteMarkBadge.label}: ${contractRouteMarkBadge.value}`}
+                    {preflightOverlayDensity.showContractDetails ? (
+                      <small>
+                        {contract.pickupLabel} -&gt; {contract.destinationLabel}
+                      </small>
+                    ) : null}
+                    {preflightOverlayDensity.showContractDetails ? (
+                      <div
+                        className={`contract-option-hook contract-option-hook-${contractOptionHook.tone}`}
+                        aria-label={`${contractOptionHook.label}: ${contractOptionHook.value}`}
                       >
-                        {contractRouteMarkBadge.value}
-                      </em>
-                      {contractRecommendationBadge ? (
-                        <em className={`contract-option-next contract-option-next-${routeBoardTarget.tone}`}>{contractRecommendationBadge}</em>
-                      ) : null}
-                      {contractSelectionBadge ? <em className="contract-option-current">{contractSelectionBadge}</em> : null}
-                      {contractDailyBadge ? <em className="contract-option-daily">{contractDailyBadge}</em> : null}
-                      <em className={`contract-option-best contract-option-best-${buildContractBestRunTone(contractBestRun)}`}>
-                        {buildContractBestRunLabel(contractBestRun)}
-                      </em>
-                      <em className={`contract-option-cargo contract-option-cargo-${contractCargoRisk.tone}`}>
-                        {buildContractCargoTrait(contract)}
-                      </em>
-                      {contractHazardTrait ? <em className="contract-option-hazard">{contractHazardTrait}</em> : null}
-                      {contractDangerPayTrait ? <em className="contract-option-danger-pay">{contractDangerPayTrait}</em> : null}
-                    </div>
-                    <strong>Gold {contract.medalTimes.gold}s</strong>
+                        {contractOptionHook.tone === "danger" ? (
+                          <ShieldAlert size={15} />
+                        ) : contractOptionHook.tone === "fuel" ? (
+                          <Zap size={15} />
+                        ) : contractOptionHook.tone === "style" ? (
+                          <Star size={15} />
+                        ) : contractOptionHook.tone === "speed" ? (
+                          <Gauge size={15} />
+                        ) : contractOptionHook.tone === "precision" ? (
+                          <Target size={15} />
+                        ) : (
+                          <PackageCheck size={15} />
+                        )}
+                        <small>{contractOptionHook.label}</small>
+                        <b>{contractOptionHook.value}</b>
+                      </div>
+                    ) : null}
+                    {preflightOverlayDensity.showContractDetails ? (
+                      <div className="contract-option-traits">
+                        <em>{contract.riskLabel}</em>
+                        <em>{contract.rewardLabel}</em>
+                        <em className={`contract-option-mastery contract-option-mastery-${contractMasteryBadge.tone}`}>
+                          {contractMasteryBadge.value}
+                        </em>
+                        <em className={`contract-option-marks contract-option-marks-${contractMarks.tone}`}>{contractMarks.value}</em>
+                        <em
+                          className={`contract-option-route-mark contract-option-route-mark-${contractRouteMarkBadge.tone}`}
+                          aria-label={`${contractRouteMarkBadge.label}: ${contractRouteMarkBadge.value}`}
+                        >
+                          {contractRouteMarkBadge.value}
+                        </em>
+                        {contractRecommendationBadge ? (
+                          <em className={`contract-option-next contract-option-next-${routeBoardTarget.tone}`}>{contractRecommendationBadge}</em>
+                        ) : null}
+                        {contractSelectionBadge ? <em className="contract-option-current">{contractSelectionBadge}</em> : null}
+                        {contractDailyBadge ? <em className="contract-option-daily">{contractDailyBadge}</em> : null}
+                        <em className={`contract-option-best contract-option-best-${buildContractBestRunTone(contractBestRun)}`}>
+                          {buildContractBestRunLabel(contractBestRun)}
+                        </em>
+                        <em className={`contract-option-cargo contract-option-cargo-${contractCargoRisk.tone}`}>
+                          {buildContractCargoTrait(contract)}
+                        </em>
+                        {contractHazardTrait ? <em className="contract-option-hazard">{contractHazardTrait}</em> : null}
+                        {contractDangerPayTrait ? <em className="contract-option-danger-pay">{contractDangerPayTrait}</em> : null}
+                      </div>
+                    ) : null}
+                    {preflightOverlayDensity.showContractDetails ? <strong>Gold {contract.medalTimes.gold}s</strong> : null}
                   </button>
                 );
               })}
@@ -1942,13 +1967,15 @@ export function App() {
               <small>Destination</small>
               <strong>{hud.destinationLabel}</strong>
             </span>
-            {preflightMasteryTargets.map((target) => (
-              <span key={target.label}>
-                {target.label === "Comet" ? <Star size={18} /> : <Trophy size={18} />}
-                <small>{target.label}</small>
-                <strong>{target.value}</strong>
-              </span>
-            ))}
+            {preflightOverlayDensity.showBonusStack
+              ? preflightMasteryTargets.map((target) => (
+                  <span key={target.label}>
+                    {target.label === "Comet" ? <Star size={18} /> : <Trophy size={18} />}
+                    <small>{target.label}</small>
+                    <strong>{target.value}</strong>
+                  </span>
+                ))
+              : null}
           </div>
           <button
             type="button"

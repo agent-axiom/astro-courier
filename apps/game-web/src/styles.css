@@ -2307,6 +2307,49 @@ button {
   scrollbar-width: thin;
 }
 
+.preflight-overlay-focused {
+  width: min(420px, calc(100vw - 32px));
+  gap: 10px;
+  padding: 18px;
+}
+
+.preflight-overlay-focused p {
+  display: none;
+}
+
+.preflight-overlay-focused .signature-maneuver-briefing small {
+  display: none;
+}
+
+.preflight-overlay-focused .contract-selector {
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+.preflight-overlay-focused .contract-option {
+  min-height: 42px;
+  gap: 3px;
+  padding: 9px 10px;
+}
+
+.preflight-overlay-focused .contract-option small {
+  font-size: 0.66rem;
+}
+
+.preflight-overlay-focused .contract-option-hook,
+.preflight-overlay-focused .contract-option-traits {
+  display: none;
+}
+
+.preflight-overlay-focused .preflight-stats {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.preflight-overlay-focused .preflight-stats span {
+  min-height: 58px;
+  padding: 8px;
+}
+
 .preflight-kicker {
   color: #7ce1ff;
   font-size: 0.74rem;
@@ -5214,6 +5257,11 @@ button {
     align-content: start;
   }
 
+  .preflight-overlay-focused {
+    width: min(420px, calc(100vw - 48px));
+    grid-template-columns: 1fr;
+  }
+
   .preflight-kicker,
   .preflight-overlay h2,
   .preflight-overlay p,
@@ -5239,6 +5287,10 @@ button {
 
   .contract-selector {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .preflight-overlay-focused .contract-selector {
+    grid-template-columns: 1fr;
   }
 
   .bonus-objectives,

@@ -29,6 +29,13 @@ describe("responsive game layout CSS", () => {
     expect(styles).toMatch(/\.run-panel-focused \.radio-message[\s\S]*display: none;/);
   });
 
+  it("defines a focused preflight mode that trims route-selection text", () => {
+    expect(styles).toContain(".preflight-overlay-focused");
+    expect(styles).toMatch(/\.preflight-overlay-focused[\s\S]*width: min\(420px, calc\(100vw - 32px\)\);/);
+    expect(styles).toMatch(/\.preflight-overlay-focused \.contract-option-hook[\s\S]*display: none;/);
+    expect(styles).toMatch(/\.preflight-overlay-focused \.contract-option-traits[\s\S]*display: none;/);
+  });
+
   it("defines a dedicated fuel-clutch screen feedback accent", () => {
     expect(styles).toContain(".screen-feedback-accent-fuel");
     expect(styles).toContain("screen-feedback-fuel-surge");
