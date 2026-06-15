@@ -245,6 +245,8 @@ const STYLE_CHAIN_MULTIPLIER_STEP = 0.25;
 const STYLE_CHAIN_MAX_COUNT = 4;
 const ACTIVE_DOCK_HALO_RADIUS_MULTIPLIER = 3.5;
 const DOCK_CAPTURE_RADIUS_MULTIPLIER = 1.7;
+const DOCK_SETTLED_RADIUS_MULTIPLIER = 2.6;
+const DOCK_SETTLED_MAX_SPEED = 0.5;
 const DOCK_HALO_APPROACH_MIN_CLOSING_SPEED = 3;
 const DOCK_HALO_SIDE_ON_MIN_SPEED = 12;
 const GRAVITY_DOCK_APPROACH_RADIUS_MULTIPLIER = ACTIVE_DOCK_HALO_RADIUS_MULTIPLIER;
@@ -921,7 +923,7 @@ function isControlledActiveDockHaloArrival(world: SimulationWorld, pad: LandingP
   }
 
   const speed = magnitude(world.ship.velocity);
-  if (speed <= 0.5 || speed > pad.allowedApproachSpeed) {
+  if (speed > pad.allowedApproachSpeed) {
     return false;
   }
 
@@ -930,6 +932,16 @@ function isControlledActiveDockHaloArrival(world: SimulationWorld, pad: LandingP
   const alignedEnough = angleDiff <= pad.requiredAngleTolerance || controlledSpeed;
   if (!alignedEnough) {
     return false;
+  }
+
+  if (speed <= DOCK_SETTLED_MAX_SPEED) {
+    return (
+      world.cargoOnboard &&
+      world.objectivePhase === "delivery" &&
+      pad.role === "destination" &&
+      distance <= pad.radius * DOCK_SETTLED_RADIUS_MULTIPLIER &&
+      angleDiff <= pad.requiredAngleTolerance
+    );
   }
 
   if (controlledSpeed && speed >= DOCK_HALO_SIDE_ON_MIN_SPEED) {

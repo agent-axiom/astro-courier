@@ -568,6 +568,19 @@ describe("radio feedback copy", () => {
     ).toContain("Relay lane impact");
   });
 
+  it("reports close target hull collisions as missed pad approaches", () => {
+    const message = buildRadioMessage({
+      ...baseHud,
+      status: "crashed",
+      contractId: "gravity-slingshot",
+      crashReason: "Hull Collision",
+      targetDistance: 54
+    });
+
+    expect(message).toContain("landing pad");
+    expect(message).not.toContain("gravity well");
+  });
+
   it("celebrates strong deliveries and reports crashes", () => {
     expect(buildRadioMessage({ ...baseHud, status: "delivered", medal: "gold", lastMilestone: "Perfect Approach" })).toContain(
       "Perfect approach"

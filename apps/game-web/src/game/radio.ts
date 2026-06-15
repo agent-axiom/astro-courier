@@ -39,6 +39,9 @@ export function buildRadioMessage(hud: HudState, context: RadioMessageContext = 
   if (hud.status === "crashed") {
     if (hud.crashReason === "Hard Landing") return "Insurance desk reports: hard landing. Bleed speed before contact.";
     if (hud.crashReason === "Misaligned Dock") return "Insurance desk reports: dock alignment failed. Align ship before contact.";
+    if (isCloseTargetHullCollision(hud)) {
+      return "Insurance desk reports: missed landing pad. Re-enter the dock ring.";
+    }
     if (hud.crashReason === "Hull Collision" && hud.contractId === "chain-relay") {
       return "Insurance desk reports: Relay lane impact. Widen asteroid clearance.";
     }
@@ -272,6 +275,10 @@ function isChainRelayCarryWindowOpen(hud: HudState): boolean {
     hud.styleMultiplier > 1 &&
     hud.styleChainSecondsRemaining > STYLE_CHAIN_URGENT_SECONDS
   );
+}
+
+function isCloseTargetHullCollision(hud: HudState): boolean {
+  return hud.crashReason === "Hull Collision" && hud.targetDistance !== undefined && hud.targetDistance <= 90;
 }
 
 function formatTrajectoryEta(seconds?: number): string {
