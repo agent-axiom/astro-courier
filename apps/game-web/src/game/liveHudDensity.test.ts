@@ -75,6 +75,7 @@ describe("live HUD density", () => {
     expect(finalApproachDensity.showRadioMessage).toBe(true);
     expect(finalApproachDensity.showRouteTempo).toBe(true);
     expect(finalApproachDensity.showPrimaryStatusRows).toBe(false);
+    expect(finalApproachDensity.showTelemetryChips).toBe(false);
     expect(finalApproachDensity.showRunFeed).toBe(false);
 
     expect(
@@ -99,8 +100,11 @@ describe("live HUD density", () => {
         fuelRatio: 0.72,
         paceTier: "silver",
         trajectoryRiskLevel: "inside"
-      }).showActionChips
-    ).toBe(true);
+      })
+    ).toMatchObject({
+      showActionChips: true,
+      showTelemetryChips: true
+    });
   });
 
   it("keeps paused route review expanded with status rows", () => {
