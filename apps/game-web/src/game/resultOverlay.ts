@@ -27,7 +27,7 @@ export function buildResultOverlayDensity(input: ResultOverlayDensityInput): Res
 
   return {
     showDetailedScore: richResult,
-    showCrashDebrief: false,
+    showCrashDebrief: input.status === "crashed",
     showRunGrade: input.status === "delivered",
     showQuickStats: input.status === "delivered",
     showRunReceipts: richResult,
