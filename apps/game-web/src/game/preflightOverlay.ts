@@ -13,6 +13,7 @@ export type PreflightOverlayDensity = {
   showProgressMeta: boolean;
   showRouteBoardStack: boolean;
   showDailyDispatch: boolean;
+  showContractSelector: boolean;
   showContractDetails: boolean;
   showBonusStack: boolean;
 };
@@ -30,6 +31,7 @@ export function buildPreflightOverlayDensity(input: PreflightOverlayDensityInput
       showProgressMeta: false,
       showRouteBoardStack: false,
       showDailyDispatch: false,
+      showContractSelector: false,
       showContractDetails: false,
       showBonusStack: false
     };
@@ -41,6 +43,7 @@ export function buildPreflightOverlayDensity(input: PreflightOverlayDensityInput
     showProgressMeta: true,
     showRouteBoardStack: richHistory,
     showDailyDispatch: true,
+    showContractSelector: true,
     showContractDetails: richHistory,
     showBonusStack: richHistory
   };

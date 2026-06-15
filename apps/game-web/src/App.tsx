@@ -1874,7 +1874,7 @@ export function App() {
               ))}
             </div>
           ) : null}
-          {hud.contractOptions.length > 1 ? (
+          {preflightOverlayDensity.showContractSelector && hud.contractOptions.length > 1 ? (
             <div className="contract-selector" aria-label="Contract selection">
               {hud.contractOptions.map((contract) => {
                 const contractBestRun = bestRunsByContract[contract.id];

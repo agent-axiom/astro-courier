@@ -15,6 +15,7 @@ describe("preflight overlay density", () => {
       showProgressMeta: false,
       showRouteBoardStack: false,
       showDailyDispatch: false,
+      showContractSelector: false,
       showContractDetails: false,
       showBonusStack: false
     });
@@ -33,6 +34,7 @@ describe("preflight overlay density", () => {
       showProgressMeta: true,
       showRouteBoardStack: false,
       showDailyDispatch: true,
+      showContractSelector: true,
       showContractDetails: false,
       showBonusStack: false
     });
@@ -51,6 +53,7 @@ describe("preflight overlay density", () => {
       showProgressMeta: true,
       showRouteBoardStack: true,
       showDailyDispatch: true,
+      showContractSelector: true,
       showContractDetails: true,
       showBonusStack: true
     });
