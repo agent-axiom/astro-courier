@@ -190,6 +190,7 @@ describe("screen feedback", () => {
     expect(buildScreenFeedback(["delivery-complete"])).toEqual({
       label: "Delivery sealed",
       value: "Manifest closed",
+      accent: "precision",
       tone: "success",
       intensity: "heavy",
       durationMs: 620
@@ -197,6 +198,7 @@ describe("screen feedback", () => {
     expect(buildScreenFeedback(["cargo-loaded"])).toEqual({
       label: "Cargo secured",
       value: "Outbound line",
+      accent: "rush",
       tone: "success",
       intensity: "medium",
       durationMs: 360

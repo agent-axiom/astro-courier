@@ -172,10 +172,24 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[], milestone
     return { label: "Insurance event", value: "Recover line", tone: "danger", intensity: "heavy", durationMs: 520 };
   }
   if (events.includes("delivery-complete")) {
-    return { label: "Delivery sealed", value: "Manifest closed", tone: "success", intensity: "heavy", durationMs: 620 };
+    return {
+      label: "Delivery sealed",
+      value: "Manifest closed",
+      accent: "precision",
+      tone: "success",
+      intensity: "heavy",
+      durationMs: 620
+    };
   }
   if (events.includes("cargo-loaded")) {
-    return { label: "Cargo secured", value: "Outbound line", tone: "success", intensity: "medium", durationMs: 360 };
+    return {
+      label: "Cargo secured",
+      value: "Outbound line",
+      accent: "rush",
+      tone: "success",
+      intensity: "medium",
+      durationMs: 360
+    };
   }
   if (events.includes("dock-lineup")) {
     return { label: "Dock lined", value: "Commit approach", tone: "success", intensity: "light", durationMs: 340 };
