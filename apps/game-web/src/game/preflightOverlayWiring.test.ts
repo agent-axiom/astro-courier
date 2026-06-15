@@ -14,6 +14,7 @@ describe("preflight overlay density wiring", () => {
   it("gates heavy preflight sections behind density flags", () => {
     expect(appSource).toContain("preflight-overlay-${preflightOverlayDensity.mode}");
     expect(appSource).toContain("preflightOverlayDensity.showProgressMeta && hud.contractOptions.length > 0");
+    expect(appSource).toContain("preflightOverlayDensity.showRouteBoardStack && hud.contractOptions.length > 0");
     expect(appSource).toContain("preflightOverlayDensity.showDailyDispatch && dailyDispatch");
     expect(appSource).toContain("preflightOverlayDensity.showBonusStack");
     expect(appSource).toContain("preflightOverlayDensity.showContractDetails");

@@ -1665,7 +1665,7 @@ export function App() {
               {contractRouteMarkTarget.detail ? <small>{contractRouteMarkTarget.detail}</small> : null}
             </div>
           ) : null}
-          {preflightOverlayDensity.showProgressMeta && hud.contractOptions.length > 0 ? (
+          {preflightOverlayDensity.showRouteBoardStack && hud.contractOptions.length > 0 ? (
             <>
               <div className="route-board" aria-label="Route board progress">
                 {routeBoardProgress.map((item) => (

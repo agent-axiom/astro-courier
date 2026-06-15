@@ -12,13 +12,14 @@ describe("preflight overlay density", () => {
     ).toEqual({
       mode: "focused",
       showProgressMeta: false,
+      showRouteBoardStack: false,
       showDailyDispatch: false,
       showContractDetails: false,
       showBonusStack: false
     });
   });
 
-  it("opens progression details once the player has route history", () => {
+  it("keeps early route history lightweight with one progression target", () => {
     expect(
       buildPreflightOverlayDensity({
         status: "paused",
@@ -28,6 +29,24 @@ describe("preflight overlay density", () => {
     ).toEqual({
       mode: "expanded",
       showProgressMeta: true,
+      showRouteBoardStack: false,
+      showDailyDispatch: true,
+      showContractDetails: false,
+      showBonusStack: false
+    });
+  });
+
+  it("opens richer board details only after the player has real route history", () => {
+    expect(
+      buildPreflightOverlayDensity({
+        status: "paused",
+        preflightOpen: true,
+        savedRouteCount: 4
+      })
+    ).toEqual({
+      mode: "expanded",
+      showProgressMeta: true,
+      showRouteBoardStack: true,
       showDailyDispatch: true,
       showContractDetails: true,
       showBonusStack: true
