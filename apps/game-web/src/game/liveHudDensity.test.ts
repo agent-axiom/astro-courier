@@ -16,6 +16,9 @@ describe("live HUD density", () => {
     ).toEqual({
       visible: true,
       expanded: false,
+      showRadioMessage: false,
+      showRouteTempo: false,
+      showPrimaryStatusRows: false,
       showActionChips: false,
       showTelemetryChips: false
     });
@@ -31,6 +34,9 @@ describe("live HUD density", () => {
     ).toEqual({
       visible: false,
       expanded: false,
+      showRadioMessage: false,
+      showRouteTempo: false,
+      showPrimaryStatusRows: false,
       showActionChips: false,
       showTelemetryChips: false
     });
@@ -53,6 +59,21 @@ describe("live HUD density", () => {
   });
 
   it("expands during final approach and danger pressure", () => {
+    const finalApproachDensity = buildLiveHudDensity({
+      status: "flying",
+      preflightOpen: false,
+      objectivePhase: "delivery",
+      targetDistance: 86,
+      cargoDamage: 0,
+      fuelRatio: 0.72,
+      paceTier: "silver"
+    });
+
+    expect(finalApproachDensity.expanded).toBe(true);
+    expect(finalApproachDensity.showRadioMessage).toBe(true);
+    expect(finalApproachDensity.showRouteTempo).toBe(true);
+    expect(finalApproachDensity.showPrimaryStatusRows).toBe(true);
+
     expect(
       buildLiveHudDensity({
         status: "flying",
@@ -121,6 +142,9 @@ describe("live HUD density", () => {
     ).toEqual({
       visible: true,
       expanded: false,
+      showRadioMessage: false,
+      showRouteTempo: false,
+      showPrimaryStatusRows: false,
       showActionChips: false,
       showTelemetryChips: false
     });

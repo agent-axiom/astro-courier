@@ -21,6 +21,9 @@ export type LiveHudDensityInput = {
 export type LiveHudDensity = {
   visible: boolean;
   expanded: boolean;
+  showRadioMessage: boolean;
+  showRouteTempo: boolean;
+  showPrimaryStatusRows: boolean;
   showActionChips: boolean;
   showTelemetryChips: boolean;
 };
@@ -34,6 +37,9 @@ export function buildLiveHudDensity(input: LiveHudDensityInput): LiveHudDensity 
     return {
       visible: false,
       expanded: false,
+      showRadioMessage: false,
+      showRouteTempo: false,
+      showPrimaryStatusRows: false,
       showActionChips: false,
       showTelemetryChips: false
     };
@@ -43,6 +49,9 @@ export function buildLiveHudDensity(input: LiveHudDensityInput): LiveHudDensity 
     return {
       visible: true,
       expanded: true,
+      showRadioMessage: true,
+      showRouteTempo: true,
+      showPrimaryStatusRows: true,
       showActionChips: true,
       showTelemetryChips: true
     };
@@ -66,6 +75,9 @@ export function buildLiveHudDensity(input: LiveHudDensityInput): LiveHudDensity 
   return {
     visible: true,
     expanded,
+    showRadioMessage: expanded,
+    showRouteTempo: expanded,
+    showPrimaryStatusRows: expanded,
     showActionChips: finalApproach || dangerPressure || activeOpportunity,
     showTelemetryChips: expanded
   };

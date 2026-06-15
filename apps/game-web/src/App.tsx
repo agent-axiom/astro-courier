@@ -1320,7 +1320,9 @@ export function App() {
 
       {liveHudDensity.visible ? (
         <aside className={`run-panel run-panel-${liveHudDensity.expanded ? "expanded" : "focused"}`} aria-label="Delivery status">
-        <div className="radio-message">{radioMessage}</div>
+        {liveHudDensity.showRadioMessage ? (
+          <div className="radio-message">{radioMessage}</div>
+        ) : null}
         {flightDirector ? (
           <div
             className={`flight-director flight-director-${flightDirector.tone}`}
@@ -1333,7 +1335,7 @@ export function App() {
             <small>{flightDirector.detail}</small>
           </div>
         ) : null}
-        {routeTempo ? (
+        {liveHudDensity.showRouteTempo && routeTempo ? (
           <div
             className={`tempo-chip tempo-chip-${routeTempo.tone}`}
             style={routeTempoStyle}
@@ -1369,14 +1371,18 @@ export function App() {
             <strong>{tacticalCue.value}</strong>
           </div>
         ) : null}
-        <div className="status-row">
-          <span>Status</span>
-          <strong>{statusLabel(hud.status)}</strong>
-        </div>
-        <div className="status-row">
-          <span>{objectiveDirective.label}</span>
-          <strong>{objectiveDirective.value}</strong>
-        </div>
+        {liveHudDensity.showPrimaryStatusRows ? (
+          <div className="status-row">
+            <span>Status</span>
+            <strong>{statusLabel(hud.status)}</strong>
+          </div>
+        ) : null}
+        {liveHudDensity.showPrimaryStatusRows ? (
+          <div className="status-row">
+            <span>{objectiveDirective.label}</span>
+            <strong>{objectiveDirective.value}</strong>
+          </div>
+        ) : null}
         {liveHudDensity.showActionChips && routeFocusReadout ? (
           <div className={`route-focus-chip route-focus-${routeFocusReadout.tone}`} aria-label={`${routeFocusReadout.label}: ${routeFocusReadout.value}`}>
             <Route size={16} />
