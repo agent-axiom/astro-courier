@@ -1576,6 +1576,58 @@ describe("deterministic Astro Courier simulation", () => {
     expect(world.crashReason).toBeUndefined();
   });
 
+  it("forgives controlled planet contact just beyond the active planet dock ring", () => {
+    const returnLegSystem: SystemContent = {
+      ...starterSystem,
+      contracts: [
+        ...starterSystem.contracts,
+        {
+          id: "return-leg",
+          title: "Return Leg",
+          briefing: "Reverse the route under tighter timing.",
+          riskLabel: "Tight Timer",
+          rewardLabel: "Gold pace pressure",
+          shipStart: {
+            position: [200, -80],
+            velocity: [0, 0],
+            rotation: 0
+          },
+          pickupId: "dock-a",
+          destinationId: "north-pad",
+          cargoId: "bottled-starlight",
+          medalTimes: {
+            bronze: 80,
+            silver: 48,
+            gold: 30
+          }
+        }
+      ]
+    };
+    const world = createWorldFromSystem(returnLegSystem, "planet-dock-grace-seed", { contractId: "return-leg" });
+    world.cargoOnboard = true;
+    world.objectivePhase = "delivery";
+    for (const pad of world.landingPads) {
+      pad.active = pad.role === "destination";
+    }
+    world.ship.position = { x: 0, y: -16 };
+    world.ship.velocity = { x: 8, y: 0 };
+    world.ship.rotation = 0;
+
+    const target = snapshotWorld(world).objectiveTarget;
+    expect(target).toMatchObject({
+      id: "north-pad",
+      distance: 58,
+      landingStatus: "ready"
+    });
+    expect(target?.distance).toBeGreaterThan(18 * 3);
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("delivered");
+    expect(world.landingRating).toBe("Soft Landing");
+    expect(world.crashReason).toBeUndefined();
+  });
+
   it("reports boost burns as momentary courier feedback", () => {
     const world = createWorldFromSystem(starterSystem, "boost-seed");
     const fuelBefore = world.ship.fuel;
