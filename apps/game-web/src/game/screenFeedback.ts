@@ -222,7 +222,14 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[], milestone
     return { label: "Drift armed", value: "No brake dock", accent: "precision", tone: "style", intensity: "medium", durationMs: 420 };
   }
   if (events.includes("perfect-approach-ready")) {
-    return { label: "Perfect setup", value: "Soft dock armed", tone: "style", intensity: "medium", durationMs: 420 };
+    return {
+      label: "Perfect setup",
+      value: "Soft dock armed",
+      accent: "precision",
+      tone: "style",
+      intensity: "medium",
+      durationMs: 420
+    };
   }
   if (events.includes("tempo-flow")) {
     return { label: "Tempo flow", value: "Hold line", accent: "tempo", tone: "success", intensity: "medium", durationMs: 420 };

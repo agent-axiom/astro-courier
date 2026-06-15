@@ -220,6 +220,7 @@ describe("screen feedback", () => {
     expect(buildScreenFeedback(["perfect-approach-ready"])).toEqual({
       label: "Perfect setup",
       value: "Soft dock armed",
+      accent: "precision",
       tone: "style",
       intensity: "medium",
       durationMs: 420
