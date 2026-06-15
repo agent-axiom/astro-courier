@@ -2043,13 +2043,13 @@ export function App() {
           <button
             type="button"
             className={`preflight-button preflight-button-${launchCommitment.tone}`}
-            aria-label={`Launch Contract. ${launchCommitment.label}: ${launchCommitment.value}${
+            aria-label={`Launch. ${launchCommitment.label}: ${launchCommitment.value}${
               preflightOverlayDensity.showRouteMarkTarget ? `. ${routeMarkLaunchCaption.label}: ${routeMarkLaunchCaption.value}` : ""
             }`}
             onClick={launchContract}
           >
             <Play size={18} />
-            <span>Launch Contract</span>
+            <span>Launch</span>
             {preflightOverlayDensity.showRouteMarkTarget ? <small>{routeMarkLaunchCaption.value}</small> : null}
           </button>
         </section>

@@ -26,5 +26,6 @@ describe("preflight overlay density wiring", () => {
     expect(appSource).toContain("preflightOverlayDensity.showBonusStack");
     expect(appSource).toContain("preflightOverlayDensity.showContractDetails");
     expect(appSource).toContain("preflightOverlayDensity.showRouteMarkTarget ? <small>{routeMarkLaunchCaption.value}</small> : null");
+    expect(appSource).toContain("<span>Launch</span>");
   });
 });
