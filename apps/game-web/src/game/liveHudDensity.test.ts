@@ -124,7 +124,7 @@ describe("live HUD density", () => {
     });
   });
 
-  it("keeps ready delivery docking quiet so the target lock owns attention", () => {
+  it("keeps ready delivery docking quiet so the target lock and flight director own attention", () => {
     expect(
       buildLiveHudDensity({
         status: "flying",
@@ -142,7 +142,7 @@ describe("live HUD density", () => {
       showRadioMessage: false,
       showRouteTempo: false,
       showPrimaryStatusRows: false,
-      showActionChips: true,
+      showActionChips: false,
       showTelemetryChips: false,
       showRunFeed: false
     });

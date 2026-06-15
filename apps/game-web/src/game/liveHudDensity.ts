@@ -82,7 +82,7 @@ export function buildLiveHudDensity(input: LiveHudDensityInput): LiveHudDensity 
     showRadioMessage: expanded && !readyDockFocus,
     showRouteTempo: expanded && !readyDockFocus,
     showPrimaryStatusRows: false,
-    showActionChips: finalApproach || dangerPressure || activeOpportunity,
+    showActionChips: (finalApproach || dangerPressure || activeOpportunity) && !readyDockFocus,
     showTelemetryChips: dangerPressure || fragileState,
     showRunFeed: false
   };
