@@ -23,4 +23,9 @@ describe("live HUD density wiring", () => {
     expect(appSource).toMatch(/liveHudDensity\.showPrimaryStatusRows \? \(\s*<div className="status-row">\s*<span>Time<\/span>/);
     expect(appSource).toMatch(/liveHudDensity\.showPrimaryStatusRows \? \(\s*<div className="status-row">\s*<span>Score<\/span>/);
   });
+
+  it("keeps the focused flight director visually reduced to action copy", () => {
+    expect(appSource).toMatch(/liveHudDensity\.expanded \? <span>{flightDirector\.label}<\/span> : null/);
+    expect(appSource).toContain('aria-label={`${flightDirector.label}: ${flightDirector.action}. ${flightDirector.detail}`}');
+  });
 });

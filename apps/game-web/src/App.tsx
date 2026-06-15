@@ -1365,7 +1365,7 @@ export function App() {
             aria-label={`${flightDirector.label}: ${flightDirector.action}. ${flightDirector.detail}`}
           >
             <Activity size={16} />
-            <span>{flightDirector.label}</span>
+            {liveHudDensity.expanded ? <span>{flightDirector.label}</span> : null}
             <strong>{flightDirector.action}</strong>
             <small>{flightDirector.detail}</small>
           </div>
