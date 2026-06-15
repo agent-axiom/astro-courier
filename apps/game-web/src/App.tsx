@@ -90,7 +90,7 @@ import {
 } from "./game/objective";
 import { buildFlightDirector } from "./game/flightDirector";
 import { buildPreflightBonusObjectives, buildPreflightMasteryTargets } from "./game/mastery";
-import { buildApproachRewardReadout, buildDockingSpeedReadout, buildLandingGuidanceLabel } from "./game/docking";
+import { buildApproachRewardReadout, buildDockingSpeedReadout, buildLandingGuidancePresentation } from "./game/docking";
 import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./game/cargo";
 import {
   buildDockGradeReceipt,
@@ -541,6 +541,16 @@ export function App() {
     targetDistance: hud.targetDistance
   });
   const approachRewardReadout = buildApproachRewardReadout({ approachStreakSeconds: hud.approachStreakSeconds });
+  const landingGuidancePresentation = hud.landingStatus
+    ? buildLandingGuidancePresentation({
+        status: hud.landingStatus,
+        assistAvailable: Boolean(hud.assistAvailable),
+        speed: hud.speed,
+        allowedSpeed: hud.targetAllowedSpeed,
+        angleError: hud.targetAngleError,
+        requiredAngleTolerance: hud.targetRequiredAngleTolerance
+      })
+    : undefined;
   const approachStreakStyle = { "--approach-streak-progress": approachRewardReadout?.progress ?? 0 } as CSSProperties;
   const primaryRunControl = buildPrimaryRunControlPresentation({ preflightOpen, paused });
   const canBoost = canUseImpulseControl({
@@ -1489,17 +1499,8 @@ export function App() {
           <span>{cargoRiskReadout.label}</span>
           <strong>{cargoRiskReadout.value}</strong>
         </div>
-        {hud.landingStatus ? (
-          <div className={`guidance-chip guidance-${hud.assistAvailable ? "assist" : hud.landingStatus}`}>
-            {buildLandingGuidanceLabel({
-              status: hud.landingStatus,
-              assistAvailable: Boolean(hud.assistAvailable),
-              speed: hud.speed,
-              allowedSpeed: hud.targetAllowedSpeed,
-              angleError: hud.targetAngleError,
-              requiredAngleTolerance: hud.targetRequiredAngleTolerance
-            })}
-          </div>
+        {landingGuidancePresentation ? (
+          <div className={`guidance-chip guidance-${landingGuidancePresentation.tone}`}>{landingGuidancePresentation.label}</div>
         ) : null}
         {approachRewardReadout ? (
           <div

@@ -54,6 +54,11 @@ describe("responsive game layout CSS", () => {
     expect(styles).toContain(".tempo-chip-danger");
   });
 
+  it("defines a dedicated soft-dock guidance tone", () => {
+    expect(styles).toContain(".guidance-soft");
+    expect(styles).toContain("rgba(142, 230, 184");
+  });
+
   it("defines tone-aware route tempo action chips", () => {
     expect(styles).toContain(".tempo-action-chip");
     expect(styles).toContain(".tempo-action-flow");

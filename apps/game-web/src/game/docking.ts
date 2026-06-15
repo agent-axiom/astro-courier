@@ -33,14 +33,24 @@ export type LandingGuidanceLabelInput = {
   requiredAngleTolerance?: number;
 };
 
+export type LandingGuidancePresentation = {
+  label: string;
+  tone: "approach" | "too-fast" | "misaligned" | "ready" | "soft" | "assist";
+};
+
 const FINAL_APPROACH_BRAKE_DISTANCE = 70;
 
 export function buildLandingGuidanceLabel(input: LandingGuidanceLabelInput): string {
-  if (input.assistAvailable) return "Assist ready";
-  if (input.status === "ready") return isSoftDockReady(input) ? "Soft dock" : "Dock ready";
-  if (input.status === "too-fast") return "Brake";
-  if (input.status === "misaligned") return "Align nose";
-  return "Line up";
+  return buildLandingGuidancePresentation(input).label;
+}
+
+export function buildLandingGuidancePresentation(input: LandingGuidanceLabelInput): LandingGuidancePresentation {
+  if (input.assistAvailable) return { label: "Assist ready", tone: "assist" };
+  if (input.status === "ready" && isSoftDockReady(input)) return { label: "Soft dock", tone: "soft" };
+  if (input.status === "ready") return { label: "Dock ready", tone: "ready" };
+  if (input.status === "too-fast") return { label: "Brake", tone: "too-fast" };
+  if (input.status === "misaligned") return { label: "Align nose", tone: "misaligned" };
+  return { label: "Line up", tone: "approach" };
 }
 
 function isSoftDockReady(input: LandingGuidanceLabelInput): boolean {

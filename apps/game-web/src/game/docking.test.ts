@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildApproachRewardReadout, buildDockingSpeedReadout, buildLandingGuidanceLabel } from "./docking";
+import { buildApproachRewardReadout, buildDockingSpeedReadout, buildLandingGuidanceLabel, buildLandingGuidancePresentation } from "./docking";
 
 describe("docking speed readout", () => {
   it("stays hidden until a target speed limit is known", () => {
@@ -81,6 +81,21 @@ describe("landing guidance label", () => {
         requiredAngleTolerance: 0.75
       })
     ).toBe("Soft dock");
+  });
+
+  it("gives slow off-angle ready contacts a dedicated soft tone", () => {
+    expect(
+      buildLandingGuidancePresentation({
+        status: "ready",
+        speed: 24,
+        allowedSpeed: 42,
+        angleError: 1,
+        requiredAngleTolerance: 0.75
+      })
+    ).toEqual({
+      label: "Soft dock",
+      tone: "soft"
+    });
   });
 
   it("keeps assist availability above ordinary landing guidance", () => {
