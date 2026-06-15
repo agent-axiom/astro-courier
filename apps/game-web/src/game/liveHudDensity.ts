@@ -29,7 +29,7 @@ export type LiveHudDensity = {
   showRunFeed: boolean;
 };
 
-const FINAL_APPROACH_DISTANCE = 120;
+const FINAL_APPROACH_DISTANCE = 95;
 const LOW_FUEL_RATIO = 0.18;
 const CARGO_DAMAGE_WARNING = 0.02;
 

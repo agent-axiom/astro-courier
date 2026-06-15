@@ -61,6 +61,23 @@ describe("live HUD density", () => {
   });
 
   it("expands during final approach and danger pressure", () => {
+    expect(
+      buildLiveHudDensity({
+        status: "flying",
+        preflightOpen: false,
+        objectivePhase: "delivery",
+        targetDistance: 110,
+        cargoDamage: 0,
+        fuelRatio: 0.72,
+        paceTier: "silver",
+        landingStatus: "approach"
+      })
+    ).toMatchObject({
+      expanded: false,
+      showRadioMessage: false,
+      showActionChips: false
+    });
+
     const finalApproachDensity = buildLiveHudDensity({
       status: "flying",
       preflightOpen: false,
