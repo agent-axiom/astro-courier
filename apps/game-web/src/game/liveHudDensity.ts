@@ -80,7 +80,7 @@ export function buildLiveHudDensity(input: LiveHudDensityInput): LiveHudDensity 
     expanded,
     showRadioMessage: expanded,
     showRouteTempo: expanded,
-    showPrimaryStatusRows: expanded,
+    showPrimaryStatusRows: false,
     showActionChips: finalApproach || dangerPressure || activeOpportunity,
     showTelemetryChips: expanded,
     showRunFeed: expanded

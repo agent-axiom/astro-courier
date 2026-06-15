@@ -1422,7 +1422,7 @@ export function App() {
             {liveRouteMarkCue.detail ? <small>{liveRouteMarkCue.detail}</small> : null}
           </div>
         ) : null}
-        {liveHudDensity.showTelemetryChips ? (
+        {liveHudDensity.showPrimaryStatusRows ? (
           <div className="status-row">
             <span>Target</span>
             <strong>{targetDistanceLabel}</strong>
@@ -1572,13 +1572,13 @@ export function App() {
             <strong>{approachRewardReadout.value}</strong>
           </div>
         ) : null}
-        {liveHudDensity.showTelemetryChips ? (
+        {liveHudDensity.showPrimaryStatusRows ? (
           <div className="status-row">
             <span>Time</span>
             <strong>{hud.elapsedSeconds.toFixed(1)}s</strong>
           </div>
         ) : null}
-        {liveHudDensity.showTelemetryChips ? (
+        {liveHudDensity.showPrimaryStatusRows ? (
           <div className="status-row">
             <span>Score</span>
             <strong>{hud.score}</strong>

@@ -16,9 +16,11 @@ describe("live HUD density wiring", () => {
     expect(appSource).toMatch(/liveHudDensity\.showRouteTempo && routeTempo \?/);
     expect(appSource).toMatch(/liveHudDensity\.showRunFeed && runFeed\.length > 0 && !preflightOpen \?/);
     expect(appSource).toMatch(/liveHudDensity\.showPrimaryStatusRows \? \(\s*<div className="status-row">\s*<span>Status<\/span>/);
+    expect(appSource).toMatch(/liveHudDensity\.showPrimaryStatusRows \? \(\s*<div className="status-row">\s*<span>Target<\/span>/);
     expect(appSource).toMatch(/liveHudDensity\.showActionChips && tacticalCue \?/);
     expect(appSource).toMatch(/liveHudDensity\.showActionChips && objectiveInterceptReadout \?/);
     expect(appSource).toMatch(/liveHudDensity\.showTelemetryChips && dockingSpeedReadout \?/);
-    expect(appSource).toMatch(/liveHudDensity\.showTelemetryChips \? \(\s*<div className="status-row">\s*<span>Time<\/span>/);
+    expect(appSource).toMatch(/liveHudDensity\.showPrimaryStatusRows \? \(\s*<div className="status-row">\s*<span>Time<\/span>/);
+    expect(appSource).toMatch(/liveHudDensity\.showPrimaryStatusRows \? \(\s*<div className="status-row">\s*<span>Score<\/span>/);
   });
 });

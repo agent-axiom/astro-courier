@@ -74,7 +74,7 @@ describe("live HUD density", () => {
     expect(finalApproachDensity.expanded).toBe(true);
     expect(finalApproachDensity.showRadioMessage).toBe(true);
     expect(finalApproachDensity.showRouteTempo).toBe(true);
-    expect(finalApproachDensity.showPrimaryStatusRows).toBe(true);
+    expect(finalApproachDensity.showPrimaryStatusRows).toBe(false);
     expect(finalApproachDensity.showRunFeed).toBe(true);
 
     expect(
@@ -100,6 +100,20 @@ describe("live HUD density", () => {
         paceTier: "silver",
         trajectoryRiskLevel: "inside"
       }).showActionChips
+    ).toBe(true);
+  });
+
+  it("keeps paused route review expanded with status rows", () => {
+    expect(
+      buildLiveHudDensity({
+        status: "paused",
+        preflightOpen: false,
+        objectivePhase: "delivery",
+        targetDistance: 86,
+        cargoDamage: 0,
+        fuelRatio: 0.72,
+        paceTier: "silver"
+      }).showPrimaryStatusRows
     ).toBe(true);
   });
 
