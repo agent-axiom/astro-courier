@@ -124,6 +124,30 @@ describe("live HUD density", () => {
     });
   });
 
+  it("keeps ready delivery docking quiet so the target lock owns attention", () => {
+    expect(
+      buildLiveHudDensity({
+        status: "flying",
+        preflightOpen: false,
+        objectivePhase: "delivery",
+        targetDistance: 42,
+        cargoDamage: 0,
+        fuelRatio: 0.72,
+        paceTier: "gold",
+        landingStatus: "ready"
+      })
+    ).toEqual({
+      visible: true,
+      expanded: true,
+      showRadioMessage: false,
+      showRouteTempo: false,
+      showPrimaryStatusRows: false,
+      showActionChips: true,
+      showTelemetryChips: false,
+      showRunFeed: false
+    });
+  });
+
   it("keeps paused route review expanded with status rows", () => {
     const density = buildLiveHudDensity({
       status: "paused",

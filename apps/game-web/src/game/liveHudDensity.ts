@@ -63,12 +63,13 @@ export function buildLiveHudDensity(input: LiveHudDensityInput): LiveHudDensity 
   const finalApproach = input.targetDistance !== undefined && input.targetDistance <= FINAL_APPROACH_DISTANCE;
   const dangerPressure = input.hazardDangerLevel !== undefined || input.trajectoryRiskLevel !== undefined || input.landingStatus === "too-fast";
   const pickupRushActive = input.objectivePhase === "pickup" && (input.quickPickupSecondsRemaining ?? 0) > 0;
+  const readyDockFocus = input.objectivePhase === "delivery" && input.landingStatus === "ready";
   const activeOpportunity =
     pickupRushActive ||
     (input.styleMultiplier ?? 1) > 1 ||
     (input.styleChainSecondsRemaining ?? 0) > 0 ||
     input.gravitySlingReady === true ||
-    input.landingStatus === "ready";
+    readyDockFocus;
   const fragileState =
     (input.cargoDamage ?? 0) > CARGO_DAMAGE_WARNING ||
     (input.fuelRatio ?? 1) <= LOW_FUEL_RATIO ||
@@ -78,8 +79,8 @@ export function buildLiveHudDensity(input: LiveHudDensityInput): LiveHudDensity 
   return {
     visible: true,
     expanded,
-    showRadioMessage: expanded,
-    showRouteTempo: expanded,
+    showRadioMessage: expanded && !readyDockFocus,
+    showRouteTempo: expanded && !readyDockFocus,
     showPrimaryStatusRows: false,
     showActionChips: finalApproach || dangerPressure || activeOpportunity,
     showTelemetryChips: dangerPressure || fragileState,
