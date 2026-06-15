@@ -14,6 +14,7 @@ describe("live HUD density wiring", () => {
   it("keeps action and telemetry chips behind live density gates", () => {
     expect(appSource).toMatch(/liveHudDensity\.showRadioMessage \? \(\s*<div className="radio-message">/);
     expect(appSource).toMatch(/liveHudDensity\.showRouteTempo && routeTempo \?/);
+    expect(appSource).toMatch(/liveHudDensity\.showRunFeed && runFeed\.length > 0 && !preflightOpen \?/);
     expect(appSource).toMatch(/liveHudDensity\.showPrimaryStatusRows \? \(\s*<div className="status-row">\s*<span>Status<\/span>/);
     expect(appSource).toMatch(/liveHudDensity\.showActionChips && tacticalCue \?/);
     expect(appSource).toMatch(/liveHudDensity\.showActionChips && objectiveInterceptReadout \?/);

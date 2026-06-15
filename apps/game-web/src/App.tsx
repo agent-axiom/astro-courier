@@ -1353,7 +1353,7 @@ export function App() {
             <strong>{routeTempoAction.value}</strong>
           </div>
         ) : null}
-        {runFeed.length > 0 && !preflightOpen ? (
+        {liveHudDensity.showRunFeed && runFeed.length > 0 && !preflightOpen ? (
           <div className="action-feed" aria-label="Recent run events">
             {runFeed.map((entry) => (
               <div key={entry.id} className={`action-feed-entry action-feed-${entry.tone}`}>

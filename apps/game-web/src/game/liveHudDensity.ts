@@ -26,6 +26,7 @@ export type LiveHudDensity = {
   showPrimaryStatusRows: boolean;
   showActionChips: boolean;
   showTelemetryChips: boolean;
+  showRunFeed: boolean;
 };
 
 const FINAL_APPROACH_DISTANCE = 120;
@@ -41,7 +42,8 @@ export function buildLiveHudDensity(input: LiveHudDensityInput): LiveHudDensity 
       showRouteTempo: false,
       showPrimaryStatusRows: false,
       showActionChips: false,
-      showTelemetryChips: false
+      showTelemetryChips: false,
+      showRunFeed: false
     };
   }
 
@@ -53,7 +55,8 @@ export function buildLiveHudDensity(input: LiveHudDensityInput): LiveHudDensity 
       showRouteTempo: true,
       showPrimaryStatusRows: true,
       showActionChips: true,
-      showTelemetryChips: true
+      showTelemetryChips: true,
+      showRunFeed: true
     };
   }
 
@@ -79,6 +82,7 @@ export function buildLiveHudDensity(input: LiveHudDensityInput): LiveHudDensity 
     showRouteTempo: expanded,
     showPrimaryStatusRows: expanded,
     showActionChips: finalApproach || dangerPressure || activeOpportunity,
-    showTelemetryChips: expanded
+    showTelemetryChips: expanded,
+    showRunFeed: expanded
   };
 }

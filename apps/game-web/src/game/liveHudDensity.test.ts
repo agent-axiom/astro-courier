@@ -20,7 +20,8 @@ describe("live HUD density", () => {
       showRouteTempo: false,
       showPrimaryStatusRows: false,
       showActionChips: false,
-      showTelemetryChips: false
+      showTelemetryChips: false,
+      showRunFeed: false
     });
   });
 
@@ -38,7 +39,8 @@ describe("live HUD density", () => {
       showRouteTempo: false,
       showPrimaryStatusRows: false,
       showActionChips: false,
-      showTelemetryChips: false
+      showTelemetryChips: false,
+      showRunFeed: false
     });
 
     expect(
@@ -73,6 +75,7 @@ describe("live HUD density", () => {
     expect(finalApproachDensity.showRadioMessage).toBe(true);
     expect(finalApproachDensity.showRouteTempo).toBe(true);
     expect(finalApproachDensity.showPrimaryStatusRows).toBe(true);
+    expect(finalApproachDensity.showRunFeed).toBe(true);
 
     expect(
       buildLiveHudDensity({
@@ -146,7 +149,8 @@ describe("live HUD density", () => {
       showRouteTempo: false,
       showPrimaryStatusRows: false,
       showActionChips: false,
-      showTelemetryChips: false
+      showTelemetryChips: false,
+      showRunFeed: false
     });
   });
 });
