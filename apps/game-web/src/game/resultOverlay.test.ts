@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 import { buildResultOverlayDensity } from "./resultOverlay";
 
 describe("result overlay density", () => {
-  it("keeps crash results focused while showing the next retry target", () => {
+  it("keeps crash results focused on retry instead of report stats", () => {
     expect(buildResultOverlayDensity({ status: "crashed" })).toEqual({
       showDetailedScore: false,
       showCrashDebrief: false,
       showRunGrade: false,
-      showQuickStats: true,
+      showQuickStats: false,
       showRunReceipts: false,
       showCoach: false,
       showTempoRecap: false,
