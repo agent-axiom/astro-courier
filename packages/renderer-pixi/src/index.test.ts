@@ -132,6 +132,15 @@ describe("objective guidance visual", () => {
     expect(readyAssist.markerScale).toBeGreaterThan(approach.markerScale);
     expect(readyAssist.lineAlpha).toBeGreaterThan(approach.lineAlpha);
   });
+
+  it("makes ready docking markers read as a stronger visual lock", () => {
+    const approach = objectiveGuidanceVisual({ distance: 72, landingStatus: "approach", assistAvailable: false });
+    const ready = objectiveGuidanceVisual({ distance: 72, landingStatus: "ready", assistAvailable: false });
+
+    expect(ready.markerScale).toBeGreaterThanOrEqual(1.32);
+    expect(ready.markerScale).toBeGreaterThan(approach.markerScale + 0.12);
+    expect(ready.edgeAlpha).toBeGreaterThanOrEqual(0.94);
+  });
 });
 
 describe("trajectory point visual", () => {
@@ -429,24 +438,33 @@ describe("landing corridor visual", () => {
   });
 
   it("marks unsafe docking statuses with warning colors", () => {
-    expect(
-      landingCorridorVisual({
-        status: "flying",
-        active: true,
-        distance: 32,
-        landingStatus: "too-fast",
-        assistAvailable: false
-      })
-    ).toMatchObject({ color: 0xff6f91, tone: "too-fast" });
-    expect(
-      landingCorridorVisual({
-        status: "flying",
-        active: true,
-        distance: 32,
-        landingStatus: "misaligned",
-        assistAvailable: false
-      })
-    ).toMatchObject({ color: 0xffd166, tone: "misaligned" });
+    const approach = landingCorridorVisual({
+      status: "flying",
+      active: true,
+      distance: 32,
+      landingStatus: "approach",
+      assistAvailable: false
+    });
+    const tooFast = landingCorridorVisual({
+      status: "flying",
+      active: true,
+      distance: 32,
+      landingStatus: "too-fast",
+      assistAvailable: false
+    });
+    const misaligned = landingCorridorVisual({
+      status: "flying",
+      active: true,
+      distance: 32,
+      landingStatus: "misaligned",
+      assistAvailable: false
+    });
+
+    expect(tooFast).toMatchObject({ color: 0xff6f91, tone: "too-fast" });
+    expect(misaligned).toMatchObject({ color: 0xffd166, tone: "misaligned" });
+    expect(tooFast?.width).toBeGreaterThan(approach?.width ?? 0);
+    expect(tooFast?.alpha).toBeGreaterThan(approach?.alpha ?? 0);
+    expect(misaligned?.width).toBeGreaterThan(approach?.width ?? 0);
   });
 });
 

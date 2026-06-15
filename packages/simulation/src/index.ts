@@ -246,6 +246,7 @@ const STYLE_CHAIN_MAX_COUNT = 4;
 const ACTIVE_DOCK_HALO_RADIUS_MULTIPLIER = 3;
 const DOCK_CAPTURE_RADIUS_MULTIPLIER = 1.7;
 const DOCK_HALO_APPROACH_MIN_CLOSING_SPEED = 3;
+const DOCK_HALO_SIDE_ON_MIN_SPEED = 12;
 const GRAVITY_DOCK_APPROACH_RADIUS_MULTIPLIER = ACTIVE_DOCK_HALO_RADIUS_MULTIPLIER;
 
 export function calculateHazardSkimStyleBonus(severity: number): number {
@@ -924,10 +925,15 @@ function isControlledActiveDockHaloArrival(world: SimulationWorld, pad: LandingP
     return false;
   }
 
+  const controlledSpeed = isControlledDockSpeed(speed, pad);
   const angleDiff = Math.abs(shortestAngleDelta(world.ship.rotation, pad.normalAngle));
-  const alignedEnough = angleDiff <= pad.requiredAngleTolerance || isControlledDockSpeed(speed, pad);
+  const alignedEnough = angleDiff <= pad.requiredAngleTolerance || controlledSpeed;
   if (!alignedEnough) {
     return false;
+  }
+
+  if (controlledSpeed && speed >= DOCK_HALO_SIDE_ON_MIN_SPEED) {
+    return true;
   }
 
   const toPad = subtract(pad.position, world.ship.position);

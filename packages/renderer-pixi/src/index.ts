@@ -97,11 +97,12 @@ export type ObjectiveGuidanceVisual = {
 export function objectiveGuidanceVisual(input: ObjectiveGuidanceVisualInput): ObjectiveGuidanceVisual {
   const proximity = 1 - clamp((input.distance - 60) / 840, 0, 1);
   const precisionBoost = input.assistAvailable || input.landingStatus === "ready" ? 1 : 0;
+  const readyLockBoost = input.landingStatus === "ready" ? 0.1 : 0;
 
   return {
     lineAlpha: round(clamp(0.14 + proximity * 0.18 + precisionBoost * 0.08, 0.14, 0.44), 2),
     lineWidth: round(2 + precisionBoost, 2),
-    markerScale: round(clamp(0.86 + proximity * 0.28 + precisionBoost * 0.14, 0.86, 1.28), 2),
+    markerScale: round(clamp(0.86 + proximity * 0.28 + precisionBoost * 0.14 + readyLockBoost, 0.86, 1.38), 2),
     edgeAlpha: round(clamp(0.68 + proximity * 0.2 + precisionBoost * 0.08, 0.68, 0.96), 2)
   };
 }
@@ -432,13 +433,14 @@ export function landingCorridorVisual(input: LandingCorridorVisualInput): Landin
             ? 0xffd166
             : 0xa0c4ff;
   const precisionBoost = tone === "ready" || tone === "assist" ? 1 : 0;
+  const unsafeBoost = tone === "too-fast" || tone === "misaligned" ? 1 : 0;
 
   return {
     color,
     tone,
     length: round(34 + proximity * 32 + precisionBoost * 8, 2),
-    alpha: round(clamp(0.2 + proximity * 0.34 + precisionBoost * 0.12, 0.2, 0.72), 2),
-    width: round(1.2 + proximity * 1.1 + precisionBoost * 0.6, 2)
+    alpha: round(clamp(0.2 + proximity * 0.34 + precisionBoost * 0.12 + unsafeBoost * 0.1, 0.2, 0.78), 2),
+    width: round(1.2 + proximity * 1.1 + precisionBoost * 0.6 + unsafeBoost * 0.35, 2)
   };
 }
 
