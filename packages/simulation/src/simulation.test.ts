@@ -1603,6 +1603,58 @@ describe("deterministic Astro Courier simulation", () => {
     expect(world.crashReason).toBeUndefined();
   });
 
+  it("delivers reported close planet-pad arrivals with safe speed instead of gravity crashes", () => {
+    const returnLegSystem: SystemContent = {
+      ...starterSystem,
+      contracts: [
+        ...starterSystem.contracts,
+        {
+          id: "return-leg",
+          title: "Return Leg",
+          briefing: "Reverse the route under tighter timing.",
+          riskLabel: "Tight Timer",
+          rewardLabel: "Gold pace pressure",
+          shipStart: {
+            position: [200, -80],
+            velocity: [0, 0],
+            rotation: 0
+          },
+          pickupId: "dock-a",
+          destinationId: "north-pad",
+          cargoId: "bottled-starlight",
+          medalTimes: {
+            bronze: 80,
+            silver: 48,
+            gold: 30
+          }
+        }
+      ]
+    };
+    const world = createWorldFromSystem(returnLegSystem, "reported-close-target-seed", { contractId: "return-leg" });
+    world.cargoOnboard = true;
+    world.objectivePhase = "delivery";
+    for (const pad of world.landingPads) {
+      pad.active = pad.role === "destination";
+    }
+    world.ship.position = { x: 0, y: -53 };
+    world.ship.velocity = { x: 23, y: 0 };
+    world.ship.rotation = 0;
+
+    const target = snapshotWorld(world).objectiveTarget;
+    expect(target).toMatchObject({
+      id: "north-pad",
+      distance: 21,
+      speed: 23,
+      allowedApproachSpeed: 42,
+      landingStatus: "ready"
+    });
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("delivered");
+    expect(world.crashReason).toBeUndefined();
+  });
+
   it("captures controlled planet-side arrivals across the live dock ring", () => {
     const returnLegSystem: SystemContent = {
       ...starterSystem,
