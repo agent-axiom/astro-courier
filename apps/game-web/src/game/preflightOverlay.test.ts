@@ -27,7 +27,7 @@ describe("preflight overlay density", () => {
     });
   });
 
-  it("keeps early route history lightweight with one progression target", () => {
+  it("keeps early route history lightweight without campaign calls to action", () => {
     expect(
       buildPreflightOverlayDensity({
         status: "paused",
@@ -41,7 +41,7 @@ describe("preflight overlay density", () => {
       showProgressMeta: true,
       showBestChase: false,
       showRouteMarkTarget: false,
-      showRouteBoardTarget: true,
+      showRouteBoardTarget: false,
       showRouteBoardStack: false,
       showDailyDispatch: false,
       showContractSelector: false,
