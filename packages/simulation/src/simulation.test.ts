@@ -444,6 +444,28 @@ describe("deterministic Astro Courier simulation", () => {
     expect(world.crashReason).toBeUndefined();
   });
 
+  it("loads controlled pickup approaches across the visible active pad halo", () => {
+    const world = createWorldFromSystem(starterSystem, "wide-pickup-halo-seed");
+    world.ship.position = { x: 50, y: -74 };
+    world.ship.velocity = { x: -20, y: 0 };
+    world.ship.rotation = -Math.PI / 2;
+
+    const target = snapshotWorld(world).objectiveTarget;
+    expect(target).toMatchObject({
+      id: "north-pad",
+      landingStatus: "ready"
+    });
+    expect(target?.distance).toBeGreaterThan(18 * 1.7);
+    expect(target?.distance).toBeLessThanOrEqual(18 * 3);
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("flying");
+    expect(world.objectivePhase).toBe("delivery");
+    expect(world.cargoOnboard).toBe(true);
+    expect(world.crashReason).toBeUndefined();
+  });
+
   it("delivers controlled planet-pad arrivals at the visible active halo", () => {
     const world = createWorldFromSystem(starterSystem, "planet-pad-visible-halo-seed");
     world.cargoOnboard = true;

@@ -245,6 +245,7 @@ const STYLE_CHAIN_MULTIPLIER_STEP = 0.25;
 const STYLE_CHAIN_MAX_COUNT = 4;
 const ACTIVE_DOCK_HALO_RADIUS_MULTIPLIER = 3;
 const DOCK_CAPTURE_RADIUS_MULTIPLIER = 1.7;
+const DOCK_HALO_APPROACH_MIN_CLOSING_SPEED = 3;
 const GRAVITY_DOCK_APPROACH_RADIUS_MULTIPLIER = ACTIVE_DOCK_HALO_RADIUS_MULTIPLIER;
 
 export function calculateHazardSkimStyleBonus(severity: number): number {
@@ -917,9 +918,6 @@ function isControlledActiveDockHaloArrival(world: SimulationWorld, pad: LandingP
   if (distance <= 0 || distance > pad.radius * ACTIVE_DOCK_HALO_RADIUS_MULTIPLIER) {
     return false;
   }
-  if (isPlanetSidePad(world, pad) && !world.cargoOnboard) {
-    return false;
-  }
 
   const speed = magnitude(world.ship.velocity);
   if (speed <= 0.5 || speed > pad.allowedApproachSpeed) {
@@ -934,11 +932,7 @@ function isControlledActiveDockHaloArrival(world: SimulationWorld, pad: LandingP
 
   const toPad = subtract(pad.position, world.ship.position);
   const closingSpeed = dot(world.ship.velocity, toPad) / distance;
-  return closingSpeed > Math.max(0.5, speed * 0.3);
-}
-
-function isPlanetSidePad(world: SimulationWorld, pad: LandingPadState): boolean {
-  return world.gravitySources.some((source) => distanceBetween(pad.position, source.position) <= source.radius + pad.radius);
+  return closingSpeed > Math.max(DOCK_HALO_APPROACH_MIN_CLOSING_SPEED, speed * 0.3);
 }
 
 function findActiveGravityDockApproachPad(world: SimulationWorld, source: GravitySourceState): LandingPadState | undefined {
