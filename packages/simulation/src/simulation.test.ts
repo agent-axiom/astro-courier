@@ -435,6 +435,54 @@ describe("deterministic Astro Courier simulation", () => {
     expect(world.crashReason).toBeUndefined();
   });
 
+  it("counts rough arrivals inside the visible active dock halo as deliveries", () => {
+    const world = createWorldFromSystem(starterSystem, "rough-visible-halo-seed");
+    world.cargoOnboard = true;
+    world.objectivePhase = "delivery";
+    for (const pad of world.landingPads) {
+      pad.active = pad.role === "destination";
+    }
+    world.ship.position = { x: 205, y: -80 };
+    world.ship.velocity = { x: 46, y: 0 };
+    world.ship.rotation = Math.PI;
+
+    const target = snapshotWorld(world).objectiveTarget;
+    expect(target).toMatchObject({
+      id: "dock-a",
+      landingStatus: "too-fast"
+    });
+    expect(target?.distance).toBeGreaterThan(22 * 1.7);
+    expect(target?.distance).toBeLessThanOrEqual(22 * 3.5);
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("delivered");
+    expect(world.objectivePhase).toBe("complete");
+    expect(world.landingRating).toBe("Spicy Landing");
+    expect(world.crashReason).toBeUndefined();
+    expect(world.ship.cargoDamage).toBeGreaterThan(0);
+  });
+
+  it("keeps very hard active target contacts as rough completions instead of hidden failures", () => {
+    const world = createWorldFromSystem(starterSystem, "hard-target-contact-seed");
+    world.cargoOnboard = true;
+    world.objectivePhase = "delivery";
+    for (const pad of world.landingPads) {
+      pad.active = pad.role === "destination";
+    }
+    world.ship.position = { x: 260, y: -80 };
+    world.ship.velocity = { x: 82, y: 0 };
+    world.ship.rotation = Math.PI;
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("delivered");
+    expect(world.objectivePhase).toBe("complete");
+    expect(world.landingRating).toBe("Cargo Survived Somehow");
+    expect(world.crashReason).toBeUndefined();
+    expect(world.ship.cargoDamage).toBeLessThan(1);
+  });
+
   it("counts near active planet-pad arrivals as pickups instead of hull collisions", () => {
     const world = createWorldFromSystem(starterSystem, "near-planet-pad-seed");
     world.ship.position = { x: 30, y: -56 };
@@ -1387,7 +1435,7 @@ describe("deterministic Astro Courier simulation", () => {
     expect(snapshotWorld(world).bestApproachStreakSeconds).toBeGreaterThan(0.45);
   });
 
-  it("gently assists near-pad landings without saving reckless impacts", () => {
+  it("gently assists near-pad landings while reckless target hits still load rough cargo", () => {
     const assisted = createWorldFromSystem(starterSystem, "assist-seed");
     assisted.ship.position = { x: 0, y: -74 };
     assisted.ship.velocity = { x: 43, y: 0 };
@@ -1406,8 +1454,11 @@ describe("deterministic Astro Courier simulation", () => {
     expect(assisted.lastMilestone).toBe("Assist Burn");
     expect(assisted.ship.fuel).toBe(fuelBeforeAssist - LANDING_ASSIST_FUEL_COST);
     expect(assisted.fuelUsed).toBe(LANDING_ASSIST_FUEL_COST);
-    expect(reckless.status).toBe("crashed");
-    expect(reckless.landingRating).toBe("Insurance Event");
+    expect(reckless.status).toBe("flying");
+    expect(reckless.objectivePhase).toBe("delivery");
+    expect(reckless.cargoOnboard).toBe(true);
+    expect(reckless.crashReason).toBeUndefined();
+    expect(reckless.ship.cargoDamage).toBeGreaterThan(0.4);
   });
 
   it("does not spend assist burn when a slightly fast target contact can rough dock", () => {
@@ -1429,9 +1480,9 @@ describe("deterministic Astro Courier simulation", () => {
 
   it("explains crash causes for hard landings, misaligned docks, and direct collisions", () => {
     const hardLanding = createWorldFromSystem(starterSystem, "crash-seed");
-    hardLanding.ship.position = { x: 0, y: -74 };
+    hardLanding.ship.position = { x: 260, y: -80 };
     hardLanding.ship.velocity = { x: 82, y: 0 };
-    hardLanding.ship.rotation = -Math.PI / 2;
+    hardLanding.ship.rotation = 0;
     stepWorld(hardLanding, 1 / 60, []);
 
     const misalignedDock = createWorldFromSystem(starterSystem, "misaligned-dock-seed");

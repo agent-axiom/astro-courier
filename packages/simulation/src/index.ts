@@ -239,6 +239,7 @@ export const CONTROLLED_DOCK_SPEED_RATIO = 0.7;
 const CATASTROPHIC_DOCK_SPEED_RATIO = 1.85;
 const ROUGH_DOCK_SPEED_DAMAGE = 0.18;
 const ROUGH_DOCK_ALIGNMENT_DAMAGE = 0.08;
+const CATASTROPHIC_ACTIVE_DOCK_DAMAGE = 0.45;
 export const STYLE_CHAIN_WINDOW_SECONDS = 4;
 export const CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS = 5.5;
 const STYLE_CHAIN_MULTIPLIER_STEP = 0.25;
@@ -913,8 +914,25 @@ function findActiveDockCapturePad(world: SimulationWorld): LandingPadState | und
     }
 
     const distance = distanceBetween(world.ship.position, pad.position);
-    return isWithinDockCaptureRadius(distance, pad) || isControlledActiveDockHaloArrival(world, pad, distance);
+    return (
+      isWithinDockCaptureRadius(distance, pad) ||
+      isControlledActiveDockHaloArrival(world, pad, distance) ||
+      isVisibleActiveObjectiveHaloContact(world, pad, distance)
+    );
   });
+}
+
+function isVisibleActiveObjectiveHaloContact(world: SimulationWorld, pad: LandingPadState, distance: number): boolean {
+  if (!isActiveObjectiveContact(world, pad) || distance <= 0 || distance > pad.radius * ACTIVE_DOCK_HALO_RADIUS_MULTIPLIER) {
+    return false;
+  }
+
+  const toPad = subtract(pad.position, world.ship.position);
+  const closingSpeed = dot(world.ship.velocity, toPad) / distance;
+  return (
+    closingSpeed > DOCK_HALO_APPROACH_MIN_CLOSING_SPEED ||
+    magnitude(world.ship.velocity) >= pad.allowedApproachSpeed
+  );
 }
 
 function isControlledActiveDockHaloArrival(world: SimulationWorld, pad: LandingPadState, distance: number): boolean {
@@ -981,7 +999,7 @@ function resolvePadContact(world: SimulationWorld, touchedPad: LandingPadState):
 
   if (!isSafeDocking) {
     const activeObjectiveContact = isActiveObjectiveContact(world, touchedPad);
-    if (!activeObjectiveContact || isCatastrophicDockImpact(speed, touchedPad)) {
+    if (!activeObjectiveContact) {
       world.status = "crashed";
       world.landingRating = "Insurance Event";
       world.crashReason = isSoftEnough ? "Misaligned Dock" : "Hard Landing";
@@ -990,6 +1008,9 @@ function resolvePadContact(world: SimulationWorld, touchedPad: LandingPadState):
     }
 
     applyRoughDockDamage(world, speed, angleDiff, touchedPad);
+    if (isCatastrophicDockImpact(speed, touchedPad)) {
+      world.ship.cargoDamage = Math.max(world.ship.cargoDamage, CATASTROPHIC_ACTIVE_DOCK_DAMAGE);
+    }
   }
 
   if (touchedPad.role === "pickup" && world.objectivePhase === "pickup") {

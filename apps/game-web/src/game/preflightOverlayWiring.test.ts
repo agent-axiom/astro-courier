@@ -15,7 +15,9 @@ describe("preflight overlay density wiring", () => {
     expect(appSource).toContain("preflight-overlay-${preflightOverlayDensity.mode}");
     expect(appSource).toContain("preflightOverlayDensity.showContractBriefing ? <p>{hud.contractBriefing}</p> : null");
     expect(appSource).toContain("preflightOverlayDensity.showControlPrimer");
-    expect(appSource).toContain("preflightOverlayDensity.showProgressMeta && hud.contractOptions.length > 0");
+    expect(appSource).toContain("preflightOverlayDensity.showBestChase");
+    expect(appSource).toContain("preflightOverlayDensity.showRouteMarkTarget");
+    expect(appSource).toContain("preflightOverlayDensity.showRouteBoardTarget && hud.contractOptions.length > 0");
     expect(appSource).toContain("preflightOverlayDensity.showRouteBoardStack && hud.contractOptions.length > 0");
     expect(appSource).toContain("preflightOverlayDensity.showDailyDispatch && dailyDispatch");
     expect(appSource).toContain("preflightOverlayDensity.showContractSelector && hud.contractOptions.length > 1");

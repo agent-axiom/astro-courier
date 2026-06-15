@@ -12,6 +12,9 @@ export type PreflightOverlayDensity = {
   showContractBriefing: boolean;
   showControlPrimer: boolean;
   showProgressMeta: boolean;
+  showBestChase: boolean;
+  showRouteMarkTarget: boolean;
+  showRouteBoardTarget: boolean;
   showRouteBoardStack: boolean;
   showDailyDispatch: boolean;
   showContractSelector: boolean;
@@ -33,6 +36,9 @@ export function buildPreflightOverlayDensity(input: PreflightOverlayDensityInput
       showContractBriefing: activePreflight,
       showControlPrimer: activePreflight,
       showProgressMeta: false,
+      showBestChase: false,
+      showRouteMarkTarget: false,
+      showRouteBoardTarget: false,
       showRouteBoardStack: false,
       showDailyDispatch: false,
       showContractSelector: false,
@@ -49,6 +55,9 @@ export function buildPreflightOverlayDensity(input: PreflightOverlayDensityInput
       showContractBriefing: false,
       showControlPrimer: false,
       showProgressMeta: true,
+      showBestChase: false,
+      showRouteMarkTarget: false,
+      showRouteBoardTarget: true,
       showRouteBoardStack: false,
       showDailyDispatch: hasDailyHistory,
       showContractSelector: false,
@@ -64,6 +73,9 @@ export function buildPreflightOverlayDensity(input: PreflightOverlayDensityInput
     showContractBriefing: false,
     showControlPrimer: false,
     showProgressMeta: true,
+    showBestChase: true,
+    showRouteMarkTarget: true,
+    showRouteBoardTarget: true,
     showRouteBoardStack: richHistory,
     showDailyDispatch: true,
     showContractSelector: true,

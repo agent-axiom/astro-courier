@@ -1698,14 +1698,14 @@ export function App() {
               ))}
             </div>
           ) : null}
-          {preflightOverlayDensity.showProgressMeta ? (
+          {preflightOverlayDensity.showBestChase ? (
             <div className={`best-chase-briefing best-chase-${bestRunChase.tone}`} aria-label={`${bestRunChase.label}: ${bestRunChase.value}`}>
               {bestRunChase.label === "PB ghost" ? <Route size={18} /> : <Trophy size={18} />}
               <span>{bestRunChase.label}</span>
               <strong>{bestRunChase.value}</strong>
             </div>
           ) : null}
-          {preflightOverlayDensity.showProgressMeta ? (
+          {preflightOverlayDensity.showRouteMarkTarget ? (
             <div
               className={`route-mark-target-briefing route-mark-target-${contractRouteMarkTarget.tone}`}
               aria-label={`${contractRouteMarkTarget.label}: ${contractRouteMarkTarget.value}${
@@ -1765,7 +1765,7 @@ export function App() {
               ) : null}
             </>
           ) : null}
-          {preflightOverlayDensity.showProgressMeta && hud.contractOptions.length > 0 ? (
+          {preflightOverlayDensity.showRouteBoardTarget && hud.contractOptions.length > 0 ? (
             routeTargetSelectionAction ? (
               <button
                 type="button"
