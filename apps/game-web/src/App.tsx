@@ -103,6 +103,7 @@ import {
 } from "./game/resultStats";
 import { buildHazardPressureReadout } from "./game/hazard";
 import { buildResultOverlayDensity } from "./game/resultOverlay";
+import { buildLiveHudDensity } from "./game/liveHudDensity";
 import {
   buildResultActionsLayout,
   buildResultBoardAction,
@@ -638,6 +639,22 @@ export function App() {
     manualBrakeUsed: hud.manualBrakeUsed
   });
   const flightDirectorStyle = { "--flight-director-progress": flightDirector?.progress ?? 0 } as CSSProperties;
+  const liveHudDensity = buildLiveHudDensity({
+    status: hud.status,
+    preflightOpen,
+    objectivePhase: hud.objectivePhase,
+    targetDistance: hud.targetDistance,
+    cargoDamage: hud.cargoDamage,
+    fuelRatio,
+    paceTier: hud.paceTier,
+    trajectoryRiskLevel: hud.trajectoryRiskLevel,
+    hazardDangerLevel: hud.hazardDangerLevel,
+    quickPickupSecondsRemaining: hud.quickPickupSecondsRemaining,
+    styleMultiplier: hud.styleMultiplier,
+    styleChainSecondsRemaining: hud.styleChainSecondsRemaining,
+    gravitySlingReady: hud.gravitySlingReady,
+    landingStatus: hud.landingStatus
+  });
   const routeTempo = buildRouteTempo({
     status: hud.status,
     preflightOpen,
@@ -1294,7 +1311,7 @@ export function App() {
         </div>
       ) : null}
 
-      <aside className="run-panel" aria-label="Delivery status">
+      <aside className={`run-panel run-panel-${liveHudDensity.expanded ? "expanded" : "focused"}`} aria-label="Delivery status">
         <div className="radio-message">{radioMessage}</div>
         {flightDirector ? (
           <div
@@ -1319,7 +1336,7 @@ export function App() {
             <strong>{routeTempo.value}</strong>
           </div>
         ) : null}
-        {routeTempoAction ? (
+        {liveHudDensity.showActionChips && routeTempoAction ? (
           <div className={`tempo-action-chip tempo-action-${routeTempoAction.tone}`} aria-label={`${routeTempoAction.label}: ${routeTempoAction.value}`}>
             <ArrowRight size={16} />
             <span>{routeTempoAction.label}</span>
@@ -1337,7 +1354,7 @@ export function App() {
             ))}
           </div>
         ) : null}
-        {tacticalCue ? (
+        {liveHudDensity.showActionChips && tacticalCue ? (
           <div className={`tactical-cue tactical-cue-${tacticalCue.tone}`} aria-label={`${tacticalCue.label}: ${tacticalCue.value}`}>
             <Target size={16} />
             <span>{tacticalCue.label}</span>
@@ -1352,14 +1369,14 @@ export function App() {
           <span>{objectiveDirective.label}</span>
           <strong>{objectiveDirective.value}</strong>
         </div>
-        {routeFocusReadout ? (
+        {liveHudDensity.showActionChips && routeFocusReadout ? (
           <div className={`route-focus-chip route-focus-${routeFocusReadout.tone}`} aria-label={`${routeFocusReadout.label}: ${routeFocusReadout.value}`}>
             <Route size={16} />
             <span>{routeFocusReadout.label}</span>
             <strong>{routeFocusReadout.value}</strong>
           </div>
         ) : null}
-        {liveRouteMarkCue ? (
+        {liveHudDensity.showTelemetryChips && liveRouteMarkCue ? (
           <div
             className={`route-mark-cue-chip route-mark-cue-${liveRouteMarkCue.tone}`}
             aria-label={`${liveRouteMarkCue.label}: ${liveRouteMarkCue.value}${liveRouteMarkCue.detail ? `. ${liveRouteMarkCue.detail}` : ""}`}
@@ -1370,11 +1387,13 @@ export function App() {
             {liveRouteMarkCue.detail ? <small>{liveRouteMarkCue.detail}</small> : null}
           </div>
         ) : null}
-        <div className="status-row">
-          <span>Target</span>
-          <strong>{targetDistanceLabel}</strong>
-        </div>
-        {objectiveInterceptReadout ? (
+        {liveHudDensity.showTelemetryChips ? (
+          <div className="status-row">
+            <span>Target</span>
+            <strong>{targetDistanceLabel}</strong>
+          </div>
+        ) : null}
+        {liveHudDensity.showActionChips && objectiveInterceptReadout ? (
           <div
             className={`intercept-chip intercept-${objectiveInterceptReadout.tone}`}
             aria-label={`${objectiveInterceptReadout.label}: ${objectiveInterceptReadout.value}`}
@@ -1384,7 +1403,7 @@ export function App() {
             <strong>{objectiveInterceptReadout.value}</strong>
           </div>
         ) : null}
-        {expressFinishReadout ? (
+        {liveHudDensity.showActionChips && expressFinishReadout ? (
           <div
             className={`finish-window-chip finish-window-${expressFinishReadout.tone}`}
             aria-label={`${expressFinishReadout.label}: ${expressFinishReadout.value}`}
@@ -1394,23 +1413,25 @@ export function App() {
             <strong>{expressFinishReadout.value}</strong>
           </div>
         ) : null}
-        {bearingGuidance ? (
+        {liveHudDensity.showTelemetryChips && bearingGuidance ? (
           <div className={`bearing-chip bearing-${bearingGuidance.tone}`}>
             <span>{bearingGuidance.label}</span>
             <strong>{bearingGuidance.value}</strong>
           </div>
         ) : null}
-        {dockingSpeedReadout ? (
+        {liveHudDensity.showTelemetryChips && dockingSpeedReadout ? (
           <div className={`dock-speed-chip dock-speed-${dockingSpeedReadout.tone}`}>
             <span>{dockingSpeedReadout.label}</span>
             <strong>{dockingSpeedReadout.value}</strong>
           </div>
         ) : null}
-        <div className={`pace-chip pace-${hud.paceTier}`}>
-          <span>{paceLabel(hud.paceTier)}</span>
-          <strong>{hud.paceTier === "overtime" ? "Expired" : `${hud.paceSecondsRemaining.toFixed(1)}s`}</strong>
-        </div>
-        {!preflightOpen && activeDailyDispatchPulse ? (
+        {liveHudDensity.showTelemetryChips ? (
+          <div className={`pace-chip pace-${hud.paceTier}`}>
+            <span>{paceLabel(hud.paceTier)}</span>
+            <strong>{hud.paceTier === "overtime" ? "Expired" : `${hud.paceSecondsRemaining.toFixed(1)}s`}</strong>
+          </div>
+        ) : null}
+        {liveHudDensity.showTelemetryChips && !preflightOpen && activeDailyDispatchPulse ? (
           <div
             className={`daily-pulse-chip daily-pulse-chip-${activeDailyDispatchPulse.tone}`}
             aria-label={`${activeDailyDispatchPulse.label}: ${activeDailyDispatchPulse.value}`}
@@ -1420,7 +1441,7 @@ export function App() {
             <strong>{activeDailyDispatchPulse.value}</strong>
           </div>
         ) : null}
-        {!preflightOpen && activeDailyDispatchProgressStatus ? (
+        {liveHudDensity.showTelemetryChips && !preflightOpen && activeDailyDispatchProgressStatus ? (
           <div
             className={`daily-streak-chip daily-streak-chip-${activeDailyDispatchProgressStatus.tone}`}
             aria-label={`${activeDailyDispatchProgressStatus.label}: ${activeDailyDispatchProgressStatus.value}`}
@@ -1430,7 +1451,7 @@ export function App() {
             <strong>{activeDailyDispatchProgressStatus.value}</strong>
           </div>
         ) : null}
-        {cometRunReadout ? (
+        {liveHudDensity.showActionChips && cometRunReadout ? (
           <div className={`comet-chip comet-${cometRunReadout.tone}`} aria-label={`${cometRunReadout.label}: ${cometRunReadout.value}`}>
             <Star size={16} />
             <span>{cometRunReadout.label}</span>
@@ -1438,13 +1459,13 @@ export function App() {
             {cometRunReadout.detail ? <small>{cometRunReadout.detail}</small> : null}
           </div>
         ) : null}
-        {liveBestPace ? (
+        {liveHudDensity.showTelemetryChips && liveBestPace ? (
           <div className={`best-pace-chip best-pace-${liveBestPace.tone}`} aria-label={`${liveBestPace.label}: ${liveBestPace.value}`}>
             <span>{liveBestPace.label}</span>
             <strong>{liveBestPace.value}</strong>
           </div>
         ) : null}
-        {replayCaptureReadout ? (
+        {liveHudDensity.showTelemetryChips && replayCaptureReadout ? (
           <div
             className={`replay-capture-chip replay-capture-${replayCaptureReadout.tone}`}
             aria-label={`${replayCaptureReadout.label}: ${replayCaptureReadout.value}`}
@@ -1454,7 +1475,7 @@ export function App() {
             <strong>{replayCaptureReadout.value}</strong>
           </div>
         ) : null}
-        {pickupRushActive ? (
+        {liveHudDensity.showActionChips && pickupRushActive ? (
           <div className="rush-chip">
             <span>Pickup rush</span>
             <strong>
@@ -1462,7 +1483,7 @@ export function App() {
             </strong>
           </div>
         ) : null}
-        {liveStyleReward ? (
+        {liveHudDensity.showActionChips && liveStyleReward ? (
           <div
             className={`style-chip style-chip-${liveStyleReward.tone} ${liveStyleReward.fresh ? "style-chip-hot" : ""} ${
               liveStyleReward.chainProgress > 0 ? "style-chip-chain-active" : ""
@@ -1480,14 +1501,14 @@ export function App() {
             {liveStyleReward.action ? <small>{liveStyleReward.action}</small> : null}
           </div>
         ) : null}
-        {styleTargetCue ? (
+        {liveHudDensity.showActionChips && styleTargetCue ? (
           <div className={`style-target-chip style-target-${styleTargetCue.tone}`} aria-label={`${styleTargetCue.label}: ${styleTargetCue.value}`}>
             <Star size={16} />
             <span>{styleTargetCue.label}</span>
             <strong>{styleTargetCue.value}</strong>
           </div>
         ) : null}
-        {hazardPressureReadout ? (
+        {liveHudDensity.showActionChips && hazardPressureReadout ? (
           <div
             className={`risk-pulse-chip risk-pulse-${hazardPressureReadout.tone}`}
             aria-label={`${hazardPressureReadout.label}: ${hazardPressureReadout.value}`}
@@ -1497,14 +1518,16 @@ export function App() {
             <strong>{hazardPressureReadout.value}</strong>
           </div>
         ) : null}
-        <div className={`cargo-risk-chip cargo-risk-${cargoRiskReadout.tone}`} aria-label={`${cargoRiskReadout.label}: ${cargoRiskReadout.value}`}>
-          <span>{cargoRiskReadout.label}</span>
-          <strong>{cargoRiskReadout.value}</strong>
-        </div>
-        {landingGuidancePresentation ? (
+        {liveHudDensity.showTelemetryChips ? (
+          <div className={`cargo-risk-chip cargo-risk-${cargoRiskReadout.tone}`} aria-label={`${cargoRiskReadout.label}: ${cargoRiskReadout.value}`}>
+            <span>{cargoRiskReadout.label}</span>
+            <strong>{cargoRiskReadout.value}</strong>
+          </div>
+        ) : null}
+        {liveHudDensity.showActionChips && landingGuidancePresentation ? (
           <div className={`guidance-chip guidance-${landingGuidancePresentation.tone}`}>{landingGuidancePresentation.label}</div>
         ) : null}
-        {approachRewardReadout ? (
+        {liveHudDensity.showActionChips && approachRewardReadout ? (
           <div
             className={`streak-chip streak-${approachRewardReadout.tone}`}
             style={approachStreakStyle}
@@ -1514,14 +1537,18 @@ export function App() {
             <strong>{approachRewardReadout.value}</strong>
           </div>
         ) : null}
-        <div className="status-row">
-          <span>Time</span>
-          <strong>{hud.elapsedSeconds.toFixed(1)}s</strong>
-        </div>
-        <div className="status-row">
-          <span>Score</span>
-          <strong>{hud.score}</strong>
-        </div>
+        {liveHudDensity.showTelemetryChips ? (
+          <div className="status-row">
+            <span>Time</span>
+            <strong>{hud.elapsedSeconds.toFixed(1)}s</strong>
+          </div>
+        ) : null}
+        {liveHudDensity.showTelemetryChips ? (
+          <div className="status-row">
+            <span>Score</span>
+            <strong>{hud.score}</strong>
+          </div>
+        ) : null}
         {hud.lastMilestone && !runFinished ? <div className="milestone">{hud.lastMilestone}</div> : null}
         {hud.landingRating ? <div className="landing-rating">{hud.landingRating}</div> : null}
       </aside>

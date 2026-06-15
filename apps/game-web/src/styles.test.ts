@@ -23,6 +23,12 @@ describe("responsive game layout CSS", () => {
     expect(styles).toMatch(/\.result-overlay-focused \.result-coach[\s\S]*grid-template-columns: 18px 1fr;/);
   });
 
+  it("defines a lighter focused live run panel", () => {
+    expect(styles).toContain(".run-panel-focused");
+    expect(styles).toMatch(/\.run-panel-focused[\s\S]*width: min\(260px, calc\(100vw - 32px\)\);/);
+    expect(styles).toMatch(/\.run-panel-focused \.radio-message[\s\S]*display: none;/);
+  });
+
   it("defines a dedicated fuel-clutch screen feedback accent", () => {
     expect(styles).toContain(".screen-feedback-accent-fuel");
     expect(styles).toContain("screen-feedback-fuel-surge");

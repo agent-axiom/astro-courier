@@ -949,6 +949,21 @@ button {
   backdrop-filter: blur(14px);
 }
 
+.run-panel-focused {
+  width: min(260px, calc(100vw - 32px));
+  padding: 10px;
+  border-color: rgba(160, 196, 255, 0.16);
+  background: rgba(8, 13, 28, 0.58);
+}
+
+.run-panel-focused .radio-message {
+  display: none;
+}
+
+.run-panel-focused .flight-director {
+  min-height: 42px;
+}
+
 .radio-message {
   padding: 10px;
   border-radius: 7px;
