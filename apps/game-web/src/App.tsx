@@ -532,7 +532,16 @@ export function App() {
     score: hud.score,
     cargoIntegrity
   });
-  const touchFlightPad = buildTouchFlightPadPresentation({ status: hud.status, preflightOpen });
+  const touchFlightPad = buildTouchFlightPadPresentation({
+    status: hud.status,
+    preflightOpen,
+    landingStatus: hud.landingStatus,
+    hazardDangerLevel: hud.hazardDangerLevel,
+    trajectoryRiskLevel: hud.trajectoryRiskLevel,
+    gravitySlingReady: hud.gravitySlingReady,
+    styleMultiplier: hud.styleMultiplier,
+    styleChainSecondsRemaining: hud.styleChainSecondsRemaining
+  });
   const runIntensity = buildRunIntensity({
     status: hud.status,
     preflightOpen,

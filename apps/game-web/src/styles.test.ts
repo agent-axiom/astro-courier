@@ -83,6 +83,15 @@ describe("responsive game layout CSS", () => {
     expect(styles).toContain("rgba(142, 230, 184");
   });
 
+  it("defines context-aware touch flight pad tones", () => {
+    expect(styles).toContain(".touch-flight-pad-precision");
+    expect(styles).toContain(".touch-flight-pad-danger");
+    expect(styles).toContain(".touch-flight-pad-opportunity");
+    expect(styles).toContain("rgba(142, 230, 184");
+    expect(styles).toContain("rgba(255, 111, 145");
+    expect(styles).toContain("rgba(255, 209, 102");
+  });
+
   it("defines tone-aware route tempo action chips", () => {
     expect(styles).toContain(".tempo-action-chip");
     expect(styles).toContain(".tempo-action-flow");

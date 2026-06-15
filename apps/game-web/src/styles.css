@@ -672,8 +672,65 @@ button {
   opacity: 0.72;
 }
 
+.touch-flight-pad-precision .touch-flight-pad-ring {
+  border-color: rgba(142, 230, 184, 0.5);
+  background:
+    radial-gradient(circle at center, rgba(142, 230, 184, 0.16), rgba(8, 13, 28, 0.16) 44%, rgba(142, 230, 184, 0.08) 45%),
+    conic-gradient(from 45deg, rgba(142, 230, 184, 0.36), transparent 18%, rgba(124, 225, 255, 0.24) 25%, transparent 42%, rgba(142, 230, 184, 0.3) 50%, transparent 68%, rgba(124, 225, 255, 0.24) 75%, transparent 92%);
+  box-shadow:
+    0 0 0 1px rgba(142, 230, 184, 0.16) inset,
+    0 0 32px rgba(142, 230, 184, 0.2);
+}
+
+.touch-flight-pad-precision .touch-flight-pad-stick {
+  border-color: rgba(142, 230, 184, 0.62);
+  background: rgba(142, 230, 184, 0.2);
+  box-shadow: 0 0 20px rgba(142, 230, 184, 0.26);
+}
+
+.touch-flight-pad-danger .touch-flight-pad-ring {
+  border-color: rgba(255, 111, 145, 0.58);
+  background:
+    radial-gradient(circle at center, rgba(255, 111, 145, 0.16), rgba(8, 13, 28, 0.18) 44%, rgba(255, 111, 145, 0.08) 45%),
+    conic-gradient(from 20deg, rgba(255, 111, 145, 0.4), transparent 16%, rgba(255, 209, 102, 0.24) 24%, transparent 42%, rgba(255, 111, 145, 0.34) 52%, transparent 70%, rgba(255, 209, 102, 0.22) 78%, transparent 94%);
+  box-shadow:
+    0 0 0 1px rgba(255, 111, 145, 0.18) inset,
+    0 0 34px rgba(255, 111, 145, 0.22);
+}
+
+.touch-flight-pad-danger .touch-flight-pad-stick {
+  border-color: rgba(255, 111, 145, 0.68);
+  background: rgba(255, 111, 145, 0.2);
+  box-shadow: 0 0 22px rgba(255, 111, 145, 0.28);
+}
+
+.touch-flight-pad-opportunity .touch-flight-pad-ring {
+  border-color: rgba(255, 209, 102, 0.58);
+  background:
+    radial-gradient(circle at center, rgba(255, 209, 102, 0.17), rgba(8, 13, 28, 0.18) 44%, rgba(255, 209, 102, 0.08) 45%),
+    conic-gradient(from 45deg, rgba(255, 209, 102, 0.38), transparent 18%, rgba(124, 225, 255, 0.22) 25%, transparent 42%, rgba(255, 209, 102, 0.32) 50%, transparent 68%, rgba(124, 225, 255, 0.22) 75%, transparent 92%);
+  box-shadow:
+    0 0 0 1px rgba(255, 209, 102, 0.18) inset,
+    0 0 34px rgba(255, 209, 102, 0.22);
+}
+
+.touch-flight-pad-opportunity .touch-flight-pad-stick {
+  border-color: rgba(255, 209, 102, 0.68);
+  background: rgba(255, 209, 102, 0.2);
+  box-shadow: 0 0 22px rgba(255, 209, 102, 0.26);
+}
+
+.touch-flight-pad-precision .touch-flight-pad-vector,
+.touch-flight-pad-danger .touch-flight-pad-vector,
+.touch-flight-pad-opportunity .touch-flight-pad-vector {
+  opacity: 0.86;
+}
+
 @media (pointer: coarse) {
-  .touch-flight-pad-active {
+  .touch-flight-pad-active,
+  .touch-flight-pad-precision,
+  .touch-flight-pad-danger,
+  .touch-flight-pad-opportunity {
     display: grid;
   }
 }
