@@ -77,6 +77,49 @@ describe("Astro Courier API", () => {
     });
   });
 
+  it("accepts misaligned dock crash reasons in submitted replay results", async () => {
+    const server = buildServer({ logger: false });
+
+    const response = await server.inject({
+      method: "POST",
+      url: "/replays/validate",
+      payload: {
+        systemId: "starter-route",
+        contractId: "first-light-delivery",
+        rngSeed: "misaligned-dock-payload",
+        ticks: 1,
+        inputFrames: [],
+        result: {
+          status: "crashed",
+          elapsedSeconds: 0,
+          score: 0,
+          cargoDamage: 1,
+          fuelUsed: 0,
+          medal: "none",
+          grade: "F",
+          landingRating: "Insurance Event",
+          crashReason: "Misaligned Dock",
+          scoreBreakdown: {
+            base: 100,
+            paceBonus: 0,
+            fuelBonus: 0,
+            cargoBonus: 0,
+            landingBonus: 0,
+            styleBonus: 0,
+            dangerBonus: 0,
+            incidentPenalty: 100,
+            total: 0
+          }
+        }
+      }
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      accepted: false
+    });
+  });
+
   it("serves the deterministic daily dispatch for a route board date", async () => {
     const server = buildServer({ logger: false });
 
