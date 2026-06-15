@@ -386,7 +386,7 @@ export function landingPadVisual(pad: LandingPadVisualInput): LandingPadVisual {
       strokeWidth: 4,
       alpha: 1,
       haloAlpha: 0.18,
-      haloRadiusMultiplier: 2.25,
+      haloRadiusMultiplier: 3,
       beaconAlpha: 0.82
     };
   }

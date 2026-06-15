@@ -372,7 +372,7 @@ describe("landing pad visual state", () => {
       color: 0x8ee6b8,
       strokeWidth: 4,
       haloAlpha: 0.18,
-      haloRadiusMultiplier: 2.25,
+      haloRadiusMultiplier: 3,
       beaconAlpha: 0.82
     });
     expect(destination.color).toBe(0xffd166);
