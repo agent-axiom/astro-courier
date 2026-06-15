@@ -17,6 +17,10 @@ export function buildCrashReasonLabel(input: CrashReasonLabelInput): string {
     return "Landed too fast";
   }
 
+  if (input.crashReason === "Misaligned Dock") {
+    return "Dock angle missed";
+  }
+
   if (input.crashReason === "Hull Collision") {
     return input.contractId === "chain-relay"
       ? "Clipped relay lane"
@@ -35,6 +39,14 @@ export function buildCrashDebrief(input: CrashReasonLabelInput): CrashDebrief {
     return {
       label: "Cause",
       value: "Too fast",
+      tone: "dock"
+    };
+  }
+
+  if (input.crashReason === "Misaligned Dock") {
+    return {
+      label: "Cause",
+      value: "Alignment",
       tone: "dock"
     };
   }

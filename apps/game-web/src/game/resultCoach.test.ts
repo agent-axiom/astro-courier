@@ -43,6 +43,25 @@ describe("result coach", () => {
     });
   });
 
+  it("coaches misaligned dock failures toward ship attitude instead of braking", () => {
+    expect(
+      buildResultCoach({
+        status: "crashed",
+        crashReason: "Misaligned Dock",
+        medal: "none",
+        grade: "F",
+        cargoDamage: 1,
+        fuel: 40,
+        maxFuel: 100,
+        scoreBreakdown: baseBreakdown
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Point nose into the dock",
+      tone: "danger"
+    });
+  });
+
   it("calls out hard landing near-misses at the delivery pad", () => {
     expect(
       buildResultCoach({

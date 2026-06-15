@@ -141,6 +141,14 @@ const flowFinishMilestones = new Set(["Comet Finish", "Perfect Approach", "Chain
 export function buildResultCoach(input: ResultCoachInput): ResultCoach {
   if (input.status === "crashed") {
     const gravityHullCollision = input.contractId === "gravity-slingshot" && input.crashReason === "Hull Collision";
+    if (input.crashReason === "Misaligned Dock") {
+      return {
+        label: "Next run",
+        value: "Point nose into the dock",
+        tone: "danger"
+      };
+    }
+
     if (isDeliveryNearMiss(input)) {
       return {
         label: "Next run",

@@ -69,6 +69,14 @@ export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
       };
     }
 
+    if (input.crashReason === "Misaligned Dock") {
+      return {
+        label: "Retry target",
+        value: "Align ship to dock",
+        tone: "danger"
+      };
+    }
+
     if (input.crashReason === "Hull Collision") {
       return {
         label: "Retry target",

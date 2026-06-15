@@ -27,7 +27,7 @@ export type LandingRating =
   | "Cargo Survived Somehow"
   | "Insurance Event";
 export type RunMedal = "none" | "bronze" | "silver" | "gold" | "comet";
-export type CrashReason = "Hard Landing" | "Hull Collision";
+export type CrashReason = "Hard Landing" | "Misaligned Dock" | "Hull Collision";
 export type RunGrade = "S" | "A" | "B" | "C" | "D" | "F";
 
 export type ScoreBreakdown = {

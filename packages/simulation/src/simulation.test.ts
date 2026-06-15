@@ -1219,12 +1219,18 @@ describe("deterministic Astro Courier simulation", () => {
     expect(emptyAssist.fuelUsed).toBe(0);
   });
 
-  it("explains crash causes for hard landings and direct collisions", () => {
+  it("explains crash causes for hard landings, misaligned docks, and direct collisions", () => {
     const hardLanding = createWorldFromSystem(starterSystem, "crash-seed");
     hardLanding.ship.position = { x: 0, y: -74 };
     hardLanding.ship.velocity = { x: 82, y: 0 };
     hardLanding.ship.rotation = -Math.PI / 2;
     stepWorld(hardLanding, 1 / 60, []);
+
+    const misalignedDock = createWorldFromSystem(starterSystem, "misaligned-dock-seed");
+    misalignedDock.ship.position = { x: 0, y: -74 };
+    misalignedDock.ship.velocity = { x: 4, y: 1 };
+    misalignedDock.ship.rotation = 0;
+    stepWorld(misalignedDock, 1 / 60, []);
 
     const collision = createWorldFromSystem(starterSystem, "crash-seed");
     collision.ship.position = { x: 0, y: 0 };
@@ -1232,7 +1238,59 @@ describe("deterministic Astro Courier simulation", () => {
     stepWorld(collision, 1 / 60, []);
 
     expect(summarizeRun(hardLanding).crashReason).toBe("Hard Landing");
+    expect(summarizeRun(misalignedDock).crashReason).toBe("Misaligned Dock");
     expect(summarizeRun(collision).crashReason).toBe("Hull Collision");
+  });
+
+  it("treats near-target planet-side approach misses as dock failures rather than gravity collisions", () => {
+    const returnLegSystem: SystemContent = {
+      ...starterSystem,
+      contracts: [
+        ...starterSystem.contracts,
+        {
+          id: "return-leg",
+          title: "Return Leg",
+          briefing: "Reverse the route under tighter timing.",
+          riskLabel: "Tight Timer",
+          rewardLabel: "Gold pace pressure",
+          shipStart: {
+            position: [200, -80],
+            velocity: [0, 0],
+            rotation: 0
+          },
+          pickupId: "dock-a",
+          destinationId: "north-pad",
+          cargoId: "bottled-starlight",
+          medalTimes: {
+            bronze: 80,
+            silver: 48,
+            gold: 30
+          }
+        }
+      ]
+    };
+    const world = createWorldFromSystem(returnLegSystem, "planet-side-dock-miss-seed", { contractId: "return-leg" });
+    world.cargoOnboard = true;
+    world.objectivePhase = "delivery";
+    for (const pad of world.landingPads) {
+      pad.active = pad.role === "destination";
+    }
+    world.ship.position = { x: 0, y: -55 };
+    world.ship.velocity = { x: 4, y: 1 };
+    world.ship.rotation = 0;
+
+    const target = snapshotWorld(world).objectiveTarget;
+    expect(target).toMatchObject({
+      id: "north-pad",
+      landingStatus: "misaligned"
+    });
+    expect(target?.distance).toBeGreaterThan(18);
+    expect(target?.distance).toBeLessThan(18 * 1.35);
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("crashed");
+    expect(summarizeRun(world).crashReason).toBe("Misaligned Dock");
   });
 
   it("reports boost burns as momentary courier feedback", () => {

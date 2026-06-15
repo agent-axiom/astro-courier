@@ -868,90 +868,99 @@ function canAwardAntimatterDrift(world: SimulationWorld): boolean {
 function resolveLandingOrCrash(world: SimulationWorld): void {
   const touchedPad = world.landingPads.find((pad) => distanceBetween(world.ship.position, pad.position) <= pad.radius);
   if (touchedPad) {
-    const speed = magnitude(world.ship.velocity);
-    const angleDiff = Math.abs(shortestAngleDelta(world.ship.rotation, touchedPad.normalAngle));
-    const isSoftEnough = speed <= touchedPad.allowedApproachSpeed;
-    const isAligned = angleDiff <= touchedPad.requiredAngleTolerance;
-    const isSafeDocking = isSoftEnough && isAligned;
-
-    if (!isSafeDocking) {
-      world.status = "crashed";
-      world.landingRating = "Insurance Event";
-      world.crashReason = "Hard Landing";
-      world.ship.cargoDamage = 1;
-      return;
-    }
-
-    if (touchedPad.role === "pickup" && world.objectivePhase === "pickup") {
-      world.cargoOnboard = true;
-      world.objectivePhase = "delivery";
-      if (world.elapsedSeconds <= QUICK_PICKUP_WINDOW_SECONDS) {
-        awardStyle(world, QUICK_PICKUP_STYLE_BONUS, world.lastMilestone === "Assist Burn" ? "Assist Burn" : "Quick Pickup");
-      } else {
-        world.lastMilestone = "Cargo Loaded";
-      }
-      world.launchBurstSecondsRemaining = LAUNCH_BURST_WINDOW_SECONDS;
-      world.ship.velocity = scale(world.ship.velocity, 0.25);
-      for (const pad of world.landingPads) {
-        pad.active = pad.role === "destination";
-      }
-      return;
-    }
-
-    if (touchedPad.role === "destination" && world.objectivePhase === "pickup") {
-      world.lastMilestone = "Pickup Required";
-      world.ship.velocity = scale(world.ship.velocity, 0.25);
-      return;
-    }
-
-    if (touchedPad.role === "destination" && world.cargoOnboard) {
-      world.status = "delivered";
-      world.objectivePhase = "complete";
-      world.landingRating = rateLanding(speed, angleDiff, touchedPad, world.ship.cargoDamage);
-      if (canAwardCometFinish(world)) {
-        awardStyle(world, COMET_FINISH_STYLE_BONUS, "Comet Finish");
-      } else if (canFinishStyleChain(world)) {
-        awardStyle(world, CHAIN_FINISH_STYLE_BONUS, "Chain Finish");
-      } else if (
-        world.landingRating === "Perfect Landing" &&
-        world.bestApproachStreakSeconds >= PERFECT_APPROACH_STREAK_SECONDS
-      ) {
-        awardStyle(world, PERFECT_APPROACH_STYLE_BONUS, "Perfect Approach");
-      } else if (canAwardExpressFinish(world)) {
-        awardStyle(world, EXPRESS_FINISH_STYLE_BONUS, "Express Finish");
-      } else if (canAwardLastDrop(world)) {
-        awardStyle(world, LAST_DROP_STYLE_BONUS, "Last Drop");
-      } else if (world.fuelUsed <= ECO_DRIFT_FUEL_USED_LIMIT && world.ship.cargoDamage <= 0.02) {
-        awardStyle(world, ECO_DRIFT_STYLE_BONUS, "Eco Drift");
-      } else if (canAwardAntimatterDrift(world)) {
-        awardStyle(world, ANTIMATTER_DRIFT_STYLE_BONUS, "Antimatter Drift");
-      } else if (canAwardNoBrakeFinesse(world)) {
-        awardStyle(world, NO_BRAKE_STYLE_BONUS, "No Brake Finesse");
-      } else if (canAwardDamageControl(world)) {
-        awardStyle(world, DAMAGE_CONTROL_STYLE_BONUS, "Damage Control");
-      } else {
-        world.lastMilestone = "Delivered";
-      }
-      return;
-    }
-
-    const departingUsedPickup =
-      touchedPad.role === "pickup" &&
-      world.cargoOnboard &&
-      world.ship.velocity.x * Math.cos(touchedPad.normalAngle) + world.ship.velocity.y * Math.sin(touchedPad.normalAngle) > 0;
-    world.lastMilestone = world.lastMilestone ?? (touchedPad.role === "pickup" ? "Cargo Already Loaded" : "Docked");
-    if (!departingUsedPickup) {
-      world.ship.velocity = scale(world.ship.velocity, 0.25);
-    }
+    resolvePadContact(world, touchedPad);
     return;
   }
 
   const hitGravitySource = world.gravitySources.find((source) => distanceBetween(world.ship.position, source.position) <= source.radius);
   if (hitGravitySource) {
+    const activeApproachPad = world.landingPads.find(
+      (pad) => pad.active && distanceBetween(world.ship.position, pad.position) <= pad.radius * 1.35
+    );
+    if (activeApproachPad) {
+      resolvePadContact(world, activeApproachPad);
+      return;
+    }
+
     world.status = "crashed";
     world.landingRating = "Insurance Event";
     world.crashReason = "Hull Collision";
     world.ship.cargoDamage = 1;
+  }
+}
+
+function resolvePadContact(world: SimulationWorld, touchedPad: LandingPadState): void {
+  const speed = magnitude(world.ship.velocity);
+  const angleDiff = Math.abs(shortestAngleDelta(world.ship.rotation, touchedPad.normalAngle));
+  const isSoftEnough = speed <= touchedPad.allowedApproachSpeed;
+  const isAligned = angleDiff <= touchedPad.requiredAngleTolerance;
+  const isSafeDocking = isSoftEnough && isAligned;
+
+  if (!isSafeDocking) {
+    world.status = "crashed";
+    world.landingRating = "Insurance Event";
+    world.crashReason = isSoftEnough ? "Misaligned Dock" : "Hard Landing";
+    world.ship.cargoDamage = 1;
+    return;
+  }
+
+  if (touchedPad.role === "pickup" && world.objectivePhase === "pickup") {
+    world.cargoOnboard = true;
+    world.objectivePhase = "delivery";
+    if (world.elapsedSeconds <= QUICK_PICKUP_WINDOW_SECONDS) {
+      awardStyle(world, QUICK_PICKUP_STYLE_BONUS, world.lastMilestone === "Assist Burn" ? "Assist Burn" : "Quick Pickup");
+    } else {
+      world.lastMilestone = "Cargo Loaded";
+    }
+    world.launchBurstSecondsRemaining = LAUNCH_BURST_WINDOW_SECONDS;
+    world.ship.velocity = scale(world.ship.velocity, 0.25);
+    for (const pad of world.landingPads) {
+      pad.active = pad.role === "destination";
+    }
+    return;
+  }
+
+  if (touchedPad.role === "destination" && world.objectivePhase === "pickup") {
+    world.lastMilestone = "Pickup Required";
+    world.ship.velocity = scale(world.ship.velocity, 0.25);
+    return;
+  }
+
+  if (touchedPad.role === "destination" && world.cargoOnboard) {
+    world.status = "delivered";
+    world.objectivePhase = "complete";
+    world.landingRating = rateLanding(speed, angleDiff, touchedPad, world.ship.cargoDamage);
+    if (canAwardCometFinish(world)) {
+      awardStyle(world, COMET_FINISH_STYLE_BONUS, "Comet Finish");
+    } else if (canFinishStyleChain(world)) {
+      awardStyle(world, CHAIN_FINISH_STYLE_BONUS, "Chain Finish");
+    } else if (world.landingRating === "Perfect Landing" && world.bestApproachStreakSeconds >= PERFECT_APPROACH_STREAK_SECONDS) {
+      awardStyle(world, PERFECT_APPROACH_STYLE_BONUS, "Perfect Approach");
+    } else if (canAwardExpressFinish(world)) {
+      awardStyle(world, EXPRESS_FINISH_STYLE_BONUS, "Express Finish");
+    } else if (canAwardLastDrop(world)) {
+      awardStyle(world, LAST_DROP_STYLE_BONUS, "Last Drop");
+    } else if (world.fuelUsed <= ECO_DRIFT_FUEL_USED_LIMIT && world.ship.cargoDamage <= 0.02) {
+      awardStyle(world, ECO_DRIFT_STYLE_BONUS, "Eco Drift");
+    } else if (canAwardAntimatterDrift(world)) {
+      awardStyle(world, ANTIMATTER_DRIFT_STYLE_BONUS, "Antimatter Drift");
+    } else if (canAwardNoBrakeFinesse(world)) {
+      awardStyle(world, NO_BRAKE_STYLE_BONUS, "No Brake Finesse");
+    } else if (canAwardDamageControl(world)) {
+      awardStyle(world, DAMAGE_CONTROL_STYLE_BONUS, "Damage Control");
+    } else {
+      world.lastMilestone = "Delivered";
+    }
+    return;
+  }
+
+  const departingUsedPickup =
+    touchedPad.role === "pickup" &&
+    world.cargoOnboard &&
+    world.ship.velocity.x * Math.cos(touchedPad.normalAngle) + world.ship.velocity.y * Math.sin(touchedPad.normalAngle) > 0;
+  world.lastMilestone = world.lastMilestone ?? (touchedPad.role === "pickup" ? "Cargo Already Loaded" : "Docked");
+  if (!departingUsedPickup) {
+    world.ship.velocity = scale(world.ship.velocity, 0.25);
   }
 }
 

@@ -6,6 +6,10 @@ describe("crash reason labels", () => {
     expect(buildCrashReasonLabel({ crashReason: "Hard Landing" })).toBe("Landed too fast");
   });
 
+  it("keeps misaligned dock advice focused on ship attitude", () => {
+    expect(buildCrashReasonLabel({ crashReason: "Misaligned Dock" })).toBe("Dock angle missed");
+  });
+
   it("points asteroid sprint hull collisions at asteroid clearance", () => {
     expect(buildCrashReasonLabel({ contractId: "asteroid-sprint", crashReason: "Hull Collision" })).toBe("Clipped asteroid field");
   });
@@ -33,6 +37,14 @@ describe("crash debrief badge", () => {
     expect(buildCrashDebrief({ crashReason: "Hard Landing" })).toEqual({
       label: "Cause",
       value: "Too fast",
+      tone: "dock"
+    });
+  });
+
+  it("turns misaligned dock failures into an alignment badge", () => {
+    expect(buildCrashDebrief({ crashReason: "Misaligned Dock" })).toEqual({
+      label: "Cause",
+      value: "Alignment",
       tone: "dock"
     });
   });

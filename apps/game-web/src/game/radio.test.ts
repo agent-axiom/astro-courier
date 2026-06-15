@@ -573,6 +573,7 @@ describe("radio feedback copy", () => {
     expect(buildRadioMessage({ ...baseHud, status: "delivered", medal: "comet" })).toContain("Comet");
     expect(buildRadioMessage({ ...baseHud, status: "crashed", landingRating: "Insurance Event" })).toContain("Insurance");
     expect(buildRadioMessage({ ...baseHud, status: "crashed", crashReason: "Hard Landing" })).toContain("Bleed speed");
+    expect(buildRadioMessage({ ...baseHud, status: "crashed", crashReason: "Misaligned Dock" })).toContain("Align ship");
   });
 
   it("calls out the missing comet condition after gold express near-misses", () => {

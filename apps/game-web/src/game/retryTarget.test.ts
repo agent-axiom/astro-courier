@@ -40,6 +40,25 @@ describe("result retry target", () => {
     });
   });
 
+  it("turns misaligned dock failures into a concrete alignment target", () => {
+    expect(
+      buildRetryTarget({
+        status: "crashed",
+        crashReason: "Misaligned Dock",
+        medal: "none",
+        elapsedSeconds: 14.2,
+        goldSeconds: 30,
+        score: 0,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Align ship to dock",
+      tone: "danger"
+    });
+  });
+
   it("turns hull collisions into a concrete gravity-well target", () => {
     expect(
       buildRetryTarget({
