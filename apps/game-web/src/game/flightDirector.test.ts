@@ -115,6 +115,27 @@ describe("flight director", () => {
     });
   });
 
+  it("lets an armed perfect approach own the ready dock command", () => {
+    expect(
+      buildFlightDirector({
+        status: "flying",
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        landingStatus: "ready",
+        approachStreakSeconds: 1.2,
+        cargoDamage: 0,
+        manualBrakeUsed: false,
+        targetDistance: 18
+      })
+    ).toEqual({
+      label: "Flight director",
+      action: "Perfect dock",
+      detail: "+220 armed",
+      tone: "opportunity",
+      progress: 1
+    });
+  });
+
   it("cashouts a fading style chain before ordinary delivery guidance", () => {
     expect(
       buildFlightDirector({

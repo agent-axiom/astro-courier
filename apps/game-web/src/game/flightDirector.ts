@@ -1,4 +1,9 @@
-import { HAZARD_THREAD_SPEED_THRESHOLD, NO_BRAKE_STYLE_BONUS, PERFECT_APPROACH_STREAK_SECONDS } from "@astro-courier/simulation";
+import {
+  HAZARD_THREAD_SPEED_THRESHOLD,
+  NO_BRAKE_STYLE_BONUS,
+  PERFECT_APPROACH_STREAK_SECONDS,
+  PERFECT_APPROACH_STYLE_BONUS
+} from "@astro-courier/simulation";
 import type { LandingGuidanceStatus, ObjectivePhase, RunStatus } from "@astro-courier/shared";
 
 export type FlightDirectorInput = {
@@ -115,6 +120,15 @@ export function buildFlightDirector(input: FlightDirectorInput): FlightDirector 
       "opportunity",
       approachStreakSeconds / PERFECT_APPROACH_STREAK_SECONDS
     );
+  }
+
+  if (
+    input.landingStatus === "ready" &&
+    input.objectivePhase === "delivery" &&
+    approachStreakSeconds >= PERFECT_APPROACH_STREAK_SECONDS &&
+    (input.cargoDamage ?? 0) <= 0.02
+  ) {
+    return director("Perfect dock", `+${PERFECT_APPROACH_STYLE_BONUS} armed`, "opportunity", 1);
   }
 
   if (
