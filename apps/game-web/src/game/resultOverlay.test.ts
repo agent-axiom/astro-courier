@@ -7,11 +7,11 @@ describe("result overlay density", () => {
       showDetailedScore: false,
       showCrashDebrief: false,
       showRunGrade: false,
-      showQuickStats: false,
+      showQuickStats: true,
       showRunReceipts: false,
       showCoach: false,
       showTempoRecap: false,
-      showRetryTarget: true,
+      showRetryTarget: false,
       showRetryActionBriefing: false,
       showRouteProgress: false,
       showBoardAction: false
