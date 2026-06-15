@@ -554,7 +554,9 @@ function classifyLandingGuidance(
   angleError: number,
   pad: LandingPadState
 ): LandingGuidanceStatus {
-  if (!isWithinDockCaptureRadius(distance, pad)) {
+  const withinDockCapture = isWithinDockCaptureRadius(distance, pad);
+  const withinDockGuidance = distance <= pad.radius * GRAVITY_DOCK_APPROACH_RADIUS_MULTIPLIER;
+  if (!withinDockGuidance) {
     return "approach";
   }
   if (speed > pad.allowedApproachSpeed) {
@@ -563,7 +565,7 @@ function classifyLandingGuidance(
   if (angleError > pad.requiredAngleTolerance && !isControlledDockSpeed(speed, pad)) {
     return "misaligned";
   }
-  return "ready";
+  return withinDockCapture ? "ready" : "approach";
 }
 
 function getNearestHazard(world: SimulationWorld): SimulationSnapshot["nearestHazard"] {

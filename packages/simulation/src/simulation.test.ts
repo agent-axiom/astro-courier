@@ -1204,6 +1204,23 @@ describe("deterministic Astro Courier simulation", () => {
     expect(snapshotWorld(world).objectiveTarget?.landingStatus).toBe("ready");
   });
 
+  it("warns about rough planet-pad approaches before the narrow dock ring", () => {
+    const world = createWorldFromSystem(starterSystem, "wide-guide-seed");
+    world.ship.position = { x: 30, y: -56 };
+    world.ship.rotation = -Math.PI / 2;
+
+    world.ship.velocity = { x: 45, y: 0 };
+    expect(snapshotWorld(world).objectiveTarget?.landingStatus).toBe("too-fast");
+
+    world.ship.velocity = { x: 30, y: 0 };
+    world.ship.rotation = Math.PI;
+    expect(snapshotWorld(world).objectiveTarget?.landingStatus).toBe("misaligned");
+
+    world.ship.velocity = { x: 30, y: 0 };
+    world.ship.rotation = -Math.PI / 2;
+    expect(snapshotWorld(world).objectiveTarget?.landingStatus).toBe("approach");
+  });
+
   it("builds and preserves a stable approach streak near the active pad", () => {
     const world = createWorldFromSystem(starterSystem, "streak-seed");
     world.ship.position = { x: 40, y: -74 };
