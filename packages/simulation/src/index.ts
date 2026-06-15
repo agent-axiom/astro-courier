@@ -554,7 +554,7 @@ function classifyLandingGuidance(
   if (speed > pad.allowedApproachSpeed) {
     return "too-fast";
   }
-  if (angleError > pad.requiredAngleTolerance) {
+  if (angleError > pad.requiredAngleTolerance && !isControlledDockSpeed(speed, pad)) {
     return "misaligned";
   }
   return "ready";
@@ -894,7 +894,7 @@ function resolvePadContact(world: SimulationWorld, touchedPad: LandingPadState):
   const angleDiff = Math.abs(shortestAngleDelta(world.ship.rotation, touchedPad.normalAngle));
   const isSoftEnough = speed <= touchedPad.allowedApproachSpeed;
   const isAligned = angleDiff <= touchedPad.requiredAngleTolerance;
-  const isSafeDocking = isSoftEnough && isAligned;
+  const isSafeDocking = isSoftEnough && (isAligned || isControlledDockSpeed(speed, touchedPad));
 
   if (!isSafeDocking) {
     world.status = "crashed";
@@ -1087,7 +1087,7 @@ function rateLanding(
     return "Perfect Landing";
   }
 
-  if (speed <= pad.allowedApproachSpeed * 0.7 && cargoDamage <= 0.08) {
+  if (isControlledDockSpeed(speed, pad) && cargoDamage <= 0.08) {
     return "Soft Landing";
   }
 
@@ -1096,6 +1096,10 @@ function rateLanding(
   }
 
   return "Cargo Survived Somehow";
+}
+
+function isControlledDockSpeed(speed: number, pad: LandingPadState): boolean {
+  return speed <= pad.allowedApproachSpeed * 0.7;
 }
 
 function rotateTowardTarget(ship: ShipState, fixedDt: number): void {

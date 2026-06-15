@@ -1153,9 +1153,12 @@ describe("deterministic Astro Courier simulation", () => {
     expect(snapshotWorld(world).objectiveTarget?.landingStatus).toBe("too-fast");
     expect(snapshotWorld(world).objectiveTarget?.assistAvailable).toBe(true);
 
-    world.ship.velocity = { x: 2, y: 1 };
+    world.ship.velocity = { x: 35, y: 0 };
     world.ship.rotation = Math.PI;
     expect(snapshotWorld(world).objectiveTarget?.landingStatus).toBe("misaligned");
+
+    world.ship.velocity = { x: 2, y: 1 };
+    expect(snapshotWorld(world).objectiveTarget?.landingStatus).toBe("ready");
 
     world.ship.rotation = -Math.PI / 2;
     expect(snapshotWorld(world).objectiveTarget?.landingStatus).toBe("ready");
@@ -1228,7 +1231,7 @@ describe("deterministic Astro Courier simulation", () => {
 
     const misalignedDock = createWorldFromSystem(starterSystem, "misaligned-dock-seed");
     misalignedDock.ship.position = { x: 0, y: -74 };
-    misalignedDock.ship.velocity = { x: 4, y: 1 };
+    misalignedDock.ship.velocity = { x: 35, y: 0 };
     misalignedDock.ship.rotation = 0;
     stepWorld(misalignedDock, 1 / 60, []);
 
@@ -1242,7 +1245,7 @@ describe("deterministic Astro Courier simulation", () => {
     expect(summarizeRun(collision).crashReason).toBe("Hull Collision");
   });
 
-  it("treats near-target planet-side approach misses as dock failures rather than gravity collisions", () => {
+  it("treats fast near-target planet-side approach misses as dock failures rather than gravity collisions", () => {
     const returnLegSystem: SystemContent = {
       ...starterSystem,
       contracts: [
@@ -1276,7 +1279,7 @@ describe("deterministic Astro Courier simulation", () => {
       pad.active = pad.role === "destination";
     }
     world.ship.position = { x: 0, y: -55 };
-    world.ship.velocity = { x: 4, y: 1 };
+    world.ship.velocity = { x: 35, y: 0 };
     world.ship.rotation = 0;
 
     const target = snapshotWorld(world).objectiveTarget;
@@ -1291,6 +1294,55 @@ describe("deterministic Astro Courier simulation", () => {
 
     expect(world.status).toBe("crashed");
     expect(summarizeRun(world).crashReason).toBe("Misaligned Dock");
+  });
+
+  it("lets slow near-target planet-side arrivals dock instead of crashing", () => {
+    const returnLegSystem: SystemContent = {
+      ...starterSystem,
+      contracts: [
+        ...starterSystem.contracts,
+        {
+          id: "return-leg",
+          title: "Return Leg",
+          briefing: "Reverse the route under tighter timing.",
+          riskLabel: "Tight Timer",
+          rewardLabel: "Gold pace pressure",
+          shipStart: {
+            position: [200, -80],
+            velocity: [0, 0],
+            rotation: 0
+          },
+          pickupId: "dock-a",
+          destinationId: "north-pad",
+          cargoId: "bottled-starlight",
+          medalTimes: {
+            bronze: 80,
+            silver: 48,
+            gold: 30
+          }
+        }
+      ]
+    };
+    const world = createWorldFromSystem(returnLegSystem, "planet-side-soft-arrival-seed", { contractId: "return-leg" });
+    world.cargoOnboard = true;
+    world.objectivePhase = "delivery";
+    for (const pad of world.landingPads) {
+      pad.active = pad.role === "destination";
+    }
+    world.ship.position = { x: 0, y: -55 };
+    world.ship.velocity = { x: 4, y: 1 };
+    world.ship.rotation = 0;
+
+    expect(snapshotWorld(world).objectiveTarget).toMatchObject({
+      id: "north-pad",
+      landingStatus: "ready"
+    });
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("delivered");
+    expect(world.landingRating).toBe("Soft Landing");
+    expect(world.crashReason).toBeUndefined();
   });
 
   it("reports boost burns as momentary courier feedback", () => {
