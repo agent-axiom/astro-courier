@@ -17,6 +17,8 @@ describe("preflight overlay density", () => {
       showDailyDispatch: false,
       showContractSelector: false,
       showContractDetails: false,
+      showRoutePressure: false,
+      showSignatureManeuver: false,
       showBonusStack: false
     });
   });
@@ -36,6 +38,8 @@ describe("preflight overlay density", () => {
       showDailyDispatch: true,
       showContractSelector: true,
       showContractDetails: false,
+      showRoutePressure: true,
+      showSignatureManeuver: true,
       showBonusStack: false
     });
   });
@@ -55,6 +59,8 @@ describe("preflight overlay density", () => {
       showDailyDispatch: true,
       showContractSelector: true,
       showContractDetails: true,
+      showRoutePressure: true,
+      showSignatureManeuver: true,
       showBonusStack: true
     });
   });

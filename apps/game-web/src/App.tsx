@@ -1583,43 +1583,47 @@ export function App() {
             <span>{routePlan.label}</span>
             <strong>{routePlan.value}</strong>
           </div>
-          <div
-            className={`route-pressure-briefing route-pressure-${routePressure.tone}`}
-            aria-label={`${routePressure.label}: ${routePressure.value}`}
-          >
-            {routePressure.tone === "hot" ? (
-              <ShieldAlert size={18} />
-            ) : routePressure.tone === "tempo" ? (
-              <Gauge size={18} />
-            ) : routePressure.tone === "care" ? (
-              <PackageCheck size={18} />
-            ) : (
-              <Route size={18} />
-            )}
-            <span>{routePressure.label}</span>
-            <strong>{routePressure.value}</strong>
-          </div>
-          <div
-            className={`signature-maneuver-briefing signature-maneuver-${signatureManeuver.tone}`}
-            aria-label={`${signatureManeuver.label}: ${signatureManeuver.value}. ${signatureManeuver.detail}`}
-          >
-            {signatureManeuver.tone === "danger" ? (
-              <ShieldAlert size={18} />
-            ) : signatureManeuver.tone === "fuel" ? (
-              <Zap size={18} />
-            ) : signatureManeuver.tone === "style" ? (
-              <Star size={18} />
-            ) : signatureManeuver.tone === "speed" ? (
-              <Gauge size={18} />
-            ) : signatureManeuver.tone === "precision" ? (
-              <Target size={18} />
-            ) : (
-              <PackageCheck size={18} />
-            )}
-            <span>{signatureManeuver.label}</span>
-            <strong>{signatureManeuver.value}</strong>
-            <small>{signatureManeuver.detail}</small>
-          </div>
+          {preflightOverlayDensity.showRoutePressure ? (
+            <div
+              className={`route-pressure-briefing route-pressure-${routePressure.tone}`}
+              aria-label={`${routePressure.label}: ${routePressure.value}`}
+            >
+              {routePressure.tone === "hot" ? (
+                <ShieldAlert size={18} />
+              ) : routePressure.tone === "tempo" ? (
+                <Gauge size={18} />
+              ) : routePressure.tone === "care" ? (
+                <PackageCheck size={18} />
+              ) : (
+                <Route size={18} />
+              )}
+              <span>{routePressure.label}</span>
+              <strong>{routePressure.value}</strong>
+            </div>
+          ) : null}
+          {preflightOverlayDensity.showSignatureManeuver ? (
+            <div
+              className={`signature-maneuver-briefing signature-maneuver-${signatureManeuver.tone}`}
+              aria-label={`${signatureManeuver.label}: ${signatureManeuver.value}. ${signatureManeuver.detail}`}
+            >
+              {signatureManeuver.tone === "danger" ? (
+                <ShieldAlert size={18} />
+              ) : signatureManeuver.tone === "fuel" ? (
+                <Zap size={18} />
+              ) : signatureManeuver.tone === "style" ? (
+                <Star size={18} />
+              ) : signatureManeuver.tone === "speed" ? (
+                <Gauge size={18} />
+              ) : signatureManeuver.tone === "precision" ? (
+                <Target size={18} />
+              ) : (
+                <PackageCheck size={18} />
+              )}
+              <span>{signatureManeuver.label}</span>
+              <strong>{signatureManeuver.value}</strong>
+              <small>{signatureManeuver.detail}</small>
+            </div>
+          ) : null}
           {preflightOverlayDensity.showControlPrimer ? (
             <div className="control-primer" aria-label="Flight controls">
               <span aria-label="Aim" title="Aim">

@@ -18,6 +18,8 @@ describe("preflight overlay density wiring", () => {
     expect(appSource).toContain("preflightOverlayDensity.showRouteBoardStack && hud.contractOptions.length > 0");
     expect(appSource).toContain("preflightOverlayDensity.showDailyDispatch && dailyDispatch");
     expect(appSource).toContain("preflightOverlayDensity.showContractSelector && hud.contractOptions.length > 1");
+    expect(appSource).toContain("preflightOverlayDensity.showRoutePressure");
+    expect(appSource).toContain("preflightOverlayDensity.showSignatureManeuver");
     expect(appSource).toContain("preflightOverlayDensity.showBonusStack");
     expect(appSource).toContain("preflightOverlayDensity.showContractDetails");
   });
