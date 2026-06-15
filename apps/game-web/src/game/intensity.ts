@@ -37,7 +37,7 @@ export function buildRunIntensity(input: RunIntensityInput): RunIntensity {
     return "lockdown";
   }
 
-  if (input.fuelRatio <= 0.25 || input.hazardDangerLevel === "near" || input.trajectoryRiskLevel === "near") {
+  if (input.fuelRatio <= 0.25 || input.trajectoryRiskLevel === "near") {
     return "alarm";
   }
 

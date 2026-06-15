@@ -9,8 +9,19 @@ describe("adaptive run intensity", () => {
 
   it("raises alarm for nearby pressure before the route is critical", () => {
     expect(buildRunIntensity({ status: "flying", preflightOpen: false, fuelRatio: 0.24 })).toBe("alarm");
-    expect(buildRunIntensity({ status: "flying", preflightOpen: false, fuelRatio: 0.9, hazardDangerLevel: "near" })).toBe("alarm");
     expect(buildRunIntensity({ status: "flying", preflightOpen: false, fuelRatio: 0.9, trajectoryRiskLevel: "near" })).toBe("alarm");
+  });
+
+  it("keeps nearby hazard fields calm until the ship enters or predicts a collision vector", () => {
+    expect(
+      buildRunIntensity({
+        status: "flying",
+        preflightOpen: false,
+        objectivePhase: "pickup",
+        fuelRatio: 0.9,
+        hazardDangerLevel: "near"
+      })
+    ).toBe("stealth");
   });
 
   it("locks down for crashes and immediate loss pressure", () => {
