@@ -31,10 +31,10 @@ export function buildResultOverlayDensity(input: ResultOverlayDensityInput): Res
     showRunGrade: input.status === "delivered",
     showQuickStats: input.status === "delivered",
     showRunReceipts: richResult,
-    showCoach: input.status === "delivered",
+    showCoach: richResult,
     showTempoRecap: richResult,
-    showRetryTarget: input.status === "delivered",
-    showRetryActionBriefing: input.status === "delivered",
+    showRetryTarget: richResult,
+    showRetryActionBriefing: richResult,
     showRouteProgress: richResult,
     showBoardAction: richResult
   };

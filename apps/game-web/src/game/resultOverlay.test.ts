@@ -18,17 +18,17 @@ describe("result overlay density", () => {
     });
   });
 
-  it("keeps ordinary delivered results focused enough for fast retries", () => {
+  it("keeps ordinary delivered results light enough for fast retries", () => {
     expect(buildResultOverlayDensity({ status: "delivered", medal: "none", grade: "D" })).toEqual({
       showDetailedScore: false,
       showCrashDebrief: false,
       showRunGrade: true,
       showQuickStats: true,
       showRunReceipts: false,
-      showCoach: true,
+      showCoach: false,
       showTempoRecap: false,
-      showRetryTarget: true,
-      showRetryActionBriefing: true,
+      showRetryTarget: false,
+      showRetryActionBriefing: false,
       showRouteProgress: false,
       showBoardAction: false
     });
