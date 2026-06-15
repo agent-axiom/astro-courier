@@ -24,12 +24,8 @@ describe("run action feed", () => {
     expect(deriveRunFeedUpdates(undefined, baseSnapshot)).toEqual([]);
   });
 
-  it("adds a persistent launch feed item only when committing from briefing", () => {
-    expect(buildLaunchFeedUpdate({ status: "paused", preflightOpen: true, resultOpen: false })).toEqual({
-      label: "Route live",
-      value: "Launch vector",
-      tone: "success"
-    });
+  it("keeps launch commits out of the persistent action feed", () => {
+    expect(buildLaunchFeedUpdate({ status: "paused", preflightOpen: true, resultOpen: false })).toBeUndefined();
 
     expect(buildLaunchFeedUpdate({ status: "paused", preflightOpen: false, resultOpen: false })).toBeUndefined();
     expect(buildLaunchFeedUpdate({ status: "flying", preflightOpen: true, resultOpen: false })).toBeUndefined();

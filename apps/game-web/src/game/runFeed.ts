@@ -103,16 +103,8 @@ const feedMilestones = new Set([
   "Boost Burn"
 ]);
 
-export function buildLaunchFeedUpdate(input: LaunchFeedInput): RunFeedUpdate | undefined {
-  if (input.status !== "paused" || !input.preflightOpen || input.resultOpen) {
-    return undefined;
-  }
-
-  return {
-    label: "Route live",
-    value: "Launch vector",
-    tone: "success"
-  };
+export function buildLaunchFeedUpdate(_input: LaunchFeedInput): RunFeedUpdate | undefined {
+  return undefined;
 }
 
 export function deriveRunFeedUpdates(previous: RunFeedSnapshot | undefined, current: RunFeedSnapshot): RunFeedUpdate[] {
