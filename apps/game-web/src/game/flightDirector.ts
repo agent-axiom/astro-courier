@@ -159,7 +159,7 @@ export function buildFlightDirector(input: FlightDirectorInput): FlightDirector 
     const chainSuffix = chainActive ? ` / x${(input.styleMultiplier ?? 1).toFixed(2)}` : "";
     return director(
       chainActive ? "Load chain" : "Load fast",
-      `+${Math.round(input.quickPickupBonus ?? 0)} / ${formatSeconds(quickPickupSeconds)}${chainSuffix}`,
+      chainActive ? `+${Math.round(input.quickPickupBonus ?? 0)} / ${formatSeconds(quickPickupSeconds)}${chainSuffix}` : "Rush cargo",
       "opportunity",
       countdownProgress(quickPickupSeconds, QUICK_PICKUP_WINDOW_SECONDS)
     );

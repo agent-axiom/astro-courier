@@ -197,6 +197,25 @@ describe("flight director", () => {
     });
   });
 
+  it("keeps ordinary opening pickup rush copy short and readable", () => {
+    expect(
+      buildFlightDirector({
+        status: "flying",
+        objectivePhase: "pickup",
+        cargoOnboard: false,
+        quickPickupSecondsRemaining: 12,
+        quickPickupBonus: 180,
+        styleMultiplier: 1
+      })
+    ).toEqual({
+      label: "Flight director",
+      action: "Load fast",
+      detail: "Rush cargo",
+      tone: "opportunity",
+      progress: 0
+    });
+  });
+
   it("turns a clean near trajectory vector into a style opportunity", () => {
     expect(
       buildFlightDirector({
