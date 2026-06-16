@@ -94,6 +94,21 @@ export type ObjectiveGuidanceVisual = {
   edgeAlpha: number;
 };
 
+export type ObjectiveDockGateVisualInput = Pick<SimulationSnapshot, "status" | "objectivePhase"> & {
+  distance: number;
+  landingStatus: LandingGuidanceStatus;
+  assistAvailable: boolean;
+};
+
+export type ObjectiveDockGateVisual = {
+  color: number;
+  tone: "open" | "assist" | "brake" | "align";
+  alpha: number;
+  radius: number;
+  width: number;
+  segments: number;
+};
+
 export function objectiveGuidanceVisual(input: ObjectiveGuidanceVisualInput): ObjectiveGuidanceVisual {
   const proximity = 1 - clamp((input.distance - 60) / 840, 0, 1);
   const precisionBoost = input.assistAvailable || input.landingStatus === "ready" ? 1 : 0;
@@ -104,6 +119,55 @@ export function objectiveGuidanceVisual(input: ObjectiveGuidanceVisualInput): Ob
     lineWidth: round(2 + precisionBoost, 2),
     markerScale: round(clamp(0.86 + proximity * 0.28 + precisionBoost * 0.14 + readyLockBoost, 0.86, 1.38), 2),
     edgeAlpha: round(clamp(0.68 + proximity * 0.2 + precisionBoost * 0.08, 0.68, 0.96), 2)
+  };
+}
+
+export function objectiveDockGateVisual(input: ObjectiveDockGateVisualInput): ObjectiveDockGateVisual | undefined {
+  if (input.status !== "flying" || input.objectivePhase !== "delivery" || input.distance > 120 || input.landingStatus === "approach") {
+    return undefined;
+  }
+
+  const proximity = 1 - clamp((input.distance - 24) / 96, 0, 1);
+  if (input.assistAvailable) {
+    return {
+      color: 0x7ce1ff,
+      tone: "assist",
+      alpha: round(0.56 + proximity * 0.26, 2),
+      radius: Math.round(38 + proximity * 10 + 2),
+      width: round(2.5 + proximity, 1),
+      segments: 3
+    };
+  }
+
+  if (input.landingStatus === "ready") {
+    return {
+      color: 0x8ee6b8,
+      tone: "open",
+      alpha: round(0.5 + proximity * 0.32, 2),
+      radius: Math.round(38 + proximity * 10),
+      width: round(2.2 + proximity, 1),
+      segments: 3
+    };
+  }
+
+  if (input.landingStatus === "too-fast") {
+    return {
+      color: 0xff6f91,
+      tone: "brake",
+      alpha: round(0.52 + proximity * 0.28, 2),
+      radius: Math.round(40 + proximity * 9),
+      width: round(2 + proximity * 0.8, 1),
+      segments: 6
+    };
+  }
+
+  return {
+    color: 0xffd166,
+    tone: "align",
+    alpha: round(0.48 + proximity * 0.26, 2),
+    radius: Math.round(40 + proximity * 9),
+    width: round(1.8 + proximity * 0.8, 1),
+    segments: 4
   };
 }
 
@@ -1179,6 +1243,13 @@ class PixiRenderer implements AstroPixiRenderer {
       cargoDamage: snapshot.ship.cargoDamage,
       approachStreakSeconds: snapshot.approachStreakSeconds
     });
+    const dockGate = objectiveDockGateVisual({
+      status: snapshot.status,
+      objectivePhase: snapshot.objectivePhase,
+      distance: target.distance,
+      landingStatus: target.landingStatus,
+      assistAvailable: target.assistAvailable
+    });
     const targetOnScreen =
       targetPoint.x >= 0 && targetPoint.x <= viewport.width && targetPoint.y >= 0 && targetPoint.y <= viewport.height;
 
@@ -1202,6 +1273,9 @@ class PixiRenderer implements AstroPixiRenderer {
             alpha: approachLock.alpha * 0.34
           });
         }
+      }
+      if (dockGate) {
+        drawObjectiveDockGate(this.guidance, targetPoint.x, targetPoint.y, dockGate);
       }
       this.guidance.circle(targetPoint.x, targetPoint.y, (pulse.radius + 12) * visual.markerScale).stroke({
         color,
@@ -1549,6 +1623,27 @@ class PixiRenderer implements AstroPixiRenderer {
       });
     }
   }
+}
+
+function drawObjectiveDockGate(guidance: Graphics, x: number, y: number, visual: ObjectiveDockGateVisual): void {
+  const segmentAngle = (Math.PI * 2) / visual.segments;
+  const halfSpan = segmentAngle * (visual.tone === "open" || visual.tone === "assist" ? 0.23 : 0.15);
+  for (let segment = 0; segment < visual.segments; segment += 1) {
+    const center = -Math.PI / 2 + segment * segmentAngle;
+    for (let step = 0; step <= 4; step += 1) {
+      const angle = center - halfSpan + (halfSpan * 2 * step) / 4;
+      const point = {
+        x: x + Math.cos(angle) * visual.radius,
+        y: y + Math.sin(angle) * visual.radius
+      };
+      if (step === 0) {
+        guidance.moveTo(point.x, point.y);
+      } else {
+        guidance.lineTo(point.x, point.y);
+      }
+    }
+  }
+  guidance.stroke({ color: visual.color, width: visual.width, alpha: visual.alpha });
 }
 
 function createStars(count: number): Star[] {

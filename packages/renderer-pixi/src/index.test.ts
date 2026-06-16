@@ -14,6 +14,7 @@ import {
   landingPadVisual,
   objectiveBeaconPulse,
   objectiveGuidanceVisual,
+  objectiveDockGateVisual,
   approachLockVisual,
   screenShakeOffset,
   shipTrailVisual,
@@ -141,6 +142,101 @@ describe("objective guidance visual", () => {
     expect(ready.markerScale).toBeGreaterThanOrEqual(1.32);
     expect(ready.markerScale).toBeGreaterThan(approach.markerScale + 0.12);
     expect(ready.edgeAlpha).toBeGreaterThanOrEqual(0.94);
+  });
+});
+
+describe("objective dock gate visual", () => {
+  it("stays hidden until a destination dock state needs a strong close-range cue", () => {
+    expect(
+      objectiveDockGateVisual({
+        status: "paused",
+        objectivePhase: "delivery",
+        distance: 48,
+        landingStatus: "ready",
+        assistAvailable: false
+      })
+    ).toBeUndefined();
+    expect(
+      objectiveDockGateVisual({
+        status: "flying",
+        objectivePhase: "pickup",
+        distance: 48,
+        landingStatus: "ready",
+        assistAvailable: false
+      })
+    ).toBeUndefined();
+    expect(
+      objectiveDockGateVisual({
+        status: "flying",
+        objectivePhase: "delivery",
+        distance: 150,
+        landingStatus: "approach",
+        assistAvailable: false
+      })
+    ).toBeUndefined();
+  });
+
+  it("turns ready delivery targets into an open dock gate", () => {
+    expect(
+      objectiveDockGateVisual({
+        status: "flying",
+        objectivePhase: "delivery",
+        distance: 42,
+        landingStatus: "ready",
+        assistAvailable: false
+      })
+    ).toEqual({
+      color: 0x8ee6b8,
+      tone: "open",
+      alpha: 0.76,
+      radius: 46,
+      width: 3,
+      segments: 3
+    });
+  });
+
+  it("makes assist and unsafe close targets visually distinct", () => {
+    expect(
+      objectiveDockGateVisual({
+        status: "flying",
+        objectivePhase: "delivery",
+        distance: 34,
+        landingStatus: "ready",
+        assistAvailable: true
+      })
+    ).toMatchObject({
+      color: 0x7ce1ff,
+      tone: "assist",
+      width: 3.4
+    });
+
+    expect(
+      objectiveDockGateVisual({
+        status: "flying",
+        objectivePhase: "delivery",
+        distance: 34,
+        landingStatus: "too-fast",
+        assistAvailable: false
+      })
+    ).toMatchObject({
+      color: 0xff6f91,
+      tone: "brake",
+      segments: 6
+    });
+
+    expect(
+      objectiveDockGateVisual({
+        status: "flying",
+        objectivePhase: "delivery",
+        distance: 34,
+        landingStatus: "misaligned",
+        assistAvailable: false
+      })
+    ).toMatchObject({
+      color: 0xffd166,
+      tone: "align",
+      segments: 4
+    });
   });
 });
 
