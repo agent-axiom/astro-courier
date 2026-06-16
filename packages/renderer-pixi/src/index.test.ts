@@ -7,6 +7,7 @@ import {
   cargoFractureVisual,
   ghostTrailSegmentVisual,
   ghostTrailPointVisual,
+  gravitySurfaceRimVisual,
   gravitySlingCueVisual,
   hazardFieldVisual,
   hazardVignetteEffect,
@@ -766,6 +767,24 @@ describe("gravity sling cue visual", () => {
     expect(ready?.width).toBeGreaterThan(setup?.width ?? 0);
     expect(ready?.alpha).toBeGreaterThan(setup?.alpha ?? 0);
     expect(ready?.dashRadius).toBeGreaterThan(setup?.dashRadius ?? 0);
+  });
+});
+
+describe("gravity surface rim visual", () => {
+  it("draws a precise readable rim on the real gravity collision radius during flight", () => {
+    expect(gravitySurfaceRimVisual({ status: "flying" })).toEqual({
+      color: 0xd7fbff,
+      alpha: 0.34,
+      width: 1.5
+    });
+  });
+
+  it("keeps the rim quieter outside active flight", () => {
+    expect(gravitySurfaceRimVisual({ status: "paused" })).toEqual({
+      color: 0xd7fbff,
+      alpha: 0.18,
+      width: 1
+    });
   });
 });
 

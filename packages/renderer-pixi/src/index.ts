@@ -642,6 +642,30 @@ export function gravitySlingCueVisual(input: GravitySlingCueVisualInput): Gravit
   };
 }
 
+export type GravitySurfaceRimVisualInput = Pick<SimulationSnapshot, "status">;
+
+export type GravitySurfaceRimVisual = {
+  color: number;
+  alpha: number;
+  width: number;
+};
+
+export function gravitySurfaceRimVisual(input: GravitySurfaceRimVisualInput): GravitySurfaceRimVisual {
+  if (input.status === "flying") {
+    return {
+      color: 0xd7fbff,
+      alpha: 0.34,
+      width: 1.5
+    };
+  }
+
+  return {
+    color: 0xd7fbff,
+    alpha: 0.18,
+    width: 1
+  };
+}
+
 export type ShipTrailVisualInput = {
   status: SimulationSnapshot["status"];
   speed: number;
@@ -1379,6 +1403,7 @@ class PixiRenderer implements AstroPixiRenderer {
   private drawWorld(snapshot: SimulationSnapshot, project: (point: Vec2) => Vec2): void {
     this.world.clear();
     const objectiveTarget = snapshot.objectiveTarget;
+    const gravitySurfaceRim = gravitySurfaceRimVisual({ status: snapshot.status });
 
     for (const source of snapshot.gravitySources) {
       const center = project(source.position);
@@ -1387,6 +1412,11 @@ class PixiRenderer implements AstroPixiRenderer {
       this.world.circle(center.x - source.radius * 0.25, center.y - source.radius * 0.3, source.radius * 0.28).fill({
         color: 0xd7fbff,
         alpha: 0.35
+      });
+      this.world.circle(center.x, center.y, source.radius).stroke({
+        color: gravitySurfaceRim.color,
+        width: gravitySurfaceRim.width,
+        alpha: gravitySurfaceRim.alpha
       });
     }
 
