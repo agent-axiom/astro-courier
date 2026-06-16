@@ -659,6 +659,23 @@ export type ShipTrailVisual = {
   alpha: number;
 };
 
+export type ShipBoostReadinessVisualInput = {
+  status: SimulationSnapshot["status"];
+  fuel: number;
+  boostCooldownSeconds: number;
+  launchBurstSecondsRemaining?: number;
+};
+
+export type ShipBoostReadinessVisual = {
+  color: number;
+  tone: "ready" | "cooldown" | "burst";
+  radius: number;
+  width: number;
+  alpha: number;
+  progress: number;
+  segments: number;
+};
+
 export type CargoAuraVisualInput = Pick<SimulationSnapshot, "status" | "cargoOnboard"> & {
   cargoDamage: number;
 };
@@ -748,6 +765,51 @@ export function shipTrailVisual(input: ShipTrailVisualInput): ShipTrailVisual | 
     length: round(18 + pressure * trailBoost, 2),
     radius: round(4 + pressure * 8, 2),
     alpha: round(clamp(0.34 + pressure * alphaBoost, 0.34, alphaMax), 2)
+  };
+}
+
+const BOOST_READINESS_COOLDOWN_SECONDS = 1.15;
+const BOOST_READINESS_SEGMENTS = 8;
+const BOOST_MINIMUM_FUEL = 2;
+
+export function shipBoostReadinessVisual(input: ShipBoostReadinessVisualInput): ShipBoostReadinessVisual | undefined {
+  if (input.status !== "flying" || input.fuel <= BOOST_MINIMUM_FUEL) {
+    return undefined;
+  }
+
+  const cooldownProgress = round(clamp(1 - input.boostCooldownSeconds / BOOST_READINESS_COOLDOWN_SECONDS, 0, 1), 2);
+  if (cooldownProgress < 1) {
+    return {
+      color: 0xa0c4ff,
+      tone: "cooldown",
+      radius: 26,
+      width: 1.4,
+      alpha: 0.24,
+      progress: cooldownProgress,
+      segments: Math.max(1, Math.round(cooldownProgress * BOOST_READINESS_SEGMENTS))
+    };
+  }
+
+  if ((input.launchBurstSecondsRemaining ?? 0) > 0) {
+    return {
+      color: 0xffd166,
+      tone: "burst",
+      radius: 31,
+      width: 2.6,
+      alpha: 0.48,
+      progress: 1,
+      segments: BOOST_READINESS_SEGMENTS
+    };
+  }
+
+  return {
+    color: 0x7ce1ff,
+    tone: "ready",
+    radius: 28,
+    width: 1.8,
+    alpha: 0.34,
+    progress: 1,
+    segments: BOOST_READINESS_SEGMENTS
   };
 }
 
@@ -1450,6 +1512,12 @@ class PixiRenderer implements AstroPixiRenderer {
     });
     const boostBurst = boostBurstVisual({ status: snapshot.status, lastMilestone: snapshot.lastMilestone, tick: snapshot.tick });
     const boostSpark = boostSparkVisual({ status: snapshot.status, lastMilestone: snapshot.lastMilestone, tick: snapshot.tick });
+    const boostReadiness = shipBoostReadinessVisual({
+      status: snapshot.status,
+      fuel: snapshot.ship.fuel,
+      boostCooldownSeconds: snapshot.ship.boostCooldownSeconds,
+      launchBurstSecondsRemaining: snapshot.launchBurstSecondsRemaining
+    });
     const cargoAura = cargoAuraVisual({
       status: snapshot.status,
       cargoOnboard: snapshot.cargoOnboard,
@@ -1478,6 +1546,10 @@ class PixiRenderer implements AstroPixiRenderer {
         width: 1,
         alpha: boostBurst.alpha * 0.42
       });
+    }
+
+    if (boostReadiness) {
+      drawShipBoostReadinessRing(this.ship, center.x, center.y, boostReadiness);
     }
 
     if (cargoAura) {
@@ -1644,6 +1716,28 @@ function drawObjectiveDockGate(guidance: Graphics, x: number, y: number, visual:
     }
   }
   guidance.stroke({ color: visual.color, width: visual.width, alpha: visual.alpha });
+}
+
+function drawShipBoostReadinessRing(ship: Graphics, x: number, y: number, visual: ShipBoostReadinessVisual): void {
+  const totalSegments = BOOST_READINESS_SEGMENTS;
+  const segmentAngle = (Math.PI * 2) / totalSegments;
+  const halfSpan = segmentAngle * 0.24;
+  for (let segment = 0; segment < Math.min(visual.segments, totalSegments); segment += 1) {
+    const center = -Math.PI / 2 + segment * segmentAngle;
+    for (let step = 0; step <= 3; step += 1) {
+      const angle = center - halfSpan + (halfSpan * 2 * step) / 3;
+      const point = {
+        x: x + Math.cos(angle) * visual.radius,
+        y: y + Math.sin(angle) * visual.radius
+      };
+      if (step === 0) {
+        ship.moveTo(point.x, point.y);
+      } else {
+        ship.lineTo(point.x, point.y);
+      }
+    }
+  }
+  ship.stroke({ color: visual.color, width: visual.width, alpha: visual.alpha });
 }
 
 function createStars(count: number): Star[] {

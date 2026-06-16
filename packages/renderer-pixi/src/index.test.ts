@@ -17,6 +17,7 @@ import {
   objectiveDockGateVisual,
   approachLockVisual,
   screenShakeOffset,
+  shipBoostReadinessVisual,
   shipTrailVisual,
   trajectoryHazardDanger,
   trajectoryHazardMarkerVisual,
@@ -833,6 +834,49 @@ describe("ship trail visual", () => {
     ).toMatchObject({
       color: 0xff4d6d,
       tone: "warning"
+    });
+  });
+});
+
+describe("ship boost readiness visual", () => {
+  it("stays hidden outside active flight or when fuel is too dry to boost", () => {
+    expect(shipBoostReadinessVisual({ status: "paused", fuel: 100, boostCooldownSeconds: 0 })).toBeUndefined();
+    expect(shipBoostReadinessVisual({ status: "flying", fuel: 2, boostCooldownSeconds: 0 })).toBeUndefined();
+  });
+
+  it("shows a ready boost halo once cooldown is clear", () => {
+    expect(shipBoostReadinessVisual({ status: "flying", fuel: 48, boostCooldownSeconds: 0 })).toEqual({
+      color: 0x7ce1ff,
+      tone: "ready",
+      radius: 28,
+      width: 1.8,
+      alpha: 0.34,
+      progress: 1,
+      segments: 8
+    });
+  });
+
+  it("turns cooldown into a partial recharge ring", () => {
+    expect(shipBoostReadinessVisual({ status: "flying", fuel: 48, boostCooldownSeconds: 0.575 })).toEqual({
+      color: 0xa0c4ff,
+      tone: "cooldown",
+      radius: 26,
+      width: 1.4,
+      alpha: 0.24,
+      progress: 0.5,
+      segments: 4
+    });
+  });
+
+  it("makes launch burst boost readiness feel urgent and rewarding", () => {
+    expect(shipBoostReadinessVisual({ status: "flying", fuel: 48, boostCooldownSeconds: 0, launchBurstSecondsRemaining: 2.4 })).toEqual({
+      color: 0xffd166,
+      tone: "burst",
+      radius: 31,
+      width: 2.6,
+      alpha: 0.48,
+      progress: 1,
+      segments: 8
     });
   });
 });
