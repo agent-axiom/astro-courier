@@ -89,6 +89,15 @@ describe("screen shake offset", () => {
     expect(Math.abs(shake.y)).toBeLessThanOrEqual(4);
   });
 
+  it("makes emergency shield rebounds feel stronger than assist correction", () => {
+    const assist = screenShakeOffset({ status: "flying", tick: 12, lastMilestone: "Assist Burn" });
+    const shield = screenShakeOffset({ status: "flying", tick: 12, lastMilestone: "Shield Rebound" });
+
+    expect(Math.hypot(shield.x, shield.y)).toBeGreaterThan(Math.hypot(assist.x, assist.y));
+    expect(Math.abs(shield.x)).toBeLessThanOrEqual(5);
+    expect(Math.abs(shield.y)).toBeLessThanOrEqual(5);
+  });
+
   it("makes inside hazard contact stronger than boost impact", () => {
     const boost = screenShakeOffset({ status: "flying", tick: 12, lastMilestone: "Boost Burn" });
     const hazard = screenShakeOffset({
@@ -1149,6 +1158,15 @@ describe("boost burst visual", () => {
     expect(express?.radius).toBeGreaterThan(perfect?.radius ?? 0);
     expect(noBrake?.alpha).toBeGreaterThanOrEqual(eco?.alpha ?? 0);
     expect(damageControl?.alpha).toBeGreaterThanOrEqual(eco?.alpha ?? 0);
+  });
+
+  it("renders emergency shield rebounds as a wide recovery shock ring", () => {
+    const shield = boostBurstVisual({ status: "flying", lastMilestone: "Shield Rebound", tick: 6 });
+
+    expect(shield).toMatchObject({ color: 0xbff7ff });
+    expect(shield?.radius).toBeGreaterThan(40);
+    expect(shield?.width).toBeGreaterThan(3);
+    expect(shield?.alpha).toBeGreaterThan(0.24);
   });
 });
 

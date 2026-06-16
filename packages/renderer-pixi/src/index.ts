@@ -67,6 +67,9 @@ function screenShakeMilestoneMagnitude(milestone?: string): number {
   if (milestone === "Boost Burn") {
     return 4;
   }
+  if (milestone === "Shield Rebound") {
+    return 5;
+  }
   if (milestone === "Assist Burn") {
     return 3;
   }
@@ -1114,6 +1117,18 @@ function styleShockwaveSpec(milestone?: string):
       alphaPulse: 0.32,
       baseWidth: 2.1,
       widthPulse: 2.8
+    };
+  }
+
+  if (milestone === "Shield Rebound") {
+    return {
+      color: 0xbff7ff,
+      baseRadius: 34,
+      radiusPulse: 28,
+      baseAlpha: 0.26,
+      alphaPulse: 0.34,
+      baseWidth: 3.1,
+      widthPulse: 2.4
     };
   }
 
