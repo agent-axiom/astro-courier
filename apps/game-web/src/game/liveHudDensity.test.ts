@@ -169,7 +169,7 @@ describe("live HUD density", () => {
       })
     ).toEqual({
       visible: true,
-      expanded: true,
+      expanded: false,
       showRadioMessage: false,
       showRouteTempo: false,
       showPrimaryStatusRows: false,
@@ -230,19 +230,31 @@ describe("live HUD density", () => {
     ).toBe(false);
   });
 
-  it("expands for active bonus windows and fragile run state", () => {
-    expect(
-      buildLiveHudDensity({
-        status: "flying",
-        preflightOpen: false,
-        objectivePhase: "pickup",
-        targetDistance: 220,
-        cargoDamage: 0,
-        fuelRatio: 0.72,
-        paceTier: "gold",
-        styleMultiplier: 1.25
-      }).showActionChips
-    ).toBe(true);
+  it("keeps bonus windows in compact meters instead of expanding the run panel", () => {
+    for (const bonusInput of [
+      { styleMultiplier: 1.25 },
+      { styleChainSecondsRemaining: 2.8 },
+      { gravitySlingReady: true }
+    ]) {
+      expect(
+        buildLiveHudDensity({
+          status: "flying",
+          preflightOpen: false,
+          objectivePhase: "pickup",
+          targetDistance: 220,
+          cargoDamage: 0,
+          fuelRatio: 0.72,
+          paceTier: "gold",
+          ...bonusInput
+        })
+      ).toMatchObject({
+        expanded: false,
+        showRadioMessage: false,
+        showRouteTempo: false,
+        showActionChips: false,
+        showTelemetryChips: false
+      });
+    }
 
     expect(
       buildLiveHudDensity({

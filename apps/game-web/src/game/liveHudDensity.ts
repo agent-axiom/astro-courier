@@ -70,16 +70,11 @@ export function buildLiveHudDensity(input: LiveHudDensityInput): LiveHudDensity 
   const hazardContactPressure = input.hazardDangerLevel === "inside";
   const dangerPressure = hazardContactPressure || input.trajectoryRiskLevel !== undefined;
   const readyDockFocus = input.objectivePhase === "delivery" && input.landingStatus === "ready";
-  const activeOpportunity =
-    (input.styleMultiplier ?? 1) > 1 ||
-    (input.styleChainSecondsRemaining ?? 0) > 0 ||
-    input.gravitySlingReady === true ||
-    readyDockFocus;
   const fragileState =
     (input.cargoDamage ?? 0) > CARGO_DAMAGE_WARNING ||
     (input.fuelRatio ?? 1) <= LOW_FUEL_RATIO ||
     input.paceTier === "overtime";
-  const expanded = dangerPressure || activeOpportunity || fragileState;
+  const expanded = dangerPressure || fragileState;
 
   return {
     visible: true,
@@ -87,7 +82,7 @@ export function buildLiveHudDensity(input: LiveHudDensityInput): LiveHudDensity 
     showRadioMessage: expanded && !readyDockFocus,
     showRouteTempo: expanded && !readyDockFocus,
     showPrimaryStatusRows: false,
-    showActionChips: (dangerPressure || activeOpportunity) && !readyDockFocus,
+    showActionChips: dangerPressure && !readyDockFocus,
     showDockingLane: dockingLaneFocus,
     showTelemetryChips: dangerPressure || fragileState,
     showRunFeed: false
