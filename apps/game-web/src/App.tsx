@@ -134,6 +134,7 @@ import {
   type HudAudioSnapshot
 } from "./game/audioEvents";
 import { createGameAudioController, type GameAudioController } from "./game/gameAudio";
+import { createGameMusicController, type GameMusicController } from "./game/gameMusic";
 import { createGameHapticsController, type GameHapticsController } from "./game/gameHaptics";
 import { buildAudioTogglePresentation } from "./game/audioControls";
 import { buildTouchFlightPadPresentation } from "./game/touchControls";
@@ -237,6 +238,7 @@ export function App() {
   const shellRef = useRef<GameShell | null>(null);
   const recordedRunRef = useRef<string | null>(null);
   const audioRef = useRef<GameAudioController | null>(null);
+  const musicRef = useRef<GameMusicController | null>(null);
   const hapticsRef = useRef<GameHapticsController | null>(null);
   const previousAudioSnapshotRef = useRef<HudAudioSnapshot | undefined>(undefined);
   const previousRunFeedSnapshotRef = useRef<RunFeedSnapshot | undefined>(undefined);
@@ -309,6 +311,17 @@ export function App() {
   }, []);
 
   useEffect(() => {
+    const music = createGameMusicController();
+    musicRef.current = music;
+    void music.loadManifest();
+
+    return () => {
+      music.destroy();
+      musicRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
     const haptics = createGameHapticsController();
     hapticsRef.current = haptics;
 
@@ -319,6 +332,7 @@ export function App() {
 
   useEffect(() => {
     audioRef.current?.setMuted(audioMuted);
+    musicRef.current?.setMuted(audioMuted);
   }, [audioMuted]);
 
   useEffect(() => {
@@ -508,6 +522,25 @@ export function App() {
   const activeScreenFeedback =
     screenFeedback ?? (!runFinished && milestoneScreenFeedback ? { key: -1, feedback: milestoneScreenFeedback } : undefined);
   const overlays = getOverlayVisibility({ status: hud.status, preflightOpen, resultDismissed });
+  useEffect(() => {
+    const music = musicRef.current;
+    if (!music) {
+      return;
+    }
+
+    if (overlays.preflight) {
+      void music.playMenu();
+      return;
+    }
+
+    if (hud.status === "flying") {
+      void music.playGameplay();
+      return;
+    }
+
+    music.stop();
+  }, [hud.status, hud.contractId, hud.replaySeed, overlays.preflight]);
+
   const topHudDensity = buildTopHudDensity({
     status: hud.status,
     preflightOpen: overlays.preflight,
@@ -1077,6 +1110,7 @@ export function App() {
 
   const launchContract = () => {
     audioRef.current?.unlock();
+    void musicRef.current?.playGameplay();
     playRouteActionEvents(
       buildLaunchAudioEvents({
         status: hud.status,
@@ -1111,6 +1145,7 @@ export function App() {
 
   const openContractBriefing = (contractId = hud.contractId) => {
     audioRef.current?.unlock();
+    void musicRef.current?.playMenu();
     resetRunUiState();
     applyRestartFlowTransition("briefing");
     const replaySeed = replaySeedForContract(contractId);
@@ -1123,6 +1158,7 @@ export function App() {
 
   const restartActiveRun = () => {
     audioRef.current?.unlock();
+    void musicRef.current?.playGameplay();
     resetRunUiState();
     applyRestartFlowTransition("direct-run");
   };
@@ -1246,105 +1282,107 @@ export function App() {
         </div>
       ) : null}
 
-      <header className={`top-hud top-hud-${topHudDensity.mode}`}>
-        <div className="brand-lockup">
-          <Satellite aria-hidden="true" size={22} />
-          {topHudDensity.showBrandCopy ? (
-            <div>
-              <h1>Astro Courier</h1>
-              <p>{hud.contractTitle}</p>
-            </div>
-          ) : null}
-        </div>
+      {topHudDensity.visible ? (
+        <header className={`top-hud top-hud-${topHudDensity.mode}`}>
+          <div className="brand-lockup">
+            <Satellite aria-hidden="true" size={22} />
+            {topHudDensity.showBrandCopy ? (
+              <div>
+                <h1>Astro Courier</h1>
+                <p>{hud.contractTitle}</p>
+              </div>
+            ) : null}
+          </div>
 
-        <div className="hud-metrics" aria-label="Run metrics">
-          <Metric
-            icon={<Zap size={18} />}
-            label="Fuel"
-            value={`${Math.round(fuelRatio * 100)}%`}
-            tone={fuelRatio < 0.25 ? "danger" : "normal"}
-            showLabel={topHudDensity.showMetricLabels}
-          />
-          <Metric
-            icon={<Gauge size={18} />}
-            label="Speed"
-            value={hud.speed.toFixed(1)}
-            tone={topHudSpeedTone}
-            showLabel={topHudDensity.showMetricLabels}
-          />
-          <Metric
-            icon={<PackageCheck size={18} />}
-            label="Cargo"
-            value={hud.cargoOnboard ? `${Math.round(cargoIntegrity * 100)}%` : "Empty"}
-            tone={cargoIntegrity < 0.7 ? "warning" : "normal"}
-            showLabel={topHudDensity.showMetricLabels}
-          />
-        </div>
+          <div className="hud-metrics" aria-label="Run metrics">
+            <Metric
+              icon={<Zap size={18} />}
+              label="Fuel"
+              value={`${Math.round(fuelRatio * 100)}%`}
+              tone={fuelRatio < 0.25 ? "danger" : "normal"}
+              showLabel={topHudDensity.showMetricLabels}
+            />
+            <Metric
+              icon={<Gauge size={18} />}
+              label="Speed"
+              value={hud.speed.toFixed(1)}
+              tone={topHudSpeedTone}
+              showLabel={topHudDensity.showMetricLabels}
+            />
+            <Metric
+              icon={<PackageCheck size={18} />}
+              label="Cargo"
+              value={hud.cargoOnboard ? `${Math.round(cargoIntegrity * 100)}%` : "Empty"}
+              tone={cargoIntegrity < 0.7 ? "warning" : "normal"}
+              showLabel={topHudDensity.showMetricLabels}
+            />
+          </div>
 
-        <div className="hud-actions">
-          <button
-            type="button"
-            className={`icon-button audio-toggle-button ${audioMuted ? "audio-toggle-muted" : ""}`}
-            aria-label={audioTogglePresentation.label}
-            aria-pressed={audioMuted}
-            title={audioTogglePresentation.title}
-            onClick={toggleAudioMuted}
-          >
-            {audioTogglePresentation.icon === "muted" ? <VolumeX size={20} /> : <Volume2 size={20} />}
-          </button>
-          <button
-            type="button"
-            className={`icon-button boost-button boost-button-${boostPresentation.tone}`}
-            aria-label={boostPresentation.label}
-            title={boostPresentation.label}
-            style={boostButtonStyle}
-            data-boost-badge={boostPresentation.badge}
-            disabled={!canBoost}
-            onClick={() => {
-              audioRef.current?.unlock();
-              shellRef.current?.queueCommand({ type: "BOOST" });
-            }}
-          >
-            <Zap size={20} />
-          </button>
-          <button
-            type="button"
-            className={`icon-button brake-button brake-button-${brakePresentation.tone}`}
-            aria-label={brakePresentation.label}
-            title={brakePresentation.label}
-            data-brake-badge={brakePresentation.badge}
-            disabled={!canBrake}
-            onClick={() => {
-              audioRef.current?.unlock();
-              shellRef.current?.queueCommand({ type: "BRAKE", amount: 1 });
-            }}
-          >
-            <OctagonMinus size={20} />
-          </button>
-          {primaryRunControl.visible ? (
+          <div className="hud-actions">
+            <button
+              type="button"
+              className={`icon-button audio-toggle-button ${audioMuted ? "audio-toggle-muted" : ""}`}
+              aria-label={audioTogglePresentation.label}
+              aria-pressed={audioMuted}
+              title={audioTogglePresentation.title}
+              onClick={toggleAudioMuted}
+            >
+              {audioTogglePresentation.icon === "muted" ? <VolumeX size={20} /> : <Volume2 size={20} />}
+            </button>
+            <button
+              type="button"
+              className={`icon-button boost-button boost-button-${boostPresentation.tone}`}
+              aria-label={boostPresentation.label}
+              title={boostPresentation.label}
+              style={boostButtonStyle}
+              data-boost-badge={boostPresentation.badge}
+              disabled={!canBoost}
+              onClick={() => {
+                audioRef.current?.unlock();
+                shellRef.current?.queueCommand({ type: "BOOST" });
+              }}
+            >
+              <Zap size={20} />
+            </button>
+            <button
+              type="button"
+              className={`icon-button brake-button brake-button-${brakePresentation.tone}`}
+              aria-label={brakePresentation.label}
+              title={brakePresentation.label}
+              data-brake-badge={brakePresentation.badge}
+              disabled={!canBrake}
+              onClick={() => {
+                audioRef.current?.unlock();
+                shellRef.current?.queueCommand({ type: "BRAKE", amount: 1 });
+              }}
+            >
+              <OctagonMinus size={20} />
+            </button>
+            {primaryRunControl.visible ? (
+              <button
+                type="button"
+                className="icon-button"
+                aria-label={primaryRunControl.label}
+                title={primaryRunControl.label}
+                onClick={() => {
+                  setRunPaused(!paused);
+                }}
+              >
+                {paused ? <Play size={20} /> : <Pause size={20} />}
+              </button>
+            ) : null}
             <button
               type="button"
               className="icon-button"
-              aria-label={primaryRunControl.label}
-              title={primaryRunControl.label}
-              onClick={() => {
-                setRunPaused(!paused);
-              }}
+              aria-label="Restart"
+              title="Restart"
+              onClick={restartToBriefing}
             >
-              {paused ? <Play size={20} /> : <Pause size={20} />}
+              <RotateCcw size={20} />
             </button>
-          ) : null}
-          <button
-            type="button"
-            className="icon-button"
-            aria-label="Restart"
-            title="Restart"
-            onClick={restartToBriefing}
-          >
-            <RotateCcw size={20} />
-          </button>
-        </div>
-      </header>
+          </div>
+        </header>
+      ) : null}
 
       {liveStyleReward?.fresh && hud.lastStyleAward && !runFinished ? (
         <div className="style-burst" aria-label={`Style hit: +${Math.round(hud.lastStyleAward)}`}>
@@ -1605,6 +1643,9 @@ export function App() {
 
       {overlays.preflight ? (
         <section className={`preflight-overlay preflight-overlay-${preflightOverlayDensity.mode}`} aria-label="Launch briefing">
+          <div className="preflight-cover-art">
+            <img src="/images/astro-courier-cover.png" alt="Astro Courier" loading="eager" />
+          </div>
           <div className="preflight-kicker">{preflightKicker}</div>
           <h2>{hud.contractTitle}</h2>
           {preflightOverlayDensity.showContractBriefing ? <p>{hud.contractBriefing}</p> : null}

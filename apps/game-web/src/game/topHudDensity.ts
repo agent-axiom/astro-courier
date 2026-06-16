@@ -8,6 +8,7 @@ export type TopHudDensityInput = {
 
 export type TopHudDensity = {
   mode: "compact" | "full";
+  visible: boolean;
   showBrandCopy: boolean;
   showMetricLabels: boolean;
 };
@@ -21,11 +22,13 @@ export type TopHudSpeedTone = "normal" | "warning";
 
 export function buildTopHudDensity(input: TopHudDensityInput): TopHudDensity {
   const compact = input.status === "flying" && !input.preflightOpen && !input.resultOpen;
+  const visible = !input.preflightOpen;
 
   return {
     mode: compact ? "compact" : "full",
-    showBrandCopy: !compact,
-    showMetricLabels: !compact
+    visible,
+    showBrandCopy: visible && !compact,
+    showMetricLabels: visible && !compact
   };
 }
 

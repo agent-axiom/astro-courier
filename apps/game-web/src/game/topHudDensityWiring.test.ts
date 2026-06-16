@@ -8,6 +8,7 @@ describe("top HUD density wiring", () => {
     expect(appSource).toContain('import { buildTopHudDensity, buildTopHudSpeedTone } from "./game/topHudDensity";');
     expect(appSource).toContain("const topHudDensity = buildTopHudDensity({");
     expect(appSource).toContain("const topHudSpeedTone = buildTopHudSpeedTone({");
+    expect(appSource).toContain("{topHudDensity.visible ? (");
     expect(appSource).toContain('top-hud top-hud-${topHudDensity.mode}');
     expect(appSource).toMatch(/topHudDensity\.showBrandCopy \? \(\s*<div>/);
     expect(appSource).toContain("showLabel={topHudDensity.showMetricLabels}");

@@ -5,24 +5,31 @@ describe("top HUD density", () => {
   it("compacts brand copy during active flight", () => {
     expect(buildTopHudDensity({ status: "flying", preflightOpen: false, resultOpen: false })).toEqual({
       mode: "compact",
+      visible: true,
       showBrandCopy: false,
       showMetricLabels: false
     });
   });
 
-  it("keeps brand copy around overlays and paused routes", () => {
+  it("hides the top HUD while preflight owns the first launch", () => {
+    expect(buildTopHudDensity({ status: "paused", preflightOpen: true, resultOpen: false })).toEqual({
+      mode: "full",
+      visible: false,
+      showBrandCopy: false,
+      showMetricLabels: false
+    });
+  });
+
+  it("keeps brand copy around result overlays and paused routes", () => {
     expect(buildTopHudDensity({ status: "paused", preflightOpen: false, resultOpen: false })).toEqual({
       mode: "full",
-      showBrandCopy: true,
-      showMetricLabels: true
-    });
-    expect(buildTopHudDensity({ status: "flying", preflightOpen: true, resultOpen: false })).toEqual({
-      mode: "full",
+      visible: true,
       showBrandCopy: true,
       showMetricLabels: true
     });
     expect(buildTopHudDensity({ status: "crashed", preflightOpen: false, resultOpen: true })).toEqual({
       mode: "full",
+      visible: true,
       showBrandCopy: true,
       showMetricLabels: true
     });
