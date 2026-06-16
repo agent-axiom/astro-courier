@@ -5739,6 +5739,13 @@ button {
     min-width: 0;
     text-align: left;
   }
+
+  .touch-flight-pad-active,
+  .touch-flight-pad-precision,
+  .touch-flight-pad-danger,
+  .touch-flight-pad-opportunity {
+    display: grid;
+  }
 }
 
 @media (max-width: 480px) {

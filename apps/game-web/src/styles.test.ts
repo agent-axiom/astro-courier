@@ -92,6 +92,12 @@ describe("responsive game layout CSS", () => {
     expect(styles).toContain("rgba(255, 209, 102");
   });
 
+  it("shows touch flight controls on narrow mobile layouts even without coarse pointer media", () => {
+    expect(styles).toMatch(
+      /@media \(max-width: 760px\)[\s\S]*\.touch-flight-pad-active,[\s\S]*\.touch-flight-pad-precision,[\s\S]*\.touch-flight-pad-danger,[\s\S]*\.touch-flight-pad-opportunity[\s\S]*\{[\s\S]*display: grid;/
+    );
+  });
+
   it("defines tone-aware route tempo action chips", () => {
     expect(styles).toContain(".tempo-action-chip");
     expect(styles).toContain(".tempo-action-flow");
