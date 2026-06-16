@@ -115,6 +115,24 @@ describe("responsive game layout CSS", () => {
     expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.pickup-pulse[\s\S]*bottom: max\(132px, calc\(env\(safe-area-inset-bottom\) \+ 126px\)\);/);
   });
 
+  it("defines a lightweight visual target compass over the playfield", () => {
+    expect(styles).toContain(".target-compass");
+    expect(styles).toContain("--target-compass-angle: 0deg;");
+    expect(styles).toContain("--target-compass-progress: 0;");
+    expect(styles).toContain("--target-compass-progress-turn: 0turn;");
+    expect(styles).toContain("--target-compass-ring-opacity: 0.18;");
+    expect(styles).toMatch(/\.target-compass[\s\S]*position: absolute;/);
+    expect(styles).toMatch(/\.target-compass[\s\S]*top: max\(92px, calc\(env\(safe-area-inset-top\) \+ 76px\)\);/);
+    expect(styles).toMatch(/\.target-compass-arrow[\s\S]*rotate\(var\(--target-compass-angle\)\)/);
+    expect(styles).toMatch(/\.target-compass::after[\s\S]*var\(--target-compass-progress-turn\)/);
+    expect(styles).toMatch(/\.target-compass::after[\s\S]*opacity: var\(--target-compass-ring-opacity\);/);
+    expect(styles).toContain(".target-compass-pickup");
+    expect(styles).toContain(".target-compass-delivery");
+    expect(styles).toContain(".target-compass-ready");
+    expect(styles).toContain(".target-compass-warning");
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.target-compass[\s\S]*top: max\(78px, calc\(env\(safe-area-inset-top\) \+ 66px\)\);/);
+  });
+
   it("defines context-aware touch flight pad tones", () => {
     expect(styles).toContain(".touch-flight-pad-precision");
     expect(styles).toContain(".touch-flight-pad-danger");

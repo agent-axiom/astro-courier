@@ -51,7 +51,7 @@ import {
   type RouteMarkReceipt
 } from "./game/bestRun";
 import { GameShell, type HudState } from "./game/GameShell";
-import { formatBearingGuidance } from "./game/bearing";
+import { buildTargetCompassPresentation, formatBearingGuidance } from "./game/bearing";
 import { buildBoostControlPresentation, buildBrakeControlPresentation, buildPrimaryRunControlPresentation, canUseImpulseControl } from "./game/hudControls";
 import {
   buildActiveDailyDispatchPulse,
@@ -667,6 +667,14 @@ export function App() {
   const radioMessage = buildRadioMessage(hud, { preflightOpen });
   const targetDistanceLabel = hud.targetDistance === undefined ? "-" : `${Math.round(hud.targetDistance)}m`;
   const bearingGuidance = hud.targetRelativeBearing === undefined ? undefined : formatBearingGuidance(hud.targetRelativeBearing);
+  const targetCompass = buildTargetCompassPresentation({
+    status: hud.status,
+    preflightOpen,
+    objectivePhase: hud.objectivePhase,
+    targetDistance: hud.targetDistance,
+    relativeBearing: hud.targetRelativeBearing,
+    landingStatus: hud.landingStatus
+  });
   const dockingSpeedReadout = buildDockingSpeedReadout({
     speed: hud.speed,
     allowedSpeed: hud.targetAllowedSpeed,
@@ -718,6 +726,12 @@ export function App() {
   const dockingLaneStyle = { "--docking-lane-progress": dockingLane?.progress ?? 0 } as CSSProperties;
   const dockingPulseStyle = { "--dock-pulse-progress": dockingPulse?.progress ?? 0 } as CSSProperties;
   const pickupPulseStyle = { "--pickup-pulse-progress": pickupPulse?.progress ?? 0 } as CSSProperties;
+  const targetCompassStyle = {
+    "--target-compass-angle": `${targetCompass?.angleDeg ?? 0}deg`,
+    "--target-compass-progress": targetCompass?.progress ?? 0,
+    "--target-compass-progress-turn": `${targetCompass?.progress ?? 0}turn`,
+    "--target-compass-ring-opacity": targetCompass ? 0.18 + targetCompass.progress * 0.42 : 0.18
+  } as CSSProperties;
   const approachStreakStyle = { "--approach-streak-progress": approachRewardReadout?.progress ?? 0 } as CSSProperties;
   const primaryRunControl = buildPrimaryRunControlPresentation({ preflightOpen, paused });
   const canBoost = canUseImpulseControl({
@@ -1535,6 +1549,20 @@ export function App() {
               <i key={`${pip}-${index}`} className={`style-chain-meter-pip style-chain-meter-pip-${pip}`} />
             ))}
           </div>
+        </div>
+      ) : null}
+
+      {targetCompass ? (
+        <div
+          className={`target-compass target-compass-${targetCompass.tone}`}
+          style={targetCompassStyle}
+          aria-label={`Target compass: ${targetCompass.label}. ${targetCompass.distance}`}
+        >
+          <span className="target-compass-arrow" aria-hidden="true">
+            <ArrowRight size={18} />
+          </span>
+          <strong>{targetCompass.label}</strong>
+          <small>{targetCompass.distance}</small>
         </div>
       ) : null}
 

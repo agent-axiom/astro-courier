@@ -1440,6 +1440,118 @@ button {
   background: linear-gradient(90deg, #7ce1ff, #8ee6b8);
 }
 
+.target-compass {
+  --target-compass-angle: 0deg;
+  --target-compass-progress: 0;
+  --target-compass-progress-turn: 0turn;
+  --target-compass-ring-opacity: 0.18;
+
+  position: absolute;
+  top: max(92px, calc(env(safe-area-inset-top) + 76px));
+  left: 50%;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 34px auto auto;
+  align-items: center;
+  gap: 8px;
+  min-width: min(188px, calc(100vw - 32px));
+  min-height: 44px;
+  padding: 7px 12px 7px 7px;
+  overflow: hidden;
+  border: 1px solid rgba(124, 225, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(8, 13, 28, 0.58);
+  color: #e8f7ff;
+  pointer-events: none;
+  transform: translateX(-50%);
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, 0.18),
+    0 0 22px rgba(124, 225, 255, 0.1);
+}
+
+.target-compass::after {
+  position: absolute;
+  inset: 4px;
+  border-radius: 999px;
+  background:
+    conic-gradient(from -90deg, rgba(124, 225, 255, 0.42) var(--target-compass-progress-turn), transparent 0),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.08), transparent);
+  opacity: var(--target-compass-ring-opacity);
+  content: "";
+}
+
+.target-compass-arrow {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(124, 225, 255, 0.16);
+  color: #ffffff;
+  transform: rotate(var(--target-compass-angle));
+}
+
+.target-compass strong,
+.target-compass small {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  line-height: 1.05;
+}
+
+.target-compass strong {
+  color: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 920;
+}
+
+.target-compass small {
+  color: rgba(232, 247, 255, 0.76);
+  font-size: 0.75rem;
+  font-weight: 860;
+}
+
+.target-compass-pickup {
+  border-color: rgba(142, 230, 184, 0.34);
+  background: rgba(7, 28, 24, 0.6);
+}
+
+.target-compass-pickup .target-compass-arrow {
+  background: rgba(142, 230, 184, 0.18);
+  color: #eafff3;
+}
+
+.target-compass-delivery {
+  border-color: rgba(124, 225, 255, 0.34);
+}
+
+.target-compass-ready {
+  border-color: rgba(142, 230, 184, 0.52);
+  background: rgba(9, 28, 22, 0.68);
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, 0.18),
+    0 0 28px rgba(142, 230, 184, 0.18);
+}
+
+.target-compass-ready .target-compass-arrow {
+  background: rgba(142, 230, 184, 0.22);
+  color: #eafff3;
+}
+
+.target-compass-warning {
+  border-color: rgba(255, 209, 102, 0.48);
+  background: rgba(31, 24, 10, 0.68);
+  color: #ffe19a;
+}
+
+.target-compass-warning .target-compass-arrow {
+  background: rgba(255, 209, 102, 0.2);
+  color: #ffe19a;
+}
+
 .pickup-pulse-pickup {
   border-color: rgba(142, 230, 184, 0.48);
   background: rgba(7, 28, 24, 0.74);
@@ -6013,6 +6125,11 @@ button {
   .pickup-pulse {
     bottom: max(132px, calc(env(safe-area-inset-bottom) + 126px));
     min-width: min(286px, calc(100vw - 24px));
+  }
+
+  .target-compass {
+    top: max(78px, calc(env(safe-area-inset-top) + 66px));
+    min-width: min(176px, calc(100vw - 24px));
   }
 
   .touch-flight-pad {

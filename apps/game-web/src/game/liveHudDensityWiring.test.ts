@@ -54,4 +54,16 @@ describe("live HUD density wiring", () => {
     expect(appSource).toContain('className={`pickup-pulse pickup-pulse-${pickupPulse.tone}`}');
     expect(appSource).toContain('aria-label={`Pickup cue: ${pickupPulse.action}. ${pickupPulse.detail}`}');
   });
+
+  it("renders a visual target compass over the playfield", () => {
+    expect(appSource).toContain("const targetCompass = buildTargetCompassPresentation({");
+    expect(appSource).toContain("relativeBearing: hud.targetRelativeBearing");
+    expect(appSource).toContain("const targetCompassStyle = {");
+    expect(appSource).toContain('"--target-compass-angle": `${targetCompass?.angleDeg ?? 0}deg`');
+    expect(appSource).toContain('"--target-compass-progress": targetCompass?.progress ?? 0');
+    expect(appSource).toContain('"--target-compass-progress-turn": `${targetCompass?.progress ?? 0}turn`');
+    expect(appSource).toContain('"--target-compass-ring-opacity": targetCompass ? 0.18 + targetCompass.progress * 0.42 : 0.18');
+    expect(appSource).toContain('className={`target-compass target-compass-${targetCompass.tone}`}');
+    expect(appSource).toContain('aria-label={`Target compass: ${targetCompass.label}. ${targetCompass.distance}`}');
+  });
 });
