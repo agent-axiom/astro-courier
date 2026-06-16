@@ -80,7 +80,7 @@ import {
   type DailyDispatchProgressReceipt
 } from "./game/contracts";
 import { buildRadioMessage } from "./game/radio";
-import { buildLiveStyleReward, buildStyleTargetCue } from "./game/style";
+import { buildLiveStyleReward, buildStyleChainMeter, buildStyleTargetCue } from "./game/style";
 import {
   buildExpressFinishReadout,
   buildObjectiveDirective,
@@ -813,6 +813,23 @@ export function App() {
     objectivePhase: hud.objectivePhase,
     manualBrakeUsed: hud.manualBrakeUsed
   });
+  const styleChainMeter = buildStyleChainMeter({
+    contractId: hud.contractId,
+    styleBonus: hud.scoreBreakdown.styleBonus,
+    lastStyleAward: hud.lastStyleAward,
+    lastMilestone: hud.lastMilestone,
+    styleMultiplier: hud.styleMultiplier,
+    styleChainCount: hud.styleChainCount,
+    styleChainSecondsRemaining: hud.styleChainSecondsRemaining,
+    launchBurstSecondsRemaining: hud.launchBurstSecondsRemaining,
+    quickPickupSecondsRemaining: hud.quickPickupSecondsRemaining,
+    cargoDamage: hud.cargoDamage,
+    hazardDangerLevel: hud.hazardDangerLevel,
+    trajectoryRiskLevel: hud.trajectoryRiskLevel,
+    gravitySlingReady: hud.gravitySlingReady,
+    objectivePhase: hud.objectivePhase,
+    manualBrakeUsed: hud.manualBrakeUsed
+  });
   const styleTargetCue = buildStyleTargetCue({
     status: hud.status,
     contractId: hud.contractId,
@@ -838,6 +855,7 @@ export function App() {
     approachStreakSeconds: hud.approachStreakSeconds
   });
   const styleChipStyle = { "--style-chain-progress": liveStyleReward?.chainProgress ?? 0 } as CSSProperties;
+  const styleChainMeterStyle = { "--style-chain-meter-progress": styleChainMeter?.progress ?? 0 } as CSSProperties;
   const preflightMasteryTargets = buildPreflightMasteryTargets({ goldSeconds: hud.paceSecondsRemaining });
   const preflightBonusObjectives = buildPreflightBonusObjectives({
     contractId: hud.contractId,
@@ -1400,10 +1418,28 @@ export function App() {
         </header>
       ) : null}
 
-      {liveStyleReward?.fresh && hud.lastStyleAward && !runFinished ? (
+      {liveStyleReward?.fresh && hud.lastStyleAward && !runFinished && !styleChainMeter ? (
         <div className="style-burst" aria-label={`Style hit: +${Math.round(hud.lastStyleAward)}`}>
           <span>{hud.lastMilestone ?? "Style hit"}</span>
           <strong>+{Math.round(hud.lastStyleAward)}</strong>
+        </div>
+      ) : null}
+
+      {styleChainMeter && !runFinished ? (
+        <div
+          className={`style-chain-meter style-chain-meter-${styleChainMeter.tone}`}
+          style={styleChainMeterStyle}
+          aria-label={`${styleChainMeter.label}: ${styleChainMeter.value}. ${styleChainMeter.detail}`}
+        >
+          <Zap size={16} />
+          <span>{styleChainMeter.label}</span>
+          <strong>{styleChainMeter.value}</strong>
+          <small>{styleChainMeter.detail}</small>
+          <div className="style-chain-meter-pips" aria-hidden="true">
+            {styleChainMeter.pips.map((pip, index) => (
+              <i key={`${pip}-${index}`} className={`style-chain-meter-pip style-chain-meter-pip-${pip}`} />
+            ))}
+          </div>
         </div>
       ) : null}
 

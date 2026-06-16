@@ -112,4 +112,12 @@ describe("responsive game layout CSS", () => {
     expect(styles).toContain(".result-tempo-clutch");
     expect(styles).toContain(".result-tempo-danger");
   });
+
+  it("defines a lightweight style chain meter overlay", () => {
+    expect(styles).toContain(".style-chain-meter");
+    expect(styles).toContain(".style-chain-meter-fresh");
+    expect(styles).toContain(".style-chain-meter-urgent");
+    expect(styles).toContain("--style-chain-meter-progress");
+    expect(styles).toContain(".style-chain-meter-pip-active");
+  });
 });

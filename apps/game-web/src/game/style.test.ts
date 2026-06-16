@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildLiveStyleReward, buildStyleTargetCue } from "./style";
+import { buildLiveStyleReward, buildStyleChainMeter, buildStyleTargetCue } from "./style";
 
 describe("live style reward HUD copy", () => {
   it("stays hidden before the player earns style", () => {
@@ -469,6 +469,88 @@ describe("live style reward HUD copy", () => {
       fresh: false,
       tone: "urgent",
       chainProgress: 0.2
+    });
+  });
+});
+
+describe("style chain meter", () => {
+  it("stays hidden before an active chain or fresh style hit", () => {
+    expect(buildStyleChainMeter({ styleBonus: 0 })).toBeUndefined();
+    expect(buildStyleChainMeter({ styleBonus: 180, styleMultiplier: 1, styleChainSecondsRemaining: 0 })).toBeUndefined();
+  });
+
+  it("turns active chain timing into a compact meter", () => {
+    expect(
+      buildStyleChainMeter({
+        styleBonus: 440,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 2.4,
+        styleChainCount: 2
+      })
+    ).toEqual({
+      label: "Chain",
+      value: "x1.50",
+      detail: "2.4s",
+      tone: "chain",
+      progress: 0.6,
+      pips: ["active", "active", "locked"]
+    });
+  });
+
+  it("calls out urgent chains with the next clean action", () => {
+    expect(
+      buildStyleChainMeter({
+        styleBonus: 440,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 0.8,
+        hazardDangerLevel: "near",
+        cargoDamage: 0
+      })
+    ).toEqual({
+      label: "Chain",
+      value: "x1.50",
+      detail: "Skim now",
+      tone: "urgent",
+      progress: 0.2,
+      pips: ["active", "active", "locked"]
+    });
+  });
+
+  it("keeps fresh style hits as short combo pulses", () => {
+    expect(
+      buildStyleChainMeter({
+        styleBonus: 320,
+        lastStyleAward: 140,
+        lastMilestone: "Clean Hazard Skim",
+        styleMultiplier: 1.25,
+        styleChainSecondsRemaining: 3.8
+      })
+    ).toEqual({
+      label: "Chain",
+      value: "x1.25",
+      detail: "+140",
+      tone: "fresh",
+      progress: 0.95,
+      pips: ["active", "locked", "locked"]
+    });
+  });
+
+  it("uses the longer chain relay window for meter progress", () => {
+    expect(
+      buildStyleChainMeter({
+        contractId: "chain-relay",
+        styleBonus: 180,
+        styleMultiplier: 1.25,
+        styleChainSecondsRemaining: 2.75,
+        styleChainCount: 3
+      })
+    ).toEqual({
+      label: "Chain",
+      value: "x1.25",
+      detail: "2.8s",
+      tone: "chain",
+      progress: 0.5,
+      pips: ["active", "active", "active"]
     });
   });
 });

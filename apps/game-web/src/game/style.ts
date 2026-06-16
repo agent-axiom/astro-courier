@@ -42,6 +42,15 @@ export type LiveStyleReward = {
   chainProgress: number;
 };
 
+export type StyleChainMeter = {
+  label: "Chain";
+  value: `x${string}`;
+  detail: string;
+  tone: "chain" | "fresh" | "urgent";
+  progress: number;
+  pips: Array<"active" | "locked">;
+};
+
 export type StyleTargetCueInput = {
   status: RunStatus;
   contractId?: string;
@@ -120,6 +129,30 @@ export function buildLiveStyleReward(input: LiveStyleRewardInput): LiveStyleRewa
     fresh,
     tone: freshAward ? "fresh" : urgent ? "urgent" : chainActive || fresh ? "chain" : "bank",
     chainProgress
+  };
+}
+
+export function buildStyleChainMeter(input: LiveStyleRewardInput): StyleChainMeter | undefined {
+  const fresh = input.lastMilestone ? styleMilestones.has(input.lastMilestone) : false;
+  const freshAward = fresh && input.lastStyleAward !== undefined && input.lastStyleAward > 0 ? Math.round(input.lastStyleAward) : undefined;
+  const styleChainSecondsRemaining = input.styleChainSecondsRemaining ?? 0;
+  const styleMultiplier = Math.max(1, input.styleMultiplier ?? 1);
+  const chainActive = styleMultiplier > 1 && styleChainSecondsRemaining > 0;
+
+  if (!chainActive && freshAward === undefined) {
+    return undefined;
+  }
+
+  const progress = chainActive ? round(clamp(styleChainSecondsRemaining / styleChainWindowSeconds(input), 0, 1), 2) : 0;
+  const urgent = chainActive && styleChainSecondsRemaining <= STYLE_CHAIN_URGENT_SECONDS && freshAward === undefined;
+
+  return {
+    label: "Chain",
+    value: `x${styleMultiplier.toFixed(2)}`,
+    detail: freshAward !== undefined ? `+${freshAward}` : urgent ? buildUrgentChainAction(input) : `${styleChainSecondsRemaining.toFixed(1)}s`,
+    tone: freshAward !== undefined ? "fresh" : urgent ? "urgent" : "chain",
+    progress,
+    pips: buildStyleChainMeterPips(input)
   };
 }
 
@@ -276,6 +309,13 @@ function buildStyleChainBadge(input: { chainActive: boolean; styleChainCount?: n
     return undefined;
   }
   return `${count} chain`;
+}
+
+function buildStyleChainMeterPips(input: LiveStyleRewardInput): Array<"active" | "locked"> {
+  const explicitCount = Math.floor(input.styleChainCount ?? 0);
+  const inferredCount = Math.round(Math.max(0, (input.styleMultiplier ?? 1) - 1) / 0.25);
+  const activeCount = Math.floor(clamp(Math.max(explicitCount, inferredCount), 0, 3));
+  return Array.from({ length: 3 }, (_, index) => (index < activeCount ? "active" : "locked"));
 }
 
 function styleChainWindowSeconds(input: LiveStyleRewardInput): number {

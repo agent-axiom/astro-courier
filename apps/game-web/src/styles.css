@@ -2141,6 +2141,148 @@ button {
   text-align: right;
 }
 
+.style-chain-meter {
+  position: absolute;
+  top: 88px;
+  left: 50%;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: 16px auto auto minmax(44px, auto);
+  gap: 8px;
+  align-items: center;
+  width: min(292px, calc(100vw - 32px));
+  min-height: 44px;
+  padding: 8px 10px 10px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  overflow: hidden;
+  border: 1px solid rgba(255, 209, 102, 0.34);
+  border-radius: 8px;
+  background: rgba(8, 13, 28, 0.74);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 14px 34px rgba(255, 209, 102, 0.12);
+  color: #fff1c7;
+  backdrop-filter: blur(14px);
+}
+
+.style-chain-meter::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  transform: scaleX(var(--style-chain-meter-progress, 0));
+  transform-origin: left center;
+  background: linear-gradient(90deg, #8ee6b8, #ffd166);
+  content: "";
+}
+
+.style-chain-meter svg,
+.style-chain-meter span,
+.style-chain-meter strong,
+.style-chain-meter small,
+.style-chain-meter-pips {
+  position: relative;
+  z-index: 1;
+}
+
+.style-chain-meter svg {
+  color: #ffd166;
+}
+
+.style-chain-meter span {
+  color: rgba(255, 241, 199, 0.78);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.style-chain-meter strong {
+  min-width: 0;
+  color: #ffffff;
+  font-size: 1.02rem;
+  font-weight: 930;
+  line-height: 1;
+}
+
+.style-chain-meter small {
+  min-width: 0;
+  overflow: hidden;
+  color: #ffe19a;
+  font-size: 0.78rem;
+  font-weight: 900;
+  line-height: 1;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.style-chain-meter-pips {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+  height: 5px;
+}
+
+.style-chain-meter-pip {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.style-chain-meter-pip-active {
+  background: linear-gradient(90deg, #8ee6b8, #ffd166);
+  box-shadow: 0 0 12px rgba(255, 209, 102, 0.24);
+}
+
+.style-chain-meter-fresh {
+  border-color: rgba(142, 230, 184, 0.46);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+    0 14px 34px rgba(142, 230, 184, 0.16);
+  color: #eafff3;
+  animation: style-chain-meter-pop 720ms ease-out both;
+}
+
+.style-chain-meter-fresh svg,
+.style-chain-meter-fresh small {
+  color: #bff7d8;
+}
+
+.style-chain-meter-urgent {
+  border-color: rgba(255, 111, 145, 0.5);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+    0 14px 34px rgba(255, 77, 109, 0.16);
+}
+
+.style-chain-meter-urgent::after {
+  background: linear-gradient(90deg, #ff4d6d, #ffd166);
+}
+
+.style-chain-meter-urgent svg,
+.style-chain-meter-urgent small {
+  color: #ffadc1;
+}
+
+@keyframes style-chain-meter-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 8px) scale(0.96);
+  }
+
+  28% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1.02);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
 @keyframes style-burst-rise {
   0% {
     opacity: 0;
@@ -5650,6 +5792,11 @@ button {
   .style-burst {
     top: 118px;
     width: calc(100vw - 20px);
+  }
+
+  .style-chain-meter {
+    top: 118px;
+    width: min(292px, calc(100vw - 20px));
   }
 
   .preflight-overlay {
