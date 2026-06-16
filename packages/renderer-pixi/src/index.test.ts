@@ -16,6 +16,7 @@ import {
   objectiveBeaconPulse,
   objectiveGuidanceVisual,
   objectiveDockGateVisual,
+  objectiveRouteBeamVisual,
   approachLockVisual,
   screenShakeOffset,
   shipBoostReadinessVisual,
@@ -239,6 +240,112 @@ describe("objective dock gate visual", () => {
       tone: "align",
       segments: 4
     });
+  });
+});
+
+describe("objective route beam visual", () => {
+  it("stays hidden outside active route flight", () => {
+    expect(
+      objectiveRouteBeamVisual({
+        status: "paused",
+        objectivePhase: "pickup",
+        distance: 180,
+        landingStatus: "approach",
+        assistAvailable: false,
+        tick: 12
+      })
+    ).toBeUndefined();
+    expect(
+      objectiveRouteBeamVisual({
+        status: "flying",
+        objectivePhase: "complete",
+        distance: 12,
+        landingStatus: "ready",
+        assistAvailable: false,
+        tick: 12
+      })
+    ).toBeUndefined();
+  });
+
+  it("makes nearby route beams more readable than distant route beams", () => {
+    const far = objectiveRouteBeamVisual({
+      status: "flying",
+      objectivePhase: "pickup",
+      distance: 720,
+      landingStatus: "approach",
+      assistAvailable: false,
+      tick: 8
+    });
+    const close = objectiveRouteBeamVisual({
+      status: "flying",
+      objectivePhase: "pickup",
+      distance: 80,
+      landingStatus: "approach",
+      assistAvailable: false,
+      tick: 8
+    });
+
+    expect(far).toMatchObject({ color: 0x8ee6b8, tone: "pickup" });
+    expect(close?.alpha).toBeGreaterThan(far?.alpha ?? 0);
+    expect(close?.width).toBeGreaterThan(far?.width ?? 0);
+    expect(close?.nodeRadius).toBeGreaterThan(far?.nodeRadius ?? 0);
+  });
+
+  it("uses tone and motion to make delivery guidance readable without text", () => {
+    const delivery = objectiveRouteBeamVisual({
+      status: "flying",
+      objectivePhase: "delivery",
+      distance: 210,
+      landingStatus: "approach",
+      assistAvailable: false,
+      tick: 4
+    });
+    const ready = objectiveRouteBeamVisual({
+      status: "flying",
+      objectivePhase: "delivery",
+      distance: 42,
+      landingStatus: "ready",
+      assistAvailable: false,
+      tick: 4
+    });
+    const warning = objectiveRouteBeamVisual({
+      status: "flying",
+      objectivePhase: "delivery",
+      distance: 42,
+      landingStatus: "too-fast",
+      assistAvailable: false,
+      tick: 4
+    });
+
+    expect(delivery).toMatchObject({ color: 0xffd166, tone: "delivery" });
+    expect(ready).toMatchObject({ color: 0x8ee6b8, tone: "ready" });
+    expect(warning).toMatchObject({ color: 0xff6f91, tone: "warning" });
+    expect(ready?.alpha).toBeGreaterThan(delivery?.alpha ?? 0);
+    expect(warning?.width).toBeGreaterThan(delivery?.width ?? 0);
+  });
+
+  it("animates beam nodes with a stable wrapped flow value", () => {
+    const early = objectiveRouteBeamVisual({
+      status: "flying",
+      objectivePhase: "pickup",
+      distance: 160,
+      landingStatus: "approach",
+      assistAvailable: false,
+      tick: 2
+    });
+    const later = objectiveRouteBeamVisual({
+      status: "flying",
+      objectivePhase: "pickup",
+      distance: 160,
+      landingStatus: "approach",
+      assistAvailable: false,
+      tick: 17
+    });
+
+    expect(early?.nodes).toBeGreaterThanOrEqual(3);
+    expect(early?.flow).toBeGreaterThanOrEqual(0);
+    expect(early?.flow).toBeLessThan(1);
+    expect(later?.flow).not.toBe(early?.flow);
   });
 });
 

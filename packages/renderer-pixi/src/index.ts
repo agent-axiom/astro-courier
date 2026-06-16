@@ -94,6 +94,22 @@ export type ObjectiveGuidanceVisual = {
   edgeAlpha: number;
 };
 
+export type ObjectiveRouteBeamVisualInput = Pick<SimulationSnapshot, "status" | "objectivePhase" | "tick"> & {
+  distance: number;
+  landingStatus: LandingGuidanceStatus;
+  assistAvailable: boolean;
+};
+
+export type ObjectiveRouteBeamVisual = {
+  color: number;
+  tone: "pickup" | "delivery" | "ready" | "warning";
+  alpha: number;
+  width: number;
+  nodes: number;
+  nodeRadius: number;
+  flow: number;
+};
+
 export type ObjectiveDockGateVisualInput = Pick<SimulationSnapshot, "status" | "objectivePhase"> & {
   distance: number;
   landingStatus: LandingGuidanceStatus;
@@ -119,6 +135,34 @@ export function objectiveGuidanceVisual(input: ObjectiveGuidanceVisualInput): Ob
     lineWidth: round(2 + precisionBoost, 2),
     markerScale: round(clamp(0.86 + proximity * 0.28 + precisionBoost * 0.14 + readyLockBoost, 0.86, 1.38), 2),
     edgeAlpha: round(clamp(0.68 + proximity * 0.2 + precisionBoost * 0.08, 0.68, 0.96), 2)
+  };
+}
+
+export function objectiveRouteBeamVisual(input: ObjectiveRouteBeamVisualInput): ObjectiveRouteBeamVisual | undefined {
+  if (input.status !== "flying" || input.objectivePhase === "complete") {
+    return undefined;
+  }
+
+  const proximity = 1 - clamp((input.distance - 60) / 720, 0, 1);
+  const ready = input.assistAvailable || input.landingStatus === "ready";
+  const unsafe = input.landingStatus === "too-fast" || input.landingStatus === "misaligned";
+  const tone: ObjectiveRouteBeamVisual["tone"] =
+    input.objectivePhase === "pickup" ? "pickup" : unsafe ? "warning" : ready ? "ready" : "delivery";
+  const color =
+    tone === "pickup" || tone === "ready"
+      ? 0x8ee6b8
+      : tone === "warning" && input.landingStatus === "too-fast"
+        ? 0xff6f91
+        : 0xffd166;
+
+  return {
+    color,
+    tone,
+    alpha: round(clamp(0.14 + proximity * 0.2 + (ready ? 0.12 : 0) + (unsafe ? 0.1 : 0), 0.14, 0.58), 2),
+    width: round(1.4 + proximity * 1 + (ready ? 0.8 : 0) + (unsafe ? 0.6 : 0), 2),
+    nodes: input.distance < 140 ? 3 : input.distance < 360 ? 4 : 5,
+    nodeRadius: round(2.1 + proximity * 1.1 + (ready ? 0.8 : 0) + (unsafe ? 0.5 : 0), 2),
+    flow: round(positiveModulo(input.tick * 0.045, 1), 2)
   };
 }
 
@@ -1322,6 +1366,14 @@ class PixiRenderer implements AstroPixiRenderer {
       landingStatus: target.landingStatus,
       assistAvailable: target.assistAvailable
     });
+    const routeBeam = objectiveRouteBeamVisual({
+      status: snapshot.status,
+      objectivePhase: snapshot.objectivePhase,
+      distance: target.distance,
+      landingStatus: target.landingStatus,
+      assistAvailable: target.assistAvailable,
+      tick: snapshot.tick
+    });
     const approachLock = approachLockVisual({
       status: snapshot.status,
       objectivePhase: snapshot.objectivePhase,
@@ -1338,6 +1390,10 @@ class PixiRenderer implements AstroPixiRenderer {
     });
     const targetOnScreen =
       targetPoint.x >= 0 && targetPoint.x <= viewport.width && targetPoint.y >= 0 && targetPoint.y <= viewport.height;
+
+    if (routeBeam) {
+      drawObjectiveRouteBeam(this.guidance, ship, targetPoint, routeBeam);
+    }
 
     this.guidance.moveTo(ship.x, ship.y).lineTo(targetPoint.x, targetPoint.y).stroke({
       color,
@@ -1724,6 +1780,38 @@ class PixiRenderer implements AstroPixiRenderer {
         alpha: hazardEffect.alpha
       });
     }
+  }
+}
+
+function drawObjectiveRouteBeam(guidance: Graphics, ship: Vec2, target: Vec2, visual: ObjectiveRouteBeamVisual): void {
+  const delta = { x: target.x - ship.x, y: target.y - ship.y };
+  const length = Math.hypot(delta.x, delta.y);
+  if (length < 1) {
+    return;
+  }
+
+  guidance.moveTo(ship.x, ship.y).lineTo(target.x, target.y).stroke({
+    color: visual.color,
+    width: visual.width + 2,
+    alpha: visual.alpha * 0.18
+  });
+
+  for (let index = 0; index < visual.nodes; index += 1) {
+    const fraction = 0.12 + positiveModulo((index + visual.flow) / visual.nodes, 1) * 0.76;
+    const point = {
+      x: ship.x + delta.x * fraction,
+      y: ship.y + delta.y * fraction
+    };
+    const activeScale = index === visual.nodes - 1 ? 1.16 : 1;
+    guidance.circle(point.x, point.y, visual.nodeRadius * activeScale).fill({
+      color: visual.color,
+      alpha: visual.alpha
+    });
+    guidance.circle(point.x, point.y, visual.nodeRadius * activeScale + 3).stroke({
+      color: visual.color,
+      width: 1,
+      alpha: visual.alpha * 0.34
+    });
   }
 }
 
