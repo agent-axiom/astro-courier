@@ -783,14 +783,14 @@ button {
   right: 16px;
   left: 16px;
   display: grid;
-  grid-template-columns: minmax(180px, 1fr) auto auto;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 260px) auto auto;
   gap: 12px;
   align-items: center;
   pointer-events: none;
 }
 
 .top-hud-compact {
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto minmax(150px, 1fr) auto auto;
 }
 
 .brand-lockup,
@@ -830,6 +830,138 @@ button {
   color: #b9c7e6;
   font-size: 0.82rem;
   line-height: 1.2;
+}
+
+.route-progress-rail {
+  --route-progress: 0;
+
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: auto minmax(88px, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-height: 40px;
+  padding: 7px 10px;
+  overflow: hidden;
+  border: 1px solid rgba(124, 225, 255, 0.24);
+  border-radius: 8px;
+  background: rgba(8, 13, 28, 0.54);
+  color: #e8f7ff;
+  backdrop-filter: blur(14px);
+}
+
+.route-progress-rail::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 0;
+  height: 3px;
+  width: calc(var(--route-progress) * 100%);
+  background: linear-gradient(90deg, #8ee6b8, #7ce1ff, #ffd166);
+  content: "";
+}
+
+.route-progress-copy,
+.route-progress-track {
+  position: relative;
+  z-index: 1;
+}
+
+.route-progress-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 58px;
+}
+
+.route-progress-copy strong,
+.route-progress-copy small {
+  min-width: 0;
+  line-height: 1;
+}
+
+.route-progress-copy strong {
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 920;
+}
+
+.route-progress-copy small {
+  color: rgba(232, 247, 255, 0.72);
+  font-size: 0.72rem;
+  font-weight: 820;
+}
+
+.route-progress-track {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.route-progress-track::before {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  left: 12px;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(160, 196, 255, 0.16);
+  content: "";
+  transform: translateY(-50%);
+}
+
+.route-progress-dot {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  height: 20px;
+  place-items: center;
+  border: 1px solid rgba(160, 196, 255, 0.24);
+  border-radius: 999px;
+  background: rgba(8, 13, 28, 0.78);
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.62rem;
+  font-style: normal;
+  font-weight: 880;
+  line-height: 1;
+}
+
+.route-progress-dot-active,
+.route-progress-dot-complete,
+.route-progress-dot-ready {
+  border-color: rgba(142, 230, 184, 0.44);
+  background: rgba(142, 230, 184, 0.16);
+  color: #eafff3;
+}
+
+.route-progress-dot-warning {
+  border-color: rgba(255, 209, 102, 0.46);
+  background: rgba(255, 209, 102, 0.16);
+  color: #ffe19a;
+}
+
+.route-progress-dot-locked {
+  color: rgba(255, 255, 255, 0.44);
+}
+
+.route-progress-pickup {
+  border-color: rgba(142, 230, 184, 0.3);
+}
+
+.route-progress-delivery {
+  border-color: rgba(124, 225, 255, 0.3);
+}
+
+.route-progress-ready {
+  border-color: rgba(142, 230, 184, 0.48);
+  background: rgba(9, 28, 22, 0.6);
+}
+
+.route-progress-warning {
+  border-color: rgba(255, 209, 102, 0.48);
+  background: rgba(31, 24, 10, 0.62);
 }
 
 .hud-metrics {
@@ -6063,6 +6195,11 @@ button {
 
   .top-hud-compact {
     grid-template-columns: auto 1fr auto;
+  }
+
+  .route-progress-rail {
+    grid-column: 1 / -1;
+    order: 2;
   }
 
   .hud-metrics {

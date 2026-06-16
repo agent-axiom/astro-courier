@@ -85,6 +85,7 @@ import {
   buildExpressFinishReadout,
   buildObjectiveDirective,
   buildObjectiveInterceptReadout,
+  buildRouteProgressRailPresentation,
   buildRouteFocusReadout,
   buildTacticalCue
 } from "./game/objective";
@@ -732,6 +733,14 @@ export function App() {
     "--target-compass-progress-turn": `${targetCompass?.progress ?? 0}turn`,
     "--target-compass-ring-opacity": targetCompass ? 0.18 + targetCompass.progress * 0.42 : 0.18
   } as CSSProperties;
+  const routeProgressRail = buildRouteProgressRailPresentation({
+    status: hud.status,
+    preflightOpen,
+    objectivePhase: hud.objectivePhase,
+    targetDistance: hud.targetDistance,
+    landingStatus: hud.landingStatus
+  });
+  const routeProgressRailStyle = { "--route-progress": routeProgressRail?.progress ?? 0 } as CSSProperties;
   const approachStreakStyle = { "--approach-streak-progress": approachRewardReadout?.progress ?? 0 } as CSSProperties;
   const primaryRunControl = buildPrimaryRunControlPresentation({ preflightOpen, paused });
   const canBoost = canUseImpulseControl({
@@ -1436,6 +1445,26 @@ export function App() {
               </div>
             ) : null}
           </div>
+
+          {routeProgressRail ? (
+            <div
+              className={`route-progress-rail route-progress-${routeProgressRail.tone}`}
+              style={routeProgressRailStyle}
+              aria-label={`${routeProgressRail.label}: ${routeProgressRail.action}. ${routeProgressRail.detail}`}
+            >
+              <div className="route-progress-copy">
+                <strong>{routeProgressRail.action}</strong>
+                <small>{routeProgressRail.detail}</small>
+              </div>
+              <div className="route-progress-track" aria-hidden="true">
+                {routeProgressRail.checkpoints.map((checkpoint) => (
+                  <i key={checkpoint.label} className={`route-progress-dot route-progress-dot-${checkpoint.state}`}>
+                    {checkpoint.label}
+                  </i>
+                ))}
+              </div>
+            </div>
+          ) : null}
 
           <div className="hud-metrics" aria-label="Run metrics">
             <Metric

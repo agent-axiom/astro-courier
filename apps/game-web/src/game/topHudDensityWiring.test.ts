@@ -21,4 +21,13 @@ describe("top HUD density wiring", () => {
     expect(appSource).toContain("tone={topHudSpeedTone}");
     expect(appSource).not.toContain("tone={hud.speed > 45 ? \"warning\" : \"normal\"}");
   });
+
+  it("wires a compact route progress rail into the top HUD", () => {
+    expect(appSource).toContain("const routeProgressRail = buildRouteProgressRailPresentation({");
+    expect(appSource).toContain("const routeProgressRailStyle = {");
+    expect(appSource).toContain('"--route-progress": routeProgressRail?.progress ?? 0');
+    expect(appSource).toContain("routeProgressRail ? (");
+    expect(appSource).toContain('className={`route-progress-rail route-progress-${routeProgressRail.tone}`}');
+    expect(appSource).toContain('aria-label={`${routeProgressRail.label}: ${routeProgressRail.action}. ${routeProgressRail.detail}`}');
+  });
 });

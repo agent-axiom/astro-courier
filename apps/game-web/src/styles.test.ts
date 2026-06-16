@@ -34,6 +34,20 @@ describe("responsive game layout CSS", () => {
     expect(styles).toMatch(/\.top-hud-compact \.metric strong[\s\S]*min-width: 0;/);
   });
 
+  it("defines a compact top HUD route progress rail", () => {
+    expect(styles).toContain(".route-progress-rail");
+    expect(styles).toContain("--route-progress: 0;");
+    expect(styles).toMatch(/\.top-hud[\s\S]*grid-template-columns: minmax\(180px, 1fr\) minmax\(180px, 260px\) auto auto;/);
+    expect(styles).toMatch(/\.top-hud-compact[\s\S]*grid-template-columns: auto minmax\(150px, 1fr\) auto auto;/);
+    expect(styles).toMatch(/\.route-progress-rail[\s\S]*min-height: 40px;/);
+    expect(styles).toMatch(/\.route-progress-rail::after[\s\S]*width: calc\(var\(--route-progress\) \* 100%\);/);
+    expect(styles).toContain(".route-progress-pickup");
+    expect(styles).toContain(".route-progress-delivery");
+    expect(styles).toContain(".route-progress-ready");
+    expect(styles).toContain(".route-progress-warning");
+    expect(styles).toMatch(/@media \(max-width: 760px\)[\s\S]*\.route-progress-rail[\s\S]*grid-column: 1 \/ -1;/);
+  });
+
   it("defines a focused preflight mode that trims route-selection text", () => {
     expect(styles).toContain(".preflight-overlay-focused");
     expect(styles).toMatch(/\.preflight-overlay-focused[\s\S]*width: min\(500px, calc\(100vw - 32px\)\);/);

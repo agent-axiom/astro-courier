@@ -15,6 +15,7 @@ import { COMET_RESERVE_MIN_RATIO, COMET_RESERVE_WARNING_RATIO, formatCometReserv
 import type { ContractPaceTier } from "./pace";
 
 const FUEL_CRITICAL_RATIO = 0.15;
+const ROUTE_PROGRESS_TARGET_RANGE = 420;
 
 export type ObjectiveDirectiveInput = {
   objectivePhase: ObjectivePhase;
@@ -42,6 +43,28 @@ export type ObjectiveInterceptReadout = {
   label: "Intercept";
   value: string;
   tone: "fast" | "steady" | "slow" | "hold";
+};
+
+export type RouteProgressRailInput = {
+  status: RunStatus;
+  preflightOpen: boolean;
+  objectivePhase: ObjectivePhase;
+  targetDistance?: number;
+  landingStatus?: LandingGuidanceStatus;
+};
+
+export type RouteProgressCheckpoint = {
+  label: "Pickup" | "Dock";
+  state: "active" | "complete" | "locked" | "ready" | "warning";
+};
+
+export type RouteProgressRailPresentation = {
+  label: "Route";
+  action: "Pickup" | "Dock";
+  detail: string;
+  tone: "pickup" | "delivery" | "ready" | "warning";
+  progress: number;
+  checkpoints: RouteProgressCheckpoint[];
 };
 
 export type ExpressFinishReadoutInput = {
@@ -208,6 +231,67 @@ export function buildObjectiveInterceptReadout(
     value: `ETA ${etaSeconds.toFixed(1)}s`,
     tone: etaSeconds <= 8 ? "fast" : etaSeconds <= 20 ? "steady" : "slow"
   };
+}
+
+export function buildRouteProgressRailPresentation(input: RouteProgressRailInput): RouteProgressRailPresentation | undefined {
+  if (
+    input.preflightOpen ||
+    input.status !== "flying" ||
+    input.objectivePhase === "complete" ||
+    input.targetDistance === undefined
+  ) {
+    return undefined;
+  }
+
+  const currentLegProgress = clamp(1 - input.targetDistance / ROUTE_PROGRESS_TARGET_RANGE, 0, 1);
+  const progress = input.objectivePhase === "pickup" ? currentLegProgress * 0.5 : 0.5 + currentLegProgress * 0.5;
+  const checkpoints =
+    input.objectivePhase === "pickup"
+      ? [
+          { label: "Pickup", state: "active" },
+          { label: "Dock", state: "locked" }
+        ]
+      : [
+          { label: "Pickup", state: "complete" },
+          { label: "Dock", state: dockCheckpointState(input) }
+        ];
+
+  return {
+    label: "Route",
+    action: input.objectivePhase === "pickup" ? "Pickup" : "Dock",
+    detail: `${Math.round(input.targetDistance)}m`,
+    tone: routeProgressTone(input),
+    progress: round(progress, 2),
+    checkpoints: checkpoints as RouteProgressCheckpoint[]
+  };
+}
+
+function routeProgressTone(input: RouteProgressRailInput): RouteProgressRailPresentation["tone"] {
+  if (input.objectivePhase === "pickup") {
+    return "pickup";
+  }
+
+  if (input.landingStatus === "ready") {
+    return "ready";
+  }
+
+  if (input.landingStatus === "too-fast" || input.landingStatus === "misaligned") {
+    return "warning";
+  }
+
+  return "delivery";
+}
+
+function dockCheckpointState(input: RouteProgressRailInput): RouteProgressCheckpoint["state"] {
+  if (input.landingStatus === "ready") {
+    return "ready";
+  }
+
+  if (input.landingStatus === "too-fast" || input.landingStatus === "misaligned") {
+    return "warning";
+  }
+
+  return "active";
 }
 
 export function buildRouteFocusReadout(input: RouteFocusReadoutInput): RouteFocusReadout | undefined {
@@ -553,4 +637,13 @@ function styleMultiplier(input: TacticalCueInput): number {
 
 function formatSeconds(seconds?: number): string {
   return `${(seconds ?? 0).toFixed(1)}s`;
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+function round(value: number, digits: number): number {
+  const scale = 10 ** digits;
+  return Math.round(value * scale) / scale;
 }

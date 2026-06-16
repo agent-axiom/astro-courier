@@ -3,6 +3,7 @@ import {
   buildExpressFinishReadout,
   buildObjectiveDirective,
   buildObjectiveInterceptReadout,
+  buildRouteProgressRailPresentation,
   buildRouteFocusReadout,
   buildTacticalCue
 } from "./objective";
@@ -115,6 +116,70 @@ describe("objective intercept readout", () => {
       label: "Intercept",
       value: "ETA 30.0s",
       tone: "slow"
+    });
+  });
+});
+
+describe("route progress rail presentation", () => {
+  it("stays hidden outside active target navigation", () => {
+    expect(
+      buildRouteProgressRailPresentation({
+        status: "paused",
+        preflightOpen: true,
+        objectivePhase: "pickup",
+        targetDistance: 180
+      })
+    ).toBeUndefined();
+
+    expect(
+      buildRouteProgressRailPresentation({
+        status: "flying",
+        preflightOpen: false,
+        objectivePhase: "pickup"
+      })
+    ).toBeUndefined();
+  });
+
+  it("turns pickup approach into a two-step route rail", () => {
+    expect(
+      buildRouteProgressRailPresentation({
+        status: "flying",
+        preflightOpen: false,
+        objectivePhase: "pickup",
+        targetDistance: 210
+      })
+    ).toEqual({
+      label: "Route",
+      action: "Pickup",
+      detail: "210m",
+      tone: "pickup",
+      progress: 0.25,
+      checkpoints: [
+        { label: "Pickup", state: "active" },
+        { label: "Dock", state: "locked" }
+      ]
+    });
+  });
+
+  it("marks pickup complete and lights the dock leg during delivery", () => {
+    expect(
+      buildRouteProgressRailPresentation({
+        status: "flying",
+        preflightOpen: false,
+        objectivePhase: "delivery",
+        targetDistance: 84,
+        landingStatus: "ready"
+      })
+    ).toEqual({
+      label: "Route",
+      action: "Dock",
+      detail: "84m",
+      tone: "ready",
+      progress: 0.9,
+      checkpoints: [
+        { label: "Pickup", state: "complete" },
+        { label: "Dock", state: "ready" }
+      ]
     });
   });
 });
