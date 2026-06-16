@@ -13,6 +13,9 @@ describe("preflight overlay density", () => {
       mode: "focused",
       showContractBriefing: false,
       showControlPrimer: true,
+      showLaunchSummary: true,
+      showCargoManifest: false,
+      showRoutePlanBriefing: false,
       showProgressMeta: false,
       showBestChase: false,
       showRouteMarkTarget: false,
@@ -39,6 +42,9 @@ describe("preflight overlay density", () => {
       mode: "focused",
       showContractBriefing: false,
       showControlPrimer: false,
+      showLaunchSummary: true,
+      showCargoManifest: false,
+      showRoutePlanBriefing: false,
       showProgressMeta: true,
       showBestChase: false,
       showRouteMarkTarget: false,
@@ -65,6 +71,9 @@ describe("preflight overlay density", () => {
       mode: "expanded",
       showContractBriefing: false,
       showControlPrimer: false,
+      showLaunchSummary: false,
+      showCargoManifest: true,
+      showRoutePlanBriefing: true,
       showProgressMeta: true,
       showBestChase: true,
       showRouteMarkTarget: true,
@@ -81,13 +90,16 @@ describe("preflight overlay density", () => {
   });
 
   it("keeps daily streak context visible after a daily clear", () => {
-    expect(
-      buildPreflightOverlayDensity({
-        status: "paused",
-        preflightOpen: true,
-        savedRouteCount: 0,
-        dailyStreak: 2
-      }).showDailyDispatch
-    ).toBe(true);
+    const density = buildPreflightOverlayDensity({
+      status: "paused",
+      preflightOpen: true,
+      savedRouteCount: 0,
+      dailyStreak: 2
+    });
+
+    expect(density.showDailyDispatch).toBe(true);
+    expect(density.showLaunchSummary).toBe(true);
+    expect(density.showCargoManifest).toBe(false);
+    expect(density.showRoutePlanBriefing).toBe(false);
   });
 });

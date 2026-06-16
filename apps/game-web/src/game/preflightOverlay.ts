@@ -11,6 +11,9 @@ export type PreflightOverlayDensity = {
   mode: "focused" | "expanded";
   showContractBriefing: boolean;
   showControlPrimer: boolean;
+  showLaunchSummary: boolean;
+  showCargoManifest: boolean;
+  showRoutePlanBriefing: boolean;
   showProgressMeta: boolean;
   showBestChase: boolean;
   showRouteMarkTarget: boolean;
@@ -36,6 +39,9 @@ export function buildPreflightOverlayDensity(input: PreflightOverlayDensityInput
       mode: "focused",
       showContractBriefing: false,
       showControlPrimer: activePreflight,
+      showLaunchSummary: activePreflight,
+      showCargoManifest: false,
+      showRoutePlanBriefing: false,
       showProgressMeta: false,
       showBestChase: false,
       showRouteMarkTarget: false,
@@ -56,6 +62,9 @@ export function buildPreflightOverlayDensity(input: PreflightOverlayDensityInput
       mode: "focused",
       showContractBriefing: false,
       showControlPrimer: false,
+      showLaunchSummary: true,
+      showCargoManifest: false,
+      showRoutePlanBriefing: false,
       showProgressMeta: true,
       showBestChase: false,
       showRouteMarkTarget: false,
@@ -75,6 +84,9 @@ export function buildPreflightOverlayDensity(input: PreflightOverlayDensityInput
     mode: "expanded",
     showContractBriefing: false,
     showControlPrimer: false,
+    showLaunchSummary: false,
+    showCargoManifest: true,
+    showRoutePlanBriefing: true,
     showProgressMeta: true,
     showBestChase: true,
     showRouteMarkTarget: true,

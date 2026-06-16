@@ -1899,16 +1899,34 @@ export function App() {
           <div className="preflight-kicker">{preflightKicker}</div>
           <h2>{hud.contractTitle}</h2>
           {preflightOverlayDensity.showContractBriefing ? <p>{hud.contractBriefing}</p> : null}
-          <div className="cargo-manifest" aria-label="Cargo manifest">
-            <PackageCheck size={18} />
-            <span>{cargoManifest.label}</span>
-            <strong>{cargoManifest.value}</strong>
-          </div>
-          <div className={`route-plan-briefing route-plan-${routePlan.tone}`} aria-label={`${routePlan.label}: ${routePlan.value}`}>
-            <Route size={18} />
-            <span>{routePlan.label}</span>
-            <strong>{routePlan.value}</strong>
-          </div>
+          {preflightOverlayDensity.showLaunchSummary ? (
+            <div className="preflight-launch-summary" aria-label={`Launch summary: ${hud.cargoName}. ${hud.pickupLabel} to ${hud.destinationLabel}`}>
+              <span>
+                <PackageCheck size={16} />
+                <strong>{hud.cargoName}</strong>
+              </span>
+              <span>
+                <Route size={16} />
+                <strong>
+                  {hud.pickupLabel} -&gt; {hud.destinationLabel}
+                </strong>
+              </span>
+            </div>
+          ) : null}
+          {preflightOverlayDensity.showCargoManifest ? (
+            <div className="cargo-manifest" aria-label="Cargo manifest">
+              <PackageCheck size={18} />
+              <span>{cargoManifest.label}</span>
+              <strong>{cargoManifest.value}</strong>
+            </div>
+          ) : null}
+          {preflightOverlayDensity.showRoutePlanBriefing ? (
+            <div className={`route-plan-briefing route-plan-${routePlan.tone}`} aria-label={`${routePlan.label}: ${routePlan.value}`}>
+              <Route size={18} />
+              <span>{routePlan.label}</span>
+              <strong>{routePlan.value}</strong>
+            </div>
+          ) : null}
           {preflightOverlayDensity.showRoutePressure ? (
             <div
               className={`route-pressure-briefing route-pressure-${routePressure.tone}`}

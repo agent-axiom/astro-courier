@@ -3113,7 +3113,7 @@ button {
 }
 
 .preflight-overlay-focused .preflight-cover-art {
-  width: min(100%, 440px);
+  width: min(100%, 390px);
   margin-bottom: 2px;
   border-color: rgba(255, 209, 102, 0.34);
   box-shadow:
@@ -3131,6 +3131,10 @@ button {
 
 .preflight-overlay-focused h2 {
   font-size: 1.16rem;
+}
+
+.preflight-overlay-focused .preflight-launch-summary {
+  margin-top: -2px;
 }
 
 .preflight-overlay-focused .cargo-manifest,
@@ -3219,6 +3223,40 @@ button {
   color: #c9d8f2;
   font-size: 0.93rem;
   line-height: 1.45;
+}
+
+.preflight-launch-summary {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.preflight-launch-summary span {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  align-items: center;
+  min-height: 36px;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(124, 225, 255, 0.18);
+  border-radius: 8px;
+  background: rgba(124, 225, 255, 0.08);
+  color: #d9f7ff;
+}
+
+.preflight-launch-summary svg {
+  color: #7ce1ff;
+}
+
+.preflight-launch-summary strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #f7fbff;
+  font-size: 0.84rem;
+  font-weight: 850;
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cargo-manifest {
@@ -6141,6 +6179,7 @@ button {
   .preflight-cover-art,
   .preflight-overlay h2,
   .preflight-overlay p,
+  .preflight-launch-summary,
   .cargo-manifest,
   .control-primer,
   .contract-modifiers,
@@ -6312,7 +6351,7 @@ button {
   }
 
   .preflight-overlay-focused .preflight-cover-art {
-    width: min(100%, 300px);
+    width: min(100%, 280px);
   }
 
   .rush-briefing {
