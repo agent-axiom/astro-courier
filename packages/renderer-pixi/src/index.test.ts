@@ -23,6 +23,7 @@ import {
   shipBoostReadinessVisual,
   shipShieldReserveVisual,
   shipTrailVisual,
+  speedLineVisual,
   trajectoryHazardDanger,
   trajectoryHazardMarkerVisual,
   trajectoryGravitySlingSignal,
@@ -150,6 +151,32 @@ describe("screen shake offset", () => {
     });
 
     expect(Math.hypot(hazard.x, hazard.y)).toBeGreaterThan(Math.hypot(boost.x, boost.y));
+  });
+});
+
+describe("speed line visual", () => {
+  it("stays hidden in menus and low-speed flight", () => {
+    expect(speedLineVisual({ status: "paused", velocity: { x: 90, y: 0 }, tick: 12 })).toBeUndefined();
+    expect(speedLineVisual({ status: "flying", velocity: { x: 18, y: 0 }, tick: 12 })).toBeUndefined();
+  });
+
+  it("adds denser longer streaks as courier speed climbs", () => {
+    const sprint = speedLineVisual({ status: "flying", velocity: { x: 42, y: 0 }, tick: 8 });
+    const warp = speedLineVisual({ status: "flying", velocity: { x: 92, y: 0 }, tick: 8 });
+
+    expect(sprint).toMatchObject({
+      angle: 0,
+      color: 0x7ce1ff,
+      tone: "sprint"
+    });
+    expect(sprint?.count).toBeGreaterThanOrEqual(8);
+    expect(warp).toMatchObject({
+      color: 0xbff7ff,
+      tone: "warp"
+    });
+    expect(warp?.count).toBeGreaterThan(sprint?.count ?? 0);
+    expect(warp?.length).toBeGreaterThan(sprint?.length ?? 0);
+    expect(warp?.alpha).toBeGreaterThan(sprint?.alpha ?? 0);
   });
 });
 

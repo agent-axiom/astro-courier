@@ -94,6 +94,43 @@ function screenShakeMilestoneMagnitude(milestone?: string): number {
   return styleShockwaveSpec(milestone) ? 2.5 : 0;
 }
 
+export type SpeedLineVisualInput = Pick<SimulationSnapshot, "status" | "tick"> & {
+  velocity: Vec2;
+};
+
+export type SpeedLineVisual = {
+  color: number;
+  tone: "sprint" | "warp";
+  angle: number;
+  count: number;
+  length: number;
+  width: number;
+  alpha: number;
+  drift: number;
+};
+
+const SPEED_LINE_MIN_SPEED = 32;
+
+export function speedLineVisual(input: SpeedLineVisualInput): SpeedLineVisual | undefined {
+  const speed = Math.hypot(input.velocity.x, input.velocity.y);
+  if (input.status !== "flying" || speed < SPEED_LINE_MIN_SPEED) {
+    return undefined;
+  }
+
+  const pressure = clamp((speed - SPEED_LINE_MIN_SPEED) / 60, 0, 1);
+  const tone: SpeedLineVisual["tone"] = speed >= 72 ? "warp" : "sprint";
+  return {
+    color: tone === "warp" ? 0xbff7ff : 0x7ce1ff,
+    tone,
+    angle: round(Math.atan2(input.velocity.y, input.velocity.x), 3),
+    count: Math.round(8 + pressure * 18),
+    length: round(28 + pressure * 54, 2),
+    width: round(1 + pressure * 0.8, 2),
+    alpha: round(0.08 + pressure * 0.16, 2),
+    drift: round(positiveModulo(input.tick * (0.018 + pressure * 0.032), 1), 3)
+  };
+}
+
 export function objectiveBeaconPulse(tick: number): { radius: number; alpha: number } {
   const wave = (Math.sin(tick * 0.12) + 1) / 2;
   return {
@@ -1253,7 +1290,7 @@ class PixiRenderer implements AstroPixiRenderer {
       y: (point.y - camera.y) * zoom + viewport.height / 2 + shake.y
     });
 
-    this.drawBackground(viewport, snapshot.tick);
+    this.drawBackground(viewport, snapshot);
     this.drawGravity(snapshot, project);
     this.drawGhostTrail(ghostTrail, project, snapshot);
     this.drawTrajectory(trajectory, project, snapshot);
@@ -1271,15 +1308,36 @@ class PixiRenderer implements AstroPixiRenderer {
     this.app = undefined;
   }
 
-  private drawBackground(viewport: { width: number; height: number }, tick: number): void {
+  private drawBackground(viewport: { width: number; height: number }, snapshot: SimulationSnapshot): void {
     this.background.clear();
     this.background.rect(0, 0, viewport.width, viewport.height).fill(0x080a18);
+    const tick = snapshot.tick;
+    const speedLines = speedLineVisual({
+      status: snapshot.status,
+      velocity: snapshot.ship.velocity,
+      tick
+    });
 
     for (const star of this.stars) {
       const drift = tick * 0.018 * star.radius;
       const x = positiveModulo(star.x * viewport.width - drift, viewport.width);
       const y = positiveModulo(star.y * viewport.height + drift * 0.18, viewport.height);
       this.background.circle(x, y, star.radius).fill({ color: 0xffffff, alpha: star.alpha });
+    }
+
+    if (speedLines) {
+      const dx = Math.cos(speedLines.angle) * speedLines.length;
+      const dy = Math.sin(speedLines.angle) * speedLines.length;
+      for (let index = 0; index < speedLines.count; index += 1) {
+        const star = this.stars[(index * 7) % this.stars.length];
+        const lane = speedLines.drift + index * 0.071;
+        const x = positiveModulo((star.x + lane) * viewport.width, viewport.width);
+        const y = positiveModulo((star.y + lane * 0.37) * viewport.height, viewport.height);
+        this.background
+          .moveTo(x, y)
+          .lineTo(x - dx, y - dy)
+          .stroke({ color: speedLines.color, width: speedLines.width, alpha: speedLines.alpha });
+      }
     }
   }
 
