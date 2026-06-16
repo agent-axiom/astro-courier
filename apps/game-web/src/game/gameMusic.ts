@@ -3,7 +3,7 @@ import { normalizeGameMusicManifest, selectGameplayMusicTrack, type GameMusicMan
 export type GameMusicController = {
   loadManifest: () => Promise<void>;
   playMenu: () => Promise<void>;
-  playGameplay: () => Promise<void>;
+  playGameplay: (options?: { forceNewTrack?: boolean }) => Promise<void>;
   stop: () => void;
   setMuted: (muted: boolean) => void;
   destroy: () => void;
@@ -62,17 +62,18 @@ export function createGameMusicController(options: GameMusicControllerOptions = 
       }
       await playTrack(menuAudio, muted);
     },
-    async playGameplay() {
+    async playGameplay(options = {}) {
       await loadManifest();
-      const wasGameplay = mode === "gameplay";
+      pauseTrack(menuAudio);
+      const wasGameplay = mode === "gameplay" && !options.forceNewTrack;
       const nextGameplaySrc = wasGameplay && gameplaySrc ? gameplaySrc : selectGameplayMusicTrack(manifest, random);
       if (!nextGameplaySrc) {
         return;
       }
 
-      pauseTrack(menuAudio);
       mode = "gameplay";
       if (!gameplayAudio || gameplaySrc !== nextGameplaySrc) {
+        pauseTrack(gameplayAudio);
         gameplaySrc = nextGameplaySrc;
         gameplayAudio = createTrack(nextGameplaySrc, true);
       } else if (!wasGameplay) {

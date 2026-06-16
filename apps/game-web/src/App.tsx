@@ -1144,7 +1144,7 @@ export function App() {
 
   const launchContract = () => {
     audioRef.current?.unlock();
-    void musicRef.current?.playGameplay();
+    void musicRef.current?.playGameplay({ forceNewTrack: true });
     playRouteActionEvents(
       buildLaunchAudioEvents({
         status: hud.status,
@@ -1192,7 +1192,7 @@ export function App() {
 
   const restartActiveRun = () => {
     audioRef.current?.unlock();
-    void musicRef.current?.playGameplay();
+    void musicRef.current?.playGameplay({ forceNewTrack: true });
     resetRunUiState();
     applyRestartFlowTransition("direct-run");
   };
