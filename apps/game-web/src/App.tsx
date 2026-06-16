@@ -90,7 +90,12 @@ import {
 } from "./game/objective";
 import { buildFlightDirector } from "./game/flightDirector";
 import { buildPreflightBonusObjectives, buildPreflightMasteryTargets } from "./game/mastery";
-import { buildApproachRewardReadout, buildDockingSpeedReadout, buildLandingGuidancePresentation } from "./game/docking";
+import {
+  buildApproachRewardReadout,
+  buildDockingLanePresentation,
+  buildDockingSpeedReadout,
+  buildLandingGuidancePresentation
+} from "./game/docking";
 import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./game/cargo";
 import {
   buildDockGradeReceipt,
@@ -601,6 +606,16 @@ export function App() {
     targetDistance: hud.targetDistance
   });
   const approachRewardReadout = buildApproachRewardReadout({ approachStreakSeconds: hud.approachStreakSeconds });
+  const dockingLane = buildDockingLanePresentation({
+    status: hud.status,
+    objectivePhase: hud.objectivePhase,
+    targetDistance: hud.targetDistance,
+    landingStatus: hud.landingStatus,
+    speed: hud.speed,
+    allowedSpeed: hud.targetAllowedSpeed,
+    approachStreakSeconds: hud.approachStreakSeconds,
+    assistAvailable: Boolean(hud.assistAvailable)
+  });
   const landingGuidancePresentation = hud.landingStatus
     ? buildLandingGuidancePresentation({
         status: hud.landingStatus,
@@ -611,6 +626,7 @@ export function App() {
         requiredAngleTolerance: hud.targetRequiredAngleTolerance
       })
     : undefined;
+  const dockingLaneStyle = { "--docking-lane-progress": dockingLane?.progress ?? 0 } as CSSProperties;
   const approachStreakStyle = { "--approach-streak-progress": approachRewardReadout?.progress ?? 0 } as CSSProperties;
   const primaryRunControl = buildPrimaryRunControlPresentation({ preflightOpen, paused });
   const canBoost = canUseImpulseControl({
@@ -1406,6 +1422,26 @@ export function App() {
             {liveHudDensity.expanded ? <span>{flightDirector.label}</span> : null}
             <strong>{flightDirector.action}</strong>
             <small>{flightDirector.detail}</small>
+          </div>
+        ) : null}
+        {liveHudDensity.showDockingLane && dockingLane ? (
+          <div
+            className={`docking-lane docking-lane-${dockingLane.tone}`}
+            style={dockingLaneStyle}
+            aria-label={`${dockingLane.label}: ${dockingLane.action}. ${dockingLane.detail}`}
+          >
+            <Target size={16} />
+            <span>{dockingLane.label}</span>
+            <strong>{dockingLane.action}</strong>
+            <small>{dockingLane.detail}</small>
+            <div className="docking-lane-rail" aria-hidden="true">
+              {dockingLane.segments.map((segment) => (
+                <i key={segment.label} className={`docking-lane-segment docking-lane-segment-${segment.state}`}>
+                  {segment.label}
+                </i>
+              ))}
+            </div>
+            {dockingLane.reward ? <b>{dockingLane.reward}</b> : null}
           </div>
         ) : null}
         {liveHudDensity.showRouteTempo && routeTempo ? (

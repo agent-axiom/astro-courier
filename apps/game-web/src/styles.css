@@ -1150,6 +1150,137 @@ button {
   background: linear-gradient(90deg, #ff4d6d, #ffd166);
 }
 
+.docking-lane {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px 8px;
+  min-height: 74px;
+  padding: 9px 10px 12px;
+  overflow: hidden;
+  border: 1px solid rgba(142, 230, 184, 0.28);
+  border-radius: 7px;
+  background: rgba(142, 230, 184, 0.13);
+  color: #dfffee;
+  font-size: 0.78rem;
+  font-weight: 880;
+}
+
+.docking-lane::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+  height: 3px;
+  transform: scaleX(var(--docking-lane-progress, 0));
+  transform-origin: left center;
+  background: linear-gradient(90deg, #7ce1ff, #8ee6b8, #ffd166);
+  opacity: 0.95;
+}
+
+.docking-lane span,
+.docking-lane strong,
+.docking-lane small,
+.docking-lane b {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.1;
+}
+
+.docking-lane span {
+  color: rgba(234, 255, 243, 0.72);
+}
+
+.docking-lane strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.docking-lane small {
+  grid-column: 2 / -1;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.72rem;
+}
+
+.docking-lane b {
+  grid-column: 2 / -1;
+  color: #ffe19a;
+  font-size: 0.72rem;
+  text-align: right;
+}
+
+.docking-lane-rail {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.docking-lane-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 20px;
+  border-radius: 5px;
+  font-size: 0.66rem;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.docking-lane-segment-locked {
+  background: rgba(160, 196, 255, 0.1);
+  color: rgba(216, 230, 255, 0.58);
+}
+
+.docking-lane-segment-warning {
+  background: rgba(255, 209, 102, 0.18);
+  color: #ffe19a;
+}
+
+.docking-lane-segment-danger {
+  background: rgba(255, 111, 145, 0.2);
+  color: #ffadc1;
+}
+
+.docking-lane-segment-ready {
+  background: rgba(142, 230, 184, 0.22);
+  color: #eafff3;
+}
+
+.docking-lane-warning {
+  border-color: rgba(255, 209, 102, 0.36);
+  background: rgba(255, 209, 102, 0.16);
+  color: #ffe19a;
+}
+
+.docking-lane-warning::after {
+  background: linear-gradient(90deg, #7ce1ff, #ffd166);
+}
+
+.docking-lane-danger {
+  border-color: rgba(255, 111, 145, 0.42);
+  background: rgba(255, 111, 145, 0.17);
+  color: #ffadc1;
+}
+
+.docking-lane-danger::after {
+  background: linear-gradient(90deg, #ff4d6d, #ffd166);
+}
+
+.docking-lane-assist {
+  border-color: rgba(124, 225, 255, 0.38);
+  background: rgba(124, 225, 255, 0.16);
+  color: #c6f6ff;
+}
+
+.docking-lane-assist::after {
+  background: linear-gradient(90deg, #7ce1ff, #8ee6b8);
+}
+
 .tempo-chip {
   position: relative;
   isolation: isolate;

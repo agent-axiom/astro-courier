@@ -25,6 +25,7 @@ export type LiveHudDensity = {
   showRouteTempo: boolean;
   showPrimaryStatusRows: boolean;
   showActionChips: boolean;
+  showDockingLane: boolean;
   showTelemetryChips: boolean;
   showRunFeed: boolean;
 };
@@ -41,6 +42,7 @@ export function buildLiveHudDensity(input: LiveHudDensityInput): LiveHudDensity 
       showRouteTempo: false,
       showPrimaryStatusRows: false,
       showActionChips: false,
+      showDockingLane: false,
       showTelemetryChips: false,
       showRunFeed: false
     };
@@ -54,14 +56,19 @@ export function buildLiveHudDensity(input: LiveHudDensityInput): LiveHudDensity 
       showRouteTempo: true,
       showPrimaryStatusRows: true,
       showActionChips: true,
+      showDockingLane: false,
       showTelemetryChips: true,
       showRunFeed: true
     };
   }
 
-  const approachProblem = input.landingStatus === "too-fast" || input.landingStatus === "misaligned";
+  const dockingLaneFocus =
+    input.objectivePhase === "delivery" &&
+    input.targetDistance !== undefined &&
+    input.targetDistance <= 120 &&
+    (input.landingStatus === "ready" || input.landingStatus === "too-fast" || input.landingStatus === "misaligned");
   const hazardContactPressure = input.hazardDangerLevel === "inside";
-  const dangerPressure = hazardContactPressure || input.trajectoryRiskLevel !== undefined || approachProblem;
+  const dangerPressure = hazardContactPressure || input.trajectoryRiskLevel !== undefined;
   const readyDockFocus = input.objectivePhase === "delivery" && input.landingStatus === "ready";
   const activeOpportunity =
     (input.styleMultiplier ?? 1) > 1 ||
@@ -81,6 +88,7 @@ export function buildLiveHudDensity(input: LiveHudDensityInput): LiveHudDensity 
     showRouteTempo: expanded && !readyDockFocus,
     showPrimaryStatusRows: false,
     showActionChips: (dangerPressure || activeOpportunity) && !readyDockFocus,
+    showDockingLane: dockingLaneFocus,
     showTelemetryChips: dangerPressure || fragileState,
     showRunFeed: false
   };

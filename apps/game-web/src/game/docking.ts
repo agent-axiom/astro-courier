@@ -1,5 +1,5 @@
 import { CONTROLLED_DOCK_SPEED_RATIO, PERFECT_APPROACH_STREAK_SECONDS, PERFECT_APPROACH_STYLE_BONUS } from "@astro-courier/simulation";
-import type { LandingGuidanceStatus } from "@astro-courier/shared";
+import type { LandingGuidanceStatus, ObjectivePhase, RunStatus } from "@astro-courier/shared";
 
 export type DockingSpeedReadoutInput = {
   speed: number;
@@ -38,7 +38,34 @@ export type LandingGuidancePresentation = {
   tone: "approach" | "too-fast" | "misaligned" | "ready" | "soft" | "assist";
 };
 
+export type DockingLanePresentationInput = {
+  status: RunStatus;
+  objectivePhase: ObjectivePhase;
+  targetDistance?: number;
+  landingStatus?: LandingGuidanceStatus;
+  speed: number;
+  allowedSpeed?: number;
+  approachStreakSeconds?: number;
+  assistAvailable?: boolean;
+};
+
+export type DockingLaneSegment = {
+  label: "Align" | "Brake" | "Touch";
+  state: "locked" | "warning" | "danger" | "ready";
+};
+
+export type DockingLanePresentation = {
+  label: "Dock lane";
+  action: string;
+  detail: string;
+  tone: "approach" | "warning" | "danger" | "ready" | "assist";
+  progress: number;
+  segments: DockingLaneSegment[];
+  reward?: string;
+};
+
 const FINAL_APPROACH_BRAKE_DISTANCE = 70;
+const DOCKING_LANE_DISTANCE = 120;
 
 export function buildLandingGuidanceLabel(input: LandingGuidanceLabelInput): string {
   return buildLandingGuidancePresentation(input).label;
@@ -100,6 +127,88 @@ export function buildApproachRewardReadout(input: ApproachRewardReadoutInput): A
     tone: "charging",
     progress: round(clamp(input.approachStreakSeconds / PERFECT_APPROACH_STREAK_SECONDS, 0, 1), 2)
   };
+}
+
+export function buildDockingLanePresentation(input: DockingLanePresentationInput): DockingLanePresentation | undefined {
+  if (
+    input.status !== "flying" ||
+    input.objectivePhase !== "delivery" ||
+    input.targetDistance === undefined ||
+    input.targetDistance > DOCKING_LANE_DISTANCE ||
+    input.landingStatus === undefined ||
+    input.landingStatus === "approach"
+  ) {
+    return undefined;
+  }
+
+  const progress = round(clamp(1 - input.targetDistance / DOCKING_LANE_DISTANCE, 0, 1), 2);
+  const distanceDetail = `${Math.round(input.targetDistance)}m / ${input.speed.toFixed(1)}`;
+
+  if (input.assistAvailable) {
+    return {
+      label: "Dock lane",
+      action: "Assist ready",
+      detail: distanceDetail,
+      tone: "assist",
+      progress,
+      segments: readySegments(),
+      reward: buildDockingLaneReward(input.approachStreakSeconds)
+    };
+  }
+
+  if (input.landingStatus === "ready") {
+    return {
+      label: "Dock lane",
+      action: "Land now",
+      detail: distanceDetail,
+      tone: "ready",
+      progress,
+      segments: readySegments(),
+      reward: buildDockingLaneReward(input.approachStreakSeconds)
+    };
+  }
+
+  if (input.landingStatus === "too-fast") {
+    return {
+      label: "Dock lane",
+      action: "Brake",
+      detail: input.allowedSpeed === undefined ? input.speed.toFixed(1) : `${input.speed.toFixed(1)} / ${input.allowedSpeed.toFixed(1)}`,
+      tone: "danger",
+      progress,
+      segments: [
+        { label: "Align", state: "ready" },
+        { label: "Brake", state: "danger" },
+        { label: "Touch", state: "locked" }
+      ]
+    };
+  }
+
+  return {
+    label: "Dock lane",
+    action: "Align",
+    detail: distanceDetail,
+    tone: "warning",
+    progress,
+    segments: [
+      { label: "Align", state: "warning" },
+      { label: "Brake", state: input.allowedSpeed !== undefined && input.speed > input.allowedSpeed ? "danger" : "ready" },
+      { label: "Touch", state: "locked" }
+    ]
+  };
+}
+
+function readySegments(): DockingLaneSegment[] {
+  return [
+    { label: "Align", state: "ready" },
+    { label: "Brake", state: "ready" },
+    { label: "Touch", state: "ready" }
+  ];
+}
+
+function buildDockingLaneReward(approachStreakSeconds: number | undefined): string | undefined {
+  return approachStreakSeconds !== undefined && approachStreakSeconds >= PERFECT_APPROACH_STREAK_SECONDS
+    ? `+${PERFECT_APPROACH_STYLE_BONUS} setup`
+    : undefined;
 }
 
 function clamp(value: number, min: number, max: number): number {

@@ -20,6 +20,7 @@ describe("live HUD density", () => {
       showRouteTempo: false,
       showPrimaryStatusRows: false,
       showActionChips: false,
+      showDockingLane: false,
       showTelemetryChips: false,
       showRunFeed: false
     });
@@ -39,6 +40,7 @@ describe("live HUD density", () => {
       showRouteTempo: false,
       showPrimaryStatusRows: false,
       showActionChips: false,
+      showDockingLane: false,
       showTelemetryChips: false,
       showRunFeed: false
     });
@@ -92,6 +94,7 @@ describe("live HUD density", () => {
     expect(finalApproachDensity.showRadioMessage).toBe(false);
     expect(finalApproachDensity.showRouteTempo).toBe(false);
     expect(finalApproachDensity.showPrimaryStatusRows).toBe(false);
+    expect(finalApproachDensity.showDockingLane).toBe(false);
     expect(finalApproachDensity.showTelemetryChips).toBe(false);
     expect(finalApproachDensity.showRunFeed).toBe(false);
 
@@ -111,6 +114,7 @@ describe("live HUD density", () => {
       showRadioMessage: false,
       showRouteTempo: false,
       showActionChips: false,
+      showDockingLane: false,
       showTelemetryChips: false
     });
 
@@ -126,11 +130,12 @@ describe("live HUD density", () => {
         landingStatus: "misaligned"
       })
     ).toMatchObject({
-      expanded: true,
-      showRadioMessage: true,
-      showRouteTempo: true,
-      showActionChips: true,
-      showTelemetryChips: true
+      expanded: false,
+      showRadioMessage: false,
+      showRouteTempo: false,
+      showActionChips: false,
+      showDockingLane: true,
+      showTelemetryChips: false
     });
 
     expect(
@@ -169,8 +174,30 @@ describe("live HUD density", () => {
       showRouteTempo: false,
       showPrimaryStatusRows: false,
       showActionChips: false,
+      showDockingLane: true,
       showTelemetryChips: false,
       showRunFeed: false
+    });
+  });
+
+  it("shows a docking lane for final approach problems without opening the whole panel", () => {
+    expect(
+      buildLiveHudDensity({
+        status: "flying",
+        preflightOpen: false,
+        objectivePhase: "delivery",
+        targetDistance: 54,
+        cargoDamage: 0,
+        fuelRatio: 0.72,
+        paceTier: "silver",
+        landingStatus: "too-fast"
+      })
+    ).toMatchObject({
+      expanded: false,
+      showRadioMessage: false,
+      showActionChips: false,
+      showDockingLane: true,
+      showTelemetryChips: false
     });
   });
 
@@ -251,6 +278,7 @@ describe("live HUD density", () => {
       showRouteTempo: false,
       showPrimaryStatusRows: false,
       showActionChips: false,
+      showDockingLane: false,
       showTelemetryChips: false,
       showRunFeed: false
     });
@@ -296,6 +324,7 @@ describe("live HUD density", () => {
       showRouteTempo: false,
       showPrimaryStatusRows: false,
       showActionChips: false,
+      showDockingLane: false,
       showTelemetryChips: false,
       showRunFeed: false
     });

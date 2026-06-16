@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { buildApproachRewardReadout, buildDockingSpeedReadout, buildLandingGuidanceLabel, buildLandingGuidancePresentation } from "./docking";
+import {
+  buildApproachRewardReadout,
+  buildDockingLanePresentation,
+  buildDockingSpeedReadout,
+  buildLandingGuidanceLabel,
+  buildLandingGuidancePresentation
+} from "./docking";
 
 describe("docking speed readout", () => {
   it("stays hidden until a target speed limit is known", () => {
@@ -100,5 +106,99 @@ describe("landing guidance label", () => {
 
   it("keeps assist availability above ordinary landing guidance", () => {
     expect(buildLandingGuidanceLabel({ status: "too-fast", assistAvailable: true })).toBe("Assist ready");
+  });
+});
+
+describe("docking lane presentation", () => {
+  it("stays hidden until the delivery target is close enough to act on", () => {
+    expect(
+      buildDockingLanePresentation({
+        status: "flying",
+        objectivePhase: "pickup",
+        targetDistance: 42,
+        landingStatus: "ready",
+        speed: 18,
+        allowedSpeed: 42
+      })
+    ).toBeUndefined();
+
+    expect(
+      buildDockingLanePresentation({
+        status: "flying",
+        objectivePhase: "delivery",
+        targetDistance: 121,
+        landingStatus: "approach",
+        speed: 18,
+        allowedSpeed: 42
+      })
+    ).toBeUndefined();
+  });
+
+  it("turns final approach into one clear ready signal", () => {
+    expect(
+      buildDockingLanePresentation({
+        status: "flying",
+        objectivePhase: "delivery",
+        targetDistance: 42,
+        landingStatus: "ready",
+        speed: 18,
+        allowedSpeed: 42,
+        approachStreakSeconds: 1.1
+      })
+    ).toEqual({
+      label: "Dock lane",
+      action: "Land now",
+      detail: "42m / 18.0",
+      tone: "ready",
+      progress: 0.65,
+      segments: [
+        { label: "Align", state: "ready" },
+        { label: "Brake", state: "ready" },
+        { label: "Touch", state: "ready" }
+      ],
+      reward: "+220 setup"
+    });
+  });
+
+  it("names the one thing blocking the landing window", () => {
+    expect(
+      buildDockingLanePresentation({
+        status: "flying",
+        objectivePhase: "delivery",
+        targetDistance: 54,
+        landingStatus: "too-fast",
+        speed: 48,
+        allowedSpeed: 42
+      })
+    ).toMatchObject({
+      action: "Brake",
+      detail: "48.0 / 42.0",
+      tone: "danger",
+      segments: [
+        { label: "Align", state: "ready" },
+        { label: "Brake", state: "danger" },
+        { label: "Touch", state: "locked" }
+      ]
+    });
+
+    expect(
+      buildDockingLanePresentation({
+        status: "flying",
+        objectivePhase: "delivery",
+        targetDistance: 54,
+        landingStatus: "misaligned",
+        speed: 22,
+        allowedSpeed: 42
+      })
+    ).toMatchObject({
+      action: "Align",
+      detail: "54m / 22.0",
+      tone: "warning",
+      segments: [
+        { label: "Align", state: "warning" },
+        { label: "Brake", state: "ready" },
+        { label: "Touch", state: "locked" }
+      ]
+    });
   });
 });
