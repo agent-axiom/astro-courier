@@ -954,6 +954,10 @@ function isControlledActiveDockHaloArrival(world: SimulationWorld, pad: LandingP
     return false;
   }
 
+  if (isActiveObjectiveContact(world, pad) && speed >= DOCK_HALO_SIDE_ON_MIN_SPEED && angleDiff <= pad.requiredAngleTolerance) {
+    return true;
+  }
+
   if (speed <= DOCK_SETTLED_MAX_SPEED) {
     return (
       world.cargoOnboard &&

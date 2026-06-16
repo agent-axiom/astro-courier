@@ -463,6 +463,33 @@ describe("deterministic Astro Courier simulation", () => {
     expect(world.ship.cargoDamage).toBeGreaterThan(0);
   });
 
+  it("counts dock-ready lateral arrivals inside the visible active dock halo as deliveries", () => {
+    const world = createWorldFromSystem(starterSystem, "ready-lateral-halo-seed");
+    world.cargoOnboard = true;
+    world.objectivePhase = "delivery";
+    for (const pad of world.landingPads) {
+      pad.active = pad.role === "destination";
+    }
+    world.ship.position = { x: 205, y: -80 };
+    world.ship.velocity = { x: 0, y: 30 };
+    world.ship.rotation = 0;
+
+    const target = snapshotWorld(world).objectiveTarget;
+    expect(target).toMatchObject({
+      id: "dock-a",
+      landingStatus: "ready"
+    });
+    expect(target?.distance).toBeGreaterThan(22 * 1.7);
+    expect(target?.distance).toBeLessThan(22 * 3);
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("delivered");
+    expect(world.objectivePhase).toBe("complete");
+    expect(world.landingRating).toBe("Spicy Landing");
+    expect(world.crashReason).toBeUndefined();
+  });
+
   it("keeps very hard active target contacts as rough completions instead of hidden failures", () => {
     const world = createWorldFromSystem(starterSystem, "hard-target-contact-seed");
     world.cargoOnboard = true;
