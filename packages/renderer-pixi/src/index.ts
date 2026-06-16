@@ -39,6 +39,24 @@ export function cameraFocus(input: CameraFocusInput): Vec2 {
   };
 }
 
+export type CameraZoomInput = Pick<SimulationSnapshot, "status" | "objectiveTarget"> & {
+  ship: Pick<SimulationSnapshot["ship"], "velocity">;
+};
+
+export function cameraZoom(input: CameraZoomInput): number {
+  if (input.status !== "flying") {
+    return 1;
+  }
+
+  const speed = Math.hypot(input.ship.velocity.x, input.ship.velocity.y);
+  const speedZoomOut = clamp((speed - 24) / 66, 0, 1) * 0.18;
+  const targetDistance = input.objectiveTarget?.distance;
+  const precisionRestore =
+    typeof targetDistance === "number" && targetDistance < 140 ? (1 - clamp(targetDistance / 140, 0, 1)) * 0.14 : 0;
+
+  return round(clamp(1 - speedZoomOut + precisionRestore, 0.82, 1), 2);
+}
+
 export type ScreenShakeInput = Pick<SimulationSnapshot, "status" | "tick" | "lastMilestone" | "nearestHazard">;
 
 export function screenShakeOffset(input: ScreenShakeInput): Vec2 {
@@ -1228,10 +1246,11 @@ class PixiRenderer implements AstroPixiRenderer {
       height: this.app.renderer.height
     };
     const camera = cameraFocus(snapshot);
+    const zoom = cameraZoom(snapshot);
     const shake = screenShakeOffset(snapshot);
     const project = (point: Vec2): Vec2 => ({
-      x: point.x - camera.x + viewport.width / 2 + shake.x,
-      y: point.y - camera.y + viewport.height / 2 + shake.y
+      x: (point.x - camera.x) * zoom + viewport.width / 2 + shake.x,
+      y: (point.y - camera.y) * zoom + viewport.height / 2 + shake.y
     });
 
     this.drawBackground(viewport, snapshot.tick);

@@ -3,6 +3,7 @@ import {
   boostBurstVisual,
   boostSparkVisual,
   cameraFocus,
+  cameraZoom,
   cargoAuraVisual,
   cargoFractureVisual,
   ghostTrailSegmentVisual,
@@ -74,6 +75,39 @@ describe("camera focus", () => {
 
     expect(far.x).toBeGreaterThan(close.x);
     expect(close.x).toBeGreaterThan(10);
+  });
+});
+
+describe("camera zoom", () => {
+  it("keeps preflight and slow flight at readable close range", () => {
+    expect(cameraZoom({ status: "paused", ship: { velocity: { x: 90, y: 0 } } })).toBe(1);
+    expect(cameraZoom({ status: "flying", ship: { velocity: { x: 12, y: 0 } } })).toBe(1);
+  });
+
+  it("pulls back during fast courier runs and eases back in near the target", () => {
+    const openSpace = cameraZoom({ status: "flying", ship: { velocity: { x: 90, y: 0 } } });
+    const nearDock = cameraZoom({
+      status: "flying",
+      ship: { velocity: { x: 90, y: 0 } },
+      objectiveTarget: {
+        id: "dock-a",
+        role: "destination",
+        position: { x: 0, y: 0 },
+        distance: 44,
+        bearing: 0,
+        speed: 90,
+        allowedApproachSpeed: 42,
+        angleError: 0,
+        requiredAngleTolerance: 0.3,
+        assistAvailable: false,
+        landingStatus: "too-fast"
+      }
+    });
+
+    expect(openSpace).toBeLessThan(1);
+    expect(openSpace).toBeGreaterThanOrEqual(0.82);
+    expect(nearDock).toBeGreaterThan(openSpace);
+    expect(nearDock).toBeLessThanOrEqual(1);
   });
 });
 
