@@ -627,6 +627,11 @@ button {
 }
 
 .touch-flight-pad {
+  --touch-stick-x: 0px;
+  --touch-stick-y: 0px;
+  --touch-vector-angle: 0deg;
+  --touch-vector-strength: 0;
+
   position: absolute;
   right: max(18px, env(safe-area-inset-right));
   bottom: max(128px, calc(env(safe-area-inset-bottom) + 96px));
@@ -663,13 +668,34 @@ button {
   border: 1px solid rgba(255, 255, 255, 0.42);
   background: rgba(248, 251, 255, 0.16);
   box-shadow: 0 0 18px rgba(124, 225, 255, 0.22);
+  transform: translate(var(--touch-stick-x), var(--touch-stick-y));
+  transition:
+    background 80ms ease-out,
+    box-shadow 80ms ease-out,
+    transform 80ms ease-out;
 }
 
 .touch-flight-pad-vector {
   width: 58px;
   height: 58px;
   border: 1px dashed rgba(255, 209, 102, 0.48);
-  opacity: 0.72;
+  opacity: calc(0.24 + var(--touch-vector-strength) * 0.58);
+  transform: rotate(var(--touch-vector-angle)) scaleX(calc(0.28 + var(--touch-vector-strength) * 0.72));
+  transform-origin: center;
+  transition:
+    opacity 80ms ease-out,
+    transform 80ms ease-out;
+}
+
+.touch-flight-pad-touching .touch-flight-pad-ring {
+  box-shadow:
+    0 0 0 1px rgba(124, 225, 255, 0.2) inset,
+    0 0 40px rgba(124, 225, 255, 0.2);
+}
+
+.touch-flight-pad-touching .touch-flight-pad-stick {
+  background: rgba(248, 251, 255, 0.28);
+  box-shadow: 0 0 24px rgba(124, 225, 255, 0.32);
 }
 
 .touch-flight-pad-precision .touch-flight-pad-ring {
@@ -2661,13 +2687,38 @@ button {
 }
 
 .preflight-overlay-focused {
-  width: min(420px, calc(100vw - 32px));
+  width: min(500px, calc(100vw - 32px));
   gap: 10px;
   padding: 18px;
+  text-align: center;
+}
+
+.preflight-overlay-focused .preflight-cover-art {
+  width: min(100%, 440px);
+  margin-bottom: 2px;
+  border-color: rgba(255, 209, 102, 0.34);
+  box-shadow:
+    0 22px 54px rgba(0, 0, 0, 0.34),
+    0 0 44px rgba(124, 225, 255, 0.16);
+}
+
+.preflight-overlay-focused .preflight-kicker {
+  display: none;
 }
 
 .preflight-overlay-focused p {
   display: none;
+}
+
+.preflight-overlay-focused h2 {
+  font-size: 1.16rem;
+}
+
+.preflight-overlay-focused .cargo-manifest,
+.preflight-overlay-focused .route-plan-briefing {
+  min-height: 42px;
+  padding: 9px 11px;
+  text-align: left;
 }
 
 .preflight-overlay-focused .signature-maneuver-briefing small {
@@ -2701,6 +2752,10 @@ button {
 .preflight-overlay-focused .preflight-stats span {
   min-height: 58px;
   padding: 8px;
+}
+
+.preflight-overlay-focused .preflight-button small {
+  display: none;
 }
 
 .preflight-cover-art {
@@ -5659,7 +5714,7 @@ button {
   }
 
   .preflight-overlay-focused {
-    width: min(420px, calc(100vw - 48px));
+    width: min(500px, calc(100vw - 48px));
     grid-template-columns: 1fr;
   }
 
@@ -5819,6 +5874,10 @@ button {
 
   .preflight-cover-art {
     width: min(100%, 240px);
+  }
+
+  .preflight-overlay-focused .preflight-cover-art {
+    width: min(100%, 300px);
   }
 
   .rush-briefing {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { buildTouchFlightPadPresentation } from "./touchControls";
+import { buildTouchFlightPadPresentation, buildTouchPointerVisual } from "./touchControls";
 
 const appSource = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
 
@@ -72,10 +72,71 @@ describe("touch flight pad presentation", () => {
   });
 });
 
+describe("touch pointer visual", () => {
+  it("stays centered when the pointer is not actively steering", () => {
+    expect(
+      buildTouchPointerVisual({
+        active: false,
+        center: { x: 200, y: 200 },
+        pointer: { x: 280, y: 220 }
+      })
+    ).toEqual({
+      active: false,
+      offsetX: 0,
+      offsetY: 0,
+      angleDeg: 0,
+      strength: 0
+    });
+  });
+
+  it("converts active drag direction into clamped stick offset and vector strength", () => {
+    expect(
+      buildTouchPointerVisual({
+        active: true,
+        center: { x: 200, y: 200 },
+        pointer: { x: 250, y: 200 },
+        maxOffset: 32,
+        fullStrengthDistance: 100
+      })
+    ).toEqual({
+      active: true,
+      offsetX: 16,
+      offsetY: 0,
+      angleDeg: 0,
+      strength: 0.5
+    });
+
+    expect(
+      buildTouchPointerVisual({
+        active: true,
+        center: { x: 200, y: 200 },
+        pointer: { x: 200, y: 340 },
+        maxOffset: 32,
+        fullStrengthDistance: 100
+      })
+    ).toEqual({
+      active: true,
+      offsetX: 0,
+      offsetY: 32,
+      angleDeg: 90,
+      strength: 1
+    });
+  });
+});
+
 describe("touch flight pad wiring", () => {
   it("feeds live HUD pressure and opportunity signals into the touch pad tone", () => {
     expect(appSource).toMatch(
       /const touchFlightPad = buildTouchFlightPadPresentation\(\{[\s\S]*status: hud\.status,[\s\S]*preflightOpen,[\s\S]*landingStatus: hud\.landingStatus,[\s\S]*hazardDangerLevel: hud\.hazardDangerLevel,[\s\S]*trajectoryRiskLevel: hud\.trajectoryRiskLevel,[\s\S]*gravitySlingReady: hud\.gravitySlingReady,[\s\S]*styleMultiplier: hud\.styleMultiplier,[\s\S]*styleChainSecondsRemaining: hud\.styleChainSecondsRemaining[\s\S]*\}\);/
     );
+  });
+
+  it("feeds pointer drag visuals into touch pad CSS variables", () => {
+    expect(appSource).toContain("const touchPointerStyle = {");
+    expect(appSource).toContain('"--touch-stick-x": `${touchPointer.offsetX}px`');
+    expect(appSource).toContain('"--touch-stick-y": `${touchPointer.offsetY}px`');
+    expect(appSource).toContain('"--touch-vector-angle": `${touchPointer.angleDeg}deg`');
+    expect(appSource).toContain('"--touch-vector-strength": touchPointer.strength');
+    expect(appSource).toContain("style={touchPointerStyle}");
   });
 });

@@ -36,9 +36,15 @@ describe("responsive game layout CSS", () => {
 
   it("defines a focused preflight mode that trims route-selection text", () => {
     expect(styles).toContain(".preflight-overlay-focused");
-    expect(styles).toMatch(/\.preflight-overlay-focused[\s\S]*width: min\(420px, calc\(100vw - 32px\)\);/);
+    expect(styles).toMatch(/\.preflight-overlay-focused[\s\S]*width: min\(500px, calc\(100vw - 32px\)\);/);
     expect(styles).toMatch(/\.preflight-overlay-focused \.contract-option-hook[\s\S]*display: none;/);
     expect(styles).toMatch(/\.preflight-overlay-focused \.contract-option-traits[\s\S]*display: none;/);
+  });
+
+  it("keeps the preflight cover art as the first lightweight menu focus", () => {
+    expect(styles).toMatch(/\.preflight-overlay-focused \.preflight-cover-art[\s\S]*width: min\(100%, 440px\);/);
+    expect(styles).toMatch(/\.preflight-overlay-focused \.preflight-kicker[\s\S]*display: none;/);
+    expect(styles).toMatch(/\.preflight-overlay-focused \.preflight-button small[\s\S]*display: none;/);
   });
 
   it("defines an icon-only first launch control primer", () => {
@@ -96,6 +102,16 @@ describe("responsive game layout CSS", () => {
     expect(styles).toMatch(
       /@media \(max-width: 760px\)[\s\S]*\.touch-flight-pad-active,[\s\S]*\.touch-flight-pad-precision,[\s\S]*\.touch-flight-pad-danger,[\s\S]*\.touch-flight-pad-opportunity[\s\S]*\{[\s\S]*display: grid;/
     );
+  });
+
+  it("maps touch pointer CSS variables into live stick and vector motion", () => {
+    expect(styles).toContain("--touch-stick-x: 0px;");
+    expect(styles).toContain("--touch-stick-y: 0px;");
+    expect(styles).toContain("--touch-vector-angle: 0deg;");
+    expect(styles).toContain("--touch-vector-strength: 0;");
+    expect(styles).toMatch(/\.touch-flight-pad-stick[\s\S]*translate\(var\(--touch-stick-x\), var\(--touch-stick-y\)\)/);
+    expect(styles).toMatch(/\.touch-flight-pad-vector[\s\S]*rotate\(var\(--touch-vector-angle\)\)/);
+    expect(styles).toContain("scaleX(calc(0.28 + var(--touch-vector-strength) * 0.72))");
   });
 
   it("defines tone-aware route tempo action chips", () => {

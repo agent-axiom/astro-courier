@@ -142,7 +142,7 @@ import { createGameAudioController, type GameAudioController } from "./game/game
 import { createGameMusicController, type GameMusicController } from "./game/gameMusic";
 import { createGameHapticsController, type GameHapticsController } from "./game/gameHaptics";
 import { buildAudioTogglePresentation } from "./game/audioControls";
-import { buildTouchFlightPadPresentation } from "./game/touchControls";
+import { buildTouchFlightPadPresentation, buildTouchPointerVisual } from "./game/touchControls";
 import { buildPauseOverlayPresentation, type PauseOverlayActionId } from "./game/pauseOverlay";
 import {
   buildLaunchScreenFeedback,
@@ -238,6 +238,12 @@ const useGameStore = create<GameStore>((set) => ({
   setHud: (hud) => set({ hud })
 }));
 
+const idleTouchPointer = buildTouchPointerVisual({
+  active: false,
+  center: { x: 0, y: 0 },
+  pointer: { x: 0, y: 0 }
+});
+
 export function App() {
   const canvasMountRef = useRef<HTMLDivElement | null>(null);
   const shellRef = useRef<GameShell | null>(null);
@@ -249,12 +255,14 @@ export function App() {
   const previousRunFeedSnapshotRef = useRef<RunFeedSnapshot | undefined>(undefined);
   const nextRunFeedIdRef = useRef(1);
   const screenFeedbackTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const touchPointerActiveRef = useRef(false);
   const hud = useGameStore((state) => state.hud);
   const setHud = useGameStore((state) => state.setHud);
   const [paused, setPaused] = useState(true);
   const [preflightOpen, setPreflightOpen] = useState(true);
   const [audioMuted, setAudioMuted] = useState(false);
   const [screenFeedback, setScreenFeedback] = useState<ActiveScreenFeedback | undefined>(undefined);
+  const [touchPointer, setTouchPointer] = useState(idleTouchPointer);
   const [runFeed, setRunFeed] = useState<RunFeedEntry[]>([]);
   const [resultDismissed, setResultDismissed] = useState(false);
   const [bestRun, setBestRun] = useState<BestRun | undefined>(() => {
@@ -304,6 +312,57 @@ export function App() {
       shellRef.current = null;
     };
   }, [setHud]);
+
+  useEffect(() => {
+    const target = canvasMountRef.current;
+    if (!target) return undefined;
+
+    const readPointerVisual = (event: PointerEvent) => {
+      const rect = target.getBoundingClientRect();
+      return buildTouchPointerVisual({
+        active: true,
+        center: {
+          x: rect.left + rect.width / 2,
+          y: rect.top + rect.height / 2
+        },
+        pointer: {
+          x: event.clientX,
+          y: event.clientY
+        }
+      });
+    };
+
+    const resetPointerVisual = () => {
+      touchPointerActiveRef.current = false;
+      setTouchPointer(idleTouchPointer);
+    };
+
+    const handlePointerDown = (event: PointerEvent) => {
+      touchPointerActiveRef.current = true;
+      setTouchPointer(readPointerVisual(event));
+    };
+
+    const handlePointerMove = (event: PointerEvent) => {
+      if (!touchPointerActiveRef.current) {
+        return;
+      }
+      setTouchPointer(readPointerVisual(event));
+    };
+
+    target.addEventListener("pointerdown", handlePointerDown);
+    target.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", resetPointerVisual);
+    window.addEventListener("pointercancel", resetPointerVisual);
+    window.addEventListener("blur", resetPointerVisual);
+
+    return () => {
+      target.removeEventListener("pointerdown", handlePointerDown);
+      target.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", resetPointerVisual);
+      window.removeEventListener("pointercancel", resetPointerVisual);
+      window.removeEventListener("blur", resetPointerVisual);
+    };
+  }, []);
 
   useEffect(() => {
     const audio = createGameAudioController();
@@ -580,6 +639,12 @@ export function App() {
     styleMultiplier: hud.styleMultiplier,
     styleChainSecondsRemaining: hud.styleChainSecondsRemaining
   });
+  const touchPointerStyle = {
+    "--touch-stick-x": `${touchPointer.offsetX}px`,
+    "--touch-stick-y": `${touchPointer.offsetY}px`,
+    "--touch-vector-angle": `${touchPointer.angleDeg}deg`,
+    "--touch-vector-strength": touchPointer.strength
+  } as CSSProperties;
   const runIntensity = buildRunIntensity({
     status: hud.status,
     preflightOpen,
@@ -1309,7 +1374,11 @@ export function App() {
         </div>
       ) : null}
       {touchFlightPad.visible ? (
-        <div className={`touch-flight-pad touch-flight-pad-${touchFlightPad.tone}`} aria-hidden="true">
+        <div
+          className={`touch-flight-pad touch-flight-pad-${touchFlightPad.tone} ${touchPointer.active ? "touch-flight-pad-touching" : ""}`}
+          style={touchPointerStyle}
+          aria-hidden="true"
+        >
           <span className="touch-flight-pad-ring" />
           <span className="touch-flight-pad-stick" />
           <span className="touch-flight-pad-vector" />
