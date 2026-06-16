@@ -1309,7 +1309,14 @@ button {
 
 .dock-pulse {
   --dock-pulse-progress: 0;
+}
 
+.pickup-pulse {
+  --pickup-pulse-progress: 0;
+}
+
+.dock-pulse,
+.pickup-pulse {
   position: absolute;
   bottom: max(34px, calc(env(safe-area-inset-bottom) + 28px));
   left: 50%;
@@ -1346,28 +1353,46 @@ button {
   content: "";
 }
 
+.pickup-pulse::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: calc(var(--pickup-pulse-progress) * 100%);
+  background: linear-gradient(90deg, #8ee6b8, #7ce1ff, #ffd166);
+  content: "";
+}
+
 .dock-pulse svg,
 .dock-pulse strong,
 .dock-pulse small,
-.dock-pulse b {
+.dock-pulse b,
+.pickup-pulse svg,
+.pickup-pulse strong,
+.pickup-pulse small,
+.pickup-pulse b {
   position: relative;
   z-index: 1;
   min-width: 0;
   line-height: 1.05;
 }
 
-.dock-pulse strong {
+.dock-pulse strong,
+.pickup-pulse strong {
   color: #ffffff;
   font-size: 1rem;
 }
 
-.dock-pulse small {
+.dock-pulse small,
+.pickup-pulse small {
   color: rgba(234, 255, 243, 0.76);
   font-size: 0.76rem;
   font-weight: 850;
 }
 
-.dock-pulse b {
+.dock-pulse b,
+.pickup-pulse b {
   min-width: 42px;
   padding: 3px 7px;
   border-radius: 999px;
@@ -1412,6 +1437,48 @@ button {
 }
 
 .dock-pulse-assist::after {
+  background: linear-gradient(90deg, #7ce1ff, #8ee6b8);
+}
+
+.pickup-pulse-pickup {
+  border-color: rgba(142, 230, 184, 0.48);
+  background: rgba(7, 28, 24, 0.74);
+  color: #eafff3;
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.24),
+    0 0 30px rgba(142, 230, 184, 0.16);
+}
+
+.pickup-pulse-danger {
+  border-color: rgba(255, 111, 145, 0.48);
+  background: rgba(30, 12, 22, 0.74);
+  color: #ffadc1;
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.24),
+    0 0 30px rgba(255, 77, 109, 0.16);
+}
+
+.pickup-pulse-danger::after {
+  background: linear-gradient(90deg, #ff4d6d, #ffd166);
+}
+
+.pickup-pulse-warning {
+  border-color: rgba(255, 209, 102, 0.48);
+  background: rgba(31, 24, 10, 0.74);
+  color: #ffe19a;
+}
+
+.pickup-pulse-warning::after {
+  background: linear-gradient(90deg, #ffd166, #7ce1ff);
+}
+
+.pickup-pulse-assist {
+  border-color: rgba(124, 225, 255, 0.48);
+  background: rgba(8, 22, 34, 0.74);
+  color: #c6f6ff;
+}
+
+.pickup-pulse-assist::after {
   background: linear-gradient(90deg, #7ce1ff, #8ee6b8);
 }
 
@@ -5942,7 +6009,8 @@ button {
     width: calc(100vw - 20px);
   }
 
-  .dock-pulse {
+  .dock-pulse,
+  .pickup-pulse {
     bottom: max(132px, calc(env(safe-area-inset-bottom) + 126px));
     min-width: min(286px, calc(100vw - 24px));
   }

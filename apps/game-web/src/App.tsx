@@ -95,6 +95,7 @@ import {
   buildDockingLanePresentation,
   buildDockingPulsePresentation,
   buildDockingSpeedReadout,
+  buildPickupPulsePresentation,
   buildLandingGuidancePresentation
 } from "./game/docking";
 import { buildCargoManifest, buildCargoRiskReadout, buildContractCargoTrait } from "./game/cargo";
@@ -692,6 +693,18 @@ export function App() {
     approachStreakSeconds: hud.approachStreakSeconds,
     assistAvailable: Boolean(hud.assistAvailable)
   });
+  const pickupPulse = buildPickupPulsePresentation({
+    status: hud.status,
+    objectivePhase: hud.objectivePhase,
+    targetDistance: hud.targetDistance,
+    landingStatus: hud.landingStatus,
+    speed: hud.speed,
+    allowedSpeed: hud.targetAllowedSpeed,
+    approachStreakSeconds: hud.approachStreakSeconds,
+    assistAvailable: Boolean(hud.assistAvailable),
+    quickPickupSecondsRemaining: hud.quickPickupSecondsRemaining,
+    quickPickupBonus: hud.quickPickupBonus
+  });
   const landingGuidancePresentation = hud.landingStatus
     ? buildLandingGuidancePresentation({
         status: hud.landingStatus,
@@ -704,6 +717,7 @@ export function App() {
     : undefined;
   const dockingLaneStyle = { "--docking-lane-progress": dockingLane?.progress ?? 0 } as CSSProperties;
   const dockingPulseStyle = { "--dock-pulse-progress": dockingPulse?.progress ?? 0 } as CSSProperties;
+  const pickupPulseStyle = { "--pickup-pulse-progress": pickupPulse?.progress ?? 0 } as CSSProperties;
   const approachStreakStyle = { "--approach-streak-progress": approachRewardReadout?.progress ?? 0 } as CSSProperties;
   const primaryRunControl = buildPrimaryRunControlPresentation({ preflightOpen, paused });
   const canBoost = canUseImpulseControl({
@@ -1521,6 +1535,19 @@ export function App() {
               <i key={`${pip}-${index}`} className={`style-chain-meter-pip style-chain-meter-pip-${pip}`} />
             ))}
           </div>
+        </div>
+      ) : null}
+
+      {pickupPulse ? (
+        <div
+          className={`pickup-pulse pickup-pulse-${pickupPulse.tone}`}
+          style={pickupPulseStyle}
+          aria-label={`Pickup cue: ${pickupPulse.action}. ${pickupPulse.detail}`}
+        >
+          <PackageCheck size={18} />
+          <strong>{pickupPulse.action}</strong>
+          <small>{pickupPulse.detail}</small>
+          {pickupPulse.reward ? <b>{pickupPulse.reward}</b> : null}
         </div>
       ) : null}
 

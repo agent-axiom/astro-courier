@@ -5,7 +5,8 @@ import {
   buildDockingLanePresentation,
   buildDockingSpeedReadout,
   buildLandingGuidanceLabel,
-  buildLandingGuidancePresentation
+  buildLandingGuidancePresentation,
+  buildPickupPulsePresentation
 } from "./docking";
 
 describe("docking speed readout", () => {
@@ -274,6 +275,95 @@ describe("docking pulse presentation", () => {
         landingStatus: "misaligned",
         speed: 22,
         allowedSpeed: 42
+      })
+    ).toEqual({
+      action: "Align",
+      detail: "54m",
+      tone: "warning",
+      progress: 0.25
+    });
+  });
+});
+
+describe("pickup pulse presentation", () => {
+  it("stays hidden until the final pickup contact window", () => {
+    expect(
+      buildPickupPulsePresentation({
+        status: "flying",
+        objectivePhase: "delivery",
+        targetDistance: 44,
+        landingStatus: "ready",
+        speed: 18,
+        allowedSpeed: 42,
+        quickPickupSecondsRemaining: 7.2,
+        quickPickupBonus: 180
+      })
+    ).toBeUndefined();
+
+    expect(
+      buildPickupPulsePresentation({
+        status: "flying",
+        objectivePhase: "pickup",
+        targetDistance: 88,
+        landingStatus: "ready",
+        speed: 18,
+        allowedSpeed: 42,
+        quickPickupSecondsRemaining: 7.2,
+        quickPickupBonus: 180
+      })
+    ).toBeUndefined();
+  });
+
+  it("turns final pickup approach into one large load cue", () => {
+    expect(
+      buildPickupPulsePresentation({
+        status: "flying",
+        objectivePhase: "pickup",
+        targetDistance: 42,
+        landingStatus: "ready",
+        speed: 18,
+        allowedSpeed: 42,
+        quickPickupSecondsRemaining: 7.2,
+        quickPickupBonus: 180
+      })
+    ).toEqual({
+      action: "Load now",
+      detail: "7.2s",
+      tone: "pickup",
+      progress: 0.42,
+      reward: "+180"
+    });
+  });
+
+  it("keeps unsafe pickup contact focused on the blocking control", () => {
+    expect(
+      buildPickupPulsePresentation({
+        status: "flying",
+        objectivePhase: "pickup",
+        targetDistance: 54,
+        landingStatus: "too-fast",
+        speed: 48,
+        allowedSpeed: 42,
+        quickPickupSecondsRemaining: 4.4,
+        quickPickupBonus: 180
+      })
+    ).toEqual({
+      action: "Brake",
+      detail: "6 over",
+      tone: "danger",
+      progress: 0.25
+    });
+
+    expect(
+      buildPickupPulsePresentation({
+        status: "flying",
+        objectivePhase: "pickup",
+        targetDistance: 54,
+        landingStatus: "misaligned",
+        speed: 22,
+        allowedSpeed: 42,
+        quickPickupSecondsRemaining: 4.4,
+        quickPickupBonus: 180
       })
     ).toEqual({
       action: "Align",

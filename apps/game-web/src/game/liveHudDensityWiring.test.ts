@@ -44,4 +44,14 @@ describe("live HUD density wiring", () => {
     expect(appSource).toContain('className={`dock-pulse dock-pulse-${dockingPulse.tone}`}');
     expect(appSource).toContain('aria-label={`Docking cue: ${dockingPulse.action}. ${dockingPulse.detail}`}');
   });
+
+  it("renders a large final pickup pulse over the playfield", () => {
+    expect(appSource).toContain("const pickupPulse = buildPickupPulsePresentation({");
+    expect(appSource).toContain("quickPickupSecondsRemaining: hud.quickPickupSecondsRemaining");
+    expect(appSource).toContain("quickPickupBonus: hud.quickPickupBonus");
+    expect(appSource).toContain("const pickupPulseStyle = {");
+    expect(appSource).toContain('"--pickup-pulse-progress": pickupPulse?.progress ?? 0');
+    expect(appSource).toContain('className={`pickup-pulse pickup-pulse-${pickupPulse.tone}`}');
+    expect(appSource).toContain('aria-label={`Pickup cue: ${pickupPulse.action}. ${pickupPulse.detail}`}');
+  });
 });

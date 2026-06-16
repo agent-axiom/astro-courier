@@ -102,6 +102,19 @@ describe("responsive game layout CSS", () => {
     expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.dock-pulse[\s\S]*bottom: max\(132px, calc\(env\(safe-area-inset-bottom\) \+ 126px\)\);/);
   });
 
+  it("defines a large lightweight pickup pulse for first cargo contact", () => {
+    expect(styles).toContain(".pickup-pulse");
+    expect(styles).toContain("--pickup-pulse-progress: 0;");
+    expect(styles).toMatch(/\.pickup-pulse[\s\S]*left: 50%;/);
+    expect(styles).toMatch(/\.pickup-pulse[\s\S]*transform: translateX\(-50%\);/);
+    expect(styles).toContain(".pickup-pulse-pickup");
+    expect(styles).toContain(".pickup-pulse-danger");
+    expect(styles).toContain(".pickup-pulse-warning");
+    expect(styles).toContain(".pickup-pulse-assist");
+    expect(styles).toMatch(/\.pickup-pulse::after[\s\S]*width: calc\(var\(--pickup-pulse-progress\) \* 100%\);/);
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.pickup-pulse[\s\S]*bottom: max\(132px, calc\(env\(safe-area-inset-bottom\) \+ 126px\)\);/);
+  });
+
   it("defines context-aware touch flight pad tones", () => {
     expect(styles).toContain(".touch-flight-pad-precision");
     expect(styles).toContain(".touch-flight-pad-danger");

@@ -72,8 +72,22 @@ export type DockingPulsePresentation = {
   reward?: string;
 };
 
+export type PickupPulsePresentationInput = DockingLanePresentationInput & {
+  quickPickupSecondsRemaining?: number;
+  quickPickupBonus?: number;
+};
+
+export type PickupPulsePresentation = {
+  action: "Align" | "Assist" | "Brake" | "Load now";
+  detail: string;
+  tone: "pickup" | "warning" | "danger" | "assist";
+  progress: number;
+  reward?: string;
+};
+
 const FINAL_APPROACH_BRAKE_DISTANCE = 70;
 const FINAL_DOCK_PULSE_DISTANCE = 72;
+const FINAL_PICKUP_PULSE_DISTANCE = 72;
 const DOCKING_LANE_DISTANCE = 120;
 
 export function buildLandingGuidanceLabel(input: LandingGuidanceLabelInput): string {
@@ -258,6 +272,58 @@ export function buildDockingPulsePresentation(input: DockingLanePresentationInpu
   };
 }
 
+export function buildPickupPulsePresentation(input: PickupPulsePresentationInput): PickupPulsePresentation | undefined {
+  if (
+    input.status !== "flying" ||
+    input.objectivePhase !== "pickup" ||
+    input.targetDistance === undefined ||
+    input.targetDistance > FINAL_PICKUP_PULSE_DISTANCE ||
+    input.landingStatus === undefined ||
+    input.landingStatus === "approach"
+  ) {
+    return undefined;
+  }
+
+  const progress = round(clamp(1 - input.targetDistance / FINAL_PICKUP_PULSE_DISTANCE, 0, 1), 2);
+  const distanceDetail = `${Math.round(input.targetDistance)}m`;
+
+  if (input.assistAvailable) {
+    return {
+      action: "Assist",
+      detail: "Ready",
+      tone: "assist",
+      progress,
+      reward: buildPickupPulseReward(input.quickPickupBonus)
+    };
+  }
+
+  if (input.landingStatus === "ready") {
+    return {
+      action: "Load now",
+      detail: formatPickupPulseDetail(input),
+      tone: "pickup",
+      progress,
+      reward: buildPickupPulseReward(input.quickPickupBonus)
+    };
+  }
+
+  if (input.landingStatus === "too-fast") {
+    return {
+      action: "Brake",
+      detail: formatDockingOverSpeed(input.speed, input.allowedSpeed),
+      tone: "danger",
+      progress
+    };
+  }
+
+  return {
+    action: "Align",
+    detail: distanceDetail,
+    tone: "warning",
+    progress
+  };
+}
+
 function readySegments(): DockingLaneSegment[] {
   return [
     { label: "Align", state: "ready" },
@@ -276,6 +342,18 @@ function buildDockingPulseReward(approachStreakSeconds: number | undefined): str
   return approachStreakSeconds !== undefined && approachStreakSeconds >= PERFECT_APPROACH_STREAK_SECONDS
     ? `+${PERFECT_APPROACH_STYLE_BONUS}`
     : undefined;
+}
+
+function buildPickupPulseReward(quickPickupBonus: number | undefined): string | undefined {
+  return quickPickupBonus !== undefined && quickPickupBonus > 0 ? `+${Math.round(quickPickupBonus)}` : undefined;
+}
+
+function formatPickupPulseDetail(input: PickupPulsePresentationInput): string {
+  if (input.quickPickupSecondsRemaining !== undefined && input.quickPickupSecondsRemaining > 0) {
+    return `${input.quickPickupSecondsRemaining.toFixed(1)}s`;
+  }
+
+  return `${Math.round(input.targetDistance ?? 0)}m`;
 }
 
 function formatDockingOverSpeed(speed: number, allowedSpeed: number | undefined): string {
