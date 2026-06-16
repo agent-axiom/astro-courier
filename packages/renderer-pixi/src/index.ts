@@ -747,6 +747,16 @@ export type ShipBoostReadinessVisual = {
   segments: number;
 };
 
+export type ShipShieldReserveVisualInput = Pick<SimulationSnapshot, "status" | "emergencyShieldAvailable" | "tick">;
+
+export type ShipShieldReserveVisual = {
+  color: number;
+  tone: "available";
+  radius: number;
+  width: number;
+  alpha: number;
+};
+
 export type CargoAuraVisualInput = Pick<SimulationSnapshot, "status" | "cargoOnboard"> & {
   cargoDamage: number;
 };
@@ -881,6 +891,21 @@ export function shipBoostReadinessVisual(input: ShipBoostReadinessVisualInput): 
     alpha: 0.34,
     progress: 1,
     segments: BOOST_READINESS_SEGMENTS
+  };
+}
+
+export function shipShieldReserveVisual(input: ShipShieldReserveVisualInput): ShipShieldReserveVisual | undefined {
+  if (input.status !== "flying" || !input.emergencyShieldAvailable) {
+    return undefined;
+  }
+
+  const pulse = (Math.sin(input.tick * 0.16) + 1) / 2;
+  return {
+    color: 0xbff7ff,
+    tone: "available",
+    radius: round(32 + pulse * 6, 2),
+    width: round(1.1 + pulse * 0.7, 2),
+    alpha: round(0.14 + pulse * 0.14, 2)
   };
 }
 
@@ -1619,6 +1644,11 @@ class PixiRenderer implements AstroPixiRenderer {
       boostCooldownSeconds: snapshot.ship.boostCooldownSeconds,
       launchBurstSecondsRemaining: snapshot.launchBurstSecondsRemaining
     });
+    const shieldReserve = shipShieldReserveVisual({
+      status: snapshot.status,
+      emergencyShieldAvailable: snapshot.emergencyShieldAvailable,
+      tick: snapshot.tick
+    });
     const cargoAura = cargoAuraVisual({
       status: snapshot.status,
       cargoOnboard: snapshot.cargoOnboard,
@@ -1651,6 +1681,19 @@ class PixiRenderer implements AstroPixiRenderer {
 
     if (boostReadiness) {
       drawShipBoostReadinessRing(this.ship, center.x, center.y, boostReadiness);
+    }
+
+    if (shieldReserve) {
+      this.ship.circle(center.x, center.y, shieldReserve.radius + 5).stroke({
+        color: shieldReserve.color,
+        width: 1,
+        alpha: shieldReserve.alpha * 0.32
+      });
+      this.ship.circle(center.x, center.y, shieldReserve.radius).stroke({
+        color: shieldReserve.color,
+        width: shieldReserve.width,
+        alpha: shieldReserve.alpha
+      });
     }
 
     if (cargoAura) {

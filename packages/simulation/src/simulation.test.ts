@@ -1531,6 +1531,11 @@ describe("deterministic Astro Courier simulation", () => {
 
   it("turns the first survivable gravity surface hit into an emergency shield rebound", () => {
     const world = createWorldFromSystem(starterSystem, "shield-rebound-seed");
+
+    expect(snapshotWorld(world)).toMatchObject({
+      emergencyShieldAvailable: true
+    });
+
     world.ship.position = { x: 63, y: 0 };
     world.ship.velocity = { x: -24, y: 0 };
     world.ship.rotation = Math.PI;
@@ -1544,6 +1549,9 @@ describe("deterministic Astro Courier simulation", () => {
     expect(world.ship.cargoDamage).toBeCloseTo(EMERGENCY_SHIELD_REBOUND_DAMAGE, 3);
     expect(Math.hypot(world.ship.position.x, world.ship.position.y)).toBeGreaterThan(64);
     expect(world.ship.velocity.x).toBeGreaterThan(0);
+    expect(snapshotWorld(world)).toMatchObject({
+      emergencyShieldAvailable: false
+    });
   });
 
   it("keeps direct core impacts and repeated gravity hits dangerous after the shield is spent", () => {

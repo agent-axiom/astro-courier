@@ -20,6 +20,7 @@ import {
   approachLockVisual,
   screenShakeOffset,
   shipBoostReadinessVisual,
+  shipShieldReserveVisual,
   shipTrailVisual,
   trajectoryHazardDanger,
   trajectoryHazardMarkerVisual,
@@ -1013,6 +1014,28 @@ describe("ship boost readiness visual", () => {
       progress: 1,
       segments: 8
     });
+  });
+});
+
+describe("ship shield reserve visual", () => {
+  it("stays hidden outside active flight or after the emergency shield is spent", () => {
+    expect(shipShieldReserveVisual({ status: "paused", emergencyShieldAvailable: true, tick: 12 })).toBeUndefined();
+    expect(shipShieldReserveVisual({ status: "flying", emergencyShieldAvailable: false, tick: 12 })).toBeUndefined();
+  });
+
+  it("shows a quiet pulsing reserve ring while the emergency shield is available", () => {
+    const early = shipShieldReserveVisual({ status: "flying", emergencyShieldAvailable: true, tick: 4 });
+    const later = shipShieldReserveVisual({ status: "flying", emergencyShieldAvailable: true, tick: 24 });
+
+    expect(early).toMatchObject({
+      color: 0xbff7ff,
+      tone: "available"
+    });
+    expect(early?.radius).toBeGreaterThanOrEqual(32);
+    expect(early?.radius).toBeLessThanOrEqual(38);
+    expect(early?.alpha).toBeLessThanOrEqual(0.28);
+    expect(early?.width).toBeLessThanOrEqual(1.8);
+    expect(later?.radius).not.toBe(early?.radius);
   });
 });
 
