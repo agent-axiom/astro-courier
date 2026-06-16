@@ -191,6 +191,9 @@ export function buildScreenFeedback(events: readonly GameAudioEvent[], milestone
       durationMs: 360
     };
   }
+  if (events.includes("shield-rebound")) {
+    return { label: "Shield rebound", value: "Recover route", tone: "warning", intensity: "medium", durationMs: 420 };
+  }
   if (events.includes("dock-lineup")) {
     return { label: "Dock lined", value: "Commit approach", tone: "success", intensity: "light", durationMs: 340 };
   }

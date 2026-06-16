@@ -7,6 +7,7 @@ import {
   ECO_DRIFT_FUEL_USED_LIMIT,
   ECO_DRIFT_STYLE_BONUS,
   EXPRESS_FINISH_STYLE_BONUS,
+  EMERGENCY_SHIELD_REBOUND_DAMAGE,
   GRAVITY_SLING_STYLE_BONUS,
   CHAIN_FINISH_STYLE_BONUS,
   CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS,
@@ -1526,6 +1527,48 @@ describe("deterministic Astro Courier simulation", () => {
     expect(summarizeRun(hardLanding).crashReason).toBe("Hard Landing");
     expect(summarizeRun(misalignedDock).crashReason).toBe("Misaligned Dock");
     expect(summarizeRun(collision).crashReason).toBe("Hull Collision");
+  });
+
+  it("turns the first survivable gravity surface hit into an emergency shield rebound", () => {
+    const world = createWorldFromSystem(starterSystem, "shield-rebound-seed");
+    world.ship.position = { x: 63, y: 0 };
+    world.ship.velocity = { x: -24, y: 0 };
+    world.ship.rotation = Math.PI;
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("flying");
+    expect(world.lastMilestone).toBe("Shield Rebound");
+    expect(world.emergencyShieldUsed).toBe(true);
+    expect(world.crashReason).toBeUndefined();
+    expect(world.ship.cargoDamage).toBeCloseTo(EMERGENCY_SHIELD_REBOUND_DAMAGE, 3);
+    expect(Math.hypot(world.ship.position.x, world.ship.position.y)).toBeGreaterThan(64);
+    expect(world.ship.velocity.x).toBeGreaterThan(0);
+  });
+
+  it("keeps direct core impacts and repeated gravity hits dangerous after the shield is spent", () => {
+    const directImpact = createWorldFromSystem(starterSystem, "direct-core-impact-seed");
+    directImpact.ship.position = { x: 0, y: 0 };
+    directImpact.ship.velocity = { x: 0, y: 0 };
+
+    stepWorld(directImpact, 1 / 60, []);
+
+    expect(directImpact.status).toBe("crashed");
+    expect(directImpact.emergencyShieldUsed).toBe(false);
+    expect(directImpact.crashReason).toBe("Hull Collision");
+
+    const repeatedHit = createWorldFromSystem(starterSystem, "repeated-surface-hit-seed");
+    repeatedHit.ship.position = { x: 63, y: 0 };
+    repeatedHit.ship.velocity = { x: -24, y: 0 };
+    stepWorld(repeatedHit, 1 / 60, []);
+
+    repeatedHit.ship.position = { x: 63, y: 0 };
+    repeatedHit.ship.velocity = { x: -24, y: 0 };
+    stepWorld(repeatedHit, 1 / 60, []);
+
+    expect(repeatedHit.status).toBe("crashed");
+    expect(repeatedHit.crashReason).toBe("Hull Collision");
+    expect(repeatedHit.ship.cargoDamage).toBe(1);
   });
 
   it("counts rough near-target planet-side arrivals as deliveries rather than gravity collisions", () => {

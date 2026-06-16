@@ -15,6 +15,7 @@ export type GameAudioEvent =
   | "tempo-flow"
   | "tempo-clutch"
   | "launch-burst"
+  | "shield-rebound"
   | "cargo-loaded"
   | "pickup-lineup"
   | "dock-lineup"
@@ -137,6 +138,8 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
   if (current.lastMilestone && previous?.lastMilestone !== current.lastMilestone) {
     if (current.lastMilestone === "Assist Burn") {
       events.push("assist-burn");
+    } else if (current.lastMilestone === "Shield Rebound") {
+      events.push("shield-rebound");
     } else if (current.lastMilestone === "Boost Burn") {
       events.push("boost-burn");
     } else if (current.lastMilestone === "Launch Burst") {

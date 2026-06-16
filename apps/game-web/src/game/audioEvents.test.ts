@@ -69,6 +69,7 @@ describe("HUD audio events", () => {
 
   it("maps fresh milestones to expressive sound events", () => {
     expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, lastMilestone: "Assist Burn" })).toEqual(["assist-burn"]);
+    expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, lastMilestone: "Shield Rebound" })).toEqual(["shield-rebound"]);
     expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, lastMilestone: "Boost Burn" })).toEqual(["boost-burn"]);
     expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, lastMilestone: "Launch Burst" })).toEqual(["launch-burst"]);
     expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, lastMilestone: "Gravity Sling" })).toEqual(["style-hit"]);

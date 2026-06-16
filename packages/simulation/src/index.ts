@@ -171,6 +171,7 @@ export type SimulationWorld = {
   slungGravitySourceIds: string[];
   manualBrakeUsed: boolean;
   fuelUsed: number;
+  emergencyShieldUsed: boolean;
   activeContract: ContractContent;
   activeCargo: CargoContent;
   gravitySources: GravitySourceState[];
@@ -236,6 +237,7 @@ export const LAST_DROP_FUEL_RATIO = 0.05;
 export const NO_BRAKE_STYLE_BONUS = 150;
 export const ANTIMATTER_DRIFT_STYLE_BONUS = 210;
 export const CONTROLLED_DOCK_SPEED_RATIO = 0.7;
+export const EMERGENCY_SHIELD_REBOUND_DAMAGE = 0.22;
 const CATASTROPHIC_DOCK_SPEED_RATIO = 1.85;
 const ROUGH_DOCK_SPEED_DAMAGE = 0.18;
 const ROUGH_DOCK_ALIGNMENT_DAMAGE = 0.08;
@@ -253,6 +255,10 @@ const DOCK_HALO_SIDE_ON_MIN_SPEED = 12;
 const GRAVITY_DOCK_CONTACT_GRACE_RADIUS_MULTIPLIER = 4;
 const GRAVITY_DOCK_TARGET_SIDE_GRACE_RADIUS_MULTIPLIER = 4.5;
 const GRAVITY_DOCK_TARGET_SIDE_MIN_SOURCE_DISTANCE_RATIO = 0.45;
+const EMERGENCY_SHIELD_REBOUND_MIN_SPEED = 6;
+const EMERGENCY_SHIELD_REBOUND_MAX_SPEED = 58;
+const EMERGENCY_SHIELD_REBOUND_PUSH_OUT = 6;
+const EMERGENCY_SHIELD_REBOUND_OUTWARD_SPEED = 22;
 
 export function calculateHazardSkimStyleBonus(severity: number): number {
   return Math.round(HAZARD_SKIM_BASE_BONUS + clamp(severity, 0, 1) * HAZARD_SKIM_SEVERITY_BONUS);
@@ -307,6 +313,7 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
     slungGravitySourceIds: [],
     manualBrakeUsed: false,
     fuelUsed: 0,
+    emergencyShieldUsed: false,
     activeContract,
     activeCargo,
     gravitySources: system.planets.map((planet) => ({
@@ -902,11 +909,38 @@ function resolveLandingOrCrash(world: SimulationWorld): void {
       return;
     }
 
+    if (tryEmergencyShieldRebound(world, hitGravitySource)) {
+      return;
+    }
+
     world.status = "crashed";
     world.landingRating = "Insurance Event";
     world.crashReason = "Hull Collision";
     world.ship.cargoDamage = 1;
   }
+}
+
+function tryEmergencyShieldRebound(world: SimulationWorld, source: GravitySourceState): boolean {
+  if (world.emergencyShieldUsed) {
+    return false;
+  }
+
+  const fromSource = subtract(world.ship.position, source.position);
+  const distance = magnitude(fromSource);
+  const speed = magnitude(world.ship.velocity);
+  if (distance <= 0 || speed < EMERGENCY_SHIELD_REBOUND_MIN_SPEED || speed > EMERGENCY_SHIELD_REBOUND_MAX_SPEED) {
+    return false;
+  }
+
+  world.emergencyShieldUsed = true;
+  const normal = scale(fromSource, 1 / distance);
+  const tangentVelocity = subtract(world.ship.velocity, scale(normal, dot(world.ship.velocity, normal)));
+  world.ship.position = add(source.position, scale(normal, source.radius + EMERGENCY_SHIELD_REBOUND_PUSH_OUT));
+  world.ship.velocity = add(scale(normal, EMERGENCY_SHIELD_REBOUND_OUTWARD_SPEED), scale(tangentVelocity, 0.35));
+  world.ship.cargoDamage = Math.max(world.ship.cargoDamage, EMERGENCY_SHIELD_REBOUND_DAMAGE);
+  world.lastMilestone = "Shield Rebound";
+  world.lastStyleAward = undefined;
+  return true;
 }
 
 function findActiveDockCapturePad(world: SimulationWorld): LandingPadState | undefined {

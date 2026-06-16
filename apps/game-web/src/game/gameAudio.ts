@@ -53,6 +53,7 @@ const eventTones: Record<GameAudioEvent, { frequency: number; duration: number; 
   "tempo-flow": { frequency: 920, duration: 0.08, gain: 0.04 },
   "tempo-clutch": { frequency: 680, duration: 0.1, gain: 0.044 },
   "launch-burst": { frequency: 820, duration: 0.12, gain: 0.05 },
+  "shield-rebound": { frequency: 380, duration: 0.13, gain: 0.048 },
   "cargo-loaded": { frequency: 660, duration: 0.08, gain: 0.042 },
   "pickup-lineup": { frequency: 740, duration: 0.07, gain: 0.042 },
   "dock-lineup": { frequency: 780, duration: 0.08, gain: 0.044 },

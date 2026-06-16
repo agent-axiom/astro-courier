@@ -203,6 +203,13 @@ describe("screen feedback", () => {
       intensity: "medium",
       durationMs: 360
     });
+    expect(buildScreenFeedback(["shield-rebound"])).toEqual({
+      label: "Shield rebound",
+      value: "Recover route",
+      tone: "warning",
+      intensity: "medium",
+      durationMs: 420
+    });
     expect(buildScreenFeedback(["style-hit"])).toEqual({
       label: "Style hit",
       value: "Bonus banked",
