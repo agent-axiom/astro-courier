@@ -2019,27 +2019,33 @@ export function App() {
               })}
             </div>
           ) : null}
-          <div className="preflight-stats" aria-label="Contract briefing">
-            <span>
-              <MapPin size={18} />
-              <small>Pickup</small>
-              <strong>{hud.pickupLabel}</strong>
-            </span>
-            <span>
-              <Flag size={18} />
-              <small>Destination</small>
-              <strong>{hud.destinationLabel}</strong>
-            </span>
-            {preflightOverlayDensity.showBonusStack
-              ? preflightMasteryTargets.map((target) => (
-                  <span key={target.label}>
-                    {target.label === "Comet" ? <Star size={18} /> : <Trophy size={18} />}
-                    <small>{target.label}</small>
-                    <strong>{target.value}</strong>
+          {preflightOverlayDensity.showRouteEndpoints || preflightOverlayDensity.showBonusStack ? (
+            <div className="preflight-stats" aria-label="Contract briefing">
+              {preflightOverlayDensity.showRouteEndpoints ? (
+                <>
+                  <span>
+                    <MapPin size={18} />
+                    <small>Pickup</small>
+                    <strong>{hud.pickupLabel}</strong>
                   </span>
-                ))
-              : null}
-          </div>
+                  <span>
+                    <Flag size={18} />
+                    <small>Destination</small>
+                    <strong>{hud.destinationLabel}</strong>
+                  </span>
+                </>
+              ) : null}
+              {preflightOverlayDensity.showBonusStack
+                ? preflightMasteryTargets.map((target) => (
+                    <span key={target.label}>
+                      {target.label === "Comet" ? <Star size={18} /> : <Trophy size={18} />}
+                      <small>{target.label}</small>
+                      <strong>{target.value}</strong>
+                    </span>
+                  ))
+                : null}
+            </div>
+          ) : null}
           <button
             type="button"
             className={`preflight-button preflight-button-${launchCommitment.tone}`}

@@ -19,6 +19,7 @@ export type PreflightOverlayDensity = {
   showDailyDispatch: boolean;
   showContractSelector: boolean;
   showContractDetails: boolean;
+  showRouteEndpoints: boolean;
   showRoutePressure: boolean;
   showSignatureManeuver: boolean;
   showBonusStack: boolean;
@@ -33,7 +34,7 @@ export function buildPreflightOverlayDensity(input: PreflightOverlayDensityInput
   if (!activePreflight || (!hasRouteHistory && !hasDailyHistory)) {
     return {
       mode: "focused",
-      showContractBriefing: activePreflight,
+      showContractBriefing: false,
       showControlPrimer: activePreflight,
       showProgressMeta: false,
       showBestChase: false,
@@ -43,6 +44,7 @@ export function buildPreflightOverlayDensity(input: PreflightOverlayDensityInput
       showDailyDispatch: false,
       showContractSelector: false,
       showContractDetails: false,
+      showRouteEndpoints: false,
       showRoutePressure: false,
       showSignatureManeuver: false,
       showBonusStack: false
@@ -62,6 +64,7 @@ export function buildPreflightOverlayDensity(input: PreflightOverlayDensityInput
       showDailyDispatch: hasDailyHistory,
       showContractSelector: false,
       showContractDetails: false,
+      showRouteEndpoints: false,
       showRoutePressure: false,
       showSignatureManeuver: false,
       showBonusStack: false
@@ -80,6 +83,7 @@ export function buildPreflightOverlayDensity(input: PreflightOverlayDensityInput
     showDailyDispatch: true,
     showContractSelector: true,
     showContractDetails: richHistory,
+    showRouteEndpoints: true,
     showRoutePressure: true,
     showSignatureManeuver: true,
     showBonusStack: richHistory

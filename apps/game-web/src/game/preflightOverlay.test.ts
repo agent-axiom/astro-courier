@@ -11,7 +11,7 @@ describe("preflight overlay density", () => {
       })
     ).toEqual({
       mode: "focused",
-      showContractBriefing: true,
+      showContractBriefing: false,
       showControlPrimer: true,
       showProgressMeta: false,
       showBestChase: false,
@@ -21,6 +21,7 @@ describe("preflight overlay density", () => {
       showDailyDispatch: false,
       showContractSelector: false,
       showContractDetails: false,
+      showRouteEndpoints: false,
       showRoutePressure: false,
       showSignatureManeuver: false,
       showBonusStack: false
@@ -46,6 +47,7 @@ describe("preflight overlay density", () => {
       showDailyDispatch: false,
       showContractSelector: false,
       showContractDetails: false,
+      showRouteEndpoints: false,
       showRoutePressure: false,
       showSignatureManeuver: false,
       showBonusStack: false
@@ -71,6 +73,7 @@ describe("preflight overlay density", () => {
       showDailyDispatch: true,
       showContractSelector: true,
       showContractDetails: true,
+      showRouteEndpoints: true,
       showRoutePressure: true,
       showSignatureManeuver: true,
       showBonusStack: true
