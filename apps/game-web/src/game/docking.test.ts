@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildApproachRewardReadout,
+  buildDockingPulsePresentation,
   buildDockingLanePresentation,
   buildDockingSpeedReadout,
   buildLandingGuidanceLabel,
@@ -199,6 +200,86 @@ describe("docking lane presentation", () => {
         { label: "Brake", state: "ready" },
         { label: "Touch", state: "locked" }
       ]
+    });
+  });
+});
+
+describe("docking pulse presentation", () => {
+  it("stays hidden until the final delivery contact window", () => {
+    expect(
+      buildDockingPulsePresentation({
+        status: "flying",
+        objectivePhase: "pickup",
+        targetDistance: 44,
+        landingStatus: "ready",
+        speed: 18,
+        allowedSpeed: 42
+      })
+    ).toBeUndefined();
+
+    expect(
+      buildDockingPulsePresentation({
+        status: "flying",
+        objectivePhase: "delivery",
+        targetDistance: 88,
+        landingStatus: "ready",
+        speed: 18,
+        allowedSpeed: 42
+      })
+    ).toBeUndefined();
+  });
+
+  it("reduces final dock state to one large action cue", () => {
+    expect(
+      buildDockingPulsePresentation({
+        status: "flying",
+        objectivePhase: "delivery",
+        targetDistance: 42,
+        landingStatus: "ready",
+        speed: 18,
+        allowedSpeed: 42,
+        approachStreakSeconds: 1.1
+      })
+    ).toEqual({
+      action: "Dock now",
+      detail: "42m",
+      tone: "ready",
+      progress: 0.42,
+      reward: "+220"
+    });
+  });
+
+  it("names only the blocking control when the final contact is unsafe", () => {
+    expect(
+      buildDockingPulsePresentation({
+        status: "flying",
+        objectivePhase: "delivery",
+        targetDistance: 54,
+        landingStatus: "too-fast",
+        speed: 48,
+        allowedSpeed: 42
+      })
+    ).toEqual({
+      action: "Brake",
+      detail: "6 over",
+      tone: "danger",
+      progress: 0.25
+    });
+
+    expect(
+      buildDockingPulsePresentation({
+        status: "flying",
+        objectivePhase: "delivery",
+        targetDistance: 54,
+        landingStatus: "misaligned",
+        speed: 22,
+        allowedSpeed: 42
+      })
+    ).toEqual({
+      action: "Align",
+      detail: "54m",
+      tone: "warning",
+      progress: 0.25
     });
   });
 });

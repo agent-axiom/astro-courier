@@ -1307,6 +1307,114 @@ button {
   background: linear-gradient(90deg, #7ce1ff, #8ee6b8);
 }
 
+.dock-pulse {
+  --dock-pulse-progress: 0;
+
+  position: absolute;
+  bottom: max(34px, calc(env(safe-area-inset-bottom) + 28px));
+  left: 50%;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 18px auto auto;
+  align-items: center;
+  gap: 8px;
+  min-width: min(270px, calc(100vw - 32px));
+  min-height: 48px;
+  padding: 10px 14px 12px;
+  overflow: hidden;
+  border: 1px solid rgba(142, 230, 184, 0.38);
+  border-radius: 8px;
+  background: rgba(8, 13, 28, 0.72);
+  color: #eafff3;
+  font-weight: 900;
+  text-align: center;
+  transform: translateX(-50%);
+  backdrop-filter: blur(14px);
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.24),
+    0 0 28px rgba(142, 230, 184, 0.14);
+}
+
+.dock-pulse::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: calc(var(--dock-pulse-progress) * 100%);
+  background: linear-gradient(90deg, #7ce1ff, #8ee6b8, #ffd166);
+  content: "";
+}
+
+.dock-pulse svg,
+.dock-pulse strong,
+.dock-pulse small,
+.dock-pulse b {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  line-height: 1.05;
+}
+
+.dock-pulse strong {
+  color: #ffffff;
+  font-size: 1rem;
+}
+
+.dock-pulse small {
+  color: rgba(234, 255, 243, 0.76);
+  font-size: 0.76rem;
+  font-weight: 850;
+}
+
+.dock-pulse b {
+  min-width: 42px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: rgba(255, 209, 102, 0.18);
+  color: #ffe19a;
+  font-size: 0.74rem;
+}
+
+.dock-pulse-ready {
+  border-color: rgba(142, 230, 184, 0.46);
+  background: rgba(9, 28, 22, 0.72);
+  color: #eafff3;
+}
+
+.dock-pulse-danger {
+  border-color: rgba(255, 111, 145, 0.48);
+  background: rgba(30, 12, 22, 0.74);
+  color: #ffadc1;
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.24),
+    0 0 30px rgba(255, 77, 109, 0.16);
+}
+
+.dock-pulse-danger::after {
+  background: linear-gradient(90deg, #ff4d6d, #ffd166);
+}
+
+.dock-pulse-warning {
+  border-color: rgba(255, 209, 102, 0.48);
+  background: rgba(31, 24, 10, 0.74);
+  color: #ffe19a;
+}
+
+.dock-pulse-warning::after {
+  background: linear-gradient(90deg, #ffd166, #7ce1ff);
+}
+
+.dock-pulse-assist {
+  border-color: rgba(124, 225, 255, 0.48);
+  background: rgba(8, 22, 34, 0.74);
+  color: #c6f6ff;
+}
+
+.dock-pulse-assist::after {
+  background: linear-gradient(90deg, #7ce1ff, #8ee6b8);
+}
+
 .tempo-chip {
   position: relative;
   isolation: isolate;
@@ -5832,6 +5940,11 @@ button {
     right: 10px;
     bottom: 10px;
     width: calc(100vw - 20px);
+  }
+
+  .dock-pulse {
+    bottom: max(132px, calc(env(safe-area-inset-bottom) + 126px));
+    min-width: min(286px, calc(100vw - 24px));
   }
 
   .touch-flight-pad {

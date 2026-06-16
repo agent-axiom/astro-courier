@@ -64,7 +64,16 @@ export type DockingLanePresentation = {
   reward?: string;
 };
 
+export type DockingPulsePresentation = {
+  action: "Align" | "Assist" | "Brake" | "Dock now";
+  detail: string;
+  tone: "warning" | "danger" | "ready" | "assist";
+  progress: number;
+  reward?: string;
+};
+
 const FINAL_APPROACH_BRAKE_DISTANCE = 70;
+const FINAL_DOCK_PULSE_DISTANCE = 72;
 const DOCKING_LANE_DISTANCE = 120;
 
 export function buildLandingGuidanceLabel(input: LandingGuidanceLabelInput): string {
@@ -197,6 +206,58 @@ export function buildDockingLanePresentation(input: DockingLanePresentationInput
   };
 }
 
+export function buildDockingPulsePresentation(input: DockingLanePresentationInput): DockingPulsePresentation | undefined {
+  if (
+    input.status !== "flying" ||
+    input.objectivePhase !== "delivery" ||
+    input.targetDistance === undefined ||
+    input.targetDistance > FINAL_DOCK_PULSE_DISTANCE ||
+    input.landingStatus === undefined ||
+    input.landingStatus === "approach"
+  ) {
+    return undefined;
+  }
+
+  const progress = round(clamp(1 - input.targetDistance / FINAL_DOCK_PULSE_DISTANCE, 0, 1), 2);
+  const distanceDetail = `${Math.round(input.targetDistance)}m`;
+
+  if (input.assistAvailable) {
+    return {
+      action: "Assist",
+      detail: "Ready",
+      tone: "assist",
+      progress,
+      reward: buildDockingPulseReward(input.approachStreakSeconds)
+    };
+  }
+
+  if (input.landingStatus === "ready") {
+    return {
+      action: "Dock now",
+      detail: distanceDetail,
+      tone: "ready",
+      progress,
+      reward: buildDockingPulseReward(input.approachStreakSeconds)
+    };
+  }
+
+  if (input.landingStatus === "too-fast") {
+    return {
+      action: "Brake",
+      detail: formatDockingOverSpeed(input.speed, input.allowedSpeed),
+      tone: "danger",
+      progress
+    };
+  }
+
+  return {
+    action: "Align",
+    detail: distanceDetail,
+    tone: "warning",
+    progress
+  };
+}
+
 function readySegments(): DockingLaneSegment[] {
   return [
     { label: "Align", state: "ready" },
@@ -209,6 +270,20 @@ function buildDockingLaneReward(approachStreakSeconds: number | undefined): stri
   return approachStreakSeconds !== undefined && approachStreakSeconds >= PERFECT_APPROACH_STREAK_SECONDS
     ? `+${PERFECT_APPROACH_STYLE_BONUS} setup`
     : undefined;
+}
+
+function buildDockingPulseReward(approachStreakSeconds: number | undefined): string | undefined {
+  return approachStreakSeconds !== undefined && approachStreakSeconds >= PERFECT_APPROACH_STREAK_SECONDS
+    ? `+${PERFECT_APPROACH_STYLE_BONUS}`
+    : undefined;
+}
+
+function formatDockingOverSpeed(speed: number, allowedSpeed: number | undefined): string {
+  if (allowedSpeed === undefined) {
+    return speed.toFixed(0);
+  }
+
+  return `${Math.max(0, Math.round(speed - allowedSpeed))} over`;
 }
 
 function clamp(value: number, min: number, max: number): number {

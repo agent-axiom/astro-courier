@@ -93,6 +93,7 @@ import { buildPreflightBonusObjectives, buildPreflightMasteryTargets } from "./g
 import {
   buildApproachRewardReadout,
   buildDockingLanePresentation,
+  buildDockingPulsePresentation,
   buildDockingSpeedReadout,
   buildLandingGuidancePresentation
 } from "./game/docking";
@@ -681,6 +682,16 @@ export function App() {
     approachStreakSeconds: hud.approachStreakSeconds,
     assistAvailable: Boolean(hud.assistAvailable)
   });
+  const dockingPulse = buildDockingPulsePresentation({
+    status: hud.status,
+    objectivePhase: hud.objectivePhase,
+    targetDistance: hud.targetDistance,
+    landingStatus: hud.landingStatus,
+    speed: hud.speed,
+    allowedSpeed: hud.targetAllowedSpeed,
+    approachStreakSeconds: hud.approachStreakSeconds,
+    assistAvailable: Boolean(hud.assistAvailable)
+  });
   const landingGuidancePresentation = hud.landingStatus
     ? buildLandingGuidancePresentation({
         status: hud.landingStatus,
@@ -692,6 +703,7 @@ export function App() {
       })
     : undefined;
   const dockingLaneStyle = { "--docking-lane-progress": dockingLane?.progress ?? 0 } as CSSProperties;
+  const dockingPulseStyle = { "--dock-pulse-progress": dockingPulse?.progress ?? 0 } as CSSProperties;
   const approachStreakStyle = { "--approach-streak-progress": approachRewardReadout?.progress ?? 0 } as CSSProperties;
   const primaryRunControl = buildPrimaryRunControlPresentation({ preflightOpen, paused });
   const canBoost = canUseImpulseControl({
@@ -1509,6 +1521,19 @@ export function App() {
               <i key={`${pip}-${index}`} className={`style-chain-meter-pip style-chain-meter-pip-${pip}`} />
             ))}
           </div>
+        </div>
+      ) : null}
+
+      {dockingPulse ? (
+        <div
+          className={`dock-pulse dock-pulse-${dockingPulse.tone}`}
+          style={dockingPulseStyle}
+          aria-label={`Docking cue: ${dockingPulse.action}. ${dockingPulse.detail}`}
+        >
+          <Target size={18} />
+          <strong>{dockingPulse.action}</strong>
+          <small>{dockingPulse.detail}</small>
+          {dockingPulse.reward ? <b>{dockingPulse.reward}</b> : null}
         </div>
       ) : null}
 

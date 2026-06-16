@@ -36,4 +36,12 @@ describe("live HUD density wiring", () => {
     expect(appSource).toContain('className={`docking-lane docking-lane-${dockingLane.tone}`}');
     expect(appSource).toContain('style={dockingLaneStyle}');
   });
+
+  it("renders a large final dock pulse over the playfield", () => {
+    expect(appSource).toContain("const dockingPulse = buildDockingPulsePresentation({");
+    expect(appSource).toContain("const dockingPulseStyle = {");
+    expect(appSource).toContain('"--dock-pulse-progress": dockingPulse?.progress ?? 0');
+    expect(appSource).toContain('className={`dock-pulse dock-pulse-${dockingPulse.tone}`}');
+    expect(appSource).toContain('aria-label={`Docking cue: ${dockingPulse.action}. ${dockingPulse.detail}`}');
+  });
 });
