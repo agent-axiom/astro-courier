@@ -21,6 +21,7 @@ import {
   approachLockVisual,
   screenShakeOffset,
   shipBoostReadinessVisual,
+  shipBankVisual,
   shipShieldReserveVisual,
   shipTrailVisual,
   speedLineVisual,
@@ -1032,6 +1033,35 @@ describe("ship trail visual", () => {
       color: 0xff4d6d,
       tone: "warning"
     });
+  });
+});
+
+describe("ship bank visual", () => {
+  it("keeps the hull neutral outside flight or while moving straight ahead", () => {
+    expect(shipBankVisual({ status: "paused", rotation: 0, velocity: { x: 0, y: 42 } })).toEqual({
+      alpha: 0,
+      bank: 0,
+      highlightSide: "neutral",
+      leftWingScale: 1,
+      rightWingScale: 1
+    });
+    expect(shipBankVisual({ status: "flying", rotation: 0, velocity: { x: 42, y: 0 } })).toMatchObject({
+      bank: 0,
+      highlightSide: "neutral"
+    });
+  });
+
+  it("leans into lateral drift so fast turns feel more physical", () => {
+    const rightDrift = shipBankVisual({ status: "flying", rotation: 0, velocity: { x: 26, y: 28 } });
+    const leftDrift = shipBankVisual({ status: "flying", rotation: 0, velocity: { x: 26, y: -28 } });
+
+    expect(rightDrift.bank).toBeGreaterThan(0);
+    expect(rightDrift.highlightSide).toBe("right");
+    expect(rightDrift.rightWingScale).toBeGreaterThan(rightDrift.leftWingScale);
+    expect(rightDrift.alpha).toBeGreaterThan(0);
+    expect(leftDrift.bank).toBeLessThan(0);
+    expect(leftDrift.highlightSide).toBe("left");
+    expect(leftDrift.leftWingScale).toBeGreaterThan(leftDrift.rightWingScale);
   });
 });
 

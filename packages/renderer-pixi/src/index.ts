@@ -785,6 +785,20 @@ export type ShipTrailVisual = {
   alpha: number;
 };
 
+export type ShipBankVisualInput = {
+  status: SimulationSnapshot["status"];
+  rotation: number;
+  velocity: Vec2;
+};
+
+export type ShipBankVisual = {
+  bank: number;
+  leftWingScale: number;
+  rightWingScale: number;
+  highlightSide: "left" | "right" | "neutral";
+  alpha: number;
+};
+
 export type ShipBoostReadinessVisualInput = {
   status: SimulationSnapshot["status"];
   fuel: number;
@@ -901,6 +915,40 @@ export function shipTrailVisual(input: ShipTrailVisualInput): ShipTrailVisual | 
     length: round(18 + pressure * trailBoost, 2),
     radius: round(4 + pressure * 8, 2),
     alpha: round(clamp(0.34 + pressure * alphaBoost, 0.34, alphaMax), 2)
+  };
+}
+
+export function shipBankVisual(input: ShipBankVisualInput): ShipBankVisual {
+  const neutral: ShipBankVisual = {
+    alpha: 0,
+    bank: 0,
+    highlightSide: "neutral",
+    leftWingScale: 1,
+    rightWingScale: 1
+  };
+  const speed = Math.hypot(input.velocity.x, input.velocity.y);
+  if (input.status !== "flying" || speed < 8) {
+    return neutral;
+  }
+
+  const rightAxis = {
+    x: Math.cos(input.rotation + Math.PI / 2),
+    y: Math.sin(input.rotation + Math.PI / 2)
+  };
+  const lateral = (input.velocity.x * rightAxis.x + input.velocity.y * rightAxis.y) / speed;
+  const speedInfluence = clamp((speed - 8) / 34, 0, 1);
+  const bank = round(clamp(lateral * speedInfluence, -1, 1), 2);
+  if (Math.abs(bank) < 0.05) {
+    return neutral;
+  }
+
+  const wingDelta = bank * 0.16;
+  return {
+    alpha: round(0.18 + Math.abs(bank) * 0.28, 2),
+    bank,
+    highlightSide: bank > 0 ? "right" : "left",
+    leftWingScale: round(1 - wingDelta, 2),
+    rightWingScale: round(1 + wingDelta, 2)
   };
 }
 
@@ -1695,13 +1743,18 @@ class PixiRenderer implements AstroPixiRenderer {
       x: center.x + Math.cos(angle) * 16,
       y: center.y + Math.sin(angle) * 16
     };
+    const bank = shipBankVisual({
+      status: snapshot.status,
+      rotation: snapshot.ship.rotation,
+      velocity: snapshot.ship.velocity
+    });
     const left = {
-      x: center.x + Math.cos(angle + 2.45) * 12,
-      y: center.y + Math.sin(angle + 2.45) * 12
+      x: center.x + Math.cos(angle + 2.45) * 12 * bank.leftWingScale,
+      y: center.y + Math.sin(angle + 2.45) * 12 * bank.leftWingScale
     };
     const right = {
-      x: center.x + Math.cos(angle - 2.45) * 12,
-      y: center.y + Math.sin(angle - 2.45) * 12
+      x: center.x + Math.cos(angle - 2.45) * 12 * bank.rightWingScale,
+      y: center.y + Math.sin(angle - 2.45) * 12 * bank.rightWingScale
     };
     const speed = Math.hypot(snapshot.ship.velocity.x, snapshot.ship.velocity.y);
     const fuelRatio = snapshot.ship.maxFuel > 0 ? snapshot.ship.fuel / snapshot.ship.maxFuel : 0;
@@ -1871,6 +1924,14 @@ class PixiRenderer implements AstroPixiRenderer {
       width: 2,
       alpha: 1
     });
+    if (bank.alpha > 0) {
+      const wing = bank.highlightSide === "right" ? right : left;
+      this.ship.moveTo(center.x, center.y).lineTo(wing.x, wing.y).stroke({
+        color: 0x7ce1ff,
+        width: 1.4,
+        alpha: bank.alpha
+      });
+    }
 
     if (trail) {
       const tail = {
