@@ -24,6 +24,7 @@ import {
   shipBoostReadinessVisual,
   shipBankVisual,
   shipShieldReserveVisual,
+  shipStyleOrbitVisual,
   shipTrailVisual,
   speedLineVisual,
   trajectoryHazardDanger,
@@ -1146,6 +1147,80 @@ describe("ship bank visual", () => {
     expect(leftDrift.bank).toBeLessThan(0);
     expect(leftDrift.highlightSide).toBe("left");
     expect(leftDrift.leftWingScale).toBeGreaterThan(leftDrift.rightWingScale);
+  });
+});
+
+describe("ship style orbit visual", () => {
+  it("stays hidden unless a style chain is actively ticking during flight", () => {
+    expect(
+      shipStyleOrbitVisual({
+        status: "paused",
+        styleMultiplier: 1.5,
+        styleChainCount: 2,
+        styleChainSecondsRemaining: 2.4,
+        tick: 8
+      })
+    ).toBeUndefined();
+    expect(
+      shipStyleOrbitVisual({
+        status: "flying",
+        styleMultiplier: 1,
+        styleChainCount: 2,
+        styleChainSecondsRemaining: 2.4,
+        tick: 8
+      })
+    ).toBeUndefined();
+    expect(
+      shipStyleOrbitVisual({
+        status: "flying",
+        styleMultiplier: 1.5,
+        styleChainCount: 2,
+        styleChainSecondsRemaining: 0,
+        tick: 8
+      })
+    ).toBeUndefined();
+  });
+
+  it("turns active chain count into orbit pips around the ship", () => {
+    const visual = shipStyleOrbitVisual({
+      status: "flying",
+      styleMultiplier: 1.75,
+      styleChainCount: 3,
+      styleChainSecondsRemaining: 2.8,
+      tick: 8
+    });
+
+    expect(visual).toMatchObject({
+      color: 0x8ee6b8,
+      tone: "chain",
+      pips: 4,
+      activePips: 3
+    });
+    expect(visual?.radius).toBeGreaterThan(30);
+    expect(visual?.progress).toBeGreaterThan(0.5);
+    expect(visual?.flow).toBeGreaterThanOrEqual(0);
+    expect(visual?.flow).toBeLessThan(1);
+  });
+
+  it("warns visually when the style chain is about to expire", () => {
+    const steady = shipStyleOrbitVisual({
+      status: "flying",
+      styleMultiplier: 1.5,
+      styleChainCount: 2,
+      styleChainSecondsRemaining: 2.4,
+      tick: 10
+    });
+    const urgent = shipStyleOrbitVisual({
+      status: "flying",
+      styleMultiplier: 1.5,
+      styleChainCount: 2,
+      styleChainSecondsRemaining: 0.7,
+      tick: 10
+    });
+
+    expect(urgent).toMatchObject({ color: 0xffd166, tone: "urgent" });
+    expect(urgent?.alpha).toBeGreaterThan(steady?.alpha ?? 0);
+    expect(urgent?.progress).toBeLessThan(steady?.progress ?? 1);
   });
 });
 

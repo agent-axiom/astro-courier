@@ -846,6 +846,27 @@ export type ShipBankVisual = {
   alpha: number;
 };
 
+export type ShipStyleOrbitVisualInput = {
+  status: SimulationSnapshot["status"];
+  styleMultiplier?: number;
+  styleChainCount?: number;
+  styleChainSecondsRemaining?: number;
+  tick: number;
+};
+
+export type ShipStyleOrbitVisual = {
+  color: number;
+  tone: "chain" | "urgent";
+  radius: number;
+  pipRadius: number;
+  width: number;
+  alpha: number;
+  progress: number;
+  pips: number;
+  activePips: number;
+  flow: number;
+};
+
 export type ShipBoostReadinessVisualInput = {
   status: SimulationSnapshot["status"];
   fuel: number;
@@ -996,6 +1017,34 @@ export function shipBankVisual(input: ShipBankVisualInput): ShipBankVisual {
     highlightSide: bank > 0 ? "right" : "left",
     leftWingScale: round(1 - wingDelta, 2),
     rightWingScale: round(1 + wingDelta, 2)
+  };
+}
+
+const STYLE_ORBIT_PIPS = 4;
+const STYLE_ORBIT_CHAIN_WINDOW_SECONDS = 4;
+const STYLE_ORBIT_URGENT_SECONDS = 1;
+
+export function shipStyleOrbitVisual(input: ShipStyleOrbitVisualInput): ShipStyleOrbitVisual | undefined {
+  const secondsRemaining = input.styleChainSecondsRemaining ?? 0;
+  const chainActive = input.status === "flying" && (input.styleMultiplier ?? 1) > 1 && secondsRemaining > 0;
+  if (!chainActive) {
+    return undefined;
+  }
+
+  const urgent = secondsRemaining <= STYLE_ORBIT_URGENT_SECONDS;
+  const progress = clamp(secondsRemaining / STYLE_ORBIT_CHAIN_WINDOW_SECONDS, 0, 1);
+  const activePips = Math.min(STYLE_ORBIT_PIPS, Math.max(1, Math.round(input.styleChainCount ?? 1)));
+  return {
+    color: urgent ? 0xffd166 : 0x8ee6b8,
+    tone: urgent ? "urgent" : "chain",
+    radius: round(31 + activePips * 1.7 + (urgent ? 2 : 0), 2),
+    pipRadius: round(2.8 + activePips * 0.18 + (urgent ? 0.5 : 0), 2),
+    width: urgent ? 2.2 : 1.5,
+    alpha: round(clamp(0.26 + activePips * 0.05 + (urgent ? 0.18 : 0), 0.26, 0.68), 2),
+    progress: round(progress, 2),
+    pips: STYLE_ORBIT_PIPS,
+    activePips,
+    flow: round(positiveModulo(input.tick * (urgent ? 0.058 : 0.034), 1), 2)
   };
 }
 
@@ -1837,6 +1886,13 @@ class PixiRenderer implements AstroPixiRenderer {
       emergencyShieldAvailable: snapshot.emergencyShieldAvailable,
       tick: snapshot.tick
     });
+    const styleOrbit = shipStyleOrbitVisual({
+      status: snapshot.status,
+      styleMultiplier: snapshot.styleMultiplier,
+      styleChainCount: snapshot.styleChainCount,
+      styleChainSecondsRemaining: snapshot.styleChainSecondsRemaining,
+      tick: snapshot.tick
+    });
     const cargoAura = cargoAuraVisual({
       status: snapshot.status,
       cargoOnboard: snapshot.cargoOnboard,
@@ -1895,6 +1951,10 @@ class PixiRenderer implements AstroPixiRenderer {
         width: cargoAura.width,
         alpha: cargoAura.alpha
       });
+    }
+
+    if (styleOrbit) {
+      drawShipStyleOrbit(this.ship, center.x, center.y, styleOrbit);
     }
 
     if (cargoFracture) {
@@ -2034,6 +2094,41 @@ class PixiRenderer implements AstroPixiRenderer {
         alpha: hazardEffect.alpha
       });
     }
+  }
+}
+
+function drawShipStyleOrbit(ship: Graphics, x: number, y: number, visual: ShipStyleOrbitVisual): void {
+  ship.circle(x, y, visual.radius).stroke({
+    color: visual.color,
+    width: visual.width,
+    alpha: visual.alpha * 0.54
+  });
+
+  const arcAngle = Math.PI * 2 * visual.progress;
+  const steps = Math.max(4, Math.ceil(arcAngle / 0.32));
+  if (arcAngle > 0.05) {
+    for (let step = 0; step <= steps; step += 1) {
+      const angle = -Math.PI / 2 + (arcAngle * step) / steps;
+      const point = {
+        x: x + Math.cos(angle) * (visual.radius + 4),
+        y: y + Math.sin(angle) * (visual.radius + 4)
+      };
+      if (step === 0) {
+        ship.moveTo(point.x, point.y);
+      } else {
+        ship.lineTo(point.x, point.y);
+      }
+    }
+    ship.stroke({ color: visual.color, width: visual.width + 0.6, alpha: visual.alpha });
+  }
+
+  for (let pip = 0; pip < visual.pips; pip += 1) {
+    const active = pip < visual.activePips;
+    const angle = (visual.flow + pip / visual.pips) * Math.PI * 2 - Math.PI / 2;
+    ship.circle(x + Math.cos(angle) * visual.radius, y + Math.sin(angle) * visual.radius, active ? visual.pipRadius : visual.pipRadius * 0.62).fill({
+      color: active ? visual.color : 0xffffff,
+      alpha: active ? visual.alpha : visual.alpha * 0.24
+    });
   }
 }
 
