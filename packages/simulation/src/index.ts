@@ -1,5 +1,6 @@
 import type {
   CrashReason,
+  EnemyDirectorPolicy,
   InputFrame,
   LandingRating,
   LandingGuidanceStatus,
@@ -131,6 +132,31 @@ export type HazardState = {
   severity: number;
 };
 
+export type EnemyPolicyMode = "patrol" | "chase" | "evade";
+
+export type EnemyShipState = {
+  id: string;
+  position: Vec2;
+  velocity: Vec2;
+  rotation: number;
+  hp: number;
+  maxHp: number;
+  radius: number;
+  fireCooldownSeconds: number;
+  policy: EnemyPolicyMode;
+};
+
+export type ProjectileState = {
+  id: string;
+  owner: "player" | "enemy";
+  position: Vec2;
+  velocity: Vec2;
+  radius: number;
+  damage: number;
+  ageSeconds: number;
+  maxAgeSeconds: number;
+};
+
 export type ShipState = {
   position: Vec2;
   velocity: Vec2;
@@ -138,6 +164,9 @@ export type ShipState = {
   targetRotation: number;
   fuel: number;
   maxFuel: number;
+  hp: number;
+  maxHp: number;
+  weaponCooldownSeconds: number;
   boostCooldownSeconds: number;
   thrustPower: number;
   rotationPower: number;
@@ -177,6 +206,11 @@ export type SimulationWorld = {
   gravitySources: GravitySourceState[];
   landingPads: LandingPadState[];
   hazards: HazardState[];
+  enemies: EnemyShipState[];
+  playerProjectiles: ProjectileState[];
+  enemyProjectiles: ProjectileState[];
+  enemyDirectorMode: "local" | "openai" | "fallback";
+  enemyDirectorPolicy: EnemyDirectorPolicy;
   ship: ShipState;
 };
 
@@ -196,6 +230,12 @@ export type WorldReplayInput = {
   commandBuffer: CommandBuffer;
   ticks: number;
   contractId?: string;
+};
+
+export type StepWorldOptions = {
+  combat?: boolean;
+  enemyDirectorPolicy?: EnemyDirectorPolicy;
+  enemyDirectorMode?: "local" | "openai" | "fallback";
 };
 
 export type WorldReplayOutput = {
@@ -259,6 +299,24 @@ const EMERGENCY_SHIELD_REBOUND_MIN_SPEED = 6;
 const EMERGENCY_SHIELD_REBOUND_MAX_SPEED = 58;
 const EMERGENCY_SHIELD_REBOUND_PUSH_OUT = 6;
 const EMERGENCY_SHIELD_REBOUND_OUTWARD_SPEED = 22;
+const SHIP_MAX_HP = 100;
+const PLAYER_WEAPON_COOLDOWN_SECONDS = 0.28;
+const PLAYER_PROJECTILE_SPEED = 112;
+const PLAYER_PROJECTILE_DAMAGE = 20;
+const PLAYER_PROJECTILE_RADIUS = 4;
+const PLAYER_PROJECTILE_MAX_AGE_SECONDS = 1.5;
+const ENEMY_MAX_HP = 40;
+const ENEMY_RADIUS = 14;
+const ENEMY_FIRE_COOLDOWN_SECONDS = 4.4;
+const ENEMY_PROJECTILE_SPEED = 66;
+const ENEMY_PROJECTILE_DAMAGE = 8;
+const ENEMY_PROJECTILE_RADIUS = 5;
+const ENEMY_PROJECTILE_MAX_AGE_SECONDS = 2.4;
+const ENEMY_STYLE_BONUS = 90;
+const ENEMY_WAKE_DISTANCE = 430;
+const ENEMY_FIRE_DISTANCE = 220;
+const ENEMY_ACCELERATION = 17;
+const ENEMY_MAX_SPEED = 26;
 
 export function calculateHazardSkimStyleBonus(severity: number): number {
   return Math.round(HAZARD_SKIM_BASE_BONUS + clamp(severity, 0, 1) * HAZARD_SKIM_SEVERITY_BONUS);
@@ -266,6 +324,26 @@ export function calculateHazardSkimStyleBonus(severity: number): number {
 
 export function calculateHazardThreadStyleBonus(severity: number): number {
   return calculateHazardSkimStyleBonus(severity) + HAZARD_THREAD_SPEED_BONUS;
+}
+
+export function defaultEnemyDirectorPolicy(): EnemyDirectorPolicy {
+  return {
+    aggression: 0.45,
+    flank: 0,
+    fireBias: 0.4,
+    retreatHp: 28,
+    focus: "cargo"
+  };
+}
+
+export function clampEnemyDirectorPolicy(policy: EnemyDirectorPolicy): EnemyDirectorPolicy {
+  return {
+    aggression: round(clamp(policy.aggression, 0, 1), 3),
+    flank: round(clamp(policy.flank, -1, 1), 3),
+    fireBias: round(clamp(policy.fireBias, 0, 1), 3),
+    retreatHp: round(clamp(policy.retreatHp, 0, ENEMY_MAX_HP), 3),
+    focus: policy.focus === "player" || policy.focus === "objective" ? policy.focus : "cargo"
+  };
 }
 
 export function createWorldFromSystem(system: SystemContent, seed: string, options: WorldCreationOptions = {}): SimulationWorld {
@@ -289,6 +367,7 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
   const shipFuel = shipStart?.fuel ?? system.ship.fuel;
   const hazardSeverityMultiplier = activeContract.hazardSeverityMultiplier ?? 1;
   const hazardSeedPulse = dailyHazardSeverityPulse(seed);
+  const shipStartPosition = toVec2(shipPosition);
 
   return {
     systemId: system.id,
@@ -346,13 +425,21 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
       radius: hazard.radius,
       severity: round(clamp(hazard.severity * hazardSeverityMultiplier * hazardSeedPulse(hazard.id), 0, 1), 3)
     })),
+    enemies: createEnemyPatrol(system, activeContract, shipStartPosition),
+    playerProjectiles: [],
+    enemyProjectiles: [],
+    enemyDirectorMode: "local",
+    enemyDirectorPolicy: defaultEnemyDirectorPolicy(),
     ship: {
-      position: toVec2(shipPosition),
+      position: shipStartPosition,
       velocity: toVec2(shipVelocity),
       rotation: shipRotation,
       targetRotation: shipRotation,
       fuel: shipFuel,
       maxFuel: shipFuel,
+      hp: SHIP_MAX_HP,
+      maxHp: SHIP_MAX_HP,
+      weaponCooldownSeconds: 0,
       boostCooldownSeconds: 0,
       thrustPower: system.ship.thrustPower,
       rotationPower: system.ship.rotationPower,
@@ -361,13 +448,62 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
   };
 }
 
-export function stepWorld(world: SimulationWorld, fixedDt: number, commands: PlayerCommand[]): SimulationWorld {
+function createEnemyPatrol(system: SystemContent, activeContract: ContractContent, shipStartPosition: Vec2): EnemyShipState[] {
+  const pickup = findPadPosition(system, activeContract.pickupId) ?? shipStartPosition;
+  const destination = findPadPosition(system, activeContract.destinationId) ?? add(shipStartPosition, { x: 220, y: 0 });
+  const route = subtract(destination, pickup);
+  const routeDistance = Math.max(1, magnitude(route));
+  const routeDirection = scale(route, 1 / routeDistance);
+  const flank = { x: -routeDirection.y, y: routeDirection.x };
+  const midpoint = scale(add(pickup, destination), 0.5);
+  const seedShift = deterministicUnit(`${system.id}:${activeContract.id}:interceptors`) - 0.5;
+
+  return [
+    createEnemyShip("interceptor-a", add(add(midpoint, scale(flank, 220)), scale(routeDirection, seedShift * 80)), 0.35),
+    createEnemyShip("interceptor-b", add(add(midpoint, scale(flank, -190)), scale(routeDirection, 90 + seedShift * 60)), -0.2)
+  ];
+}
+
+function createEnemyShip(id: string, position: Vec2, drift: number): EnemyShipState {
+  return {
+    id,
+    position,
+    velocity: { x: Math.cos(drift) * 5, y: Math.sin(drift) * 5 },
+    rotation: drift,
+    hp: ENEMY_MAX_HP,
+    maxHp: ENEMY_MAX_HP,
+    radius: ENEMY_RADIUS,
+    fireCooldownSeconds: ENEMY_FIRE_COOLDOWN_SECONDS,
+    policy: "patrol"
+  };
+}
+
+function findPadPosition(system: SystemContent, padId: string): Vec2 | undefined {
+  const pads = [
+    ...system.planets.flatMap((planet) => planet.landingPads),
+    ...system.stations.flatMap((station) => station.landingPads)
+  ];
+  const pad = pads.find((candidate) => candidate.id === padId);
+  return pad ? toVec2(pad.position) : undefined;
+}
+
+export function stepWorld(
+  world: SimulationWorld,
+  fixedDt: number,
+  commands: PlayerCommand[],
+  options: StepWorldOptions = {}
+): SimulationWorld {
   if (world.status !== "flying") {
     return world;
+  }
+  if (options.enemyDirectorPolicy) {
+    world.enemyDirectorPolicy = clampEnemyDirectorPolicy(options.enemyDirectorPolicy);
+    world.enemyDirectorMode = options.enemyDirectorMode ?? "openai";
   }
   world.lastMilestone = undefined;
   world.lastStyleAward = undefined;
   tickBoostCooldown(world, fixedDt);
+  tickWeaponCooldown(world, fixedDt);
   tickStyleChain(world, fixedDt);
   tickLaunchBurstWindow(world, fixedDt);
 
@@ -400,6 +536,8 @@ export function stepWorld(world: SimulationWorld, fixedDt: number, commands: Pla
         world.launchBurstSecondsRemaining = 0;
         awardStyle(world, LAUNCH_BURST_STYLE_BONUS, "Launch Burst");
       }
+    } else if (command.type === "FIRE") {
+      firePlayerProjectile(world);
     } else if (command.type === "PAUSE") {
       world.status = "paused";
       return world;
@@ -412,6 +550,9 @@ export function stepWorld(world: SimulationWorld, fixedDt: number, commands: Pla
   applyBrake(world, fixedDt, brake);
   applyCargoHandlingStress(world, fixedDt, brake);
   integrate(world, fixedDt);
+  if (options.combat !== false) {
+    updateCombat(world, fixedDt);
+  }
   updateGravitySling(world);
   applyLandingAssist(world);
   updateApproachStreak(world, fixedDt);
@@ -472,7 +613,7 @@ export function predictTrajectory(world: SimulationWorld, options: TrajectoryOpt
   const points: Vec2[] = [];
 
   for (let tick = 0; tick < totalTicks; tick += 1) {
-    stepWorld(preview, options.fixedDt, []);
+    stepWorld(preview, options.fixedDt, [], { combat: false });
     if (tick % sampleEvery === 0) {
       points.push({ ...preview.ship.position });
     }
@@ -507,8 +648,37 @@ export function snapshotWorld(world: SimulationWorld): SimulationSnapshot {
       rotation: world.ship.rotation,
       fuel: world.ship.fuel,
       maxFuel: world.ship.maxFuel,
+      hp: round(world.ship.hp, 3),
+      maxHp: world.ship.maxHp,
+      weaponCooldownSeconds: round(world.ship.weaponCooldownSeconds, 3),
       boostCooldownSeconds: round(world.ship.boostCooldownSeconds, 3),
       cargoDamage: world.ship.cargoDamage
+    },
+    enemies: world.enemies.map((enemy) => ({
+      id: enemy.id,
+      position: { ...enemy.position },
+      velocity: { ...enemy.velocity },
+      rotation: enemy.rotation,
+      hp: round(enemy.hp, 3),
+      maxHp: enemy.maxHp,
+      radius: enemy.radius,
+      policy: enemy.policy
+    })),
+    playerProjectiles: world.playerProjectiles.map((projectile) => ({
+      id: projectile.id,
+      position: { ...projectile.position },
+      velocity: { ...projectile.velocity },
+      radius: projectile.radius
+    })),
+    enemyProjectiles: world.enemyProjectiles.map((projectile) => ({
+      id: projectile.id,
+      position: { ...projectile.position },
+      velocity: { ...projectile.velocity },
+      radius: projectile.radius
+    })),
+    enemyDirector: {
+      mode: world.enemyDirectorMode,
+      policy: { ...world.enemyDirectorPolicy }
     },
     gravitySources: world.gravitySources.map((source) => ({
       id: source.id,
@@ -743,6 +913,152 @@ function isBrakeSensitiveCargo(cargoKind: string): boolean {
 
 function integrate(world: SimulationWorld, fixedDt: number): void {
   world.ship.position = add(world.ship.position, scale(world.ship.velocity, fixedDt));
+}
+
+function tickWeaponCooldown(world: SimulationWorld, fixedDt: number): void {
+  world.ship.weaponCooldownSeconds = round(Math.max(0, world.ship.weaponCooldownSeconds - fixedDt), 6);
+  for (const enemy of world.enemies) {
+    enemy.fireCooldownSeconds = round(Math.max(0, enemy.fireCooldownSeconds - fixedDt), 6);
+  }
+}
+
+function firePlayerProjectile(world: SimulationWorld): void {
+  if (world.ship.weaponCooldownSeconds > 0 || world.ship.hp <= 0) {
+    return;
+  }
+
+  const forward = { x: Math.cos(world.ship.rotation), y: Math.sin(world.ship.rotation) };
+  const muzzle = add(world.ship.position, scale(forward, 18));
+  world.playerProjectiles.push({
+    id: `player-shot-${world.tick}-${world.playerProjectiles.length}`,
+    owner: "player",
+    position: muzzle,
+    velocity: add(world.ship.velocity, scale(forward, PLAYER_PROJECTILE_SPEED)),
+    radius: PLAYER_PROJECTILE_RADIUS,
+    damage: PLAYER_PROJECTILE_DAMAGE,
+    ageSeconds: 0,
+    maxAgeSeconds: PLAYER_PROJECTILE_MAX_AGE_SECONDS
+  });
+  world.ship.weaponCooldownSeconds = PLAYER_WEAPON_COOLDOWN_SECONDS;
+}
+
+function updateCombat(world: SimulationWorld, fixedDt: number): void {
+  updateEnemies(world, fixedDt);
+  stepProjectiles(world.playerProjectiles, fixedDt);
+  stepProjectiles(world.enemyProjectiles, fixedDt);
+  resolvePlayerProjectileHits(world);
+  resolveEnemyProjectileHits(world);
+  cleanupProjectiles(world);
+}
+
+function updateEnemies(world: SimulationWorld, fixedDt: number): void {
+  const policy = clampEnemyDirectorPolicy(world.enemyDirectorPolicy);
+  for (const enemy of world.enemies) {
+    const toShip = subtract(world.ship.position, enemy.position);
+    const distance = magnitude(toShip);
+    const direction = distance > 0 ? scale(toShip, 1 / distance) : { x: 1, y: 0 };
+    const lowHp = enemy.hp <= policy.retreatHp;
+    const waking = distance <= ENEMY_WAKE_DISTANCE;
+    enemy.policy = lowHp ? "evade" : waking ? "chase" : "patrol";
+
+    const flankAxis = {
+      x: -direction.y * policy.flank,
+      y: direction.x * policy.flank
+    };
+    const desired =
+      enemy.policy === "evade"
+        ? scale(direction, -1)
+        : enemy.policy === "chase"
+          ? normalizeVector(add(scale(direction, 1 + policy.aggression), scale(flankAxis, 0.45)))
+          : normalizeVector({ x: Math.cos(world.tick * 0.01 + enemy.position.x), y: Math.sin(world.tick * 0.01 + enemy.position.y) });
+    enemy.velocity = add(enemy.velocity, scale(desired, ENEMY_ACCELERATION * fixedDt));
+    enemy.velocity = limitVector(enemy.velocity, ENEMY_MAX_SPEED);
+    enemy.position = add(enemy.position, scale(enemy.velocity, fixedDt));
+    enemy.rotation = normalizeAngle(Math.atan2(enemy.velocity.y || direction.y, enemy.velocity.x || direction.x));
+
+    if (distance <= ENEMY_FIRE_DISTANCE && enemy.fireCooldownSeconds <= 0) {
+      fireEnemyProjectile(world, enemy, direction, policy);
+    }
+  }
+}
+
+function fireEnemyProjectile(
+  world: SimulationWorld,
+  enemy: EnemyShipState,
+  directionToShip: Vec2,
+  policy: EnemyDirectorPolicy
+): void {
+  const fireBiasCooldown = ENEMY_FIRE_COOLDOWN_SECONDS * (1.15 - policy.fireBias * 0.35);
+  enemy.fireCooldownSeconds = round(clamp(fireBiasCooldown, 0.9, 2.4), 6);
+  world.enemyProjectiles.push({
+    id: `${enemy.id}-shot-${world.tick}-${world.enemyProjectiles.length}`,
+    owner: "enemy",
+    position: add(enemy.position, scale(directionToShip, enemy.radius + 5)),
+    velocity: add(enemy.velocity, scale(directionToShip, ENEMY_PROJECTILE_SPEED)),
+    radius: ENEMY_PROJECTILE_RADIUS,
+    damage: ENEMY_PROJECTILE_DAMAGE,
+    ageSeconds: 0,
+    maxAgeSeconds: ENEMY_PROJECTILE_MAX_AGE_SECONDS
+  });
+}
+
+function stepProjectiles(projectiles: ProjectileState[], fixedDt: number): void {
+  for (const projectile of projectiles) {
+    projectile.position = add(projectile.position, scale(projectile.velocity, fixedDt));
+    projectile.ageSeconds = round(projectile.ageSeconds + fixedDt, 6);
+  }
+}
+
+function resolvePlayerProjectileHits(world: SimulationWorld): void {
+  const remainingProjectiles: ProjectileState[] = [];
+  const destroyedEnemyIds = new Set<string>();
+
+  for (const projectile of world.playerProjectiles) {
+    const target = world.enemies.find(
+      (enemy) => !destroyedEnemyIds.has(enemy.id) && distanceBetween(projectile.position, enemy.position) <= projectile.radius + enemy.radius
+    );
+    if (!target) {
+      remainingProjectiles.push(projectile);
+      continue;
+    }
+
+    target.hp = round(Math.max(0, target.hp - projectile.damage), 3);
+    if (target.hp <= 0) {
+      destroyedEnemyIds.add(target.id);
+    }
+  }
+
+  if (destroyedEnemyIds.size > 0) {
+    world.enemies = world.enemies.filter((enemy) => !destroyedEnemyIds.has(enemy.id));
+    awardStyle(world, ENEMY_STYLE_BONUS * destroyedEnemyIds.size, "Interceptor Down");
+  }
+  world.playerProjectiles = remainingProjectiles;
+}
+
+function resolveEnemyProjectileHits(world: SimulationWorld): void {
+  const remainingProjectiles: ProjectileState[] = [];
+  for (const projectile of world.enemyProjectiles) {
+    if (distanceBetween(projectile.position, world.ship.position) > projectile.radius + 10) {
+      remainingProjectiles.push(projectile);
+      continue;
+    }
+
+    world.ship.hp = round(Math.max(0, world.ship.hp - projectile.damage), 3);
+    world.lastMilestone = "Hull Hit";
+    if (world.ship.hp <= 0) {
+      world.status = "crashed";
+      world.landingRating = "Insurance Event";
+      world.crashReason = "Hull Collision";
+      world.ship.cargoDamage = 1;
+      break;
+    }
+  }
+  world.enemyProjectiles = remainingProjectiles;
+}
+
+function cleanupProjectiles(world: SimulationWorld): void {
+  world.playerProjectiles = world.playerProjectiles.filter((projectile) => projectile.ageSeconds <= projectile.maxAgeSeconds);
+  world.enemyProjectiles = world.enemyProjectiles.filter((projectile) => projectile.ageSeconds <= projectile.maxAgeSeconds);
 }
 
 function updateGravitySling(world: SimulationWorld): void {
@@ -1347,6 +1663,22 @@ function scale(value: Vec2, amount: number): Vec2 {
 
 function magnitude(value: Vec2): number {
   return Math.hypot(value.x, value.y);
+}
+
+function normalizeVector(value: Vec2): Vec2 {
+  const length = magnitude(value);
+  if (length <= 0) {
+    return { x: 0, y: 0 };
+  }
+  return scale(value, 1 / length);
+}
+
+function limitVector(value: Vec2, maxLength: number): Vec2 {
+  const length = magnitude(value);
+  if (length <= maxLength || length <= 0) {
+    return value;
+  }
+  return scale(value, maxLength / length);
 }
 
 function dot(left: Vec2, right: Vec2): number {

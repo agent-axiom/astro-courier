@@ -8,6 +8,7 @@ const gamepadTriggerDeadZone = 0.05;
 const gamepadBrakeButtonIndex = 6;
 const gamepadThrustButtonIndex = 7;
 const gamepadBoostButtonIndex = 0;
+const gamepadFireButtonIndex = 2;
 
 export type ScreenPoint = {
   x: number;
@@ -110,7 +111,9 @@ export class KeyboardInput {
   private pointerTarget?: HTMLElement;
   private pointerActive = false;
   private boostQueued = false;
+  private fireQueued = false;
   private gamepadBoostPressed = false;
+  private gamepadFirePressed = false;
   private pointer: ScreenPoint = { x: 0, y: 0 };
 
   constructor(target: Window) {
@@ -139,7 +142,9 @@ export class KeyboardInput {
     this.pressed.clear();
     this.pointerActive = false;
     this.boostQueued = false;
+    this.fireQueued = false;
     this.gamepadBoostPressed = false;
+    this.gamepadFirePressed = false;
   }
 
   commands(currentRotation: number): PlayerCommand[] {
@@ -152,8 +157,15 @@ export class KeyboardInput {
       commands.push({ type: "BOOST" });
       this.boostQueued = false;
     }
+    if (this.fireQueued) {
+      commands.push({ type: "FIRE" });
+      this.fireQueued = false;
+    }
     if (this.takeGamepadBoost(gamepad)) {
       commands.push({ type: "BOOST" });
+    }
+    if (this.takeGamepadFire(gamepad)) {
+      commands.push({ type: "FIRE" });
     }
     return [...commands, ...this.pointerCommands()];
   }
@@ -165,6 +177,9 @@ export class KeyboardInput {
       this.pressed.add(event.code);
       if (event.code === "KeyE" && !wasPressed) {
         this.boostQueued = true;
+      }
+      if ((event.code === "KeyJ" || event.code === "Enter") && !wasPressed) {
+        this.fireQueued = true;
       }
     }
   };
@@ -180,7 +195,9 @@ export class KeyboardInput {
     this.pressed.clear();
     this.pointerActive = false;
     this.boostQueued = false;
+    this.fireQueued = false;
     this.gamepadBoostPressed = false;
+    this.gamepadFirePressed = false;
   };
 
   private readonly handlePointerDown = (event: PointerEvent) => {
@@ -213,6 +230,13 @@ export class KeyboardInput {
     return shouldQueue;
   }
 
+  private takeGamepadFire(gamepad: GamepadCommandInput | undefined): boolean {
+    const firePressed = gamepad ? gamepadButtonValue(gamepad.buttons[gamepadFireButtonIndex]) > 0 : false;
+    const shouldQueue = firePressed && !this.gamepadFirePressed;
+    this.gamepadFirePressed = firePressed;
+    return shouldQueue;
+  }
+
   private pointerCommands(): PlayerCommand[] {
     if (!this.pointerTarget) {
       return [];
@@ -242,6 +266,8 @@ function isGameKey(code: string): boolean {
     code === "KeyS" ||
     code === "Space" ||
     code === "KeyE" ||
+    code === "KeyJ" ||
+    code === "Enter" ||
     code === "ShiftLeft" ||
     code === "ShiftRight"
   );

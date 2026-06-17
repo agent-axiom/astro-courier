@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createCommandBuffer, checksumReplay } from "@astro-courier/engine";
+import type { PlayerCommand, Vec2 } from "@astro-courier/shared";
 import {
   calculateHazardThreadStyleBonus,
   calculateHazardSkimStyleBonus,
@@ -24,6 +25,7 @@ import {
   snapshotWorld,
   stepWorld,
   summarizeRun,
+  type SimulationWorld,
   type SystemContent
 } from "./index";
 
@@ -274,6 +276,90 @@ describe("deterministic Astro Courier simulation", () => {
     stepWorld(world, 1 / 60, [{ type: "BOOST" }]);
     expect(world.lastMilestone).toBeDefined();
     expect(world.ship.fuel).toBeLessThan(fuelAfterFirstBoost);
+  });
+
+  it("starts runs with ship HP and a small interceptor patrol", () => {
+    const world = createWorldFromSystem(starterSystem, "combat-seed");
+    const snapshot = combatSnapshot(world);
+
+    expect(snapshot.ship.hp).toBe(100);
+    expect(snapshot.ship.maxHp).toBe(100);
+    expect(snapshot.enemies).toHaveLength(2);
+    expect(snapshot.enemies.every((enemy) => enemy.hp > 0 && enemy.maxHp >= enemy.hp)).toBe(true);
+    expect(snapshot.playerProjectiles).toEqual([]);
+    expect(snapshot.enemyProjectiles).toEqual([]);
+  });
+
+  it("fires one player projectile per weapon cooldown", () => {
+    const world = createWorldFromSystem(starterSystem, "fire-cooldown-seed");
+    const combat = combatWorld(world);
+    combat.enemies = [testEnemy("interceptor-a", { x: 170, y: 0 })];
+    combat.ship.position = { x: 120, y: 0 };
+    combat.ship.velocity = { x: 0, y: 0 };
+    combat.ship.rotation = 0;
+    combat.ship.targetRotation = 0;
+
+    stepWorld(world, 1 / 60, fireCommand());
+    stepWorld(world, 1 / 60, fireCommand());
+
+    expect(combat.playerProjectiles).toHaveLength(1);
+    expect(combat.ship.weaponCooldownSeconds).toBeGreaterThan(0);
+  });
+
+  it("lets player shots damage and destroy interceptors", () => {
+    const world = createWorldFromSystem(starterSystem, "projectile-hit-seed");
+    const combat = combatWorld(world);
+    combat.enemies = [testEnemy("interceptor-a", { x: 154, y: 0 }, { hp: 20 })];
+    combat.ship.position = { x: 120, y: 0 };
+    combat.ship.velocity = { x: 0, y: 0 };
+    combat.ship.rotation = 0;
+    combat.ship.targetRotation = 0;
+
+    stepWorld(world, 1 / 60, fireCommand());
+    for (let tick = 0; tick < 24; tick += 1) {
+      stepWorld(world, 1 / 60, []);
+    }
+
+    expect(combat.enemies).toHaveLength(0);
+    expect(summarizeRun(world).scoreBreakdown.styleBonus).toBeGreaterThan(0);
+  });
+
+  it("lets enemy shots damage the player and crash the run at zero HP", () => {
+    const world = createWorldFromSystem(starterSystem, "enemy-shot-seed");
+    const combat = combatWorld(world);
+    combat.enemies = [];
+    combat.ship.position = { x: 120, y: 0 };
+    combat.ship.velocity = { x: 0, y: 0 };
+    combat.ship.hp = 12;
+    combat.enemyProjectiles = [
+      {
+        id: "enemy-shot-a",
+        owner: "enemy",
+        position: { x: 120, y: 0 },
+        velocity: { x: 0, y: 0 },
+        radius: 5,
+        damage: 18,
+        ageSeconds: 0,
+        maxAgeSeconds: 1
+      }
+    ];
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(combat.ship.hp).toBe(0);
+    expect(world.status).toBe("crashed");
+    expect(world.crashReason).toBe("Hull Collision");
+  });
+
+  it("keeps the first seconds focused on launch instead of immediate interceptor damage", () => {
+    const world = createWorldFromSystem(starterSystem, "gentle-combat-seed");
+
+    for (let tick = 0; tick < 180; tick += 1) {
+      stepWorld(world, 1 / 60, []);
+    }
+
+    expect(combatWorld(world).ship.hp).toBe(100);
+    expect(combatWorld(world).enemyProjectiles).toHaveLength(0);
   });
 
   it("can start worlds and replays from a selected contract", () => {
@@ -2099,3 +2185,73 @@ describe("deterministic Astro Courier simulation", () => {
     expect(world.ship.fuel).toBe(before.fuel);
   });
 });
+
+type CombatEnemyForTest = {
+  id: string;
+  position: Vec2;
+  velocity: Vec2;
+  rotation: number;
+  hp: number;
+  maxHp: number;
+  radius: number;
+  fireCooldownSeconds: number;
+  policy: "patrol" | "chase" | "evade";
+};
+
+type CombatProjectileForTest = {
+  id: string;
+  owner: "player" | "enemy";
+  position: Vec2;
+  velocity: Vec2;
+  radius: number;
+  damage: number;
+  ageSeconds: number;
+  maxAgeSeconds: number;
+};
+
+type CombatWorldForTest = SimulationWorld & {
+  ship: SimulationWorld["ship"] & {
+    hp: number;
+    maxHp: number;
+    weaponCooldownSeconds: number;
+  };
+  enemies: CombatEnemyForTest[];
+  playerProjectiles: CombatProjectileForTest[];
+  enemyProjectiles: CombatProjectileForTest[];
+};
+
+type CombatSnapshotForTest = ReturnType<typeof snapshotWorld> & {
+  ship: ReturnType<typeof snapshotWorld>["ship"] & {
+    hp: number;
+    maxHp: number;
+  };
+  enemies: CombatEnemyForTest[];
+  playerProjectiles: CombatProjectileForTest[];
+  enemyProjectiles: CombatProjectileForTest[];
+};
+
+function combatWorld(world: SimulationWorld): CombatWorldForTest {
+  return world as CombatWorldForTest;
+}
+
+function combatSnapshot(world: SimulationWorld): CombatSnapshotForTest {
+  return snapshotWorld(world) as CombatSnapshotForTest;
+}
+
+function fireCommand(): PlayerCommand[] {
+  return [{ type: "FIRE" } as PlayerCommand];
+}
+
+function testEnemy(id: string, position: Vec2, options: { hp?: number } = {}): CombatEnemyForTest {
+  return {
+    id,
+    position,
+    velocity: { x: 0, y: 0 },
+    rotation: 0,
+    hp: options.hp ?? 40,
+    maxHp: 40,
+    radius: 14,
+    fireCooldownSeconds: 999,
+    policy: "patrol"
+  };
+}

@@ -871,6 +871,44 @@ export type ShipTrailVisual = {
   alpha: number;
 };
 
+export type CombatShipVisualInput = Pick<SimulationSnapshot, "status"> & {
+  hp: number;
+  maxHp: number;
+};
+
+export type CombatShipVisual = {
+  bodyColor: number;
+  canopyColor: number;
+  wingColor: number;
+  warningAlpha: number;
+  scale: number;
+};
+
+export type EnemyShipVisualInput = {
+  policy: "patrol" | "chase" | "evade";
+  hp: number;
+  maxHp: number;
+};
+
+export type EnemyShipVisual = {
+  color: number;
+  beamColor: number;
+  alpha: number;
+  radius: number;
+  warningAlpha: number;
+};
+
+export type ProjectileVisualInput = {
+  owner: "player" | "enemy";
+};
+
+export type ProjectileVisual = {
+  color: number;
+  glowColor: number;
+  radius: number;
+  alpha: number;
+};
+
 export type ShipBankVisualInput = {
   status: SimulationSnapshot["status"];
   rotation: number;
@@ -1022,6 +1060,65 @@ export function shipTrailVisual(input: ShipTrailVisualInput): ShipTrailVisual | 
     length: round(18 + pressure * trailBoost, 2),
     radius: round(4 + pressure * 8, 2),
     alpha: round(clamp(0.34 + pressure * alphaBoost, 0.34, alphaMax), 2)
+  };
+}
+
+export function combatShipVisual(input: CombatShipVisualInput): CombatShipVisual {
+  const hpRatio = input.maxHp > 0 ? clamp(input.hp / input.maxHp, 0, 1) : 0;
+  const damaged = hpRatio < 0.35 && input.status === "flying";
+  return {
+    bodyColor: damaged ? 0xff8a3d : 0xffb13b,
+    canopyColor: 0x92f4ff,
+    wingColor: 0xf7f0da,
+    warningAlpha: damaged ? round(clamp(0.28 + (0.35 - hpRatio) / 0.35 * 0.82, 0.28, 0.88), 2) : 0,
+    scale: input.status === "crashed" ? 0.94 : 1
+  };
+}
+
+export function enemyShipVisual(input: EnemyShipVisualInput): EnemyShipVisual {
+  const hpRatio = input.maxHp > 0 ? clamp(input.hp / input.maxHp, 0, 1) : 0;
+  const lowHp = hpRatio <= 0.35;
+  if (input.policy === "evade" || lowHp) {
+    return {
+      color: 0xffd166,
+      beamColor: 0xfff0ad,
+      alpha: 0.55,
+      radius: 15,
+      warningAlpha: 0.32
+    };
+  }
+  if (input.policy === "chase") {
+    return {
+      color: 0xff6f91,
+      beamColor: 0xffb3c7,
+      alpha: 0.9,
+      radius: 16,
+      warningAlpha: 0.18
+    };
+  }
+  return {
+    color: 0xb36bff,
+    beamColor: 0xff7ab6,
+    alpha: 0.88,
+    radius: 15,
+    warningAlpha: 0
+  };
+}
+
+export function projectileVisual(input: ProjectileVisualInput): ProjectileVisual {
+  if (input.owner === "player") {
+    return {
+      color: 0x7ce1ff,
+      glowColor: 0xbff7ff,
+      radius: 4,
+      alpha: 0.9
+    };
+  }
+  return {
+    color: 0xff6f91,
+    glowColor: 0xffb3c7,
+    radius: 5,
+    alpha: 0.86
   };
 }
 
@@ -1445,6 +1542,7 @@ class PixiRenderer implements AstroPixiRenderer {
   private readonly guidance = new Graphics();
   private readonly world = new Graphics();
   private readonly hazards = new Graphics();
+  private readonly combat = new Graphics();
   private readonly ship = new Graphics();
   private readonly screenFx = new Graphics();
   private readonly stars: Star[] = createStars(140);
@@ -1477,6 +1575,7 @@ class PixiRenderer implements AstroPixiRenderer {
       this.guidance,
       this.world,
       this.hazards,
+      this.combat,
       this.ship,
       this.screenFx
     );
@@ -1504,6 +1603,7 @@ class PixiRenderer implements AstroPixiRenderer {
     this.drawGuidance(snapshot, project, viewport);
     this.drawWorld(snapshot, project);
     this.drawHazards(snapshot, project);
+    this.drawCombat(snapshot, project);
     this.drawShip(snapshot, project);
     this.drawScreenFx(snapshot, viewport);
   }
@@ -1919,13 +2019,74 @@ class PixiRenderer implements AstroPixiRenderer {
     }
   }
 
+  private drawCombat(snapshot: SimulationSnapshot, project: (point: Vec2) => Vec2): void {
+    this.combat.clear();
+
+    for (const projectile of snapshot.playerProjectiles) {
+      const point = project(projectile.position);
+      const visual = projectileVisual({ owner: "player" });
+      this.combat.circle(point.x, point.y, visual.radius + 5).fill({ color: visual.glowColor, alpha: visual.alpha * 0.18 });
+      this.combat.circle(point.x, point.y, visual.radius).fill({ color: visual.color, alpha: visual.alpha });
+    }
+
+    for (const projectile of snapshot.enemyProjectiles) {
+      const point = project(projectile.position);
+      const visual = projectileVisual({ owner: "enemy" });
+      this.combat.circle(point.x, point.y, visual.radius + 6).fill({ color: visual.glowColor, alpha: visual.alpha * 0.16 });
+      this.combat.circle(point.x, point.y, visual.radius).fill({ color: visual.color, alpha: visual.alpha });
+    }
+
+    for (const enemy of snapshot.enemies) {
+      const center = project(enemy.position);
+      const visual = enemyShipVisual(enemy);
+      const angle = enemy.rotation;
+      const nose = {
+        x: center.x + Math.cos(angle) * visual.radius,
+        y: center.y + Math.sin(angle) * visual.radius
+      };
+      const left = {
+        x: center.x + Math.cos(angle + 2.35) * visual.radius * 0.9,
+        y: center.y + Math.sin(angle + 2.35) * visual.radius * 0.9
+      };
+      const right = {
+        x: center.x + Math.cos(angle - 2.35) * visual.radius * 0.9,
+        y: center.y + Math.sin(angle - 2.35) * visual.radius * 0.9
+      };
+      this.combat.circle(center.x, center.y, visual.radius + 11).fill({ color: visual.beamColor, alpha: 0.08 + visual.warningAlpha * 0.22 });
+      this.combat.moveTo(nose.x, nose.y).lineTo(left.x, left.y).lineTo(right.x, right.y).closePath().fill({
+        color: visual.color,
+        alpha: visual.alpha
+      });
+      this.combat.moveTo(nose.x, nose.y).lineTo(left.x, left.y).lineTo(right.x, right.y).closePath().stroke({
+        color: visual.beamColor,
+        width: 1.6,
+        alpha: 0.62
+      });
+      this.combat.circle(center.x, center.y, 4).fill({ color: visual.beamColor, alpha: 0.86 });
+      if (enemy.hp < enemy.maxHp) {
+        const hpRatio = enemy.maxHp > 0 ? enemy.hp / enemy.maxHp : 0;
+        this.combat.circle(center.x, center.y, visual.radius + 7).stroke({
+          color: hpRatio <= 0.35 ? 0xffd166 : 0xff7ab6,
+          width: 2,
+          alpha: 0.28 + (1 - hpRatio) * 0.34
+        });
+      }
+    }
+  }
+
   private drawShip(snapshot: SimulationSnapshot, project: (point: Vec2) => Vec2): void {
     this.ship.clear();
     const center = project(snapshot.ship.position);
     const angle = snapshot.ship.rotation;
+    const hullVisual = combatShipVisual({
+      status: snapshot.status,
+      hp: snapshot.ship.hp,
+      maxHp: snapshot.ship.maxHp
+    });
+    const shipScale = hullVisual.scale;
     const nose = {
-      x: center.x + Math.cos(angle) * 16,
-      y: center.y + Math.sin(angle) * 16
+      x: center.x + Math.cos(angle) * 19 * shipScale,
+      y: center.y + Math.sin(angle) * 19 * shipScale
     };
     const bank = shipBankVisual({
       status: snapshot.status,
@@ -1933,12 +2094,12 @@ class PixiRenderer implements AstroPixiRenderer {
       velocity: snapshot.ship.velocity
     });
     const left = {
-      x: center.x + Math.cos(angle + 2.45) * 12 * bank.leftWingScale,
-      y: center.y + Math.sin(angle + 2.45) * 12 * bank.leftWingScale
+      x: center.x + Math.cos(angle + 2.45) * 15 * bank.leftWingScale * shipScale,
+      y: center.y + Math.sin(angle + 2.45) * 15 * bank.leftWingScale * shipScale
     };
     const right = {
-      x: center.x + Math.cos(angle - 2.45) * 12 * bank.rightWingScale,
-      y: center.y + Math.sin(angle - 2.45) * 12 * bank.rightWingScale
+      x: center.x + Math.cos(angle - 2.45) * 15 * bank.rightWingScale * shipScale,
+      y: center.y + Math.sin(angle - 2.45) * 15 * bank.rightWingScale * shipScale
     };
     const speed = Math.hypot(snapshot.ship.velocity.x, snapshot.ship.velocity.y);
     const fuelRatio = snapshot.ship.maxFuel > 0 ? snapshot.ship.fuel / snapshot.ship.maxFuel : 0;
@@ -2113,11 +2274,58 @@ class PixiRenderer implements AstroPixiRenderer {
       }
     }
 
-    this.ship.moveTo(nose.x, nose.y).lineTo(left.x, left.y).lineTo(right.x, right.y).closePath().fill(0xfff7d6);
-    this.ship.moveTo(nose.x, nose.y).lineTo(left.x, left.y).lineTo(right.x, right.y).closePath().stroke({
+    if (hullVisual.warningAlpha > 0) {
+      this.ship.circle(center.x, center.y, 27).fill({ color: 0xff4d6d, alpha: hullVisual.warningAlpha * 0.18 });
+      this.ship.circle(center.x, center.y, 32).stroke({ color: 0xff4d6d, width: 2, alpha: hullVisual.warningAlpha });
+    }
+
+    const tail = {
+      x: center.x - Math.cos(angle) * 14 * shipScale,
+      y: center.y - Math.sin(angle) * 14 * shipScale
+    };
+    const bodyLeft = {
+      x: center.x + Math.cos(angle + Math.PI / 2) * 6 * shipScale - Math.cos(angle) * 5 * shipScale,
+      y: center.y + Math.sin(angle + Math.PI / 2) * 6 * shipScale - Math.sin(angle) * 5 * shipScale
+    };
+    const bodyRight = {
+      x: center.x + Math.cos(angle - Math.PI / 2) * 6 * shipScale - Math.cos(angle) * 5 * shipScale,
+      y: center.y + Math.sin(angle - Math.PI / 2) * 6 * shipScale - Math.sin(angle) * 5 * shipScale
+    };
+    const leftWingRoot = {
+      x: center.x + Math.cos(angle + Math.PI / 2) * 5 * shipScale - Math.cos(angle) * 3 * shipScale,
+      y: center.y + Math.sin(angle + Math.PI / 2) * 5 * shipScale - Math.sin(angle) * 3 * shipScale
+    };
+    const rightWingRoot = {
+      x: center.x + Math.cos(angle - Math.PI / 2) * 5 * shipScale - Math.cos(angle) * 3 * shipScale,
+      y: center.y + Math.sin(angle - Math.PI / 2) * 5 * shipScale - Math.sin(angle) * 3 * shipScale
+    };
+    const leftWingTip = left;
+    const rightWingTip = right;
+
+    this.ship.moveTo(leftWingRoot.x, leftWingRoot.y).lineTo(leftWingTip.x, leftWingTip.y).lineTo(tail.x, tail.y).closePath().fill({
+      color: hullVisual.wingColor,
+      alpha: 0.96
+    });
+    this.ship.moveTo(rightWingRoot.x, rightWingRoot.y).lineTo(rightWingTip.x, rightWingTip.y).lineTo(tail.x, tail.y).closePath().fill({
+      color: hullVisual.wingColor,
+      alpha: 0.96
+    });
+    this.ship.moveTo(nose.x, nose.y).lineTo(bodyLeft.x, bodyLeft.y).lineTo(tail.x, tail.y).lineTo(bodyRight.x, bodyRight.y).closePath().fill({
+      color: hullVisual.bodyColor,
+      alpha: 1
+    });
+    this.ship.moveTo(nose.x, nose.y).lineTo(bodyLeft.x, bodyLeft.y).lineTo(tail.x, tail.y).lineTo(bodyRight.x, bodyRight.y).closePath().stroke({
       color: 0x2e2d4d,
       width: 2,
       alpha: 1
+    });
+    this.ship.circle(center.x + Math.cos(angle) * 4 * shipScale, center.y + Math.sin(angle) * 4 * shipScale, 5.6 * shipScale).fill({
+      color: hullVisual.canopyColor,
+      alpha: 0.94
+    });
+    this.ship.circle(center.x + Math.cos(angle) * 6 * shipScale, center.y + Math.sin(angle) * 6 * shipScale, 2.2 * shipScale).fill({
+      color: 0xffffff,
+      alpha: 0.46
     });
     if (bank.alpha > 0) {
       const wing = bank.highlightSide === "right" ? right : left;

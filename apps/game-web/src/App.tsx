@@ -51,6 +51,7 @@ import {
   type RouteMarkReceipt
 } from "./game/bestRun";
 import { GameShell, type HudState } from "./game/GameShell";
+import { createEnemyDirectorClient } from "./game/enemyDirector";
 import { buildTargetCompassPresentation, formatBearingGuidance } from "./game/bearing";
 import { buildBoostControlPresentation, buildBrakeControlPresentation, buildPrimaryRunControlPresentation, canUseImpulseControl } from "./game/hudControls";
 import {
@@ -195,6 +196,11 @@ const initialHud: HudState = {
   score: 0,
   fuel: 100,
   maxFuel: 100,
+  shipHp: 100,
+  shipMaxHp: 100,
+  weaponCooldownSeconds: 0,
+  interceptorCount: 2,
+  enemyDirectorMode: "local",
   fuelUsed: 0,
   boostCooldownSeconds: 0,
   cargoDamage: 0,
@@ -307,6 +313,7 @@ export function App() {
     const shell = new GameShell({
       mount: canvasMountRef.current,
       onHud: setHud,
+      enemyDirector: createEnemyDirectorClient(import.meta.env.VITE_ENEMY_DIRECTOR_URL as string | undefined),
       initialPaused: true
     });
     shellRef.current = shell;
@@ -585,6 +592,7 @@ export function App() {
   }, [hud.contractId, hud.contractOptions, hud.elapsedSeconds, hud.medal, hud.score, hud.status]);
 
   const fuelRatio = hud.maxFuel > 0 ? hud.fuel / hud.maxFuel : 0;
+  const hullRatio = hud.shipMaxHp > 0 ? hud.shipHp / hud.shipMaxHp : 0;
   const cargoIntegrity = Math.max(0, 1 - hud.cargoDamage);
   const runFinished = hud.status === "delivered" || hud.status === "crashed";
   const milestoneScreenFeedback = buildMilestoneScreenFeedback(hud.lastMilestone);
@@ -1496,6 +1504,13 @@ export function App() {
               label="Cargo"
               value={hud.cargoOnboard ? `${Math.round(cargoIntegrity * 100)}%` : "Empty"}
               tone={cargoIntegrity < 0.7 ? "warning" : "normal"}
+              showLabel={topHudDensity.showMetricLabels}
+            />
+            <Metric
+              icon={<ShieldAlert size={18} />}
+              label="HP"
+              value={`${Math.round(hullRatio * 100)}%`}
+              tone={hullRatio < 0.35 ? "danger" : hullRatio < 0.7 ? "warning" : "normal"}
               showLabel={topHudDensity.showMetricLabels}
             />
           </div>

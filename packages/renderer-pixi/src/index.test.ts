@@ -4,8 +4,10 @@ import {
   boostSparkVisual,
   cameraFocus,
   cameraZoom,
+  combatShipVisual,
   cargoAuraVisual,
   cargoFractureVisual,
+  enemyShipVisual,
   ghostTrailSegmentVisual,
   ghostTrailPointVisual,
   gravitySurfaceRimVisual,
@@ -22,6 +24,7 @@ import {
   objectiveRouteBeamVisual,
   approachLockVisual,
   screenShakeOffset,
+  projectileVisual,
   shipBoostReadinessVisual,
   shipBankVisual,
   shipShieldReserveVisual,
@@ -80,6 +83,50 @@ describe("camera focus", () => {
 
     expect(far.x).toBeGreaterThan(close.x);
     expect(close.x).toBeGreaterThan(10);
+  });
+});
+
+describe("combat visuals", () => {
+  it("keeps the courier ship bright while showing HP pressure", () => {
+    expect(combatShipVisual({ status: "flying", hp: 100, maxHp: 100 })).toEqual({
+      bodyColor: 0xffb13b,
+      canopyColor: 0x92f4ff,
+      wingColor: 0xf7f0da,
+      warningAlpha: 0,
+      scale: 1
+    });
+
+    expect(combatShipVisual({ status: "flying", hp: 18, maxHp: 100 })).toMatchObject({
+      bodyColor: 0xff8a3d,
+      warningAlpha: 0.68
+    });
+  });
+
+  it("distinguishes enemy policy tone without extra UI text", () => {
+    expect(enemyShipVisual({ policy: "patrol", hp: 40, maxHp: 40 })).toMatchObject({
+      color: 0xb36bff,
+      beamColor: 0xff7ab6,
+      alpha: 0.88
+    });
+    expect(enemyShipVisual({ policy: "evade", hp: 8, maxHp: 40 })).toMatchObject({
+      color: 0xffd166,
+      alpha: 0.55
+    });
+  });
+
+  it("uses distinct projectile colors for player and enemy fire", () => {
+    expect(projectileVisual({ owner: "player" })).toEqual({
+      color: 0x7ce1ff,
+      glowColor: 0xbff7ff,
+      radius: 4,
+      alpha: 0.9
+    });
+    expect(projectileVisual({ owner: "enemy" })).toEqual({
+      color: 0xff6f91,
+      glowColor: 0xffb3c7,
+      radius: 5,
+      alpha: 0.86
+    });
   });
 });
 

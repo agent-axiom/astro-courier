@@ -31,6 +31,7 @@ import { KeyboardInput, type InputSource } from "./input";
 import { calculateContractPace, type ContractPaceTier } from "./pace";
 import { normalizeAngle } from "./bearing";
 import { forecastTrajectoryHazardRisk, type TrajectoryRiskForecast, type TrajectoryRiskLevel } from "./trajectoryRisk";
+import type { EnemyDirectorClient, EnemyDirectorResult } from "./enemyDirector";
 
 export type HudState = {
   status: RunStatus;
@@ -52,6 +53,11 @@ export type HudState = {
   score: number;
   fuel: number;
   maxFuel: number;
+  shipHp: number;
+  shipMaxHp: number;
+  weaponCooldownSeconds: number;
+  interceptorCount: number;
+  enemyDirectorMode: "local" | "openai" | "fallback";
   fuelUsed: number;
   boostCooldownSeconds: number;
   cargoDamage: number;
@@ -113,6 +119,7 @@ export type GameShellOptions = {
   onHud: (hud: HudState) => void;
   renderer?: AstroPixiRenderer;
   input?: InputSource;
+  enemyDirector?: EnemyDirectorClient;
   initialPaused?: boolean;
 };
 
@@ -128,6 +135,7 @@ const trajectorySampleEvery = 6;
 const trajectorySampleIntervalSeconds = fixedDt * trajectorySampleEvery;
 const minRunTrailSampleDistance = 0.5;
 const maxRunTrailSamples = 140;
+const enemyDirectorPollIntervalSeconds = 2.5;
 const gameVersion = "0.1.0";
 const localReplaySeed = "local-starter-seed";
 
@@ -136,6 +144,7 @@ export class GameShell {
   private readonly onHud: (hud: HudState) => void;
   private readonly renderer: AstroPixiRenderer;
   private readonly input: InputSource;
+  private readonly enemyDirector?: EnemyDirectorClient;
   private readonly system = validateSystemContent(starterRoute);
   private readonly contractOptionList = this.system.contracts.map((contract) => this.contractOption(contract));
   private world: SimulationWorld;
@@ -154,6 +163,9 @@ export class GameShell {
   private ghostTrail: Vec2[] = [];
   private selectedContractId?: string;
   private replaySeed = localReplaySeed;
+  private enemyDirectorResult?: EnemyDirectorResult;
+  private enemyDirectorPollSeconds = 0;
+  private enemyDirectorRequestInFlight = false;
   private destroyed = false;
 
   constructor(options: GameShellOptions) {
@@ -161,6 +173,7 @@ export class GameShell {
     this.onHud = options.onHud;
     this.renderer = options.renderer ?? createAstroPixiRenderer();
     this.input = options.input ?? new KeyboardInput(window);
+    this.enemyDirector = options.enemyDirector;
     this.paused = Boolean(options.initialPaused);
     this.world = this.createFreshWorld();
     this.resetRunTrail();
@@ -188,6 +201,9 @@ export class GameShell {
     this.retainedStyleAward = undefined;
     this.retainedMilestoneTimer = 0;
     this.latestTrajectoryRisk = undefined;
+    this.enemyDirectorResult = undefined;
+    this.enemyDirectorPollSeconds = 0;
+    this.enemyDirectorRequestInFlight = false;
     this.queuedCommands.length = 0;
     this.inputFrames.length = 0;
     this.lastTime = performance.now();
@@ -213,6 +229,9 @@ export class GameShell {
     this.retainedStyleAward = undefined;
     this.retainedMilestoneTimer = 0;
     this.latestTrajectoryRisk = undefined;
+    this.enemyDirectorResult = undefined;
+    this.enemyDirectorPollSeconds = 0;
+    this.enemyDirectorRequestInFlight = false;
     this.queuedCommands.length = 0;
     this.inputFrames.length = 0;
     this.lastTime = performance.now();
@@ -271,7 +290,7 @@ export class GameShell {
       while (this.accumulator >= fixedDt && subSteps < maxSubSteps) {
         const commands = [...this.input.commands(this.world.ship.rotation), ...this.consumeQueuedCommands()];
         this.recordReplayCommands(commands);
-        stepWorld(this.world, fixedDt, commands);
+        stepWorld(this.world, fixedDt, commands, this.enemyDirectorStepOptions());
         if (this.world.lastMilestone) {
           this.retainedMilestone = this.world.lastMilestone;
           this.retainedStyleAward = this.world.lastStyleAward;
@@ -307,6 +326,7 @@ export class GameShell {
       sampleIntervalSeconds: trajectorySampleIntervalSeconds
     });
     this.renderer.render(snapshot, trajectory, this.ghostTrail);
+    this.pollEnemyDirector(rawDelta);
 
     this.hudTimer += rawDelta;
     if (this.hudTimer >= 0.1 || this.world.status !== "flying") {
@@ -331,6 +351,51 @@ export class GameShell {
         command
       });
     }
+  }
+
+  private enemyDirectorStepOptions():
+    | {
+        enemyDirectorPolicy: NonNullable<EnemyDirectorResult>["policy"];
+        enemyDirectorMode: NonNullable<EnemyDirectorResult>["mode"];
+      }
+    | undefined {
+    if (!this.enemyDirectorResult) {
+      return undefined;
+    }
+    return {
+      enemyDirectorPolicy: this.enemyDirectorResult.policy,
+      enemyDirectorMode: this.enemyDirectorResult.mode
+    };
+  }
+
+  private pollEnemyDirector(deltaSeconds: number): void {
+    if (!this.enemyDirector || this.destroyed || this.world.status !== "flying") {
+      return;
+    }
+    if (this.enemyDirectorRequestInFlight) {
+      return;
+    }
+    this.enemyDirectorPollSeconds = Math.max(0, this.enemyDirectorPollSeconds - deltaSeconds);
+    if (this.enemyDirectorPollSeconds > 0) {
+      return;
+    }
+
+    this.enemyDirectorPollSeconds = enemyDirectorPollIntervalSeconds;
+    this.enemyDirectorRequestInFlight = true;
+    void this.enemyDirector
+      .requestPolicy(snapshotWorld(this.world))
+      .then((result) => {
+        if (!result || this.destroyed) {
+          return;
+        }
+        this.enemyDirectorResult = result;
+        this.world.enemyDirectorPolicy = result.policy;
+        this.world.enemyDirectorMode = result.mode;
+        this.publishHud();
+      })
+      .finally(() => {
+        this.enemyDirectorRequestInFlight = false;
+      });
   }
 
   private resetRunTrail(): void {
@@ -396,6 +461,11 @@ export class GameShell {
       score: result.score,
       fuel: this.world.ship.fuel,
       maxFuel: this.world.ship.maxFuel,
+      shipHp: snapshot.ship.hp,
+      shipMaxHp: snapshot.ship.maxHp,
+      weaponCooldownSeconds: snapshot.ship.weaponCooldownSeconds,
+      interceptorCount: snapshot.enemies.length,
+      enemyDirectorMode: snapshot.enemyDirector.mode,
       fuelUsed: result.fuelUsed,
       boostCooldownSeconds: snapshot.ship.boostCooldownSeconds,
       cargoDamage: result.cargoDamage,

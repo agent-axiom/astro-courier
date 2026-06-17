@@ -66,6 +66,26 @@ describe("keyboard input mapping", () => {
 
     expect(input.commands(Math.PI / 2)).toEqual([{ type: "BOOST" }]);
   });
+
+  it("queues fire once per keyboard press", () => {
+    const target = new FakeKeyboardTarget();
+    const input = new KeyboardInput(target as unknown as Window);
+    input.attach();
+
+    target.dispatch("keydown", "KeyJ");
+
+    expect(input.commands(0)).toEqual([{ type: "FIRE" }]);
+    expect(input.commands(0)).toEqual([]);
+
+    target.dispatch("keydown", "KeyJ");
+
+    expect(input.commands(0)).toEqual([]);
+
+    target.dispatch("keyup", "KeyJ");
+    target.dispatch("keydown", "Enter");
+
+    expect(input.commands(0)).toEqual([{ type: "FIRE" }]);
+  });
 });
 
 describe("gamepad input mapping", () => {
@@ -199,6 +219,23 @@ describe("gamepad input mapping", () => {
     target.setGamepads([{ axes: [0, 0], buttons: [{ pressed: true, value: 1 }] }]);
     expect(input.commands(0)).toEqual([{ type: "BOOST" }]);
   });
+
+  it("queues gamepad fire once per secondary face-button press", () => {
+    const target = new FakeGamepadTarget();
+    const input = new KeyboardInput(target as unknown as Window);
+    input.attach();
+
+    target.setGamepads([{ axes: [0, 0], buttons: gamepadButtons({ 2: { pressed: true, value: 1 } }) }]);
+
+    expect(input.commands(0)).toEqual([{ type: "FIRE" }]);
+    expect(input.commands(0)).toEqual([]);
+
+    target.setGamepads([{ axes: [0, 0], buttons: gamepadButtons({ 2: { pressed: false, value: 0 } }) }]);
+    expect(input.commands(0)).toEqual([]);
+
+    target.setGamepads([{ axes: [0, 0], buttons: gamepadButtons({ 2: { pressed: true, value: 1 } }) }]);
+    expect(input.commands(0)).toEqual([{ type: "FIRE" }]);
+  });
 });
 
 type KeyboardListener = (event: { code: string; preventDefault: () => void }) => void;
@@ -237,9 +274,9 @@ class FakeGamepadTarget extends FakeKeyboardTarget {
     getGamepads: () => this.gamepads
   };
 
-  private gamepads: Array<{ axes: number[]; buttons: Array<{ pressed: boolean; value: number }> } | null> = [];
+  private gamepads: Array<{ axes: number[]; buttons: Array<{ pressed: boolean; value?: number }> } | null> = [];
 
-  setGamepads(gamepads: Array<{ axes: number[]; buttons: Array<{ pressed: boolean; value: number }> } | null>): void {
+  setGamepads(gamepads: Array<{ axes: number[]; buttons: Array<{ pressed: boolean; value?: number }> } | null>): void {
     this.gamepads = gamepads;
   }
 }

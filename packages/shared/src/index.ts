@@ -8,6 +8,7 @@ export type PlayerCommand =
   | { type: "THRUST"; amount: number }
   | { type: "BRAKE"; amount: number }
   | { type: "BOOST" }
+  | { type: "FIRE" }
   | { type: "INTERACT" }
   | { type: "PAUSE" };
 
@@ -40,6 +41,14 @@ export type ScoreBreakdown = {
   dangerBonus: number;
   incidentPenalty: number;
   total: number;
+};
+
+export type EnemyDirectorPolicy = {
+  aggression: number;
+  flank: number;
+  fireBias: number;
+  retreatHp: number;
+  focus: "cargo" | "player" | "objective";
 };
 
 export type RunResultSummary = {
@@ -113,8 +122,37 @@ export type SimulationSnapshot = {
     rotation: number;
     fuel: number;
     maxFuel: number;
+    hp: number;
+    maxHp: number;
+    weaponCooldownSeconds: number;
     boostCooldownSeconds: number;
     cargoDamage: number;
+  };
+  enemies: Array<{
+    id: string;
+    position: Vec2;
+    velocity: Vec2;
+    rotation: number;
+    hp: number;
+    maxHp: number;
+    radius: number;
+    policy: "patrol" | "chase" | "evade";
+  }>;
+  playerProjectiles: Array<{
+    id: string;
+    position: Vec2;
+    velocity: Vec2;
+    radius: number;
+  }>;
+  enemyProjectiles: Array<{
+    id: string;
+    position: Vec2;
+    velocity: Vec2;
+    radius: number;
+  }>;
+  enemyDirector: {
+    mode: "local" | "openai" | "fallback";
+    policy: EnemyDirectorPolicy;
   };
   gravitySources: Array<{
     id: string;

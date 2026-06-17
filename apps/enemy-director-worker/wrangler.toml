@@ -1,0 +1,7 @@
+name = "astro-courier-enemy-director"
+main = "src/index.ts"
+compatibility_date = "2026-06-17"
+
+[vars]
+ALLOWED_ORIGIN = "https://agent-axiom.github.io"
+OPENAI_MODEL = "gpt-5.2-mini"

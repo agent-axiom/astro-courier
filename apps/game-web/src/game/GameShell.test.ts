@@ -3,6 +3,7 @@ import { GameShell } from "./GameShell";
 import type { AstroPixiRenderer } from "@astro-courier/renderer-pixi";
 import type { SimulationWorld } from "@astro-courier/simulation";
 import type { InputSource } from "./input";
+import type { EnemyDirectorClient } from "./enemyDirector";
 
 describe("GameShell lifecycle", () => {
   it("does not publish HUD or start frames after being destroyed during async mount", async () => {
@@ -70,6 +71,10 @@ describe("GameShell lifecycle", () => {
     expect(onHud.mock.calls[0]?.[0].quickPickupBonus).toBe(180);
     expect(onHud.mock.calls[0]?.[0].fuelUsed).toBe(0);
     expect(onHud.mock.calls[0]?.[0].hazardSeverity).toBe(0.2);
+    expect(onHud.mock.calls[0]?.[0].shipHp).toBe(100);
+    expect(onHud.mock.calls[0]?.[0].shipMaxHp).toBe(100);
+    expect(onHud.mock.calls[0]?.[0].interceptorCount).toBe(2);
+    expect(onHud.mock.calls[0]?.[0].enemyDirectorMode).toBe("local");
     expect(input.commands).not.toHaveBeenCalled();
     expect(renderer.render).toHaveBeenCalled();
   });
@@ -134,6 +139,50 @@ describe("GameShell lifecycle", () => {
     expect(onHud.mock.calls.at(-1)?.[0].paceSecondsRemaining).toBeLessThan(35);
     expect(onHud.mock.calls.at(-1)?.[0].quickPickupSecondsRemaining).toBeLessThan(12);
     expect(input.commands).toHaveBeenCalled();
+  });
+
+  it("polls the enemy director during flight and publishes the returned mode", async () => {
+    const { renderer, input } = createShellDoubles();
+    const onHud = vi.fn();
+    const enemyDirector: EnemyDirectorClient = {
+      requestPolicy: vi.fn(async () => ({
+        mode: "openai" as const,
+        policy: {
+          aggression: 0.8,
+          flank: -0.4,
+          fireBias: 0.7,
+          retreatHp: 16,
+          focus: "player" as const
+        }
+      }))
+    };
+    let frame: FrameRequestCallback = () => 0;
+    vi.stubGlobal(
+      "requestAnimationFrame",
+      vi.fn((callback: FrameRequestCallback) => {
+        frame = callback;
+        return 7;
+      })
+    );
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    vi.spyOn(performance, "now").mockReturnValue(1000);
+
+    const shell = new GameShell({
+      mount: {} as HTMLElement,
+      onHud,
+      renderer,
+      input,
+      enemyDirector,
+      initialPaused: true
+    });
+
+    await shell.start();
+    shell.setPaused(false);
+    frame(1167);
+    await Promise.resolve();
+
+    expect(enemyDirector.requestPolicy).toHaveBeenCalled();
+    expect(onHud.mock.calls.at(-1)?.[0].enemyDirectorMode).toBe("openai");
   });
 
   it("can switch contracts while waiting in preflight mode", async () => {
