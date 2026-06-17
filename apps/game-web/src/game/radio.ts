@@ -84,6 +84,10 @@ export function buildRadioMessage(hud: HudState, context: RadioMessageContext = 
     return "Style bonus logged. Clean skim, no scratches.";
   }
 
+  if (hud.lastMilestone === "Shield Rebound") {
+    return "Shield rebound spent. Widen the route; next gravity hit breaks hull.";
+  }
+
   const urgentStyleChainMessage = buildUrgentStyleChainMessage(hud);
   if (urgentStyleChainMessage) {
     return urgentStyleChainMessage;

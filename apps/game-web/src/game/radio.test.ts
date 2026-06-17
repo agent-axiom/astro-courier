@@ -39,6 +39,7 @@ const baseHud: HudState = {
   boostCooldownSeconds: 0,
   cargoDamage: 0,
   cargoOnboard: false,
+  emergencyShieldAvailable: true,
   manualBrakeUsed: false,
   speed: 0,
   medal: "none",
@@ -595,6 +596,16 @@ describe("radio feedback copy", () => {
     expect(buildRadioMessage({ ...baseHud, status: "crashed", landingRating: "Insurance Event" })).toContain("Insurance");
     expect(buildRadioMessage({ ...baseHud, status: "crashed", crashReason: "Hard Landing" })).toContain("Bleed speed");
     expect(buildRadioMessage({ ...baseHud, status: "crashed", crashReason: "Misaligned Dock" })).toContain("Align ship");
+  });
+
+  it("explains emergency shield rebounds as a spent one-time save", () => {
+    expect(
+      buildRadioMessage({
+        ...baseHud,
+        lastMilestone: "Shield Rebound",
+        emergencyShieldAvailable: false
+      })
+    ).toBe("Shield rebound spent. Widen the route; next gravity hit breaks hull.");
   });
 
   it("calls out the missing comet condition after gold express near-misses", () => {

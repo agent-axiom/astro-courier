@@ -38,6 +38,25 @@ describe("flight director", () => {
     });
   });
 
+  it("turns a shield rebound into an immediate recovery directive", () => {
+    expect(
+      buildFlightDirector({
+        status: "flying",
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        targetDistance: 180,
+        lastMilestone: "Shield Rebound",
+        emergencyShieldAvailable: false
+      })
+    ).toEqual({
+      label: "Flight director",
+      action: "Recover line",
+      detail: "Shield spent",
+      tone: "urgent",
+      progress: 1
+    });
+  });
+
   it("turns ready docking windows into a direct command", () => {
     expect(
       buildFlightDirector({

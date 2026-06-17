@@ -21,6 +21,8 @@ export type FlightDirectorInput = {
   gravitySlingReady?: boolean;
   gravitySlingStyleBonus?: number;
   cargoDamage?: number;
+  emergencyShieldAvailable?: boolean;
+  lastMilestone?: string;
   approachStreakSeconds?: number;
   styleMultiplier?: number;
   styleChainSecondsRemaining?: number;
@@ -57,6 +59,10 @@ export function buildFlightDirector(input: FlightDirectorInput): FlightDirector 
   if (input.trajectoryRiskLevel === "inside") {
     const seconds = input.trajectoryRiskSeconds ?? 0;
     return director("Evade vector", `Impact in ${formatSeconds(seconds)}`, "danger", countdownProgress(seconds, TRAJECTORY_WARNING_SECONDS));
+  }
+
+  if (input.lastMilestone === "Shield Rebound" && input.emergencyShieldAvailable === false) {
+    return director("Recover line", "Shield spent", "urgent", 1);
   }
 
   if (input.landingStatus === "too-fast") {
