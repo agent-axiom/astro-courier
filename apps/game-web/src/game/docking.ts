@@ -80,9 +80,9 @@ export type PickupPulsePresentationInput = DockingLanePresentationInput & {
 };
 
 export type PickupPulsePresentation = {
-  action: "Align" | "Assist" | "Brake" | "Load now";
+  action: "Align" | "Assist" | "Brake" | "Load now" | "Track cargo";
   detail: string;
-  tone: "pickup" | "warning" | "danger" | "assist";
+  tone: "approach" | "pickup" | "warning" | "danger" | "assist";
   progress: number;
   reward?: string;
 };
@@ -316,14 +316,23 @@ export function buildPickupPulsePresentation(input: PickupPulsePresentationInput
     input.objectivePhase !== "pickup" ||
     input.targetDistance === undefined ||
     input.targetDistance > FINAL_PICKUP_PULSE_DISTANCE ||
-    input.landingStatus === undefined ||
-    input.landingStatus === "approach"
+    input.landingStatus === undefined
   ) {
     return undefined;
   }
 
   const progress = round(clamp(1 - input.targetDistance / FINAL_PICKUP_PULSE_DISTANCE, 0, 1), 2);
   const distanceDetail = `${Math.round(input.targetDistance)}m`;
+
+  if (input.landingStatus === "approach") {
+    return {
+      action: "Track cargo",
+      detail: distanceDetail,
+      tone: "approach",
+      progress,
+      reward: buildPickupPulseReward(input.quickPickupBonus)
+    };
+  }
 
   if (input.assistAvailable) {
     return {

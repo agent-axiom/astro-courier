@@ -378,6 +378,26 @@ describe("pickup pulse presentation", () => {
     ).toBeUndefined();
   });
 
+  it("shows a lightweight tracking cue before the first cargo window arms", () => {
+    expect(
+      buildPickupPulsePresentation({
+        status: "flying",
+        objectivePhase: "pickup",
+        targetDistance: 60,
+        landingStatus: "approach",
+        speed: 18,
+        allowedSpeed: 42,
+        quickPickupBonus: 180
+      })
+    ).toEqual({
+      action: "Track cargo",
+      detail: "60m",
+      tone: "approach",
+      progress: 0.17,
+      reward: "+180"
+    });
+  });
+
   it("turns final pickup approach into one large load cue", () => {
     expect(
       buildPickupPulsePresentation({

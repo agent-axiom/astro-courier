@@ -1752,6 +1752,19 @@ button {
     0 0 30px rgba(142, 230, 184, 0.16);
 }
 
+.pickup-pulse-approach {
+  border-color: rgba(124, 225, 255, 0.4);
+  background: rgba(8, 22, 34, 0.68);
+  color: #d8fbff;
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.22),
+    0 0 24px rgba(124, 225, 255, 0.12);
+}
+
+.pickup-pulse-approach::after {
+  background: linear-gradient(90deg, #7ce1ff, #8ee6b8);
+}
+
 .pickup-pulse-danger {
   border-color: rgba(255, 111, 145, 0.48);
   background: rgba(30, 12, 22, 0.74);

@@ -140,6 +140,7 @@ describe("responsive game layout CSS", () => {
     expect(styles).toMatch(/\.pickup-pulse[\s\S]*left: 50%;/);
     expect(styles).toMatch(/\.pickup-pulse[\s\S]*transform: translateX\(-50%\);/);
     expect(styles).toContain(".pickup-pulse-pickup");
+    expect(styles).toContain(".pickup-pulse-approach");
     expect(styles).toContain(".pickup-pulse-danger");
     expect(styles).toContain(".pickup-pulse-warning");
     expect(styles).toContain(".pickup-pulse-assist");
