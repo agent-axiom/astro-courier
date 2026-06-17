@@ -17,3 +17,26 @@ The production game is deployed with GitHub Pages from `.github/workflows/deploy
 After the workflow is enabled and `main` is pushed, the public URL is:
 
 https://agent-axiom.github.io/astro-courier/
+
+## Enemy Director Worker
+
+The optional OpenAI enemy director runs as a Cloudflare Worker from `apps/enemy-director-worker`.
+Deploy it with Wrangler:
+
+```sh
+corepack pnpm dlx wrangler login
+corepack pnpm dlx wrangler deploy --config apps/enemy-director-worker/wrangler.toml
+corepack pnpm dlx wrangler secret put OPENAI_API_KEY --config apps/enemy-director-worker/wrangler.toml
+```
+
+After deploy, verify:
+
+```sh
+curl https://astro-courier-enemy-director.<your-subdomain>.workers.dev/health
+```
+
+Then set the GitHub repository variable `VITE_ENEMY_DIRECTOR_URL` to:
+
+```text
+https://astro-courier-enemy-director.<your-subdomain>.workers.dev/enemy-director
+```

@@ -56,7 +56,7 @@ describe("enemy director worker", () => {
   it("calls OpenAI Responses API and clamps structured director policy", async () => {
     const fetchOpenAI = vi.fn(async (_url: string, init: RequestInit) => {
       const body = JSON.parse(String(init.body));
-      expect(body.model).toBe("gpt-5.2-mini");
+      expect(body.model).toBe("gpt-5.4-mini");
       expect(body.text.format.type).toBe("json_schema");
       expect(init.headers).toMatchObject({
         Authorization: "Bearer test-openai-key",
@@ -129,7 +129,7 @@ describe("enemy director worker", () => {
 function testEnv(): EnemyDirectorEnv {
   return {
     OPENAI_API_KEY: "test-openai-key",
-    OPENAI_MODEL: "gpt-5.2-mini",
+    OPENAI_MODEL: "gpt-5.4-mini",
     ALLOWED_ORIGIN: "https://agent-axiom.github.io"
   };
 }

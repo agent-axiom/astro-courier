@@ -2,6 +2,7 @@ import {
   Activity,
   ArrowRight,
   CalendarDays,
+  Crosshair,
   Flag,
   Gauge,
   MapPin,
@@ -2016,6 +2017,9 @@ export function App() {
               </span>
               <span aria-label="Boost" title="Boost">
                 <Zap size={18} />
+              </span>
+              <span aria-label="Fire" title="Fire: J / Enter">
+                <Crosshair size={18} />
               </span>
             </div>
           ) : null}

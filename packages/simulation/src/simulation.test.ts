@@ -362,6 +362,42 @@ describe("deterministic Astro Courier simulation", () => {
     expect(combatWorld(world).enemyProjectiles).toHaveLength(0);
   });
 
+  it("keeps interceptors from pushing through the courier hull while chasing", () => {
+    const world = createWorldFromSystem(starterSystem, "interceptor-avoidance-seed");
+    const combat = combatWorld(world);
+    combat.gravitySources = [];
+    combat.landingPads = [];
+    combat.enemies = [testEnemy("interceptor-a", { x: 190, y: 0 })];
+    combat.enemies[0].velocity = { x: -26, y: 0 };
+    combat.ship.position = { x: 120, y: 0 };
+    combat.ship.velocity = { x: 0, y: 0 };
+
+    let closestDistance = Number.POSITIVE_INFINITY;
+    for (let tick = 0; tick < 180; tick += 1) {
+      stepWorld(world, 1 / 60, []);
+      closestDistance = Math.min(closestDistance, distanceBetweenTest(combat.enemies[0].position, combat.ship.position));
+    }
+
+    expect(closestDistance).toBeGreaterThanOrEqual(combat.enemies[0].radius + 10);
+    expect(combat.ship.hp).toBe(100);
+  });
+
+  it("damages both ships and separates them on interceptor hull contact", () => {
+    const world = createWorldFromSystem(starterSystem, "interceptor-contact-seed");
+    const combat = combatWorld(world);
+    combat.gravitySources = [];
+    combat.landingPads = [];
+    combat.enemies = [testEnemy("interceptor-a", { x: 120, y: 0 })];
+    combat.ship.position = { x: 120, y: 0 };
+    combat.ship.velocity = { x: 0, y: 0 };
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(combat.ship.hp).toBeLessThan(100);
+    expect(combat.enemies[0].hp).toBeLessThan(40);
+    expect(distanceBetweenTest(combat.enemies[0].position, combat.ship.position)).toBeGreaterThanOrEqual(combat.enemies[0].radius + 10);
+  });
+
   it("can start worlds and replays from a selected contract", () => {
     const systemWithChoice: SystemContent = {
       ...starterSystem,
@@ -2195,6 +2231,7 @@ type CombatEnemyForTest = {
   maxHp: number;
   radius: number;
   fireCooldownSeconds: number;
+  contactCooldownSeconds: number;
   policy: "patrol" | "chase" | "evade";
 };
 
@@ -2242,6 +2279,10 @@ function fireCommand(): PlayerCommand[] {
   return [{ type: "FIRE" } as PlayerCommand];
 }
 
+function distanceBetweenTest(left: Vec2, right: Vec2): number {
+  return Math.hypot(left.x - right.x, left.y - right.y);
+}
+
 function testEnemy(id: string, position: Vec2, options: { hp?: number } = {}): CombatEnemyForTest {
   return {
     id,
@@ -2252,6 +2293,7 @@ function testEnemy(id: string, position: Vec2, options: { hp?: number } = {}): C
     maxHp: 40,
     radius: 14,
     fireCooldownSeconds: 999,
+    contactCooldownSeconds: 0,
     policy: "patrol"
   };
 }

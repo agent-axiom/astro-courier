@@ -143,6 +143,7 @@ export type EnemyShipState = {
   maxHp: number;
   radius: number;
   fireCooldownSeconds: number;
+  contactCooldownSeconds: number;
   policy: EnemyPolicyMode;
 };
 
@@ -317,6 +318,17 @@ const ENEMY_WAKE_DISTANCE = 430;
 const ENEMY_FIRE_DISTANCE = 220;
 const ENEMY_ACCELERATION = 17;
 const ENEMY_MAX_SPEED = 26;
+const SHIP_COMBAT_RADIUS = 10;
+const ENEMY_STANDOFF_DISTANCE = ENEMY_RADIUS + SHIP_COMBAT_RADIUS + 42;
+const ENEMY_STANDOFF_SLOW_RANGE = 46;
+const ENEMY_CONTACT_COOLDOWN_SECONDS = 0.55;
+const ENEMY_CONTACT_BASE_DAMAGE = 7;
+const ENEMY_CONTACT_SPEED_DAMAGE = 0.22;
+const ENEMY_CONTACT_MAX_DAMAGE = 18;
+const ENEMY_CONTACT_ENEMY_DAMAGE_MULTIPLIER = 1.25;
+const ENEMY_CONTACT_PUSH_OUT = 1.5;
+const ENEMY_CONTACT_REBOUND_SPEED = 18;
+const ENEMY_CONTACT_SHIP_IMPULSE = 5;
 
 export function calculateHazardSkimStyleBonus(severity: number): number {
   return Math.round(HAZARD_SKIM_BASE_BONUS + clamp(severity, 0, 1) * HAZARD_SKIM_SEVERITY_BONUS);
@@ -474,6 +486,7 @@ function createEnemyShip(id: string, position: Vec2, drift: number): EnemyShipSt
     maxHp: ENEMY_MAX_HP,
     radius: ENEMY_RADIUS,
     fireCooldownSeconds: ENEMY_FIRE_COOLDOWN_SECONDS,
+    contactCooldownSeconds: 0,
     policy: "patrol"
   };
 }
@@ -919,6 +932,7 @@ function tickWeaponCooldown(world: SimulationWorld, fixedDt: number): void {
   world.ship.weaponCooldownSeconds = round(Math.max(0, world.ship.weaponCooldownSeconds - fixedDt), 6);
   for (const enemy of world.enemies) {
     enemy.fireCooldownSeconds = round(Math.max(0, enemy.fireCooldownSeconds - fixedDt), 6);
+    enemy.contactCooldownSeconds = round(Math.max(0, (enemy.contactCooldownSeconds ?? 0) - fixedDt), 6);
   }
 }
 
@@ -944,6 +958,7 @@ function firePlayerProjectile(world: SimulationWorld): void {
 
 function updateCombat(world: SimulationWorld, fixedDt: number): void {
   updateEnemies(world, fixedDt);
+  resolveEnemyHullContacts(world);
   stepProjectiles(world.playerProjectiles, fixedDt);
   stepProjectiles(world.enemyProjectiles, fixedDt);
   resolvePlayerProjectileHits(world);
@@ -960,6 +975,12 @@ function updateEnemies(world: SimulationWorld, fixedDt: number): void {
     const lowHp = enemy.hp <= policy.retreatHp;
     const waking = distance <= ENEMY_WAKE_DISTANCE;
     enemy.policy = lowHp ? "evade" : waking ? "chase" : "patrol";
+    const standoffSlowDistance = ENEMY_STANDOFF_DISTANCE + ENEMY_STANDOFF_SLOW_RANGE;
+    const inboundSpeed = dot(enemy.velocity, direction);
+    if (!lowHp && distance < standoffSlowDistance && inboundSpeed > 0) {
+      const slowFactor = clamp((standoffSlowDistance - distance) / ENEMY_STANDOFF_SLOW_RANGE, 0, 0.86);
+      enemy.velocity = subtract(enemy.velocity, scale(direction, inboundSpeed * slowFactor));
+    }
 
     const flankAxis = {
       x: -direction.y * policy.flank,
@@ -969,7 +990,12 @@ function updateEnemies(world: SimulationWorld, fixedDt: number): void {
       enemy.policy === "evade"
         ? scale(direction, -1)
         : enemy.policy === "chase"
-          ? normalizeVector(add(scale(direction, 1 + policy.aggression), scale(flankAxis, 0.45)))
+          ? normalizeVector(
+              add(
+                scale(direction, distance < ENEMY_STANDOFF_DISTANCE ? -1.85 : 1 + policy.aggression),
+                scale(flankAxis, distance < standoffSlowDistance ? 1.15 : 0.45)
+              )
+            )
           : normalizeVector({ x: Math.cos(world.tick * 0.01 + enemy.position.x), y: Math.sin(world.tick * 0.01 + enemy.position.y) });
     enemy.velocity = add(enemy.velocity, scale(desired, ENEMY_ACCELERATION * fixedDt));
     enemy.velocity = limitVector(enemy.velocity, ENEMY_MAX_SPEED);
@@ -1033,6 +1059,63 @@ function resolvePlayerProjectileHits(world: SimulationWorld): void {
     awardStyle(world, ENEMY_STYLE_BONUS * destroyedEnemyIds.size, "Interceptor Down");
   }
   world.playerProjectiles = remainingProjectiles;
+}
+
+function resolveEnemyHullContacts(world: SimulationWorld): void {
+  const destroyedEnemyIds = new Set<string>();
+
+  for (const enemy of world.enemies) {
+    const fromShip = subtract(enemy.position, world.ship.position);
+    const distance = magnitude(fromShip);
+    const contactDistance = enemy.radius + SHIP_COMBAT_RADIUS;
+    if (distance > contactDistance) {
+      continue;
+    }
+
+    const fallbackNormal = normalizeVector(enemy.velocity);
+    const normal =
+      distance > 0
+        ? scale(fromShip, 1 / distance)
+        : magnitude(fallbackNormal) > 0
+          ? fallbackNormal
+          : { x: Math.cos(world.ship.rotation), y: Math.sin(world.ship.rotation) };
+    const impactSpeed = Math.max(0, dot(subtract(world.ship.velocity, enemy.velocity), normal));
+    enemy.position = add(world.ship.position, scale(normal, contactDistance + ENEMY_CONTACT_PUSH_OUT));
+
+    const enemyRadialSpeed = dot(enemy.velocity, normal);
+    const enemyTangentVelocity = subtract(enemy.velocity, scale(normal, enemyRadialSpeed));
+    enemy.velocity = add(enemyTangentVelocity, scale(normal, Math.max(ENEMY_CONTACT_REBOUND_SPEED, enemyRadialSpeed)));
+    world.ship.velocity = subtract(world.ship.velocity, scale(normal, ENEMY_CONTACT_SHIP_IMPULSE));
+
+    if ((enemy.contactCooldownSeconds ?? 0) > 0) {
+      continue;
+    }
+
+    const damage = round(
+      clamp(ENEMY_CONTACT_BASE_DAMAGE + impactSpeed * ENEMY_CONTACT_SPEED_DAMAGE, ENEMY_CONTACT_BASE_DAMAGE, ENEMY_CONTACT_MAX_DAMAGE),
+      3
+    );
+    world.ship.hp = round(Math.max(0, world.ship.hp - damage), 3);
+    enemy.hp = round(Math.max(0, enemy.hp - damage * ENEMY_CONTACT_ENEMY_DAMAGE_MULTIPLIER), 3);
+    enemy.contactCooldownSeconds = ENEMY_CONTACT_COOLDOWN_SECONDS;
+    world.lastMilestone = "Hull Contact";
+
+    if (enemy.hp <= 0) {
+      destroyedEnemyIds.add(enemy.id);
+    }
+    if (world.ship.hp <= 0) {
+      world.status = "crashed";
+      world.landingRating = "Insurance Event";
+      world.crashReason = "Hull Collision";
+      world.ship.cargoDamage = 1;
+      break;
+    }
+  }
+
+  if (destroyedEnemyIds.size > 0) {
+    world.enemies = world.enemies.filter((enemy) => !destroyedEnemyIds.has(enemy.id));
+    awardStyle(world, ENEMY_STYLE_BONUS * destroyedEnemyIds.size, "Interceptor Down");
+  }
 }
 
 function resolveEnemyProjectileHits(world: SimulationWorld): void {

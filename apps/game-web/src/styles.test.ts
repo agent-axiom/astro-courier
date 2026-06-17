@@ -81,7 +81,7 @@ describe("responsive game layout CSS", () => {
 
   it("defines an icon-only first launch control primer", () => {
     expect(styles).toContain(".control-primer");
-    expect(styles).toMatch(/\.control-primer[\s\S]*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/);
+    expect(styles).toMatch(/\.control-primer[\s\S]*grid-template-columns: repeat\(5, minmax\(0, 1fr\)\);/);
     expect(styles).toMatch(/\.control-primer span[\s\S]*aspect-ratio: 1;/);
   });
 

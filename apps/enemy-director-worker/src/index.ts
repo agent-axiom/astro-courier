@@ -49,7 +49,7 @@ const fallbackPolicy: EnemyDirectorPolicy = {
   focus: "cargo"
 };
 
-const defaultModel = "gpt-5.2-mini";
+const defaultModel = "gpt-5.4-mini";
 
 export function createEnemyDirectorWorker(deps: EnemyDirectorWorkerDeps = {}): EnemyDirectorWorker {
   const fetchOpenAI = deps.fetchOpenAI ?? ((url, init) => fetch(url, init));
