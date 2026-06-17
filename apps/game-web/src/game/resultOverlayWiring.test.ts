@@ -17,6 +17,8 @@ describe("result overlay density wiring", () => {
   it("keeps focused crash results from rendering dense report widgets", () => {
     expect(appSource).toContain("resultOverlayDensity?.showCrashDebrief && crashDebrief");
     expect(appSource).toContain("resultOverlayDensity?.showRunGrade");
+    expect(appSource).toContain("resultOverlayDensity?.showResultSummary");
+    expect(appSource).toContain('className="result-summary-strip"');
     expect(appSource).toContain("resultOverlayDensity?.showQuickStats");
     expect(appSource).toContain("resultOverlayDensity?.showCoach");
     expect(appSource).toContain("resultOverlayDensity?.showRetryActionBriefing");

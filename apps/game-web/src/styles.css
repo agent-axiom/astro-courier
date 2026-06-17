@@ -4978,6 +4978,45 @@ button {
   text-align: left;
 }
 
+.result-summary-strip {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  min-height: 44px;
+  padding: 7px;
+  border: 1px solid rgba(142, 230, 184, 0.18);
+  border-radius: 8px;
+  background: rgba(142, 230, 184, 0.09);
+}
+
+.result-summary-strip span {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+  align-content: center;
+}
+
+.result-summary-strip small,
+.result-summary-strip strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.05;
+}
+
+.result-summary-strip small {
+  color: rgba(234, 255, 243, 0.64);
+  font-size: 0.62rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.result-summary-strip strong {
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 920;
+}
+
 .result-icon {
   display: grid;
   place-items: center;

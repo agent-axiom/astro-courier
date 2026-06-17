@@ -2506,6 +2506,16 @@ export function App() {
               <strong>{dailyProgressReceipt.value}</strong>
             </div>
           ) : null}
+          {hud.status === "delivered" && resultOverlayDensity?.showResultSummary ? (
+            <div className="result-summary-strip" aria-label={`Result summary: ${resultStats.map((stat) => `${stat.label} ${stat.value}`).join(". ")}`}>
+              {resultStats.map((stat) => (
+                <span key={stat.label}>
+                  <small>{stat.label}</small>
+                  <strong>{stat.value}</strong>
+                </span>
+              ))}
+            </div>
+          ) : null}
           {resultOverlayDensity?.showQuickStats ? (
             <div className="result-stats">
               {resultStats.map((stat) => (

@@ -21,6 +21,8 @@ describe("responsive game layout CSS", () => {
     expect(styles).toContain(".result-overlay-focused");
     expect(styles).toMatch(/\.result-overlay-focused[\s\S]*width: min\(340px, calc\(100vw - 32px\)\);/);
     expect(styles).toMatch(/\.result-overlay-focused \.result-coach[\s\S]*grid-template-columns: 18px 1fr;/);
+    expect(styles).toContain(".result-summary-strip");
+    expect(styles).toMatch(/\.result-summary-strip[\s\S]*grid-template-columns: repeat\(3, minmax\(0, 1fr\)\);/);
   });
 
   it("defines a lighter focused live run panel", () => {
