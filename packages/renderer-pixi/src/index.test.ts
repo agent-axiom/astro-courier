@@ -9,6 +9,7 @@ import {
   ghostTrailSegmentVisual,
   ghostTrailPointVisual,
   gravitySurfaceRimVisual,
+  gravitySurfaceWarningVisual,
   gravitySlingCueVisual,
   hazardFieldVisual,
   hazardVignetteEffect,
@@ -1049,6 +1050,24 @@ describe("gravity surface rim visual", () => {
       alpha: 0.18,
       width: 1
     });
+  });
+});
+
+describe("gravity surface warning visual", () => {
+  it("stays hidden away from active flight or outside the surface warning band", () => {
+    expect(gravitySurfaceWarningVisual({ status: "paused", distance: 100, radius: 80, tick: 0 })).toBeUndefined();
+    expect(gravitySurfaceWarningVisual({ status: "flying", distance: 170, radius: 80, tick: 0 })).toBeUndefined();
+  });
+
+  it("marks the true gravity collision edge before hull contact", () => {
+    const near = gravitySurfaceWarningVisual({ status: "flying", distance: 118, radius: 80, tick: 0 });
+    const inside = gravitySurfaceWarningVisual({ status: "flying", distance: 72, radius: 80, tick: 0 });
+
+    expect(near).toMatchObject({ color: 0xffd166, tone: "near" });
+    expect(inside).toMatchObject({ color: 0xff4d6d, tone: "inside" });
+    expect(inside?.alpha).toBeGreaterThan(near?.alpha ?? 0);
+    expect(inside?.width).toBeGreaterThan(near?.width ?? 0);
+    expect(near?.radiusOffset).toBeGreaterThan(0);
   });
 });
 

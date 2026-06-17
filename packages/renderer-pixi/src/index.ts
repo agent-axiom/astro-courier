@@ -815,6 +815,45 @@ export function gravitySurfaceRimVisual(input: GravitySurfaceRimVisualInput): Gr
   };
 }
 
+export type GravitySurfaceWarningVisualInput = {
+  status: SimulationSnapshot["status"];
+  distance: number;
+  radius: number;
+  tick?: number;
+};
+
+export type GravitySurfaceWarningVisual = {
+  color: number;
+  tone: "near" | "inside";
+  alpha: number;
+  width: number;
+  radiusOffset: number;
+};
+
+export function gravitySurfaceWarningVisual(input: GravitySurfaceWarningVisualInput): GravitySurfaceWarningVisual | undefined {
+  if (input.status !== "flying") {
+    return undefined;
+  }
+
+  const edgeDistance = input.distance - input.radius;
+  const warningBand = Math.max(48, input.radius * 0.52);
+  if (edgeDistance > warningBand) {
+    return undefined;
+  }
+
+  const pulse = (Math.sin((input.tick ?? 0) * 0.2) + 1) / 2;
+  const inside = edgeDistance <= 0;
+  const pressure = inside ? 1 : 1 - clamp(edgeDistance / warningBand, 0, 1);
+
+  return {
+    color: inside ? 0xff4d6d : 0xffd166,
+    tone: inside ? "inside" : "near",
+    alpha: round(clamp((inside ? 0.42 : 0.18) + pressure * 0.24 + pulse * 0.08, 0.18, 0.78), 2),
+    width: round((inside ? 2.4 : 1.6) + pressure * 2.4 + pulse * 0.6, 2),
+    radiusOffset: round(5 + pulse * 4, 2)
+  };
+}
+
 export type ShipTrailVisualInput = {
   status: SimulationSnapshot["status"];
   speed: number;
@@ -1759,6 +1798,13 @@ class PixiRenderer implements AstroPixiRenderer {
 
     for (const source of snapshot.gravitySources) {
       const center = project(source.position);
+      const distanceToShip = Math.hypot(snapshot.ship.position.x - source.position.x, snapshot.ship.position.y - source.position.y);
+      const surfaceWarning = gravitySurfaceWarningVisual({
+        status: snapshot.status,
+        distance: distanceToShip,
+        radius: source.radius,
+        tick: snapshot.tick
+      });
       this.world.circle(center.x, center.y, source.radius + 8).fill({ color: 0x254a86, alpha: 0.45 });
       this.world.circle(center.x, center.y, source.radius).fill(0x66c8ff);
       this.world.circle(center.x - source.radius * 0.25, center.y - source.radius * 0.3, source.radius * 0.28).fill({
@@ -1770,6 +1816,13 @@ class PixiRenderer implements AstroPixiRenderer {
         width: gravitySurfaceRim.width,
         alpha: gravitySurfaceRim.alpha
       });
+      if (surfaceWarning) {
+        this.world.circle(center.x, center.y, source.radius + surfaceWarning.radiusOffset).stroke({
+          color: surfaceWarning.color,
+          width: surfaceWarning.width,
+          alpha: surfaceWarning.alpha
+        });
+      }
     }
 
     for (const pad of snapshot.landingPads) {
