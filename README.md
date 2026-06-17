@@ -3,6 +3,7 @@
 ![Astro Courier cover](apps/game-web/public/images/astro-courier-cover.png)
 
 Astro Courier is a lightweight space delivery arcade game. The web build lives in `apps/game-web`.
+The same cover art is shown in the preflight launch menu before each flight.
 
 ## Run Locally
 

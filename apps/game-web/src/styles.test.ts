@@ -50,14 +50,15 @@ describe("responsive game layout CSS", () => {
 
   it("defines a focused preflight mode that trims route-selection text", () => {
     expect(styles).toContain(".preflight-overlay-focused");
-    expect(styles).toMatch(/\.preflight-overlay-focused[\s\S]*width: min\(500px, calc\(100vw - 32px\)\);/);
+    expect(styles).toMatch(/\.preflight-overlay-focused[\s\S]*width: min\(540px, calc\(100vw - 32px\)\);/);
     expect(styles).toMatch(/\.preflight-overlay-focused \.contract-option-hook[\s\S]*display: none;/);
     expect(styles).toMatch(/\.preflight-overlay-focused \.contract-option-traits[\s\S]*display: none;/);
   });
 
   it("keeps the preflight cover art as the first lightweight menu focus", () => {
-    expect(styles).toMatch(/\.preflight-overlay-focused \.preflight-cover-art[\s\S]*width: min\(100%, 390px\);/);
+    expect(styles).toMatch(/\.preflight-overlay-focused \.preflight-cover-art[\s\S]*width: min\(100%, 430px\);/);
     expect(styles).toContain(".preflight-launch-summary");
+    expect(styles).toMatch(/\.preflight-overlay-focused \.control-primer[\s\S]*width: min\(100%, 300px\);/);
     expect(styles).toMatch(/\.preflight-overlay-focused \.preflight-kicker[\s\S]*display: none;/);
     expect(styles).toMatch(/\.preflight-overlay-focused \.preflight-button small[\s\S]*display: none;/);
   });

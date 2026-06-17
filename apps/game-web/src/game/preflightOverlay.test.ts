@@ -13,7 +13,7 @@ describe("preflight overlay density", () => {
       mode: "focused",
       showContractBriefing: false,
       showControlPrimer: true,
-      showLaunchSummary: true,
+      showLaunchSummary: false,
       showCargoManifest: false,
       showRoutePlanBriefing: false,
       showProgressMeta: false,
@@ -41,8 +41,8 @@ describe("preflight overlay density", () => {
     ).toEqual({
       mode: "focused",
       showContractBriefing: false,
-      showControlPrimer: false,
-      showLaunchSummary: true,
+      showControlPrimer: true,
+      showLaunchSummary: false,
       showCargoManifest: false,
       showRoutePlanBriefing: false,
       showProgressMeta: true,
@@ -98,7 +98,8 @@ describe("preflight overlay density", () => {
     });
 
     expect(density.showDailyDispatch).toBe(true);
-    expect(density.showLaunchSummary).toBe(true);
+    expect(density.showLaunchSummary).toBe(false);
+    expect(density.showControlPrimer).toBe(true);
     expect(density.showCargoManifest).toBe(false);
     expect(density.showRoutePlanBriefing).toBe(false);
   });
