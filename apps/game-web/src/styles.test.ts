@@ -63,6 +63,13 @@ describe("responsive game layout CSS", () => {
     expect(styles).toMatch(/\.preflight-overlay-focused \.preflight-button small[\s\S]*display: none;/);
   });
 
+  it("styles the focused cover art as a tappable launch poster", () => {
+    expect(styles).toContain(".preflight-cover-launch");
+    expect(styles).toMatch(/\.preflight-cover-launch[\s\S]*cursor: pointer;/);
+    expect(styles).toContain(".preflight-cover-cta");
+    expect(styles).toMatch(/\.preflight-cover-cta[\s\S]*position: absolute;/);
+  });
+
   it("defines an icon-only first launch control primer", () => {
     expect(styles).toContain(".control-primer");
     expect(styles).toMatch(/\.control-primer[\s\S]*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/);

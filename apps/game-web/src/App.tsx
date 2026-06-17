@@ -623,6 +623,7 @@ export function App() {
     savedRouteCount: Object.values(bestRunsByContract).filter(Boolean).length,
     dailyStreak: dailyProgress?.streak
   });
+  const focusedPreflight = preflightOverlayDensity.mode === "focused";
   const pauseOverlay = buildPauseOverlayPresentation({
     status: hud.status,
     preflightOpen: overlays.preflight,
@@ -1897,9 +1898,19 @@ export function App() {
 
       {overlays.preflight ? (
         <section className={`preflight-overlay preflight-overlay-${preflightOverlayDensity.mode}`} aria-label="Launch briefing">
-          <div className="preflight-cover-art">
-            <img src="/images/astro-courier-cover.png" alt="Astro Courier" loading="eager" />
-          </div>
+          {focusedPreflight ? (
+            <button type="button" className="preflight-cover-art preflight-cover-launch" aria-label="Launch Astro Courier" onClick={launchContract}>
+              <img src="/images/astro-courier-cover.png" alt="Astro Courier" loading="eager" />
+              <span className="preflight-cover-cta" aria-hidden="true">
+                <Play size={18} />
+                <span>Launch</span>
+              </span>
+            </button>
+          ) : (
+            <div className="preflight-cover-art">
+              <img src="/images/astro-courier-cover.png" alt="Astro Courier" loading="eager" />
+            </div>
+          )}
           <div className="preflight-kicker">{preflightKicker}</div>
           <h2>{hud.contractTitle}</h2>
           {preflightOverlayDensity.showContractBriefing ? <p>{hud.contractBriefing}</p> : null}
@@ -2359,18 +2370,20 @@ export function App() {
                 : null}
             </div>
           ) : null}
-          <button
-            type="button"
-            className={`preflight-button preflight-button-${launchCommitment.tone}`}
-            aria-label={`Launch. ${launchCommitment.label}: ${launchCommitment.value}${
-              preflightOverlayDensity.showRouteMarkTarget ? `. ${routeMarkLaunchCaption.label}: ${routeMarkLaunchCaption.value}` : ""
-            }`}
-            onClick={launchContract}
-          >
-            <Play size={18} />
-            <span>Launch</span>
-            {preflightOverlayDensity.showRouteMarkTarget ? <small>{routeMarkLaunchCaption.value}</small> : null}
-          </button>
+          {focusedPreflight ? null : (
+            <button
+              type="button"
+              className={`preflight-button preflight-button-${launchCommitment.tone}`}
+              aria-label={`Launch. ${launchCommitment.label}: ${launchCommitment.value}${
+                preflightOverlayDensity.showRouteMarkTarget ? `. ${routeMarkLaunchCaption.label}: ${routeMarkLaunchCaption.value}` : ""
+              }`}
+              onClick={launchContract}
+            >
+              <Play size={18} />
+              <span>Launch</span>
+              {preflightOverlayDensity.showRouteMarkTarget ? <small>{routeMarkLaunchCaption.value}</small> : null}
+            </button>
+          )}
         </section>
       ) : null}
 

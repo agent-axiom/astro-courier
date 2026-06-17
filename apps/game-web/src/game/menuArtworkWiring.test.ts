@@ -15,6 +15,13 @@ describe("menu artwork wiring", () => {
     expect(appSource).toContain('src="/images/astro-courier-cover.png"');
   });
 
+  it("turns the focused cover art into the first launch action", () => {
+    expect(appSource).toContain('className="preflight-cover-art preflight-cover-launch"');
+    expect(appSource).toContain('aria-label="Launch Astro Courier"');
+    expect(appSource).toMatch(/className="preflight-cover-art preflight-cover-launch"[\s\S]*onClick=\{launchContract\}/);
+    expect(appSource).toContain('className="preflight-cover-cta"');
+  });
+
   it("features the same cover art in the project README", () => {
     const readme = existsSync(readmeUrl) ? readFileSync(readmeUrl, "utf8") : "";
 
