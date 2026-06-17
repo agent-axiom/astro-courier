@@ -128,11 +128,12 @@ describe("screen feedback", () => {
 
   it("adds a route-live pulse when committing from the launch briefing", () => {
     expect(buildLaunchScreenFeedback({ status: "paused", preflightOpen: true, resultOpen: false })).toEqual({
-      label: "Route live",
-      value: "Launch vector",
+      label: "Go",
+      value: "Pickup line",
+      accent: "rush",
       tone: "success",
       intensity: "medium",
-      durationMs: 360
+      durationMs: 420
     });
 
     expect(buildLaunchScreenFeedback({ status: "paused", preflightOpen: false, resultOpen: false })).toBeUndefined();

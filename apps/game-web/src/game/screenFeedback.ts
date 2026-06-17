@@ -159,11 +159,12 @@ export function buildLaunchScreenFeedback(input: LaunchScreenFeedbackInput): Scr
   }
 
   return {
-    label: "Route live",
-    value: "Launch vector",
+    label: "Go",
+    value: "Pickup line",
+    accent: "rush",
     tone: "success",
     intensity: "medium",
-    durationMs: 360
+    durationMs: 420
   };
 }
 
