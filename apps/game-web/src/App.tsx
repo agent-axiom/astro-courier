@@ -624,7 +624,7 @@ export function App() {
     savedRouteCount: Object.values(bestRunsByContract).filter(Boolean).length,
     dailyStreak: dailyProgress?.streak
   });
-  const focusedPreflight = preflightOverlayDensity.mode === "focused";
+  const focusedPreflight = preflightOverlayDensity.mode === "poster" || preflightOverlayDensity.mode === "focused";
   const pauseOverlay = buildPauseOverlayPresentation({
     status: hud.status,
     preflightOpen: overlays.preflight,
@@ -1915,7 +1915,7 @@ export function App() {
             </div>
           )}
           <div className="preflight-kicker">{preflightKicker}</div>
-          <h2>{hud.contractTitle}</h2>
+          {preflightOverlayDensity.showContractTitle ? <h2>{hud.contractTitle}</h2> : null}
           {preflightOverlayDensity.showContractBriefing ? <p>{hud.contractBriefing}</p> : null}
           {preflightOverlayDensity.showLaunchSummary ? (
             <div className="preflight-launch-summary" aria-label={`Launch summary: ${hud.cargoName}. ${hud.pickupLabel} to ${hud.destinationLabel}`}>

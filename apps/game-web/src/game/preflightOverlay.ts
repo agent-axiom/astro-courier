@@ -8,7 +8,8 @@ export type PreflightOverlayDensityInput = {
 };
 
 export type PreflightOverlayDensity = {
-  mode: "focused" | "expanded";
+  mode: "poster" | "focused" | "expanded";
+  showContractTitle: boolean;
   showContractBriefing: boolean;
   showControlPrimer: boolean;
   showLaunchSummary: boolean;
@@ -34,11 +35,36 @@ export function buildPreflightOverlayDensity(input: PreflightOverlayDensityInput
   const richHistory = input.savedRouteCount >= 4 || (input.dailyStreak ?? 0) >= 3;
   const activePreflight = input.preflightOpen && input.status === "paused";
 
-  if (!activePreflight || (!hasRouteHistory && !hasDailyHistory)) {
+  if (!activePreflight) {
     return {
       mode: "focused",
+      showContractTitle: false,
       showContractBriefing: false,
-      showControlPrimer: activePreflight,
+      showControlPrimer: false,
+      showLaunchSummary: false,
+      showCargoManifest: false,
+      showRoutePlanBriefing: false,
+      showProgressMeta: false,
+      showBestChase: false,
+      showRouteMarkTarget: false,
+      showRouteBoardTarget: false,
+      showRouteBoardStack: false,
+      showDailyDispatch: false,
+      showContractSelector: false,
+      showContractDetails: false,
+      showRouteEndpoints: false,
+      showRoutePressure: false,
+      showSignatureManeuver: false,
+      showBonusStack: false
+    };
+  }
+
+  if (!hasRouteHistory && !hasDailyHistory) {
+    return {
+      mode: "poster",
+      showContractTitle: false,
+      showContractBriefing: false,
+      showControlPrimer: false,
       showLaunchSummary: false,
       showCargoManifest: false,
       showRoutePlanBriefing: false,
@@ -60,6 +86,7 @@ export function buildPreflightOverlayDensity(input: PreflightOverlayDensityInput
   if (!richHistory) {
     return {
       mode: "focused",
+      showContractTitle: true,
       showContractBriefing: false,
       showControlPrimer: true,
       showLaunchSummary: false,
@@ -82,6 +109,7 @@ export function buildPreflightOverlayDensity(input: PreflightOverlayDensityInput
 
   return {
     mode: "expanded",
+    showContractTitle: true,
     showContractBriefing: false,
     showControlPrimer: false,
     showLaunchSummary: false,

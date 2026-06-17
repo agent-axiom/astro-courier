@@ -3184,6 +3184,28 @@ button {
   text-align: center;
 }
 
+.preflight-overlay-poster {
+  width: min(560px, calc(100vw - 24px));
+  max-height: calc(100vh - 24px);
+  gap: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+  text-align: center;
+  backdrop-filter: none;
+}
+
+.preflight-overlay-poster .preflight-cover-art {
+  width: min(100%, 520px);
+  border-color: rgba(255, 209, 102, 0.54);
+  box-shadow:
+    0 28px 70px rgba(0, 0, 0, 0.42),
+    0 0 58px rgba(255, 209, 102, 0.16),
+    0 0 48px rgba(124, 225, 255, 0.18);
+}
+
 .preflight-overlay-focused .preflight-cover-art {
   width: min(100%, 430px);
   margin-bottom: 2px;
@@ -6340,6 +6362,11 @@ button {
 
   .preflight-overlay-focused {
     width: min(540px, calc(100vw - 48px));
+    grid-template-columns: 1fr;
+  }
+
+  .preflight-overlay-poster {
+    width: min(560px, calc(100vw - 48px));
     grid-template-columns: 1fr;
   }
 

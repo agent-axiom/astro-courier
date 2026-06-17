@@ -62,6 +62,9 @@ describe("responsive game layout CSS", () => {
   });
 
   it("keeps the preflight cover art as the first lightweight menu focus", () => {
+    expect(styles).toContain(".preflight-overlay-poster");
+    expect(styles).toMatch(/\.preflight-overlay-poster[\s\S]*background: transparent;/);
+    expect(styles).toMatch(/\.preflight-overlay-poster[\s\S]*border: 0;/);
     expect(styles).toMatch(/\.preflight-overlay-focused \.preflight-cover-art[\s\S]*width: min\(100%, 430px\);/);
     expect(styles).toContain(".preflight-launch-summary");
     expect(styles).toMatch(/\.preflight-overlay-focused \.control-primer[\s\S]*width: min\(100%, 300px\);/);

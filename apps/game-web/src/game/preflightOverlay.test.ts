@@ -10,9 +10,10 @@ describe("preflight overlay density", () => {
         savedRouteCount: 0
       })
     ).toEqual({
-      mode: "focused",
+      mode: "poster",
+      showContractTitle: false,
       showContractBriefing: false,
-      showControlPrimer: true,
+      showControlPrimer: false,
       showLaunchSummary: false,
       showCargoManifest: false,
       showRoutePlanBriefing: false,
@@ -40,6 +41,7 @@ describe("preflight overlay density", () => {
       })
     ).toEqual({
       mode: "focused",
+      showContractTitle: true,
       showContractBriefing: false,
       showControlPrimer: true,
       showLaunchSummary: false,
@@ -69,6 +71,7 @@ describe("preflight overlay density", () => {
       })
     ).toEqual({
       mode: "expanded",
+      showContractTitle: true,
       showContractBriefing: false,
       showControlPrimer: false,
       showLaunchSummary: false,
@@ -98,6 +101,7 @@ describe("preflight overlay density", () => {
     });
 
     expect(density.showDailyDispatch).toBe(true);
+    expect(density.showContractTitle).toBe(true);
     expect(density.showLaunchSummary).toBe(false);
     expect(density.showControlPrimer).toBe(true);
     expect(density.showCargoManifest).toBe(false);

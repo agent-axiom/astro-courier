@@ -15,6 +15,7 @@ describe("preflight overlay density wiring", () => {
     expect(appSource).toContain("preflight-overlay-${preflightOverlayDensity.mode}");
     expect(appSource).toContain("preflightOverlayDensity.showContractBriefing ? <p>{hud.contractBriefing}</p> : null");
     expect(appSource).toContain("preflightOverlayDensity.showControlPrimer");
+    expect(appSource).toContain("preflightOverlayDensity.showContractTitle ? <h2>{hud.contractTitle}</h2> : null");
     expect(appSource).toContain("preflightOverlayDensity.showLaunchSummary");
     expect(appSource).toContain('className="preflight-launch-summary"');
     expect(appSource).toContain("preflightOverlayDensity.showCargoManifest");
