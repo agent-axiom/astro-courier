@@ -255,6 +255,24 @@ describe("docking pulse presentation", () => {
     ).toBeUndefined();
   });
 
+  it("shows a lightweight tracking cue before the strict dock window arms", () => {
+    expect(
+      buildDockingPulsePresentation({
+        status: "flying",
+        objectivePhase: "delivery",
+        targetDistance: 64,
+        landingStatus: "approach",
+        speed: 18,
+        allowedSpeed: 42
+      })
+    ).toEqual({
+      action: "Track pad",
+      detail: "64m",
+      tone: "approach",
+      progress: 0.11
+    });
+  });
+
   it("reduces final dock state to one large action cue", () => {
     expect(
       buildDockingPulsePresentation({

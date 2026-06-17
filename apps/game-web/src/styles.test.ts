@@ -124,6 +124,7 @@ describe("responsive game layout CSS", () => {
     expect(styles).toMatch(/\.dock-pulse[\s\S]*left: 50%;/);
     expect(styles).toMatch(/\.dock-pulse[\s\S]*transform: translateX\(-50%\);/);
     expect(styles).toContain(".dock-pulse-ready");
+    expect(styles).toContain(".dock-pulse-approach");
     expect(styles).toContain(".dock-pulse-danger");
     expect(styles).toContain(".dock-pulse-warning");
     expect(styles).toContain(".dock-pulse-soft");

@@ -67,9 +67,9 @@ export type DockingLanePresentation = {
 };
 
 export type DockingPulsePresentation = {
-  action: "Align" | "Assist" | "Brake" | "Dock now" | "Ease in";
+  action: "Align" | "Assist" | "Brake" | "Dock now" | "Ease in" | "Track pad";
   detail: string;
-  tone: "warning" | "danger" | "ready" | "soft" | "assist";
+  tone: "approach" | "warning" | "danger" | "ready" | "soft" | "assist";
   progress: number;
   reward?: string;
 };
@@ -246,14 +246,22 @@ export function buildDockingPulsePresentation(input: DockingLanePresentationInpu
     input.objectivePhase !== "delivery" ||
     input.targetDistance === undefined ||
     input.targetDistance > FINAL_DOCK_PULSE_DISTANCE ||
-    input.landingStatus === undefined ||
-    input.landingStatus === "approach"
+    input.landingStatus === undefined
   ) {
     return undefined;
   }
 
   const progress = round(clamp(1 - input.targetDistance / FINAL_DOCK_PULSE_DISTANCE, 0, 1), 2);
   const distanceDetail = `${Math.round(input.targetDistance)}m`;
+
+  if (input.landingStatus === "approach") {
+    return {
+      action: "Track pad",
+      detail: distanceDetail,
+      tone: "approach",
+      progress
+    };
+  }
 
   if (input.assistAvailable) {
     return {
