@@ -25,8 +25,12 @@ describe("responsive game layout CSS", () => {
 
   it("defines a lighter focused live run panel", () => {
     expect(styles).toContain(".run-panel-focused");
-    expect(styles).toMatch(/\.run-panel-focused[\s\S]*width: min\(260px, calc\(100vw - 32px\)\);/);
+    expect(styles).toMatch(/\.run-panel-focused[\s\S]*left: 50%;/);
+    expect(styles).toMatch(/\.run-panel-focused[\s\S]*transform: translateX\(-50%\);/);
+    expect(styles).toMatch(/\.run-panel-focused[\s\S]*border: 0;/);
+    expect(styles).toMatch(/\.run-panel-focused[\s\S]*background: transparent;/);
     expect(styles).toMatch(/\.run-panel-focused \.radio-message[\s\S]*display: none;/);
+    expect(styles).toMatch(/\.run-panel-focused \.flight-director small[\s\S]*display: none;/);
   });
 
   it("defines compact active-flight metrics without text labels", () => {
