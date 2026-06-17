@@ -15,6 +15,7 @@ import {
   landingCorridorVisual,
   landingPadVisual,
   objectiveBeaconPulse,
+  objectiveCourseBeaconVisual,
   objectiveGuidanceVisual,
   objectiveDockGateVisual,
   objectiveRouteBeamVisual,
@@ -188,6 +189,89 @@ describe("objective beacon pulse", () => {
     expect(samples.every((sample) => sample.radius >= 34 && sample.radius <= 50)).toBe(true);
     expect(samples.every((sample) => sample.alpha >= 0.18 && sample.alpha <= 0.72)).toBe(true);
     expect(new Set(samples.map((sample) => sample.radius)).size).toBeGreaterThan(1);
+  });
+});
+
+describe("objective course beacon visual", () => {
+  it("stays hidden outside active route flight", () => {
+    expect(
+      objectiveCourseBeaconVisual({
+        status: "paused",
+        objectivePhase: "pickup",
+        distance: 120,
+        landingStatus: "approach",
+        assistAvailable: false,
+        tick: 4
+      })
+    ).toBeUndefined();
+    expect(
+      objectiveCourseBeaconVisual({
+        status: "flying",
+        objectivePhase: "complete",
+        distance: 24,
+        landingStatus: "ready",
+        assistAvailable: false,
+        tick: 4
+      })
+    ).toBeUndefined();
+  });
+
+  it("uses compact tone and scale to distinguish pickup, delivery, and unsafe docks", () => {
+    const pickup = objectiveCourseBeaconVisual({
+      status: "flying",
+      objectivePhase: "pickup",
+      distance: 360,
+      landingStatus: "approach",
+      assistAvailable: false,
+      tick: 8
+    });
+    const delivery = objectiveCourseBeaconVisual({
+      status: "flying",
+      objectivePhase: "delivery",
+      distance: 120,
+      landingStatus: "approach",
+      assistAvailable: false,
+      tick: 8
+    });
+    const warning = objectiveCourseBeaconVisual({
+      status: "flying",
+      objectivePhase: "delivery",
+      distance: 48,
+      landingStatus: "too-fast",
+      assistAvailable: false,
+      tick: 8
+    });
+
+    expect(pickup).toMatchObject({ color: 0x8ee6b8, tone: "pickup" });
+    expect(delivery).toMatchObject({ color: 0xffd166, tone: "delivery" });
+    expect(warning).toMatchObject({ color: 0xff6f91, tone: "warning" });
+    expect(delivery?.outerRadius).toBeGreaterThan(pickup?.outerRadius ?? 0);
+    expect(warning?.sweepAlpha).toBeGreaterThan(delivery?.sweepAlpha ?? 0);
+  });
+
+  it("animates a stable beacon flow while stronger ready docks stay readable", () => {
+    const early = objectiveCourseBeaconVisual({
+      status: "flying",
+      objectivePhase: "delivery",
+      distance: 42,
+      landingStatus: "ready",
+      assistAvailable: false,
+      tick: 2
+    });
+    const later = objectiveCourseBeaconVisual({
+      status: "flying",
+      objectivePhase: "delivery",
+      distance: 42,
+      landingStatus: "ready",
+      assistAvailable: false,
+      tick: 18
+    });
+
+    expect(early).toMatchObject({ color: 0x8ee6b8, tone: "ready" });
+    expect(early?.alpha).toBeGreaterThanOrEqual(0.54);
+    expect(early?.flow).toBeGreaterThanOrEqual(0);
+    expect(early?.flow).toBeLessThan(1);
+    expect(later?.flow).not.toBe(early?.flow);
   });
 });
 

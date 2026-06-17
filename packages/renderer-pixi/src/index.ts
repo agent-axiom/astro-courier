@@ -139,6 +139,22 @@ export function objectiveBeaconPulse(tick: number): { radius: number; alpha: num
   };
 }
 
+export type ObjectiveCourseBeaconVisualInput = Pick<SimulationSnapshot, "status" | "objectivePhase" | "tick"> & {
+  distance: number;
+  landingStatus: LandingGuidanceStatus;
+  assistAvailable: boolean;
+};
+
+export type ObjectiveCourseBeaconVisual = {
+  color: number;
+  tone: "pickup" | "delivery" | "ready" | "warning";
+  innerRadius: number;
+  outerRadius: number;
+  alpha: number;
+  sweepAlpha: number;
+  flow: number;
+};
+
 export type ObjectiveGuidanceVisualInput = {
   distance: number;
   landingStatus: LandingGuidanceStatus;
@@ -151,6 +167,37 @@ export type ObjectiveGuidanceVisual = {
   markerScale: number;
   edgeAlpha: number;
 };
+
+export function objectiveCourseBeaconVisual(input: ObjectiveCourseBeaconVisualInput): ObjectiveCourseBeaconVisual | undefined {
+  if (input.status !== "flying" || input.objectivePhase === "complete") {
+    return undefined;
+  }
+
+  const proximity = 1 - clamp((input.distance - 64) / 560, 0, 1);
+  const ready = input.assistAvailable || input.landingStatus === "ready";
+  const unsafe = input.landingStatus === "too-fast" || input.landingStatus === "misaligned";
+  const tone: ObjectiveCourseBeaconVisual["tone"] =
+    input.objectivePhase === "pickup" ? "pickup" : unsafe ? "warning" : ready ? "ready" : "delivery";
+  const color =
+    tone === "pickup" || tone === "ready"
+      ? 0x8ee6b8
+      : tone === "warning" && input.landingStatus === "too-fast"
+        ? 0xff6f91
+        : 0xffd166;
+  const wave = (Math.sin(input.tick * 0.14) + 1) / 2;
+  const extraEmphasis = (ready ? 1 : 0) + (unsafe ? 0.8 : 0);
+  const innerRadius = round(27 + proximity * 15 + extraEmphasis * 5 + wave * 2.5, 2);
+
+  return {
+    color,
+    tone,
+    innerRadius,
+    outerRadius: round(innerRadius + 13 + proximity * 10 + extraEmphasis * 4, 2),
+    alpha: round(clamp(0.24 + proximity * 0.22 + (ready ? 0.12 : 0) + (unsafe ? 0.08 : 0), 0.24, 0.72), 2),
+    sweepAlpha: round(clamp(0.2 + proximity * 0.18 + (ready ? 0.12 : 0) + (unsafe ? 0.2 : 0), 0.2, 0.68), 2),
+    flow: round(positiveModulo(input.tick * 0.035, 1), 2)
+  };
+}
 
 export type ObjectiveRouteBeamVisualInput = Pick<SimulationSnapshot, "status" | "objectivePhase" | "tick"> & {
   distance: number;
@@ -1531,6 +1578,14 @@ class PixiRenderer implements AstroPixiRenderer {
       landingStatus: target.landingStatus,
       assistAvailable: target.assistAvailable
     });
+    const courseBeacon = objectiveCourseBeaconVisual({
+      status: snapshot.status,
+      objectivePhase: snapshot.objectivePhase,
+      distance: target.distance,
+      landingStatus: target.landingStatus,
+      assistAvailable: target.assistAvailable,
+      tick: snapshot.tick
+    });
     const routeBeam = objectiveRouteBeamVisual({
       status: snapshot.status,
       objectivePhase: snapshot.objectivePhase,
@@ -1567,6 +1622,9 @@ class PixiRenderer implements AstroPixiRenderer {
     });
 
     if (targetOnScreen) {
+      if (courseBeacon) {
+        drawObjectiveCourseBeacon(this.guidance, targetPoint.x, targetPoint.y, courseBeacon);
+      }
       if (approachLock) {
         this.guidance.circle(targetPoint.x, targetPoint.y, approachLock.radius).stroke({
           color: approachLock.color,
@@ -1976,6 +2034,29 @@ class PixiRenderer implements AstroPixiRenderer {
         alpha: hazardEffect.alpha
       });
     }
+  }
+}
+
+function drawObjectiveCourseBeacon(guidance: Graphics, x: number, y: number, visual: ObjectiveCourseBeaconVisual): void {
+  guidance.circle(x, y, visual.outerRadius).stroke({
+    color: visual.color,
+    width: visual.tone === "warning" ? 2 : 1.5,
+    alpha: visual.alpha * 0.52
+  });
+  guidance.circle(x, y, visual.innerRadius).stroke({
+    color: visual.color,
+    width: visual.tone === "ready" ? 2.4 : 1.4,
+    alpha: visual.alpha
+  });
+
+  const sweepCount = visual.tone === "warning" ? 5 : 3;
+  for (let index = 0; index < sweepCount; index += 1) {
+    const angle = (visual.flow + index / sweepCount) * Math.PI * 2 - Math.PI / 2;
+    const radius = visual.innerRadius + (visual.outerRadius - visual.innerRadius) * 0.58;
+    guidance.circle(x + Math.cos(angle) * radius, y + Math.sin(angle) * radius, visual.tone === "warning" ? 3.2 : 2.6).fill({
+      color: visual.color,
+      alpha: visual.sweepAlpha
+    });
   }
 }
 
