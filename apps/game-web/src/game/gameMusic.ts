@@ -66,7 +66,8 @@ export function createGameMusicController(options: GameMusicControllerOptions = 
       await loadManifest();
       pauseTrack(menuAudio);
       const wasGameplay = mode === "gameplay" && !options.forceNewTrack;
-      const nextGameplaySrc = wasGameplay && gameplaySrc ? gameplaySrc : selectGameplayMusicTrack(manifest, random);
+      const previousGameplaySrc = options.forceNewTrack ? gameplaySrc : undefined;
+      const nextGameplaySrc = wasGameplay && gameplaySrc ? gameplaySrc : selectGameplayMusicTrack(manifest, random, previousGameplaySrc);
       if (!nextGameplaySrc) {
         return;
       }

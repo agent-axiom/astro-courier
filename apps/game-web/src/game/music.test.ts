@@ -32,4 +32,13 @@ describe("game music manifest", () => {
 
     expect(selectGameplayMusicTrack(manifest, () => 0.67)).toBe("/audio/gameplay/flight-c.mp3");
   });
+
+  it("avoids immediately repeating the previous gameplay track when alternatives exist", () => {
+    const manifest = normalizeGameMusicManifest({
+      gameplay: ["/audio/gameplay/flight-a.mp3", "/audio/gameplay/flight-b.mp3", "/audio/gameplay/flight-c.mp3"]
+    });
+
+    expect(selectGameplayMusicTrack(manifest, () => 0, "/audio/gameplay/flight-a.mp3")).toBe("/audio/gameplay/flight-b.mp3");
+    expect(selectGameplayMusicTrack(manifest, () => 0.99, "/audio/gameplay/flight-a.mp3")).toBe("/audio/gameplay/flight-c.mp3");
+  });
 });

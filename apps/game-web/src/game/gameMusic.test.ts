@@ -76,6 +76,51 @@ describe("game music controller", () => {
     expect(tracks[1]?.play).toHaveBeenCalledTimes(1);
   });
 
+  it("does not repeat the current gameplay track on a forced fresh level start", async () => {
+    const tracks: FakeMusicTrack[] = [];
+    const random = vi.fn(() => 0);
+    const controller = createGameMusicController({
+      random,
+      fetchJson: vi.fn(async () => ({
+        gameplay: ["/audio/gameplay/flight-a.mp3", "/audio/gameplay/flight-b.mp3", "/audio/gameplay/flight-c.mp3"]
+      })),
+      createAudio: (src) => {
+        const track = new FakeMusicTrack(src);
+        tracks.push(track);
+        return track as unknown as HTMLAudioElement;
+      }
+    });
+
+    await controller.playGameplay();
+    await controller.playGameplay({ forceNewTrack: true });
+
+    expect(tracks).toHaveLength(2);
+    expect(tracks[0]?.src).toBe("/audio/gameplay/flight-a.mp3");
+    expect(tracks[1]?.src).toBe("/audio/gameplay/flight-b.mp3");
+    expect(tracks[0]?.pause).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps a single gameplay track playable when there are no alternatives", async () => {
+    const tracks: FakeMusicTrack[] = [];
+    const controller = createGameMusicController({
+      random: () => 0,
+      fetchJson: vi.fn(async () => ({
+        gameplay: ["/audio/gameplay/flight-a.mp3"]
+      })),
+      createAudio: (src) => {
+        const track = new FakeMusicTrack(src);
+        tracks.push(track);
+        return track as unknown as HTMLAudioElement;
+      }
+    });
+
+    await controller.playGameplay();
+    await controller.playGameplay({ forceNewTrack: true });
+
+    expect(tracks).toHaveLength(1);
+    expect(tracks[0]?.play).toHaveBeenCalledTimes(2);
+  });
+
   it("pauses menu music even when gameplay tracks are not configured yet", async () => {
     const tracks: FakeMusicTrack[] = [];
     const controller = createGameMusicController({

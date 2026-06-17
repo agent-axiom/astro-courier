@@ -21,13 +21,22 @@ export function normalizeGameMusicManifest(input: unknown): GameMusicManifest {
   };
 }
 
-export function selectGameplayMusicTrack(manifest: Pick<GameMusicManifest, "gameplay">, random: () => number = Math.random): string | undefined {
-  if (manifest.gameplay.length === 0) {
+export function selectGameplayMusicTrack(
+  manifest: Pick<GameMusicManifest, "gameplay">,
+  random: () => number = Math.random,
+  previousTrack?: string
+): string | undefined {
+  const tracks =
+    previousTrack && manifest.gameplay.length > 1
+      ? manifest.gameplay.filter((track) => track !== previousTrack)
+      : manifest.gameplay;
+
+  if (tracks.length === 0) {
     return undefined;
   }
 
-  const index = Math.min(manifest.gameplay.length - 1, Math.max(0, Math.floor(random() * manifest.gameplay.length)));
-  return manifest.gameplay[index];
+  const index = Math.min(tracks.length - 1, Math.max(0, Math.floor(random() * tracks.length)));
+  return tracks[index];
 }
 
 function normalizePath(value: unknown): string | null {
