@@ -689,6 +689,8 @@ export function App() {
     landingStatus: hud.landingStatus,
     speed: hud.speed,
     allowedSpeed: hud.targetAllowedSpeed,
+    angleError: hud.targetAngleError,
+    requiredAngleTolerance: hud.targetRequiredAngleTolerance,
     approachStreakSeconds: hud.approachStreakSeconds,
     assistAvailable: Boolean(hud.assistAvailable)
   });
@@ -699,6 +701,8 @@ export function App() {
     landingStatus: hud.landingStatus,
     speed: hud.speed,
     allowedSpeed: hud.targetAllowedSpeed,
+    angleError: hud.targetAngleError,
+    requiredAngleTolerance: hud.targetRequiredAngleTolerance,
     approachStreakSeconds: hud.approachStreakSeconds,
     assistAvailable: Boolean(hud.assistAvailable)
   });

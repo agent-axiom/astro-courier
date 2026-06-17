@@ -162,6 +162,31 @@ describe("docking lane presentation", () => {
     });
   });
 
+  it("frames slow off-angle ready delivery as an easing soft dock", () => {
+    expect(
+      buildDockingLanePresentation({
+        status: "flying",
+        objectivePhase: "delivery",
+        targetDistance: 36,
+        landingStatus: "ready",
+        speed: 24,
+        allowedSpeed: 42,
+        angleError: 1,
+        requiredAngleTolerance: 0.75,
+        approachStreakSeconds: 0.4
+      })
+    ).toMatchObject({
+      action: "Ease in",
+      detail: "Soft dock",
+      tone: "soft",
+      segments: [
+        { label: "Align", state: "warning" },
+        { label: "Brake", state: "ready" },
+        { label: "Touch", state: "ready" }
+      ]
+    });
+  });
+
   it("names the one thing blocking the landing window", () => {
     expect(
       buildDockingLanePresentation({
@@ -247,6 +272,27 @@ describe("docking pulse presentation", () => {
       tone: "ready",
       progress: 0.42,
       reward: "+220"
+    });
+  });
+
+  it("uses the final pulse to show slow off-angle contacts are safe soft docks", () => {
+    expect(
+      buildDockingPulsePresentation({
+        status: "flying",
+        objectivePhase: "delivery",
+        targetDistance: 36,
+        landingStatus: "ready",
+        speed: 24,
+        allowedSpeed: 42,
+        angleError: 1,
+        requiredAngleTolerance: 0.75,
+        approachStreakSeconds: 0.4
+      })
+    ).toEqual({
+      action: "Ease in",
+      detail: "Soft dock",
+      tone: "soft",
+      progress: 0.5
     });
   });
 

@@ -45,6 +45,8 @@ export type DockingLanePresentationInput = {
   landingStatus?: LandingGuidanceStatus;
   speed: number;
   allowedSpeed?: number;
+  angleError?: number;
+  requiredAngleTolerance?: number;
   approachStreakSeconds?: number;
   assistAvailable?: boolean;
 };
@@ -58,16 +60,16 @@ export type DockingLanePresentation = {
   label: "Dock lane";
   action: string;
   detail: string;
-  tone: "approach" | "warning" | "danger" | "ready" | "assist";
+  tone: "approach" | "warning" | "danger" | "ready" | "soft" | "assist";
   progress: number;
   segments: DockingLaneSegment[];
   reward?: string;
 };
 
 export type DockingPulsePresentation = {
-  action: "Align" | "Assist" | "Brake" | "Dock now";
+  action: "Align" | "Assist" | "Brake" | "Dock now" | "Ease in";
   detail: string;
-  tone: "warning" | "danger" | "ready" | "assist";
+  tone: "warning" | "danger" | "ready" | "soft" | "assist";
   progress: number;
   reward?: string;
 };
@@ -103,7 +105,9 @@ export function buildLandingGuidancePresentation(input: LandingGuidanceLabelInpu
   return { label: "Line up", tone: "approach" };
 }
 
-function isSoftDockReady(input: LandingGuidanceLabelInput): boolean {
+function isSoftDockReady(
+  input: Pick<LandingGuidanceLabelInput, "speed" | "allowedSpeed" | "angleError" | "requiredAngleTolerance">
+): boolean {
   return (
     input.speed !== undefined &&
     input.allowedSpeed !== undefined &&
@@ -179,6 +183,22 @@ export function buildDockingLanePresentation(input: DockingLanePresentationInput
     };
   }
 
+  if (input.landingStatus === "ready" && isSoftDockReady(input)) {
+    return {
+      label: "Dock lane",
+      action: "Ease in",
+      detail: "Soft dock",
+      tone: "soft",
+      progress,
+      segments: [
+        { label: "Align", state: "warning" },
+        { label: "Brake", state: "ready" },
+        { label: "Touch", state: "ready" }
+      ],
+      reward: buildDockingLaneReward(input.approachStreakSeconds)
+    };
+  }
+
   if (input.landingStatus === "ready") {
     return {
       label: "Dock lane",
@@ -240,6 +260,16 @@ export function buildDockingPulsePresentation(input: DockingLanePresentationInpu
       action: "Assist",
       detail: "Ready",
       tone: "assist",
+      progress,
+      reward: buildDockingPulseReward(input.approachStreakSeconds)
+    };
+  }
+
+  if (input.landingStatus === "ready" && isSoftDockReady(input)) {
+    return {
+      action: "Ease in",
+      detail: "Soft dock",
+      tone: "soft",
       progress,
       reward: buildDockingPulseReward(input.approachStreakSeconds)
     };

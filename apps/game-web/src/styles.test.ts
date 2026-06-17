@@ -113,7 +113,9 @@ describe("responsive game layout CSS", () => {
     expect(styles).toContain(".dock-pulse-ready");
     expect(styles).toContain(".dock-pulse-danger");
     expect(styles).toContain(".dock-pulse-warning");
+    expect(styles).toContain(".dock-pulse-soft");
     expect(styles).toContain(".dock-pulse-assist");
+    expect(styles).toContain(".docking-lane-soft");
     expect(styles).toMatch(/\.dock-pulse::after[\s\S]*width: calc\(var\(--dock-pulse-progress\) \* 100%\);/);
     expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.dock-pulse[\s\S]*bottom: max\(132px, calc\(env\(safe-area-inset-bottom\) \+ 126px\)\);/);
   });

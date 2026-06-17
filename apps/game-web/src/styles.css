@@ -1419,6 +1419,16 @@ button {
   background: linear-gradient(90deg, #7ce1ff, #ffd166);
 }
 
+.docking-lane-soft {
+  border-color: rgba(142, 230, 184, 0.36);
+  background: rgba(142, 230, 184, 0.13);
+  color: #bff7d8;
+}
+
+.docking-lane-soft::after {
+  background: linear-gradient(90deg, #7ce1ff, #8ee6b8);
+}
+
 .docking-lane-danger {
   border-color: rgba(255, 111, 145, 0.42);
   background: rgba(255, 111, 145, 0.17);
@@ -1560,6 +1570,19 @@ button {
 
 .dock-pulse-warning::after {
   background: linear-gradient(90deg, #ffd166, #7ce1ff);
+}
+
+.dock-pulse-soft {
+  border-color: rgba(142, 230, 184, 0.48);
+  background: rgba(9, 28, 22, 0.72);
+  color: #bff7d8;
+  box-shadow:
+    0 16px 36px rgba(0, 0, 0, 0.24),
+    0 0 30px rgba(142, 230, 184, 0.14);
+}
+
+.dock-pulse-soft::after {
+  background: linear-gradient(90deg, #7ce1ff, #8ee6b8);
 }
 
 .dock-pulse-assist {
