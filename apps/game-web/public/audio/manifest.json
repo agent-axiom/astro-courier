@@ -1,5 +1,5 @@
 {
-  "menu": null,
-  "gameplay": [],
+  "menu": "/audio/menu/menu-theme.mp3",
+  "gameplay": ["/audio/gameplay/arcade.mp3", "/audio/gameplay/space-delivery.mp3"],
   "volume": 0.36
 }

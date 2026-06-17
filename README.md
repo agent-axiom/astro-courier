@@ -17,12 +17,3 @@ The production game is deployed with GitHub Pages from `.github/workflows/deploy
 After the workflow is enabled and `main` is pushed, the public URL is:
 
 https://agent-axiom.github.io/astro-courier/
-
-## Music Assets
-
-Place MP3 files under `apps/game-web/public/audio`:
-
-- `menu/menu.mp3` for the main menu loop
-- `gameplay/*.mp3` for level music
-
-Then list them in `apps/game-web/public/audio/manifest.json`. Gameplay tracks are selected randomly when a level starts.

@@ -6,6 +6,11 @@ const gameMusicSource = readFileSync(new URL("./gameMusic.ts", import.meta.url),
 const viteConfig = readFileSync(new URL("../../vite.config.ts", import.meta.url), "utf8");
 const readme = readFileSync(new URL("../../../../README.md", import.meta.url), "utf8");
 const workflowUrl = new URL("../../../../.github/workflows/deploy-pages.yml", import.meta.url);
+const audioReadmeUrl = new URL("../../public/audio/README.md", import.meta.url);
+const audioManifestUrl = new URL("../../public/audio/manifest.json", import.meta.url);
+const menuMusicUrl = new URL("../../public/audio/menu/menu-theme.mp3", import.meta.url);
+const arcadeMusicUrl = new URL("../../public/audio/gameplay/arcade.mp3", import.meta.url);
+const spaceDeliveryMusicUrl = new URL("../../public/audio/gameplay/space-delivery.mp3", import.meta.url);
 
 describe("deployment wiring", () => {
   it("configures Vite with a deploy base for GitHub project pages", () => {
@@ -40,5 +45,24 @@ describe("deployment wiring", () => {
   it("documents the production URL and deployment source", () => {
     expect(readme).toContain("https://agent-axiom.github.io/astro-courier/");
     expect(readme).toContain("GitHub Pages");
+    expect(readme).not.toContain("## Music Assets");
+    expect(existsSync(audioReadmeUrl)).toBe(false);
+  });
+
+  it("ships the configured music assets in the public audio manifest", () => {
+    const manifest = JSON.parse(readFileSync(audioManifestUrl, "utf8")) as {
+      menu: string | null;
+      gameplay: string[];
+      volume: number;
+    };
+
+    expect(manifest).toEqual({
+      menu: "/audio/menu/menu-theme.mp3",
+      gameplay: ["/audio/gameplay/arcade.mp3", "/audio/gameplay/space-delivery.mp3"],
+      volume: 0.36
+    });
+    expect(existsSync(menuMusicUrl)).toBe(true);
+    expect(existsSync(arcadeMusicUrl)).toBe(true);
+    expect(existsSync(spaceDeliveryMusicUrl)).toBe(true);
   });
 });
