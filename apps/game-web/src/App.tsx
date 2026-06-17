@@ -147,6 +147,7 @@ import { createGameHapticsController, type GameHapticsController } from "./game/
 import { buildAudioTogglePresentation } from "./game/audioControls";
 import { buildTouchFlightPadPresentation, buildTouchPointerVisual } from "./game/touchControls";
 import { buildPauseOverlayPresentation, type PauseOverlayActionId } from "./game/pauseOverlay";
+import { resolvePublicAssetPath } from "./game/publicAssets";
 import {
   buildLaunchScreenFeedback,
   buildMilestoneScreenFeedback,
@@ -618,6 +619,7 @@ export function App() {
     speed: hud.speed,
     landingStatus: hud.landingStatus
   });
+  const coverArtSrc = resolvePublicAssetPath("images/astro-courier-cover.png");
   const preflightOverlayDensity = buildPreflightOverlayDensity({
     status: hud.status,
     preflightOpen: overlays.preflight,
@@ -1903,7 +1905,7 @@ export function App() {
         <section className={`preflight-overlay preflight-overlay-${preflightOverlayDensity.mode}`} aria-label="Launch briefing">
           {focusedPreflight ? (
             <button type="button" className="preflight-cover-art preflight-cover-launch" aria-label="Launch Astro Courier" onClick={launchContract}>
-              <img src="/images/astro-courier-cover.png" alt="Astro Courier" loading="eager" />
+              <img src={coverArtSrc} alt="Astro Courier" loading="eager" />
               <span className="preflight-cover-cta" aria-hidden="true">
                 <Play size={18} />
                 <span>Launch</span>
@@ -1911,7 +1913,7 @@ export function App() {
             </button>
           ) : (
             <div className="preflight-cover-art">
-              <img src="/images/astro-courier-cover.png" alt="Astro Courier" loading="eager" />
+              <img src={coverArtSrc} alt="Astro Courier" loading="eager" />
             </div>
           )}
           <div className="preflight-kicker">{preflightKicker}</div>

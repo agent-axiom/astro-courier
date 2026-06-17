@@ -12,7 +12,8 @@ describe("menu artwork wiring", () => {
 
   it("features the Astro Courier cover art in the preflight menu", () => {
     expect(appSource).toContain('className="preflight-cover-art"');
-    expect(appSource).toContain('src="/images/astro-courier-cover.png"');
+    expect(appSource).toContain('resolvePublicAssetPath("images/astro-courier-cover.png")');
+    expect(appSource).toContain("src={coverArtSrc}");
   });
 
   it("turns the focused cover art into the first launch action", () => {

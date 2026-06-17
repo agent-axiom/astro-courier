@@ -11,6 +11,13 @@ The same cover art is shown in the preflight launch menu before each flight.
 corepack pnpm --filter @astro-courier/game-web dev
 ```
 
+## Publish
+
+The production game is deployed with GitHub Pages from `.github/workflows/deploy-pages.yml`.
+After the workflow is enabled and `main` is pushed, the public URL is:
+
+https://agent-axiom.github.io/astro-courier/
+
 ## Music Assets
 
 Place MP3 files under `apps/game-web/public/audio`:

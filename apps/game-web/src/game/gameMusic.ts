@@ -1,4 +1,5 @@
 import { normalizeGameMusicManifest, selectGameplayMusicTrack, type GameMusicManifest } from "./music";
+import { resolvePublicAssetPath } from "./publicAssets";
 
 export type GameMusicController = {
   loadManifest: () => Promise<void>;
@@ -18,7 +19,7 @@ export type GameMusicControllerOptions = {
 
 type MusicMode = "idle" | "menu" | "gameplay";
 
-const defaultManifestUrl = "/audio/manifest.json";
+const defaultManifestUrl = resolvePublicAssetPath("audio/manifest.json");
 
 export function createGameMusicController(options: GameMusicControllerOptions = {}): GameMusicController {
   const manifestUrl = options.manifestUrl ?? defaultManifestUrl;
@@ -36,12 +37,12 @@ export function createGameMusicController(options: GameMusicControllerOptions = 
   const loadManifest = async () => {
     manifestPromise ??= fetchJson(manifestUrl)
       .then((json) => {
-        manifest = normalizeGameMusicManifest(json);
+        manifest = resolveManifestAssetPaths(normalizeGameMusicManifest(json));
         syncTrack(menuAudio, true);
         syncTrack(gameplayAudio, true);
       })
       .catch(() => {
-        manifest = normalizeGameMusicManifest({});
+        manifest = resolveManifestAssetPaths(normalizeGameMusicManifest({}));
       });
 
     return manifestPromise;
@@ -126,6 +127,14 @@ export function createGameMusicController(options: GameMusicControllerOptions = 
       return;
     }
   }
+}
+
+function resolveManifestAssetPaths(manifest: GameMusicManifest): GameMusicManifest {
+  return {
+    ...manifest,
+    menu: manifest.menu ? resolvePublicAssetPath(manifest.menu) : null,
+    gameplay: manifest.gameplay.map((track) => resolvePublicAssetPath(track))
+  };
 }
 
 async function playTrack(audio: HTMLAudioElement | undefined, muted: boolean): Promise<void> {
