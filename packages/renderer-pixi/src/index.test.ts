@@ -1441,6 +1441,18 @@ describe("boost burst visual", () => {
     expect(shield?.width).toBeGreaterThan(3);
     expect(shield?.alpha).toBeGreaterThan(0.24);
   });
+
+  it("turns early cargo chain rewards into readable pickup and launch pop rings", () => {
+    const pickup = boostBurstVisual({ status: "flying", lastMilestone: "Quick Pickup", tick: 6 });
+    const launch = boostBurstVisual({ status: "flying", lastMilestone: "Launch Burst", tick: 6 });
+
+    expect(pickup).toMatchObject({ color: 0x8ee6b8 });
+    expect(pickup?.radius).toBeGreaterThan(34);
+    expect(pickup?.alpha).toBeGreaterThan(0.2);
+    expect(launch).toMatchObject({ color: 0xffd166 });
+    expect(launch?.radius).toBeGreaterThan(pickup?.radius ?? 0);
+    expect(launch?.width).toBeGreaterThan(pickup?.width ?? 0);
+  });
 });
 
 describe("boost spark visual", () => {

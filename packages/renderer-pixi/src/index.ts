@@ -1284,6 +1284,30 @@ function styleShockwaveSpec(milestone?: string):
     };
   }
 
+  if (milestone === "Quick Pickup") {
+    return {
+      color: 0x8ee6b8,
+      baseRadius: 22,
+      radiusPulse: 30,
+      baseAlpha: 0.2,
+      alphaPulse: 0.3,
+      baseWidth: 1.8,
+      widthPulse: 2.6
+    };
+  }
+
+  if (milestone === "Launch Burst") {
+    return {
+      color: 0xffd166,
+      baseRadius: 31,
+      radiusPulse: 38,
+      baseAlpha: 0.2,
+      alphaPulse: 0.34,
+      baseWidth: 2.4,
+      widthPulse: 3.2
+    };
+  }
+
   if (milestone === "Eco Drift") {
     return {
       color: 0x8ee6b8,
