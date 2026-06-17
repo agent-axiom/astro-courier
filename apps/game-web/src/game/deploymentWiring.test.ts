@@ -28,6 +28,7 @@ describe("deployment wiring", () => {
     expect(workflow).toContain("name: Deploy Astro Courier to GitHub Pages");
     expect(workflow).toContain("pages: write");
     expect(workflow).toContain("id-token: write");
+    expect(workflow).toContain("pnpm/action-setup");
     expect(workflow).toContain("DEPLOY_BASE: /astro-courier/");
     expect(workflow).toContain("corepack pnpm --filter @astro-courier/game-web build");
     expect(workflow).toContain("actions/configure-pages");

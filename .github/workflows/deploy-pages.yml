@@ -24,6 +24,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.1
+          run_install: false
+
       - name: Set up Node
         uses: actions/setup-node@v6
         with:
