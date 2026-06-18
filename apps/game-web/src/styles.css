@@ -6465,6 +6465,29 @@ button {
   .touch-flight-pad-opportunity {
     display: grid;
   }
+
+  .touch-flight-pad {
+    right: auto;
+    bottom: max(18px, env(safe-area-inset-bottom));
+    left: 50%;
+    width: min(68vw, 340px);
+    height: min(68vw, 340px);
+    transform: translateX(-50%);
+  }
+
+  .touch-flight-pad-ring {
+    border-width: 2px;
+  }
+
+  .touch-flight-pad-stick {
+    width: 76px;
+    height: 76px;
+  }
+
+  .touch-flight-pad-vector {
+    width: 42%;
+    height: 42%;
+  }
 }
 
 @media (max-width: 480px) {
@@ -6517,20 +6540,19 @@ button {
   }
 
   .touch-flight-pad {
-    right: max(12px, env(safe-area-inset-right));
-    bottom: max(238px, calc(env(safe-area-inset-bottom) + 224px));
-    width: 92px;
-    height: 92px;
+    bottom: max(18px, env(safe-area-inset-bottom));
+    width: min(76vw, 320px);
+    height: min(76vw, 320px);
   }
 
   .touch-flight-pad-stick {
-    width: 28px;
-    height: 28px;
+    width: 72px;
+    height: 72px;
   }
 
   .touch-flight-pad-vector {
-    width: 46px;
-    height: 46px;
+    width: 42%;
+    height: 42%;
   }
 
   .style-burst {

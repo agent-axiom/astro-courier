@@ -23,4 +23,8 @@ describe("result overlay density wiring", () => {
     expect(appSource).toContain("resultOverlayDensity?.showCoach");
     expect(appSource).toContain("resultOverlayDensity?.showRetryActionBriefing");
   });
+
+  it("keeps medal celebration copy behind compact result density", () => {
+    expect(appSource).toContain('resultOverlayDensity?.showQuickStats && hud.medal !== "none"');
+  });
 });

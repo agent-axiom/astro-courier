@@ -29,6 +29,18 @@ export type TouchPointerVisualInput = {
   fullStrengthDistance?: number;
 };
 
+export type TouchPadGeometryInput = {
+  viewportWidth: number;
+  viewportHeight: number;
+  safeAreaBottom?: number;
+};
+
+export type TouchPadGeometry = {
+  size: number;
+  bottom: number;
+  center: TouchPoint;
+};
+
 export type TouchPointerVisual = {
   active: boolean;
   offsetX: number;
@@ -106,6 +118,26 @@ export function buildTouchPointerVisual(input: TouchPointerVisualInput): TouchPo
     offsetY: round((dy / distance) * offsetDistance, 2),
     angleDeg: round((Math.atan2(dy, dx) * 180) / Math.PI, 2),
     strength: round(strength, 2)
+  };
+}
+
+export function buildTouchPadGeometry(input: TouchPadGeometryInput): TouchPadGeometry {
+  const safeAreaBottom = input.safeAreaBottom ?? 0;
+  const bottom = input.viewportWidth <= 760 ? Math.max(18, safeAreaBottom) : Math.max(28, safeAreaBottom + 24);
+  const size =
+    input.viewportWidth <= 480
+      ? Math.min(input.viewportWidth * 0.76, 320)
+      : input.viewportWidth <= 760
+        ? Math.min(input.viewportWidth * 0.68, 340)
+        : 116;
+
+  return {
+    size: round(size, 2),
+    bottom: round(bottom, 2),
+    center: {
+      x: round(input.viewportWidth / 2, 2),
+      y: round(input.viewportHeight - bottom - size / 2, 2)
+    }
   };
 }
 

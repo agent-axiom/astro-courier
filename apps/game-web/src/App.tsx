@@ -147,7 +147,7 @@ import { createGameAudioController, type GameAudioController } from "./game/game
 import { createGameMusicController, type GameMusicController } from "./game/gameMusic";
 import { createGameHapticsController, type GameHapticsController } from "./game/gameHaptics";
 import { buildAudioTogglePresentation } from "./game/audioControls";
-import { buildTouchFlightPadPresentation, buildTouchPointerVisual } from "./game/touchControls";
+import { buildTouchFlightPadPresentation, buildTouchPadGeometry, buildTouchPointerVisual } from "./game/touchControls";
 import { buildPauseOverlayPresentation, type PauseOverlayActionId } from "./game/pauseOverlay";
 import { resolvePublicAssetPath } from "./game/publicAssets";
 import {
@@ -331,17 +331,20 @@ export function App() {
     if (!target) return undefined;
 
     const readPointerVisual = (event: PointerEvent) => {
-      const rect = target.getBoundingClientRect();
+      const touchPad = buildTouchPadGeometry({
+        viewportWidth: window.innerWidth,
+        viewportHeight: window.innerHeight
+      });
+
       return buildTouchPointerVisual({
         active: true,
-        center: {
-          x: rect.left + rect.width / 2,
-          y: rect.top + rect.height / 2
-        },
+        center: touchPad.center,
         pointer: {
           x: event.clientX,
           y: event.clientY
-        }
+        },
+        maxOffset: touchPad.size * 0.2,
+        fullStrengthDistance: touchPad.size * 0.34
       });
     };
 
@@ -2450,7 +2453,7 @@ export function App() {
           <span className={`result-icon result-icon-${resultOutcomePresentation?.tone ?? "success"}`} aria-hidden="true">
             {resultOutcomePresentation?.icon === "alert" ? <ShieldAlert size={28} /> : <Trophy size={28} />}
           </span>
-          <h2>{hud.status === "delivered" ? "Delivery Complete" : "Delivery Failed"}</h2>
+          <h2>{hud.status === "delivered" ? "Delivered" : "Failed"}</h2>
           <p>{hud.status === "crashed" ? buildCrashReasonLabel(hud) : hud.landingRating ?? statusLabel(hud.status)}</p>
           {resultOverlayDensity?.showCrashDebrief && crashDebrief ? (
             <div className={`crash-debrief crash-debrief-${crashDebrief.tone}`} aria-label={`${crashDebrief.label}: ${crashDebrief.value}`}>
@@ -2465,7 +2468,7 @@ export function App() {
               <strong>{hud.grade}</strong>
             </div>
           ) : null}
-          {hud.medal !== "none" ? <div className={`medal-banner medal-${hud.medal}`}>{medalLabel(hud.medal)}</div> : null}
+          {resultOverlayDensity?.showQuickStats && hud.medal !== "none" ? <div className={`medal-banner medal-${hud.medal}`}>{medalLabel(hud.medal)}</div> : null}
           {hud.status === "delivered" && resultOverlayDensity?.showRunReceipts && bestRun ? (
             <div className={`best-run ${newBest ? "best-run-new" : ""}`}>
               <span>{newBest ? "New best" : "Personal best"}</span>

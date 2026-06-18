@@ -184,6 +184,13 @@ describe("responsive game layout CSS", () => {
     );
   });
 
+  it("turns mobile touch control into a large bottom steering zone", () => {
+    expect(styles).toMatch(/@media \(max-width: 760px\)[\s\S]*\.touch-flight-pad[\s\S]*width: min\(68vw, 340px\);/);
+    expect(styles).toMatch(/@media \(max-width: 760px\)[\s\S]*\.touch-flight-pad[\s\S]*height: min\(68vw, 340px\);/);
+    expect(styles).toMatch(/@media \(max-width: 760px\)[\s\S]*\.touch-flight-pad[\s\S]*bottom: max\(18px, env\(safe-area-inset-bottom\)\);/);
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.touch-flight-pad[\s\S]*width: min\(76vw, 320px\);/);
+  });
+
   it("maps touch pointer CSS variables into live stick and vector motion", () => {
     expect(styles).toContain("--touch-stick-x: 0px;");
     expect(styles).toContain("--touch-stick-y: 0px;");

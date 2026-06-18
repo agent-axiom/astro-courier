@@ -19,12 +19,12 @@ describe("result overlay density", () => {
     });
   });
 
-  it("keeps ordinary delivered results light enough for fast retries", () => {
+  it("keeps delivered results light enough for fast retries", () => {
     expect(buildResultOverlayDensity({ status: "delivered", medal: "none", grade: "D" })).toEqual({
       showDetailedScore: false,
       showCrashDebrief: false,
-      showRunGrade: true,
-      showResultSummary: true,
+      showRunGrade: false,
+      showResultSummary: false,
       showQuickStats: false,
       showRunReceipts: false,
       showCoach: false,
@@ -36,24 +36,25 @@ describe("result overlay density", () => {
     });
   });
 
-  it("keeps strong delivered results rich enough to celebrate progress", () => {
+  it("keeps strong delivered results compact instead of opening a report", () => {
     expect(buildResultOverlayDensity({ status: "delivered", medal: "gold", grade: "A" })).toEqual({
-      showDetailedScore: true,
+      showDetailedScore: false,
       showCrashDebrief: false,
-      showRunGrade: true,
+      showRunGrade: false,
       showResultSummary: false,
-      showQuickStats: true,
-      showRunReceipts: true,
-      showCoach: true,
-      showTempoRecap: true,
-      showRetryTarget: true,
-      showRetryActionBriefing: true,
-      showRouteProgress: true,
-      showBoardAction: true
+      showQuickStats: false,
+      showRunReceipts: false,
+      showCoach: false,
+      showTempoRecap: false,
+      showRetryTarget: false,
+      showRetryActionBriefing: false,
+      showRouteProgress: false,
+      showBoardAction: false
     });
   });
 
-  it("keeps comet results rich as the elite delivery celebration", () => {
-    expect(buildResultOverlayDensity({ status: "delivered", medal: "comet", grade: "S" }).showDetailedScore).toBe(true);
+  it("keeps comet results compact as an instant retry screen", () => {
+    expect(buildResultOverlayDensity({ status: "delivered", medal: "comet", grade: "S" }).showDetailedScore).toBe(false);
+    expect(buildResultOverlayDensity({ status: "delivered", medal: "comet", grade: "S" }).showRunReceipts).toBe(false);
   });
 });

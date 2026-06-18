@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { buildTouchFlightPadPresentation, buildTouchPointerVisual } from "./touchControls";
+import { buildTouchFlightPadPresentation, buildTouchPadGeometry, buildTouchPointerVisual } from "./touchControls";
 
 const appSource = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
 
@@ -124,6 +124,30 @@ describe("touch pointer visual", () => {
   });
 });
 
+describe("touch pad geometry", () => {
+  it("centers mobile steering in the large bottom pad instead of the screen center", () => {
+    expect(buildTouchPadGeometry({ viewportWidth: 390, viewportHeight: 844 })).toEqual({
+      size: 296.4,
+      bottom: 18,
+      center: {
+        x: 195,
+        y: 677.8
+      }
+    });
+  });
+
+  it("keeps tablet steering close to the visible bottom control", () => {
+    expect(buildTouchPadGeometry({ viewportWidth: 760, viewportHeight: 1024 })).toEqual({
+      size: 340,
+      bottom: 18,
+      center: {
+        x: 380,
+        y: 836
+      }
+    });
+  });
+});
+
 describe("touch flight pad wiring", () => {
   it("feeds live HUD pressure and opportunity signals into the touch pad tone", () => {
     expect(appSource).toMatch(
@@ -133,6 +157,7 @@ describe("touch flight pad wiring", () => {
 
   it("feeds pointer drag visuals into touch pad CSS variables", () => {
     expect(appSource).toContain("const touchPointerStyle = {");
+    expect(appSource).toContain("buildTouchPadGeometry({");
     expect(appSource).toContain('"--touch-stick-x": `${touchPointer.offsetX}px`');
     expect(appSource).toContain('"--touch-stick-y": `${touchPointer.offsetY}px`');
     expect(appSource).toContain('"--touch-vector-angle": `${touchPointer.angleDeg}deg`');

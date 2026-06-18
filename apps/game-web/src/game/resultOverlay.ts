@@ -22,22 +22,18 @@ export type ResultOverlayDensity = {
 };
 
 export function buildResultOverlayDensity(input: ResultOverlayDensityInput): ResultOverlayDensity {
-  const richResult =
-    input.status === "delivered" &&
-    (input.medal === "gold" || input.medal === "comet" || input.grade === "A" || input.grade === "S");
-
   return {
-    showDetailedScore: richResult,
+    showDetailedScore: false,
     showCrashDebrief: input.status === "crashed",
-    showRunGrade: input.status === "delivered",
-    showResultSummary: input.status === "delivered" && !richResult,
-    showQuickStats: richResult,
-    showRunReceipts: richResult,
-    showCoach: richResult,
-    showTempoRecap: richResult,
-    showRetryTarget: richResult,
-    showRetryActionBriefing: richResult,
-    showRouteProgress: richResult,
-    showBoardAction: richResult
+    showRunGrade: false,
+    showResultSummary: false,
+    showQuickStats: false,
+    showRunReceipts: false,
+    showCoach: false,
+    showTempoRecap: false,
+    showRetryTarget: false,
+    showRetryActionBriefing: false,
+    showRouteProgress: false,
+    showBoardAction: false
   };
 }
