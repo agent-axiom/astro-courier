@@ -45,6 +45,9 @@ describe("deployment wiring", () => {
   it("documents the production URL and deployment source", () => {
     expect(readme).toContain("https://agent-axiom.github.io/astro-courier/");
     expect(readme).toContain("GitHub Pages");
+    expect(readme).toContain("## What I made");
+    expect(readme).toContain("## How to play");
+    expect(readme).toContain("## How Codex helped");
     expect(readme).not.toContain("## Music Assets");
     expect(existsSync(audioReadmeUrl)).toBe(false);
   });
