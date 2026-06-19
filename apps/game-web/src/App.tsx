@@ -148,7 +148,7 @@ import { createGameAudioController, type GameAudioController } from "./game/game
 import { createGameMusicController, type GameMusicController } from "./game/gameMusic";
 import { createGameHapticsController, type GameHapticsController } from "./game/gameHaptics";
 import { buildAudioTogglePresentation } from "./game/audioControls";
-import { buildTouchFlightPadPresentation, buildTouchPadGeometry, buildTouchPointerVisual } from "./game/touchControls";
+import { buildTouchFlightPadPresentation, buildTouchPadGeometry, buildTouchPointerVisual, resolveTouchSteeringOrigin } from "./game/touchControls";
 import { buildPauseOverlayPresentation, type PauseOverlayActionId } from "./game/pauseOverlay";
 import { resolvePublicAssetPath } from "./game/publicAssets";
 import {
@@ -285,6 +285,7 @@ export function App() {
   const nextRunFeedIdRef = useRef(1);
   const screenFeedbackTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const touchPointerActiveRef = useRef(false);
+  const touchPointerOriginRef = useRef<{ x: number; y: number } | undefined>(undefined);
   const hud = useGameStore((state) => state.hud);
   const setHud = useGameStore((state) => state.setHud);
   const [paused, setPaused] = useState(true);
@@ -356,14 +357,19 @@ export function App() {
         viewportWidth: window.innerWidth,
         viewportHeight: window.innerHeight
       });
+      const pointer = {
+        x: event.clientX,
+        y: event.clientY
+      };
+      const center =
+        event.pointerType === "touch"
+          ? (touchPointerOriginRef.current ?? resolveTouchSteeringOrigin({ geometry: touchPad, pointer }))
+          : touchPad.center;
 
       return buildTouchPointerVisual({
         active: true,
-        center: touchPad.center,
-        pointer: {
-          x: event.clientX,
-          y: event.clientY
-        },
+        center,
+        pointer,
         maxOffset: touchPad.size * 0.2,
         fullStrengthDistance: touchPad.size * 0.34
       });
@@ -371,10 +377,18 @@ export function App() {
 
     const resetPointerVisual = () => {
       touchPointerActiveRef.current = false;
+      touchPointerOriginRef.current = undefined;
       setTouchPointer(idleTouchPointer);
     };
 
     const handlePointerDown = (event: PointerEvent) => {
+      const touchPad = buildTouchPadGeometry({
+        viewportWidth: window.innerWidth,
+        viewportHeight: window.innerHeight
+      });
+      const pointer = { x: event.clientX, y: event.clientY };
+      touchPointerOriginRef.current =
+        event.pointerType === "touch" ? resolveTouchSteeringOrigin({ geometry: touchPad, pointer }) : undefined;
       touchPointerActiveRef.current = true;
       setTouchPointer(readPointerVisual(event));
     };

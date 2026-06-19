@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { buildTouchFlightPadPresentation, buildTouchPadGeometry, buildTouchPointerVisual } from "./touchControls";
+import { buildTouchFlightPadPresentation, buildTouchPadGeometry, buildTouchPointerVisual, resolveTouchSteeringOrigin } from "./touchControls";
 
 const appSource = readFileSync(new URL("../App.tsx", import.meta.url), "utf8");
 
@@ -152,6 +152,28 @@ describe("touch pad geometry", () => {
   });
 });
 
+describe("touch steering origin", () => {
+  const phoneGeometry = buildTouchPadGeometry({ viewportWidth: 390, viewportHeight: 844 });
+
+  it("uses the first thumb contact inside the phone steering strip as the neutral origin", () => {
+    expect(
+      resolveTouchSteeringOrigin({
+        geometry: phoneGeometry,
+        pointer: { x: 112, y: 704 }
+      })
+    ).toEqual({ x: 112, y: 704 });
+  });
+
+  it("falls back to the safe strip center when the contact starts outside the steering strip", () => {
+    expect(
+      resolveTouchSteeringOrigin({
+        geometry: phoneGeometry,
+        pointer: { x: 112, y: 520 }
+      })
+    ).toEqual({ x: 195, y: 704 });
+  });
+});
+
 describe("touch flight pad wiring", () => {
   it("feeds live HUD pressure and opportunity signals into the touch pad tone", () => {
     expect(appSource).toMatch(
@@ -162,6 +184,8 @@ describe("touch flight pad wiring", () => {
   it("feeds pointer drag visuals into touch pad CSS variables", () => {
     expect(appSource).toContain("const touchPointerStyle = {");
     expect(appSource).toContain("buildTouchPadGeometry({");
+    expect(appSource).toContain("touchPointerOriginRef");
+    expect(appSource).toContain("resolveTouchSteeringOrigin({");
     expect(appSource).toContain('"--touch-stick-x": `${touchPointer.offsetX}px`');
     expect(appSource).toContain('"--touch-stick-y": `${touchPointer.offsetY}px`');
     expect(appSource).toContain('"--touch-vector-angle": `${touchPointer.angleDeg}deg`');

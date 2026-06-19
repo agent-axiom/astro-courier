@@ -58,6 +58,36 @@ describe("pointer input mapping", () => {
     });
   });
 
+  it("uses the initial phone touch inside the steering strip as a floating command center", () => {
+    expect(
+      resolvePointerCommandCenter({
+        pointerType: "touch",
+        viewportWidth: 390,
+        viewportHeight: 844,
+        targetRect: { left: 0, top: 0, width: 390, height: 844 },
+        touchOrigin: { x: 112, y: 704 }
+      })
+    ).toEqual({
+      x: 112,
+      y: 704
+    });
+  });
+
+  it("ignores floating touch origins that begin outside the visible phone steering strip", () => {
+    expect(
+      resolvePointerCommandCenter({
+        pointerType: "touch",
+        viewportWidth: 390,
+        viewportHeight: 844,
+        targetRect: { left: 0, top: 0, width: 390, height: 844 },
+        touchOrigin: { x: 112, y: 520 }
+      })
+    ).toEqual({
+      x: 195,
+      y: 704
+    });
+  });
+
   it("keeps desktop mouse aiming centered on the canvas", () => {
     expect(
       resolvePointerCommandCenter({

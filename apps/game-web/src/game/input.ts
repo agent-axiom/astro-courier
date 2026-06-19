@@ -1,5 +1,5 @@
 import type { PlayerCommand } from "@astro-courier/shared";
-import { buildTouchPadGeometry } from "./touchControls";
+import { buildTouchPadGeometry, resolveTouchSteeringOrigin } from "./touchControls";
 
 const turnStep = 0.11;
 const pointerDeadZone = 10;
@@ -27,6 +27,7 @@ export type PointerCommandCenterInput = {
   viewportWidth: number;
   viewportHeight: number;
   targetRect: Pick<DOMRect, "left" | "top" | "width" | "height">;
+  touchOrigin?: ScreenPoint;
 };
 
 export type GamepadButtonSnapshot = {
@@ -66,10 +67,11 @@ export function commandsFromPointer(input: PointerCommandInput): PlayerCommand[]
 export function resolvePointerCommandCenter(input: PointerCommandCenterInput): ScreenPoint {
   const shouldUseTouchZone = input.pointerType === "touch" || input.viewportWidth <= 760;
   if (shouldUseTouchZone) {
-    return buildTouchPadGeometry({
+    const geometry = buildTouchPadGeometry({
       viewportWidth: input.viewportWidth,
       viewportHeight: input.viewportHeight
-    }).center;
+    });
+    return input.touchOrigin ? resolveTouchSteeringOrigin({ geometry, pointer: input.touchOrigin }) : geometry.center;
   }
 
   return {
@@ -138,6 +140,7 @@ export class KeyboardInput {
   private gamepadBoostPressed = false;
   private gamepadFirePressed = false;
   private pointer: ScreenPoint = { x: 0, y: 0 };
+  private pointerOrigin?: ScreenPoint;
   private pointerType = "";
 
   constructor(target: Window) {
@@ -165,6 +168,7 @@ export class KeyboardInput {
     this.pointerTarget?.removeEventListener("pointermove", this.handlePointerMove);
     this.pressed.clear();
     this.pointerActive = false;
+    this.pointerOrigin = undefined;
     this.boostQueued = false;
     this.fireQueued = false;
     this.gamepadBoostPressed = false;
@@ -218,6 +222,7 @@ export class KeyboardInput {
   private readonly handleBlur = () => {
     this.pressed.clear();
     this.pointerActive = false;
+    this.pointerOrigin = undefined;
     this.boostQueued = false;
     this.fireQueued = false;
     this.gamepadBoostPressed = false;
@@ -228,6 +233,7 @@ export class KeyboardInput {
     this.pointerActive = true;
     this.pointerType = event.pointerType;
     this.pointer = { x: event.clientX, y: event.clientY };
+    this.pointerOrigin = event.pointerType === "touch" ? this.pointer : undefined;
     this.pointerTarget?.setPointerCapture(event.pointerId);
   };
 
@@ -239,6 +245,7 @@ export class KeyboardInput {
 
   private readonly handlePointerUp = () => {
     this.pointerActive = false;
+    this.pointerOrigin = undefined;
     this.pointerType = "";
   };
 
@@ -276,7 +283,8 @@ export class KeyboardInput {
         pointerType: this.pointerType,
         viewportWidth: this.target.innerWidth,
         viewportHeight: this.target.innerHeight,
-        targetRect: rect
+        targetRect: rect,
+        touchOrigin: this.pointerOrigin
       }),
       pointer: this.pointer
     });

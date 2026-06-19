@@ -51,6 +51,11 @@ export type TouchPointerVisual = {
   strength: number;
 };
 
+export type TouchSteeringOriginInput = {
+  geometry: TouchPadGeometry;
+  pointer: TouchPoint;
+};
+
 export function buildTouchFlightPadPresentation(input: TouchFlightPadPresentationInput): TouchFlightPadPresentation {
   const visible = input.status === "flying" && !input.preflightOpen;
   if (!visible) {
@@ -145,6 +150,24 @@ export function buildTouchPadGeometry(input: TouchPadGeometryInput): TouchPadGeo
       x: round(input.viewportWidth / 2, 2),
       y: round(input.viewportHeight - bottom - height / 2, 2)
     }
+  };
+}
+
+export function resolveTouchSteeringOrigin(input: TouchSteeringOriginInput): TouchPoint {
+  const left = input.geometry.center.x - input.geometry.width / 2;
+  const right = input.geometry.center.x + input.geometry.width / 2;
+  const top = input.geometry.center.y - input.geometry.height / 2;
+  const bottom = input.geometry.center.y + input.geometry.height / 2;
+  const insidePad =
+    input.pointer.x >= left && input.pointer.x <= right && input.pointer.y >= top && input.pointer.y <= bottom;
+
+  if (!insidePad) {
+    return input.geometry.center;
+  }
+
+  return {
+    x: round(input.pointer.x, 2),
+    y: round(input.pointer.y, 2)
   };
 }
 
