@@ -720,6 +720,81 @@ describe("style target cue", () => {
     });
   });
 
+  it("surfaces ready combat tags as a compact style target", () => {
+    expect(
+      buildStyleTargetCue({
+        status: "flying",
+        styleBonus: 0,
+        interceptorCount: 2,
+        weaponCooldownSeconds: 0
+      })
+    ).toEqual({
+      label: "Style target",
+      value: "Tag ship / +35",
+      tone: "opportunity"
+    });
+  });
+
+  it("frames combat tags as a chain target while a multiplier is live", () => {
+    expect(
+      buildStyleTargetCue({
+        status: "flying",
+        styleBonus: 180,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 1.4,
+        interceptorCount: 2,
+        weaponCooldownSeconds: 0
+      })
+    ).toEqual({
+      label: "Style target",
+      value: "Tag ship / +35 / chain x1.50",
+      tone: "chain"
+    });
+  });
+
+  it("shows reload timing only when combat can save a live chain", () => {
+    expect(
+      buildStyleTargetCue({
+        status: "flying",
+        styleBonus: 180,
+        styleMultiplier: 1.5,
+        styleChainSecondsRemaining: 1.4,
+        interceptorCount: 1,
+        weaponCooldownSeconds: 0.8
+      })
+    ).toEqual({
+      label: "Style target",
+      value: "Reload / 0.8s / chain x1.50",
+      tone: "clutch"
+    });
+
+    expect(
+      buildStyleTargetCue({
+        status: "flying",
+        styleBonus: 0,
+        interceptorCount: 1,
+        weaponCooldownSeconds: 0.8
+      })
+    ).toBeUndefined();
+  });
+
+  it("keeps route danger above optional combat targets", () => {
+    expect(
+      buildStyleTargetCue({
+        status: "flying",
+        styleBonus: 180,
+        hazardDangerLevel: "near",
+        cargoDamage: 0,
+        interceptorCount: 2,
+        weaponCooldownSeconds: 0
+      })
+    ).toEqual({
+      label: "Style target",
+      value: "Clean skim / danger style",
+      tone: "risk"
+    });
+  });
+
   it("teaches no-brake finesse while clean delivery is still alive", () => {
     expect(
       buildStyleTargetCue({

@@ -1066,7 +1066,9 @@ export function App() {
     gravitySlingStyleBonus: hud.gravitySlingStyleBonus,
     manualBrakeUsed: hud.manualBrakeUsed,
     landingStatus: hud.landingStatus,
-    approachStreakSeconds: hud.approachStreakSeconds
+    approachStreakSeconds: hud.approachStreakSeconds,
+    interceptorCount: hud.interceptorCount,
+    weaponCooldownSeconds: hud.weaponCooldownSeconds
   });
   const styleChipStyle = { "--style-chain-progress": liveStyleReward?.chainProgress ?? 0 } as CSSProperties;
   const styleChainMeterStyle = { "--style-chain-meter-progress": styleChainMeter?.progress ?? 0 } as CSSProperties;

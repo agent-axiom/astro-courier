@@ -1,6 +1,7 @@
 import {
   ANTIMATTER_DRIFT_STYLE_BONUS,
   CHAIN_RELAY_STYLE_CHAIN_WINDOW_SECONDS,
+  ENEMY_HIT_STYLE_BONUS,
   LAUNCH_BURST_STYLE_BONUS,
   LAST_DROP_FUEL_RATIO,
   LAST_DROP_STYLE_BONUS,
@@ -74,6 +75,8 @@ export type StyleTargetCueInput = {
   manualBrakeUsed?: boolean;
   landingStatus?: LandingGuidanceStatus;
   approachStreakSeconds?: number;
+  interceptorCount?: number;
+  weaponCooldownSeconds?: number;
 };
 
 export type StyleTargetCue = {
@@ -227,6 +230,24 @@ export function buildStyleTargetCue(input: StyleTargetCueInput): StyleTargetCue 
       value: `Last drop / +${formatLastDropTargetPayout(input)}${chainSuffix}`,
       tone: "clutch"
     };
+  }
+
+  if ((input.interceptorCount ?? 0) > 0) {
+    if ((input.weaponCooldownSeconds ?? 0) <= 0) {
+      return {
+        label: "Style target",
+        value: `Tag ship / +${ENEMY_HIT_STYLE_BONUS}${chainSuffix}`,
+        tone: chainActive ? "chain" : "opportunity"
+      };
+    }
+
+    if (chainActive) {
+      return {
+        label: "Style target",
+        value: `Reload / ${(input.weaponCooldownSeconds ?? 0).toFixed(1)}s${chainSuffix}`,
+        tone: "clutch"
+      };
+    }
   }
 
   if (input.objectivePhase === "delivery" && input.manualBrakeUsed === false && (input.cargoDamage ?? 0) <= 0.02) {
