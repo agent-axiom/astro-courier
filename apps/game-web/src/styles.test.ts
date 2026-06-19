@@ -79,6 +79,15 @@ describe("responsive game layout CSS", () => {
     expect(styles).toMatch(/\.preflight-cover-cta[\s\S]*position: absolute;/);
   });
 
+  it("defines compact preflight perk and mini-goal controls", () => {
+    expect(styles).toContain(".perk-selector");
+    expect(styles).toMatch(/\.perk-selector[\s\S]*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/);
+    expect(styles).toMatch(/\.perk-card[\s\S]*grid-template-columns: 17px minmax\(0, 1fr\);/);
+    expect(styles).toContain(".perk-card-active");
+    expect(styles).toContain(".preflight-mini-goals");
+    expect(styles).toMatch(/@media \(max-width: 760px\)[\s\S]*\.perk-selector[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/);
+  });
+
   it("defines an icon-only first launch control primer", () => {
     expect(styles).toContain(".control-primer");
     expect(styles).toMatch(/\.control-primer[\s\S]*grid-template-columns: repeat\(5, minmax\(0, 1fr\)\);/);

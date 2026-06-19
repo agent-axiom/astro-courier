@@ -23,6 +23,7 @@ import {
   objectiveDockGateVisual,
   objectiveRouteBeamVisual,
   approachLockVisual,
+  riskGateVisual,
   screenShakeOffset,
   projectileVisual,
   shipBoostReadinessVisual,
@@ -160,6 +161,46 @@ describe("camera zoom", () => {
     expect(openSpace).toBeGreaterThanOrEqual(0.82);
     expect(nearDock).toBeGreaterThan(openSpace);
     expect(nearDock).toBeLessThanOrEqual(1);
+  });
+});
+
+describe("risk gate visual", () => {
+  it("stays hidden after clear and brightens when the ship is fast enough", () => {
+    expect(
+      riskGateVisual({
+        status: "flying",
+        cleared: true,
+        speed: 60,
+        speedThreshold: 34,
+        tick: 4
+      })
+    ).toBeUndefined();
+
+    expect(
+      riskGateVisual({
+        status: "flying",
+        cleared: false,
+        speed: 24,
+        speedThreshold: 34,
+        tick: 4
+      })
+    ).toMatchObject({
+      tone: "setup",
+      color: 0x7ce1ff
+    });
+
+    expect(
+      riskGateVisual({
+        status: "flying",
+        cleared: false,
+        speed: 42,
+        speedThreshold: 34,
+        tick: 4
+      })
+    ).toMatchObject({
+      tone: "ready",
+      color: 0xffd166
+    });
   });
 });
 

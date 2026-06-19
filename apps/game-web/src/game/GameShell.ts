@@ -19,6 +19,7 @@ import type {
   LandingGuidanceStatus,
   ObjectivePhase,
   PlayerCommand,
+  PlayerPerkId,
   ReplayEnvelope,
   RunGrade,
   RunMedal,
@@ -101,8 +102,24 @@ export type HudState = {
   gravitySlingReady?: boolean;
   gravitySlingSpeedThreshold?: number;
   gravitySlingStyleBonus?: number;
+  activePerk: PlayerPerkId;
+  perkOptions: PerkOption[];
+  riskGateCount: number;
+  clearedRiskGateCount: number;
+  nextRiskGateDistance?: number;
+  nextRiskGateSpeedThreshold?: number;
+  nextRiskGateStyleBonus?: number;
   replayFrameCount: number;
   replayChecksum?: string;
+};
+
+export type PerkOption = {
+  id: PlayerPerkId;
+  label: string;
+  shortLabel: string;
+  summary: string;
+  stat: string;
+  tone: "boost" | "guard" | "shot" | "dock";
 };
 
 export type ContractOption = Pick<ContractContent, "id" | "title" | "briefing" | "riskLabel" | "rewardLabel" | "medalTimes"> & {
@@ -138,6 +155,40 @@ const maxRunTrailSamples = 140;
 const enemyDirectorPollIntervalSeconds = 2.5;
 const gameVersion = "0.1.0";
 const localReplaySeed = "local-starter-seed";
+const perkOptionList: PerkOption[] = [
+  {
+    id: "afterburner",
+    label: "Afterburner",
+    shortLabel: "Boost",
+    summary: "Fast boost",
+    stat: "+33% burst",
+    tone: "boost"
+  },
+  {
+    id: "shield-crate",
+    label: "Shield Crate",
+    shortLabel: "Shield",
+    summary: "Safer hull",
+    stat: "125 HP",
+    tone: "guard"
+  },
+  {
+    id: "pulse-shot",
+    label: "Pulse Shot",
+    shortLabel: "Pulse",
+    summary: "Charged opener",
+    stat: "42 dmg",
+    tone: "shot"
+  },
+  {
+    id: "magnet-clamp",
+    label: "Magnet Clamp",
+    shortLabel: "Magnet",
+    summary: "Easy pickup",
+    stat: "Wide grab",
+    tone: "dock"
+  }
+];
 
 export class GameShell {
   private readonly mount: HTMLElement;
@@ -166,6 +217,7 @@ export class GameShell {
   private enemyDirectorResult?: EnemyDirectorResult;
   private enemyDirectorPollSeconds = 0;
   private enemyDirectorRequestInFlight = false;
+  private selectedPerkId: PlayerPerkId = "afterburner";
   private destroyed = false;
 
   constructor(options: GameShellOptions) {
@@ -222,6 +274,33 @@ export class GameShell {
 
     this.selectedContractId = contractId;
     this.replaySeed = options.replaySeed ?? localReplaySeed;
+    this.paused = true;
+    this.accumulator = 0;
+    this.hudTimer = 0;
+    this.retainedMilestone = undefined;
+    this.retainedStyleAward = undefined;
+    this.retainedMilestoneTimer = 0;
+    this.latestTrajectoryRisk = undefined;
+    this.enemyDirectorResult = undefined;
+    this.enemyDirectorPollSeconds = 0;
+    this.enemyDirectorRequestInFlight = false;
+    this.queuedCommands.length = 0;
+    this.inputFrames.length = 0;
+    this.lastTime = performance.now();
+    this.world = this.createFreshWorld();
+    this.resetRunTrail();
+    this.publishHud();
+  }
+
+  selectPerk(perkId: PlayerPerkId): void {
+    if (this.destroyed || this.world.status !== "paused") {
+      return;
+    }
+    if (!perkOptionList.some((perk) => perk.id === perkId)) {
+      throw new Error(`Unknown perk "${perkId}"`);
+    }
+
+    this.selectedPerkId = perkId;
     this.paused = true;
     this.accumulator = 0;
     this.hudTimer = 0;
@@ -418,7 +497,10 @@ export class GameShell {
   }
 
   private createFreshWorld(): SimulationWorld {
-    const world = createWorldFromSystem(this.system, this.replaySeed, { contractId: this.selectedContractId });
+    const world = createWorldFromSystem(this.system, this.replaySeed, {
+      contractId: this.selectedContractId,
+      perkId: this.selectedPerkId
+    });
     if (this.paused) {
       world.status = "paused";
     }
@@ -432,6 +514,13 @@ export class GameShell {
     const pace = calculateContractPace(result.elapsedSeconds, this.world.activeContract.medalTimes);
     const activeContract = this.contractOption(this.world.activeContract);
     const trajectoryRisk = this.world.status === "flying" ? this.latestTrajectoryRisk : undefined;
+    const unclearedRiskGates = snapshot.riskGates.filter((gate) => !gate.cleared);
+    const nextRiskGate = unclearedRiskGates
+      .map((gate) => ({
+        gate,
+        distance: distanceBetween(snapshot.ship.position, gate.position)
+      }))
+      .sort((left, right) => left.distance - right.distance)[0];
     const perfectDockReady =
       snapshot.objectiveTarget === undefined
         ? undefined
@@ -506,6 +595,13 @@ export class GameShell {
       gravitySlingReady: snapshot.gravitySlingOpportunity?.ready,
       gravitySlingSpeedThreshold: snapshot.gravitySlingOpportunity?.speedThreshold,
       gravitySlingStyleBonus: snapshot.gravitySlingOpportunity?.styleBonus,
+      activePerk: snapshot.activePerk,
+      perkOptions: perkOptionList,
+      riskGateCount: snapshot.riskGates.length,
+      clearedRiskGateCount: snapshot.riskGates.length - unclearedRiskGates.length,
+      nextRiskGateDistance: nextRiskGate ? Math.round(nextRiskGate.distance) : undefined,
+      nextRiskGateSpeedThreshold: nextRiskGate?.gate.speedThreshold,
+      nextRiskGateStyleBonus: nextRiskGate?.gate.styleBonus,
       trajectoryRiskLevel: trajectoryRisk?.level,
       trajectoryRiskSeconds: trajectoryRisk?.seconds,
       trajectoryRiskClearance: trajectoryRisk?.clearance,
@@ -524,7 +620,7 @@ export class GameShell {
       rngSeed: this.world.seed,
       shipConfig: {
         hull: "starter",
-        upgrades: []
+        upgrades: [this.world.activePerk]
       },
       inputFrames: this.inputFrames.map((frame) => ({
         tick: frame.tick,

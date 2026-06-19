@@ -240,6 +240,13 @@ const initialHud: HudState = {
   trajectoryRiskLevel: undefined,
   trajectoryRiskSeconds: undefined,
   trajectoryRiskClearance: undefined,
+  activePerk: "afterburner",
+  perkOptions: [],
+  riskGateCount: 0,
+  clearedRiskGateCount: 0,
+  nextRiskGateDistance: undefined,
+  nextRiskGateSpeedThreshold: undefined,
+  nextRiskGateStyleBonus: undefined,
   runTrail: [],
   replayFrameCount: 0,
   replayChecksum: undefined
@@ -1378,6 +1385,11 @@ export function App() {
     shellRef.current?.selectContract(dailyDispatchAction.contractId, { replaySeed: dailyDispatch.seed });
   };
 
+  const selectPerk = (perkId: HudState["activePerk"]) => {
+    audioRef.current?.unlock();
+    shellRef.current?.selectPerk(perkId);
+  };
+
   const toggleAudioMuted = () => {
     const nextMuted = !audioMuted;
     setAudioMuted(nextMuted);
@@ -1935,6 +1947,61 @@ export function App() {
               <img src={coverArtSrc} alt="Astro Courier" loading="eager" />
             </div>
           )}
+          {hud.perkOptions.length > 0 ? (
+            <div className="perk-selector" aria-label="Courier loadout">
+              {hud.perkOptions.map((perk) => (
+                <button
+                  key={perk.id}
+                  type="button"
+                  className={`perk-card perk-card-${perk.tone} ${perk.id === hud.activePerk ? "perk-card-active" : ""}`}
+                  aria-pressed={perk.id === hud.activePerk}
+                  aria-label={`${perk.label}: ${perk.summary}. ${perk.stat}`}
+                  title={`${perk.label}: ${perk.summary}`}
+                  onClick={() => selectPerk(perk.id)}
+                >
+                  {perk.tone === "guard" ? (
+                    <ShieldAlert size={17} />
+                  ) : perk.tone === "shot" ? (
+                    <Crosshair size={17} />
+                  ) : perk.tone === "dock" ? (
+                    <PackageCheck size={17} />
+                  ) : (
+                    <Zap size={17} />
+                  )}
+                  <span>{perk.shortLabel}</span>
+                  <strong>{perk.stat}</strong>
+                </button>
+              ))}
+            </div>
+          ) : null}
+          <div className="preflight-mini-goals" aria-label="Launch goals">
+            <span>
+              <MapPin size={16} />
+              <small>Target</small>
+              <strong>{targetDistanceLabel}</strong>
+            </span>
+            <span>
+              <Trophy size={16} />
+              <small>Gold</small>
+              <strong>{Math.max(0, Math.round(hud.paceSecondsRemaining))}s</strong>
+            </span>
+            {hud.riskGateCount > 0 ? (
+              <span>
+                <Star size={16} />
+                <small>Gate</small>
+                <strong>
+                  {hud.clearedRiskGateCount}/{hud.riskGateCount}
+                </strong>
+                <b>{hud.nextRiskGateDistance === undefined ? `+${hud.nextRiskGateStyleBonus ?? 0}` : `${hud.nextRiskGateDistance}m`}</b>
+              </span>
+            ) : (
+              <span>
+                <Crosshair size={16} />
+                <small>Shots</small>
+                <strong>{hud.interceptorCount}</strong>
+              </span>
+            )}
+          </div>
           <div className="preflight-kicker">{preflightKicker}</div>
           {preflightOverlayDensity.showContractTitle ? <h2>{hud.contractTitle}</h2> : null}
           {preflightOverlayDensity.showContractBriefing ? <p>{hud.contractBriefing}</p> : null}

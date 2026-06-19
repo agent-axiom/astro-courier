@@ -20,6 +20,7 @@ export type InputFrame = {
 export type RunStatus = "flying" | "delivered" | "crashed" | "paused";
 export type ObjectivePhase = "pickup" | "delivery" | "complete";
 export type LandingGuidanceStatus = "approach" | "too-fast" | "misaligned" | "ready";
+export type PlayerPerkId = "afterburner" | "shield-crate" | "pulse-shot" | "magnet-clamp";
 
 export type LandingRating =
   | "Perfect Landing"
@@ -49,6 +50,15 @@ export type EnemyDirectorPolicy = {
   fireBias: number;
   retreatHp: number;
   focus: "cargo" | "player" | "objective";
+};
+
+export type RiskGateSnapshot = {
+  id: string;
+  position: Vec2;
+  radius: number;
+  cleared: boolean;
+  speedThreshold: number;
+  styleBonus: number;
 };
 
 export type RunResultSummary = {
@@ -82,6 +92,7 @@ export type SimulationSnapshot = {
   tick: number;
   status: RunStatus;
   objectivePhase: ObjectivePhase;
+  activePerk: PlayerPerkId;
   cargoOnboard: boolean;
   manualBrakeUsed: boolean;
   emergencyShieldAvailable: boolean;
@@ -116,6 +127,7 @@ export type SimulationSnapshot = {
     speedThreshold: number;
     styleBonus: number;
   };
+  riskGates: RiskGateSnapshot[];
   ship: {
     position: Vec2;
     velocity: Vec2;

@@ -320,6 +320,40 @@ export function objectiveDockGateVisual(input: ObjectiveDockGateVisualInput): Ob
   };
 }
 
+export type RiskGateVisualInput = Pick<SimulationSnapshot, "status" | "tick"> & {
+  cleared: boolean;
+  speed: number;
+  speedThreshold: number;
+};
+
+export type RiskGateVisual = {
+  color: number;
+  tone: "setup" | "ready";
+  alpha: number;
+  width: number;
+  radiusOffset: number;
+  markerRadius: number;
+  spin: number;
+};
+
+export function riskGateVisual(input: RiskGateVisualInput): RiskGateVisual | undefined {
+  if ((input.status !== "flying" && input.status !== "paused") || input.cleared) {
+    return undefined;
+  }
+
+  const ready = input.speed >= input.speedThreshold;
+  const wave = (Math.sin(input.tick * 0.12) + 1) / 2;
+  return {
+    color: ready ? 0xffd166 : 0x7ce1ff,
+    tone: ready ? "ready" : "setup",
+    alpha: round((ready ? 0.48 : 0.3) + wave * (ready ? 0.2 : 0.1), 2),
+    width: round(ready ? 2.4 + wave * 0.7 : 1.4 + wave * 0.4, 2),
+    radiusOffset: round(wave * (ready ? 5 : 3), 2),
+    markerRadius: round(ready ? 3.8 + wave * 0.8 : 2.8 + wave * 0.5, 2),
+    spin: round(positiveModulo(input.tick * (ready ? 0.026 : 0.014), 1) * Math.PI * 2, 3)
+  };
+}
+
 export type TrajectoryPointVisualInput = {
   status: SimulationSnapshot["status"];
   index: number;
@@ -1778,6 +1812,7 @@ class PixiRenderer implements AstroPixiRenderer {
     viewport: { width: number; height: number }
   ): void {
     this.guidance.clear();
+    this.drawRiskGates(snapshot, project);
     const target = snapshot.objectiveTarget;
     if (!target || (snapshot.status !== "flying" && snapshot.status !== "paused")) return;
 
@@ -1889,6 +1924,42 @@ class PixiRenderer implements AstroPixiRenderer {
       color,
       alpha: visual.edgeAlpha
     });
+  }
+
+  private drawRiskGates(snapshot: SimulationSnapshot, project: (point: Vec2) => Vec2): void {
+    const speed = Math.hypot(snapshot.ship.velocity.x, snapshot.ship.velocity.y);
+    for (const gate of snapshot.riskGates) {
+      const visual = riskGateVisual({
+        status: snapshot.status,
+        tick: snapshot.tick,
+        cleared: gate.cleared,
+        speed,
+        speedThreshold: gate.speedThreshold
+      });
+      if (!visual) {
+        continue;
+      }
+
+      const center = project(gate.position);
+      const radius = gate.radius + visual.radiusOffset;
+      this.guidance.circle(center.x, center.y, radius).stroke({
+        color: visual.color,
+        width: visual.width,
+        alpha: visual.alpha
+      });
+      this.guidance.circle(center.x, center.y, radius + 9).stroke({
+        color: visual.color,
+        width: 1,
+        alpha: visual.alpha * 0.24
+      });
+      for (let index = 0; index < 4; index += 1) {
+        const angle = visual.spin + index * (Math.PI / 2);
+        this.guidance.circle(center.x + Math.cos(angle) * radius, center.y + Math.sin(angle) * radius, visual.markerRadius).fill({
+          color: visual.color,
+          alpha: Math.min(0.88, visual.alpha + 0.16)
+        });
+      }
+    }
   }
 
   private drawWorld(snapshot: SimulationSnapshot, project: (point: Vec2) => Vec2): void {

@@ -337,6 +337,34 @@ describe("GameShell lifecycle", () => {
     expect((shell as unknown as { world: SimulationWorld }).world.seed).toBe("daily-2026-06-13-asteroid-sprint");
   });
 
+  it("can switch the selected run perk while waiting in preflight mode", async () => {
+    const { renderer, input } = createShellDoubles();
+    const onHud = vi.fn();
+    vi.stubGlobal("requestAnimationFrame", vi.fn(() => 7));
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    vi.spyOn(performance, "now").mockReturnValue(1000);
+
+    const shell = new GameShell({
+      mount: {} as HTMLElement,
+      onHud,
+      renderer,
+      input,
+      initialPaused: true
+    });
+
+    await shell.start();
+    shell.selectPerk("shield-crate");
+
+    expect(onHud.mock.calls.at(-1)?.[0]).toMatchObject({
+      status: "paused",
+      activePerk: "shield-crate",
+      shipHp: 125,
+      shipMaxHp: 125
+    });
+    expect(onHud.mock.calls.at(-1)?.[0].perkOptions).toHaveLength(4);
+    expect((shell as unknown as { world: SimulationWorld }).world.activePerk).toBe("shield-crate");
+  });
+
   it("can retarget the current paused contract to a daily replay seed", async () => {
     const { renderer, input } = createShellDoubles();
     const onHud = vi.fn();

@@ -3351,6 +3351,136 @@ button {
   object-fit: cover;
 }
 
+.perk-selector {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+  width: min(100%, 520px);
+  justify-self: center;
+}
+
+.perk-card {
+  display: grid;
+  grid-template-columns: 17px minmax(0, 1fr);
+  align-items: center;
+  min-height: 52px;
+  gap: 5px 7px;
+  padding: 8px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 7px;
+  background: rgba(14, 22, 44, 0.76);
+  color: #eaf4ff;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+.perk-card:hover,
+.perk-card:focus-visible,
+.perk-card-active {
+  border-color: rgba(255, 209, 102, 0.66);
+  background: rgba(255, 209, 102, 0.12);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.perk-card svg {
+  grid-row: 1 / 3;
+}
+
+.perk-card span,
+.perk-card strong {
+  min-width: 0;
+  overflow: hidden;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.perk-card span {
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.perk-card strong {
+  color: #fff4cc;
+  font-size: 0.7rem;
+  font-weight: 850;
+}
+
+.perk-card-boost svg,
+.perk-card-shot svg {
+  color: #ffd166;
+}
+
+.perk-card-guard svg {
+  color: #ff9fbe;
+}
+
+.perk-card-dock svg {
+  color: #8ee6b8;
+}
+
+.preflight-mini-goals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  width: min(100%, 520px);
+  justify-self: center;
+}
+
+.preflight-mini-goals span {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  align-items: center;
+  min-height: 44px;
+  gap: 3px 7px;
+  padding: 7px 9px;
+  border: 1px solid rgba(124, 225, 255, 0.15);
+  border-radius: 7px;
+  background: rgba(124, 225, 255, 0.07);
+  color: #d9f7ff;
+  text-align: left;
+}
+
+.preflight-mini-goals svg {
+  grid-row: 1 / 3;
+  color: #7ce1ff;
+}
+
+.preflight-mini-goals small,
+.preflight-mini-goals strong,
+.preflight-mini-goals b {
+  min-width: 0;
+  overflow: hidden;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preflight-mini-goals small {
+  color: #9fb2d5;
+  font-size: 0.62rem;
+  font-weight: 850;
+  text-transform: uppercase;
+}
+
+.preflight-mini-goals strong {
+  color: #f7fbff;
+  font-size: 0.82rem;
+  font-weight: 920;
+}
+
+.preflight-mini-goals b {
+  grid-column: 2;
+  color: #fff4cc;
+  font-size: 0.66rem;
+  font-weight: 850;
+}
+
 .preflight-kicker {
   color: #7ce1ff;
   font-size: 0.74rem;
@@ -6378,6 +6508,8 @@ button {
 
   .preflight-kicker,
   .preflight-cover-art,
+  .perk-selector,
+  .preflight-mini-goals,
   .preflight-overlay h2,
   .preflight-overlay p,
   .preflight-launch-summary,
@@ -6488,6 +6620,25 @@ button {
     width: 42%;
     height: 42%;
   }
+
+  .perk-selector {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .perk-card {
+    min-height: 46px;
+    padding: 7px 8px;
+  }
+
+  .preflight-mini-goals {
+    gap: 6px;
+  }
+
+  .preflight-mini-goals span {
+    min-height: 40px;
+    padding: 7px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -6553,6 +6704,22 @@ button {
   .touch-flight-pad-vector {
     width: 42%;
     height: 42%;
+  }
+
+  .perk-card span {
+    font-size: 0.68rem;
+  }
+
+  .perk-card strong {
+    font-size: 0.66rem;
+  }
+
+  .preflight-mini-goals small {
+    font-size: 0.58rem;
+  }
+
+  .preflight-mini-goals strong {
+    font-size: 0.76rem;
   }
 
   .style-burst {

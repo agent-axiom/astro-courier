@@ -16,6 +16,8 @@ const baseHud: HudState = {
   cargoName: "Bottled Starlight",
   cargoKind: "fragile",
   cargoFragility: 0.8,
+  activePerk: "afterburner",
+  perkOptions: [],
   contractOptions: [
     {
       id: "first-light-delivery",
@@ -75,6 +77,8 @@ const baseHud: HudState = {
   launchBurstSecondsRemaining: 0,
   hazardDangerLevel: undefined,
   hazardDistance: undefined,
+  riskGateCount: 0,
+  clearedRiskGateCount: 0,
   runTrail: [],
   replayFrameCount: 0
 };

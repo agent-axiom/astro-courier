@@ -18,6 +18,8 @@ import {
   LANDING_ASSIST_FUEL_COST,
   NO_BRAKE_STYLE_BONUS,
   QUICK_PICKUP_STYLE_BONUS,
+  RISK_GATE_SPEED_THRESHOLD,
+  RISK_GATE_STYLE_BONUS,
   STYLE_CHAIN_WINDOW_SECONDS,
   createWorldFromSystem,
   createWorldReplay,
@@ -288,6 +290,143 @@ describe("deterministic Astro Courier simulation", () => {
     expect(snapshot.enemies.every((enemy) => enemy.hp > 0 && enemy.maxHp >= enemy.hp)).toBe(true);
     expect(snapshot.playerProjectiles).toEqual([]);
     expect(snapshot.enemyProjectiles).toEqual([]);
+  });
+
+  it("starts with a selected run perk and deterministic risk gates", () => {
+    const systemWithHazard: SystemContent = {
+      ...starterSystem,
+      hazards: [
+        {
+          id: "risk-field",
+          type: "asteroid_field",
+          position: [165, -76],
+          radius: 36,
+          severity: 0.55
+        }
+      ]
+    };
+    const world = createWorldFromSystem(systemWithHazard, "perk-seed", { perkId: "afterburner" });
+    const snapshot = snapshotWorld(world);
+
+    expect(world.activePerk).toBe("afterburner");
+    expect(snapshot.activePerk).toBe("afterburner");
+    expect(snapshot.riskGates).toHaveLength(1);
+    expect(snapshot.riskGates[0]).toMatchObject({
+      id: "risk-gate-risk-field",
+      cleared: false,
+      radius: 28,
+      speedThreshold: RISK_GATE_SPEED_THRESHOLD,
+      styleBonus: RISK_GATE_STYLE_BONUS
+    });
+  });
+
+  it("lets afterburner trade more fuel for a stronger boost", () => {
+    const baseline = createWorldFromSystem(starterSystem, "baseline-boost-seed", { perkId: "shield-crate" });
+    const afterburner = createWorldFromSystem(starterSystem, "afterburner-boost-seed", { perkId: "afterburner" });
+    for (const world of [baseline, afterburner]) {
+      world.gravitySources = [];
+      world.landingPads = [];
+      world.ship.position = { x: 500, y: 500 };
+      world.ship.velocity = { x: 0, y: 0 };
+      world.ship.rotation = 0;
+      world.ship.targetRotation = 0;
+    }
+
+    stepWorld(baseline, 1 / 60, [{ type: "BOOST" }], { combat: false });
+    stepWorld(afterburner, 1 / 60, [{ type: "BOOST" }], { combat: false });
+
+    expect(afterburner.ship.velocity.x).toBeGreaterThan(baseline.ship.velocity.x + 6);
+    expect(afterburner.fuelUsed).toBeGreaterThan(baseline.fuelUsed);
+  });
+
+  it("starts shield-crate runs with extra hull capacity and lighter shield cargo damage", () => {
+    const world = createWorldFromSystem(starterSystem, "shield-crate-seed", { perkId: "shield-crate" });
+    const source = world.gravitySources[0]!;
+    world.ship.position = { x: source.position.x + source.radius - 2, y: source.position.y };
+    world.ship.velocity = { x: -18, y: 0 };
+    world.ship.rotation = Math.PI;
+    world.landingPads = [];
+
+    stepWorld(world, 1 / 60, [], { combat: false });
+
+    expect(world.ship.maxHp).toBe(125);
+    expect(world.ship.hp).toBe(125);
+    expect(world.emergencyShieldUsed).toBe(true);
+    expect(world.ship.cargoDamage).toBeCloseTo(0.08, 3);
+  });
+
+  it("loads pulse-shot as one charged player projectile", () => {
+    const world = createWorldFromSystem(starterSystem, "pulse-shot-seed", { perkId: "pulse-shot" });
+    world.gravitySources = [];
+    world.landingPads = [];
+    world.enemies = [];
+    world.ship.position = { x: 500, y: 500 };
+    world.ship.velocity = { x: 0, y: 0 };
+    world.ship.rotation = 0;
+    world.ship.targetRotation = 0;
+
+    stepWorld(world, 1 / 60, [{ type: "FIRE" }], { combat: false });
+
+    expect(world.playerProjectiles).toHaveLength(1);
+    expect(world.playerProjectiles[0]).toMatchObject({
+      damage: 42,
+      radius: 6
+    });
+    expect(world.pulseShotAvailable).toBe(false);
+  });
+
+  it("lets magnet-clamp grab pickup cargo from a wider lane", () => {
+    const baseline = createWorldFromSystem(starterSystem, "baseline-magnet-seed", { perkId: "shield-crate" });
+    const magnet = createWorldFromSystem(starterSystem, "magnet-clamp-seed", { perkId: "magnet-clamp" });
+    for (const world of [baseline, magnet]) {
+      world.enemies = [];
+      world.ship.position = { x: 74, y: -74 };
+      world.ship.velocity = { x: -4, y: 0 };
+      world.ship.rotation = -Math.PI / 2;
+      world.ship.targetRotation = -Math.PI / 2;
+    }
+
+    stepWorld(baseline, 1 / 60, [], { combat: false });
+    stepWorld(magnet, 1 / 60, [], { combat: false });
+
+    expect(baseline.objectivePhase).toBe("pickup");
+    expect(baseline.cargoOnboard).toBe(false);
+    expect(magnet.objectivePhase).toBe("delivery");
+    expect(magnet.cargoOnboard).toBe(true);
+  });
+
+  it("awards risk gate style once for a fast clean pass", () => {
+    const systemWithHazard: SystemContent = {
+      ...starterSystem,
+      hazards: [
+        {
+          id: "threadable-field",
+          type: "asteroid_field",
+          position: [165, -76],
+          radius: 36,
+          severity: 0.55
+        }
+      ]
+    };
+    const world = createWorldFromSystem(systemWithHazard, "risk-gate-clear-seed");
+    const gate = world.riskGates[0]!;
+    world.gravitySources = [];
+    world.landingPads = [];
+    world.ship.position = { ...gate.position };
+    world.ship.velocity = { x: gate.speedThreshold + 8, y: 0 };
+
+    stepWorld(world, 1 / 60, [], { combat: false });
+    const firstStyle = summarizeRun(world).scoreBreakdown.styleBonus;
+
+    expect(gate.cleared).toBe(true);
+    expect(world.clearedRiskGateIds).toEqual([gate.id]);
+    expect(world.lastMilestone).toBe("Risk Gate");
+    expect(world.lastStyleAward).toBe(RISK_GATE_STYLE_BONUS);
+    expect(firstStyle).toBe(RISK_GATE_STYLE_BONUS);
+
+    stepWorld(world, 1 / 60, [], { combat: false });
+
+    expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(firstStyle);
   });
 
   it("fires one player projectile per weapon cooldown", () => {

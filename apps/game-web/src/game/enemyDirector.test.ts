@@ -78,6 +78,7 @@ function testSnapshot(): SimulationSnapshot {
     tick: 240,
     status: "flying",
     objectivePhase: "delivery",
+    activePerk: "afterburner",
     cargoOnboard: true,
     manualBrakeUsed: false,
     emergencyShieldAvailable: true,
@@ -127,6 +128,7 @@ function testSnapshot(): SimulationSnapshot {
     },
     gravitySources: [],
     landingPads: [],
-    hazards: []
+    hazards: [],
+    riskGates: []
   };
 }
