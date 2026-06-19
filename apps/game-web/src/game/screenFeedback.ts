@@ -6,7 +6,7 @@ import type { DailyDispatchProgressReceipt } from "./contracts";
 export type ScreenFeedback = {
   label?: string;
   value?: string;
-  accent?: "chain" | "fuel" | "precision" | "rush" | "sling" | "tempo";
+  accent?: "chain" | "combat" | "fuel" | "precision" | "rush" | "sling" | "tempo";
   tone: "style" | "success" | "warning" | "danger";
   intensity: "light" | "medium" | "heavy";
   durationMs: number;
@@ -53,6 +53,14 @@ export function buildMilestoneScreenFeedback(milestone: string | undefined): Scr
 
   if (milestone === "Boost Burn") {
     return buildScreenFeedback(["boost-burn"]);
+  }
+
+  if (milestone === "Direct Hit") {
+    return buildScreenFeedback(["combat-hit"], milestone);
+  }
+
+  if (milestone === "Interceptor Down") {
+    return buildScreenFeedback(["enemy-down"], milestone);
   }
 
   return undefined;
@@ -221,6 +229,26 @@ export function buildScreenFeedback(
       tone: "success",
       intensity: "medium",
       durationMs: 360
+    };
+  }
+  if (events.includes("enemy-down")) {
+    return {
+      label: "Interceptor down",
+      value: "Combo cashed",
+      accent: "combat",
+      tone: "style",
+      intensity: "medium",
+      durationMs: 420
+    };
+  }
+  if (events.includes("combat-hit")) {
+    return {
+      label: "Direct hit",
+      value: "Chain armed",
+      accent: "combat",
+      tone: "style",
+      intensity: "light",
+      durationMs: 280
     };
   }
   if (events.includes("shield-rebound")) {

@@ -76,6 +76,8 @@ describe("HUD audio events", () => {
     expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, lastMilestone: "Comet Finish" })).toEqual(["style-hit"]);
     expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, lastMilestone: "No Brake Finesse" })).toEqual(["style-hit"]);
     expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, lastMilestone: "Antimatter Drift" })).toEqual(["antimatter-drift"]);
+    expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, lastMilestone: "Direct Hit" })).toEqual(["combat-hit"]);
+    expect(deriveHudAudioEvents(baseSnapshot, { ...baseSnapshot, lastMilestone: "Interceptor Down" })).toEqual(["enemy-down"]);
   });
 
   it("ignores service milestones that are not audio-worthy style hits", () => {

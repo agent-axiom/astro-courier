@@ -118,6 +118,11 @@ describe("responsive game layout CSS", () => {
     expect(styles).toContain("screen-feedback-tempo-sweep");
   });
 
+  it("defines a dedicated combat screen feedback accent", () => {
+    expect(styles).toContain(".screen-feedback-accent-combat");
+    expect(styles).toContain("screen-feedback-combat-snap");
+  });
+
   it("defines a dedicated clutch tone for low-fuel style targets", () => {
     expect(styles).toContain(".style-target-clutch");
   });

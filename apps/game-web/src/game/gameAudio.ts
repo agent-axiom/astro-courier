@@ -46,6 +46,8 @@ const eventTones: Record<GameAudioEvent, { frequency: number; duration: number; 
   "delivery-complete": { frequency: 880, duration: 0.16, gain: 0.05 },
   "ship-crash": { frequency: 120, duration: 0.24, gain: 0.06 },
   "style-hit": { frequency: 720, duration: 0.08, gain: 0.045 },
+  "combat-hit": { frequency: 980, duration: 0.06, gain: 0.044 },
+  "enemy-down": { frequency: 1240, duration: 0.13, gain: 0.052 },
   "antimatter-drift": { frequency: 1180, duration: 0.14, gain: 0.052 },
   "antimatter-armed": { frequency: 1060, duration: 0.11, gain: 0.048 },
   "route-launch": { frequency: 640, duration: 0.15, gain: 0.048 },

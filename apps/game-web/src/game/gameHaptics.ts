@@ -116,6 +116,12 @@ export function hapticPatternForEvents(events: readonly GameAudioEvent[]): Hapti
   if (events.includes("antimatter-armed")) {
     return [9, 12, 9];
   }
+  if (events.includes("enemy-down")) {
+    return [12, 10, 18];
+  }
+  if (events.includes("combat-hit")) {
+    return [8];
+  }
   if (events.includes("style-hit") || events.includes("assist-burn")) {
     return [14];
   }

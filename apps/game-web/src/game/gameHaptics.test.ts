@@ -5,6 +5,8 @@ describe("game haptics", () => {
   it("maps gameplay event batches to tactile patterns by priority", () => {
     expect(hapticPatternForEvents(["boost-burn"])).toEqual([12]);
     expect(hapticPatternForEvents(["style-hit"])).toEqual([14]);
+    expect(hapticPatternForEvents(["combat-hit"])).toEqual([8]);
+    expect(hapticPatternForEvents(["enemy-down"])).toEqual([12, 10, 18]);
     expect(hapticPatternForEvents(["delivery-complete"])).toEqual([16, 18, 34, 18]);
     expect(hapticPatternForEvents(["antimatter-drift"])).toEqual([10, 14, 10, 20]);
     expect(hapticPatternForEvents(["antimatter-armed"])).toEqual([9, 12, 9]);
@@ -39,6 +41,7 @@ describe("game haptics", () => {
     expect(hapticPatternForEvents(["trajectory-clear"])).toEqual([8, 8]);
     expect(hapticPatternForEvents(["hazard-contact"])).toEqual([30, 32, 36]);
     expect(hapticPatternForEvents(["thread-window", "chain-critical"])).toEqual([12, 24, 12, 24]);
+    expect(hapticPatternForEvents(["style-hit", "enemy-down"])).toEqual([12, 10, 18]);
     expect(hapticPatternForEvents(["delivery-complete", "ship-crash"])).toEqual([45, 45, 65]);
     expect(hapticPatternForEvents(["style-hit", "ship-crash"])).toEqual([45, 45, 65]);
     expect(hapticPatternForEvents([])).toBeUndefined();

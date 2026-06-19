@@ -238,6 +238,22 @@ describe("screen feedback", () => {
       intensity: "light",
       durationMs: 360
     });
+    expect(buildScreenFeedback(["combat-hit"], "Direct Hit")).toEqual({
+      label: "Direct hit",
+      value: "Chain armed",
+      accent: "combat",
+      tone: "style",
+      intensity: "light",
+      durationMs: 280
+    });
+    expect(buildScreenFeedback(["enemy-down"], "Interceptor Down")).toEqual({
+      label: "Interceptor down",
+      value: "Combo cashed",
+      accent: "combat",
+      tone: "style",
+      intensity: "medium",
+      durationMs: 420
+    });
     expect(buildScreenFeedback(["comet-armed"])).toEqual({
       label: "Comet dock",
       value: "Perfect line armed",
@@ -575,6 +591,22 @@ describe("screen feedback", () => {
     expect(buildMilestoneScreenFeedback("Launch Burst")).toEqual({
       label: "Launch burst",
       value: "+120 style",
+      tone: "style",
+      intensity: "medium",
+      durationMs: 420
+    });
+    expect(buildMilestoneScreenFeedback("Direct Hit")).toEqual({
+      label: "Direct hit",
+      value: "Chain armed",
+      accent: "combat",
+      tone: "style",
+      intensity: "light",
+      durationMs: 280
+    });
+    expect(buildMilestoneScreenFeedback("Interceptor Down")).toEqual({
+      label: "Interceptor down",
+      value: "Combo cashed",
+      accent: "combat",
       tone: "style",
       intensity: "medium",
       durationMs: 420

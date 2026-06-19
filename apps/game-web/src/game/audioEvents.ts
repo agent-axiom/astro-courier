@@ -8,6 +8,8 @@ export type GameAudioEvent =
   | "delivery-complete"
   | "ship-crash"
   | "style-hit"
+  | "combat-hit"
+  | "enemy-down"
   | "antimatter-drift"
   | "antimatter-armed"
   | "route-launch"
@@ -146,6 +148,10 @@ export function deriveHudAudioEvents(previous: HudAudioSnapshot | undefined, cur
       events.push("launch-burst");
     } else if (current.lastMilestone === "Antimatter Drift") {
       events.push("antimatter-drift");
+    } else if (current.lastMilestone === "Direct Hit") {
+      events.push("combat-hit");
+    } else if (current.lastMilestone === "Interceptor Down") {
+      events.push("enemy-down");
     } else if (styleMilestones.has(current.lastMilestone)) {
       events.push("style-hit");
     }

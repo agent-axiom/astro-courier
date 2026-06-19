@@ -87,6 +87,28 @@ describe("game audio controller", () => {
     expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.12, 3);
   });
 
+  it("plays a crisp hit marker tone for direct combat hits", () => {
+    const context = new FakeAudioContext();
+    const controller = createGameAudioController({ createContext: () => context });
+
+    controller.play(["combat-hit"]);
+
+    expect(context.oscillators).toHaveLength(1);
+    expect(context.oscillators[0]?.frequencyValue).toBe(980);
+    expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.06, 3);
+  });
+
+  it("plays a brighter confirmation tone when an interceptor is destroyed", () => {
+    const context = new FakeAudioContext();
+    const controller = createGameAudioController({ createContext: () => context });
+
+    controller.play(["enemy-down"]);
+
+    expect(context.oscillators).toHaveLength(1);
+    expect(context.oscillators[0]?.frequencyValue).toBe(1240);
+    expect(context.oscillators[0]?.stoppedAt).toBeCloseTo(0.13, 3);
+  });
+
   it("plays a confident route-launch confirmation tone", () => {
     const context = new FakeAudioContext();
     const controller = createGameAudioController({ createContext: () => context });
