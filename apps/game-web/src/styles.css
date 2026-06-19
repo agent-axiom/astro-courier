@@ -6931,10 +6931,21 @@ button {
   }
 
   .preflight-overlay {
-    top: 50%;
+    top: auto;
+    bottom: max(118px, calc(env(safe-area-inset-bottom) + 104px));
     width: calc(100vw - 20px);
+    max-height: min(56vh, 430px);
+    gap: 8px;
+    padding: 12px;
+    transform: translateX(-50%);
+  }
+
+  .preflight-overlay-poster {
+    top: 50%;
+    bottom: auto;
     max-height: calc(100vh - 20px);
-    padding: 16px;
+    padding: 0;
+    transform: translate(-50%, -50%);
   }
 
   .preflight-overlay h2 {
@@ -6946,7 +6957,106 @@ button {
   }
 
   .preflight-overlay-focused .preflight-cover-art {
-    width: min(100%, 320px);
+    width: min(100%, 220px);
+  }
+
+  .preflight-cover-cta {
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    min-height: 40px;
+    padding: 8px 10px;
+    font-size: 0.86rem;
+  }
+
+  .preflight-overlay-focused .control-primer {
+    display: none;
+  }
+
+  .perk-selector {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .perk-card {
+    grid-template-columns: 1fr;
+    min-height: 44px;
+    place-items: center;
+    gap: 3px;
+    padding: 7px 5px;
+    text-align: center;
+  }
+
+  .perk-card svg {
+    grid-row: auto;
+  }
+
+  .perk-card span,
+  .preflight-mini-goals small,
+  .preflight-mini-goals b {
+    display: none;
+  }
+
+  .perk-card strong {
+    width: 100%;
+    font-size: 0.58rem;
+    text-align: center;
+  }
+
+  .preflight-mini-goals {
+    gap: 5px;
+  }
+
+  .preflight-mini-goals span {
+    min-height: 36px;
+    gap: 3px 6px;
+    padding: 6px;
+  }
+
+  .preflight-mini-goals svg {
+    grid-row: 1;
+  }
+
+  .preflight-mini-goals strong {
+    font-size: 0.74rem;
+  }
+
+  .route-target-briefing {
+    grid-template-columns: 18px 1fr auto;
+    min-height: 36px;
+    padding: 8px 9px;
+  }
+
+  .route-target-briefing span {
+    font-size: 0.68rem;
+  }
+
+  .route-target-briefing strong {
+    font-size: 0.8rem;
+  }
+
+  .route-target-briefing small {
+    display: none;
+  }
+
+  .daily-dispatch-briefing small,
+  .daily-dispatch-briefing b,
+  .route-campaign-briefing small,
+  .route-campaign-milestone-target small,
+  .route-mark-target-briefing small {
+    display: none;
+  }
+
+  .contract-option {
+    min-height: 46px;
+    padding: 9px;
+  }
+
+  .preflight-overlay-expanded .contract-option small,
+  .preflight-overlay-expanded .contract-option strong,
+  .preflight-overlay-expanded .contract-option-hook,
+  .preflight-overlay-expanded .contract-option-traits {
+    display: none;
   }
 
   .rush-briefing {

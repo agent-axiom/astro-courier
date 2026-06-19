@@ -88,6 +88,20 @@ describe("responsive game layout CSS", () => {
     expect(styles).toMatch(/@media \(max-width: 760px\)[\s\S]*\.perk-selector[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/);
   });
 
+  it("turns phone preflight into a compact launch sheet with icon-first choices", () => {
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.preflight-overlay[\s\S]*top: auto;/);
+    expect(styles).toMatch(
+      /@media \(max-width: 480px\)[\s\S]*\.preflight-overlay[\s\S]*bottom: max\(118px, calc\(env\(safe-area-inset-bottom\) \+ 104px\)\);/
+    );
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.preflight-overlay[\s\S]*max-height: min\(56vh, 430px\);/);
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.preflight-overlay-focused \.preflight-cover-art[\s\S]*width: min\(100%, 220px\);/);
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.perk-selector[\s\S]*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/);
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.perk-card[\s\S]*grid-template-columns: 1fr;/);
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.perk-card span,[\s\S]*\.preflight-mini-goals small,[\s\S]*\.preflight-mini-goals b[\s\S]*display: none;/);
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.route-target-briefing small[\s\S]*display: none;/);
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.preflight-overlay-focused \.control-primer[\s\S]*display: none;/);
+  });
+
   it("defines an icon-only first launch control primer", () => {
     expect(styles).toContain(".control-primer");
     expect(styles).toMatch(/\.control-primer[\s\S]*grid-template-columns: repeat\(5, minmax\(0, 1fr\)\);/);
