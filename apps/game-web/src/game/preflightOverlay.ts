@@ -95,7 +95,7 @@ export function buildPreflightOverlayDensity(input: PreflightOverlayDensityInput
       showProgressMeta: true,
       showBestChase: false,
       showRouteMarkTarget: false,
-      showRouteBoardTarget: false,
+      showRouteBoardTarget: hasRouteHistory,
       showRouteBoardStack: false,
       showDailyDispatch: hasDailyHistory,
       showContractSelector: false,

@@ -34,4 +34,12 @@ describe("result overlay density wiring", () => {
     expect(appSource).toContain("copyDeliveryReport");
     expect(appSource).toContain("result-button-share");
   });
+
+  it("wires a compact next-route action into delivered results", () => {
+    expect(appSource).toContain('from "./game/routeUnlock"');
+    expect(appSource).toContain("const routeUnlockAction =");
+    expect(appSource).toContain("buildRouteUnlockAction({");
+    expect(appSource).toContain("openRouteUnlockTarget");
+    expect(appSource).toContain("result-button-next-route");
+  });
 });

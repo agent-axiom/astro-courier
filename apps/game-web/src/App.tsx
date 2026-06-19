@@ -130,6 +130,7 @@ import {
 import { getOverlayVisibility } from "./game/overlays";
 import { buildCometRunReadout } from "./game/comet";
 import { buildResultRetryAction, buildRetryActionBriefing, buildRetryTarget } from "./game/retryTarget";
+import { buildRouteUnlockAction } from "./game/routeUnlock";
 import { buildRunIntensity } from "./game/intensity";
 import { buildRouteTempo, buildRouteTempoAction, buildRouteTempoShellClass } from "./game/tempo";
 import { buildRestartFlowTransition, type RestartFlowMode } from "./game/restartFlow";
@@ -1199,6 +1200,14 @@ export function App() {
     hud.status === "delivered" || hud.status === "crashed"
       ? buildResultBoardAction({ status: hud.status, currentContractId: hud.contractId, routeBoardTarget })
       : undefined;
+  const routeUnlockAction =
+    hud.status === "delivered" || hud.status === "crashed"
+      ? buildRouteUnlockAction({
+          status: hud.status,
+          currentContractId: hud.contractId,
+          routeBoardTarget
+        })
+      : undefined;
   const resultBoardActionBriefing = buildResultBoardActionBriefing(resultBoardAction);
   const resultActionsLayout =
     hud.status === "delivered" || hud.status === "crashed"
@@ -1507,6 +1516,14 @@ export function App() {
       return;
     }
     openContractBriefing(resultBoardAction.targetContractId);
+  };
+
+  const openRouteUnlockTarget = () => {
+    audioRef.current?.unlock();
+    if (!routeUnlockAction) {
+      return;
+    }
+    openContractBriefing(routeUnlockAction.targetContractId);
   };
 
   const selectRouteBoardTarget = () => {
@@ -2939,7 +2956,7 @@ export function App() {
               <small>{resultCampaignMilestonePrompt.detail}</small>
             </div>
           ) : null}
-          <div className={`result-actions ${deliveryReport ? "result-actions-share" : `result-actions-${resultActionsLayout}`}`}>
+          <div className={`result-actions ${deliveryReport || routeUnlockAction ? "result-actions-share" : `result-actions-${resultActionsLayout}`}`}>
             <button
               type="button"
               className={`result-button result-button-retry result-button-retry-${resultRetryAction.tone}`}
@@ -2948,6 +2965,20 @@ export function App() {
               <RotateCcw size={18} />
               {resultRetryAction.label}
             </button>
+            {routeUnlockAction ? (
+              <button
+                type="button"
+                className="result-button result-button-next-route"
+                aria-label={`${routeUnlockAction.label}: ${routeUnlockAction.value}`}
+                onClick={openRouteUnlockTarget}
+              >
+                <ArrowRight size={18} />
+                <span className="result-button-copy">
+                  <span>{routeUnlockAction.label}</span>
+                  <small>{routeUnlockAction.value}</small>
+                </span>
+              </button>
+            ) : null}
             {deliveryReport ? (
               <button
                 type="button"

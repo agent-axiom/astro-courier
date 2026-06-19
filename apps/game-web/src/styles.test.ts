@@ -233,6 +233,7 @@ describe("responsive game layout CSS", () => {
     expect(styles).toContain(".courier-license-cue");
     expect(styles).toContain(".courier-license-precision");
     expect(styles).toContain(".result-button-share");
+    expect(styles).toContain(".result-button-next-route");
     expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.courier-license-cue[\s\S]*top: 58px;/);
   });
 
