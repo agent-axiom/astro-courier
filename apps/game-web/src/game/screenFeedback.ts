@@ -30,6 +30,11 @@ export type LaunchScreenFeedbackInput = {
   status: RunStatus;
   preflightOpen: boolean;
   resultOpen: boolean;
+  hasGhostTrail?: boolean;
+};
+
+export type ScreenFeedbackContext = {
+  landingBonus?: number;
 };
 
 export function buildMilestoneScreenFeedback(milestone: string | undefined): ScreenFeedback | undefined {
@@ -158,6 +163,17 @@ export function buildLaunchScreenFeedback(input: LaunchScreenFeedbackInput): Scr
     return undefined;
   }
 
+  if (input.hasGhostTrail) {
+    return {
+      label: "Ghost run",
+      value: "Beat your trail",
+      accent: "tempo",
+      tone: "style",
+      intensity: "medium",
+      durationMs: 460
+    };
+  }
+
   return {
     label: "Go",
     value: "Pickup line",
@@ -168,11 +184,26 @@ export function buildLaunchScreenFeedback(input: LaunchScreenFeedbackInput): Scr
   };
 }
 
-export function buildScreenFeedback(events: readonly GameAudioEvent[], milestone?: string): ScreenFeedback | undefined {
+export function buildScreenFeedback(
+  events: readonly GameAudioEvent[],
+  milestone?: string,
+  context: ScreenFeedbackContext = {}
+): ScreenFeedback | undefined {
   if (events.includes("ship-crash")) {
     return { label: "Insurance event", value: "Recover line", tone: "danger", intensity: "heavy", durationMs: 520 };
   }
   if (events.includes("delivery-complete")) {
+    if ((context.landingBonus ?? 0) >= 300) {
+      return {
+        label: "Perfect dock",
+        value: "Stamp sealed",
+        accent: "precision",
+        tone: "success",
+        intensity: "heavy",
+        durationMs: 680
+      };
+    }
+
     return {
       label: "Delivery sealed",
       value: "Manifest closed",

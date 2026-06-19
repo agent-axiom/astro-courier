@@ -27,4 +27,11 @@ describe("result overlay density wiring", () => {
   it("keeps medal celebration copy behind compact result density", () => {
     expect(appSource).toContain('resultOverlayDensity?.showQuickStats && hud.medal !== "none"');
   });
+
+  it("wires a compact shareable delivery report action into the result overlay", () => {
+    expect(appSource).toContain('from "./game/deliveryReport"');
+    expect(appSource).toContain("const deliveryReport = runFinished");
+    expect(appSource).toContain("copyDeliveryReport");
+    expect(appSource).toContain("result-button-share");
+  });
 });

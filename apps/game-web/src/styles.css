@@ -1797,6 +1797,63 @@ button {
   color: #ffe19a;
 }
 
+.courier-license-cue {
+  position: absolute;
+  top: max(84px, calc(env(safe-area-inset-top) + 70px));
+  left: 16px;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: 15px auto auto;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid rgba(124, 225, 255, 0.28);
+  border-radius: 999px;
+  background: rgba(8, 13, 28, 0.62);
+  color: #d9fbff;
+  font-size: 0.76rem;
+  font-weight: 880;
+  pointer-events: none;
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 12px 26px rgba(0, 0, 0, 0.18),
+    0 0 18px rgba(124, 225, 255, 0.1);
+}
+
+.courier-license-cue span,
+.courier-license-cue strong {
+  min-width: 0;
+  line-height: 1;
+}
+
+.courier-license-cue span {
+  color: rgba(217, 251, 255, 0.68);
+  text-transform: uppercase;
+}
+
+.courier-license-cue strong {
+  color: #ffffff;
+}
+
+.courier-license-ready {
+  border-color: rgba(255, 209, 102, 0.42);
+  color: #fff1c7;
+}
+
+.courier-license-active {
+  border-color: rgba(124, 225, 255, 0.36);
+  color: #d9fbff;
+}
+
+.courier-license-precision {
+  border-color: rgba(142, 230, 184, 0.46);
+  color: #eafff3;
+  box-shadow:
+    0 12px 26px rgba(0, 0, 0, 0.18),
+    0 0 24px rgba(142, 230, 184, 0.14);
+}
+
 .pickup-pulse-pickup {
   border-color: rgba(142, 230, 184, 0.48);
   background: rgba(7, 28, 24, 0.74);
@@ -6434,6 +6491,10 @@ button {
   justify-content: center;
 }
 
+.result-actions-share {
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+}
+
 .result-button {
   display: inline-flex;
   align-items: center;
@@ -6523,6 +6584,18 @@ button {
   color: #eafff3;
 }
 
+.result-button-share {
+  border-color: rgba(124, 225, 255, 0.68);
+  background: rgba(124, 225, 255, 0.15);
+  color: #d9fbff;
+}
+
+.result-button-share-copied {
+  border-color: rgba(142, 230, 184, 0.72);
+  background: rgba(142, 230, 184, 0.18);
+  color: #eafff3;
+}
+
 .result-button:hover {
   background: rgba(255, 209, 102, 0.24);
 }
@@ -6541,6 +6614,10 @@ button {
 
 .result-button-primary:hover {
   background: rgba(142, 230, 184, 0.26);
+}
+
+.result-button-share:hover {
+  background: rgba(124, 225, 255, 0.24);
 }
 
 @media (min-width: 900px) {
@@ -6779,6 +6856,14 @@ button {
   .target-compass {
     top: max(78px, calc(env(safe-area-inset-top) + 66px));
     min-width: min(176px, calc(100vw - 24px));
+  }
+
+  .courier-license-cue {
+    top: 58px;
+    left: 12px;
+    min-height: 32px;
+    padding: 6px 9px;
+    font-size: 0.7rem;
   }
 
   .touch-flight-pad {

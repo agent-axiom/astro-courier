@@ -34,4 +34,11 @@ describe("preflight overlay density wiring", () => {
     expect(appSource).toContain("preflightOverlayDensity.showRouteMarkTarget ? <small>{routeMarkLaunchCaption.value}</small> : null");
     expect(appSource).toContain("<span>Launch</span>");
   });
+
+  it("wires the first-run courier license cue without opening a tutorial panel", () => {
+    expect(appSource).toContain('from "./game/courierLicense"');
+    expect(appSource).toContain("const courierLicenseCue = buildCourierLicenseCue({");
+    expect(appSource).toContain("shouldIssueCourierLicense({");
+    expect(appSource).toContain("courier-license-cue");
+  });
 });

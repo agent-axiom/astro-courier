@@ -229,6 +229,13 @@ describe("responsive game layout CSS", () => {
     expect(styles).toContain(".mobile-action-fire");
   });
 
+  it("defines compact courier license and share report UI affordances", () => {
+    expect(styles).toContain(".courier-license-cue");
+    expect(styles).toContain(".courier-license-precision");
+    expect(styles).toContain(".result-button-share");
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.courier-license-cue[\s\S]*top: 58px;/);
+  });
+
   it("maps touch pointer CSS variables into live stick and vector motion", () => {
     expect(styles).toContain("--touch-stick-x: 0px;");
     expect(styles).toContain("--touch-stick-y: 0px;");

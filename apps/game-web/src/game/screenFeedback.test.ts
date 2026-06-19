@@ -141,6 +141,17 @@ describe("screen feedback", () => {
     expect(buildLaunchScreenFeedback({ status: "crashed", preflightOpen: false, resultOpen: true })).toBeUndefined();
   });
 
+  it("turns ghost launches into a short race cue", () => {
+    expect(buildLaunchScreenFeedback({ status: "paused", preflightOpen: true, resultOpen: false, hasGhostTrail: true })).toEqual({
+      label: "Ghost run",
+      value: "Beat your trail",
+      accent: "tempo",
+      tone: "style",
+      intensity: "medium",
+      durationMs: 460
+    });
+  });
+
   it("adds a light route-live pulse only when resuming a paused live route", () => {
     expect(
       buildPauseResumeScreenFeedback({
@@ -188,6 +199,15 @@ describe("screen feedback", () => {
   });
 
   it("maps delivery and style events to positive feedback", () => {
+    expect(buildScreenFeedback(["delivery-complete"], undefined, { landingBonus: 300 })).toEqual({
+      label: "Perfect dock",
+      value: "Stamp sealed",
+      accent: "precision",
+      tone: "success",
+      intensity: "heavy",
+      durationMs: 680
+    });
+
     expect(buildScreenFeedback(["delivery-complete"])).toEqual({
       label: "Delivery sealed",
       value: "Manifest closed",

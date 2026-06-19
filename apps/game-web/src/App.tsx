@@ -159,6 +159,13 @@ import {
   type ScreenFeedback
 } from "./game/screenFeedback";
 import {
+  buildCourierLicenseCue,
+  buildCourierLicenseIssuedFeedback,
+  COURIER_LICENSE_STORAGE_KEY,
+  shouldIssueCourierLicense
+} from "./game/courierLicense";
+import { buildShareableDeliveryReport } from "./game/deliveryReport";
+import {
   appendRunFeedUpdates,
   buildLaunchFeedUpdate,
   buildProgressReceiptFeedUpdates,
@@ -176,6 +183,8 @@ type ActiveScreenFeedback = {
   key: number;
   feedback: ScreenFeedback;
 };
+
+const GAME_PUBLIC_URL = "https://agent-axiom.github.io/astro-courier/";
 
 const initialHud: HudState = {
   status: "paused",
@@ -285,6 +294,9 @@ export function App() {
   const [mobileBrakeHeld, setMobileBrakeHeld] = useState(false);
   const [runFeed, setRunFeed] = useState<RunFeedEntry[]>([]);
   const [resultDismissed, setResultDismissed] = useState(false);
+  const [deliveryReportCopied, setDeliveryReportCopied] = useState(false);
+  const [courierLicenseIssued, setCourierLicenseIssued] = useState(() => readCourierLicenseIssued(getBestRunStorage()));
+  const [courierLicenseJustIssued, setCourierLicenseJustIssued] = useState(false);
   const [bestRun, setBestRun] = useState<BestRun | undefined>(() => {
     const storage = getBestRunStorage();
     return storage ? getBestRun(storage, initialHud.contractId) : undefined;
@@ -438,8 +450,26 @@ export function App() {
   useEffect(() => {
     if (hud.status === "flying" || hud.status === "paused") {
       setResultDismissed(false);
+      setDeliveryReportCopied(false);
+      setCourierLicenseJustIssued(false);
     }
   }, [hud.status]);
+
+  useEffect(() => {
+    if (!shouldIssueCourierLicense({ contractId: hud.contractId, licenseIssued: courierLicenseIssued, status: hud.status })) {
+      return;
+    }
+
+    const storage = getBestRunStorage();
+    try {
+      storage?.setItem(COURIER_LICENSE_STORAGE_KEY, "issued");
+    } catch {
+      // License state is a first-run cue only; the run should not depend on storage availability.
+    }
+    setCourierLicenseIssued(true);
+    setCourierLicenseJustIssued(true);
+    pushScreenFeedback(buildCourierLicenseIssuedFeedback());
+  }, [courierLicenseIssued, hud.contractId, hud.status]);
 
   useEffect(() => {
     if (hud.status !== "flying") {
@@ -475,7 +505,7 @@ export function App() {
     previousAudioSnapshotRef.current = currentSnapshot;
     audioRef.current?.play(events);
     hapticsRef.current?.play(events);
-    pushScreenFeedback(buildScreenFeedback(events, hud.lastMilestone));
+    pushScreenFeedback(buildScreenFeedback(events, hud.lastMilestone, { landingBonus: hud.scoreBreakdown.landingBonus }));
   }, [
     hud.cargoDamage,
     hud.cargoKind,
@@ -488,6 +518,7 @@ export function App() {
     hud.paceTier,
     hud.perfectDockReady,
     hud.score,
+    hud.scoreBreakdown.landingBonus,
     hud.speed,
     hud.status,
     hud.targetDistance,
@@ -1032,6 +1063,20 @@ export function App() {
   });
   const cargoManifest = buildCargoManifest({ cargoName: hud.cargoName, cargoOnboard: hud.cargoOnboard });
   const resultStats = buildResultStats({ score: hud.score, elapsedSeconds: hud.elapsedSeconds, cargoIntegrity });
+  const deliveryReport = runFinished && (hud.status === "delivered" || hud.status === "crashed")
+    ? buildShareableDeliveryReport({
+        status: hud.status,
+        contractTitle: hud.contractTitle,
+        cargoName: hud.cargoName,
+        score: hud.score,
+        elapsedSeconds: hud.elapsedSeconds,
+        cargoIntegrity,
+        medal: hud.medal,
+        grade: hud.grade,
+        landingBonus: hud.scoreBreakdown.landingBonus,
+        url: GAME_PUBLIC_URL
+      })
+    : undefined;
   const resultOutcomePresentation =
     hud.status === "delivered" || hud.status === "crashed" ? buildResultOutcomePresentation(hud.status) : undefined;
   const resultOverlayDensity =
@@ -1246,6 +1291,15 @@ export function App() {
     gravitySlingStyleBonus: hud.gravitySlingStyleBonus,
     cargoDamage: hud.cargoDamage
   });
+  const courierLicenseCue = buildCourierLicenseCue({
+    contractId: hud.contractId,
+    licenseIssued: courierLicenseIssued,
+    preflightOpen: overlays.preflight,
+    status: hud.status,
+    objectivePhase: hud.objectivePhase,
+    landingStatus: hud.landingStatus
+  });
+  const resultTitle = courierLicenseJustIssued && hud.status === "delivered" ? "License Issued" : hud.status === "delivered" ? "Delivered" : "Failed";
 
   const resetRunUiState = () => {
     recordedRunRef.current = null;
@@ -1324,7 +1378,8 @@ export function App() {
       buildLaunchScreenFeedback({
         status: hud.status,
         preflightOpen: overlays.preflight,
-        resultOpen: overlays.result
+        resultOpen: overlays.result,
+        hasGhostTrail: (bestRun?.ghostTrail?.length ?? 0) >= 2
       })
     );
     const launchFeedUpdate = buildLaunchFeedUpdate({
@@ -1416,6 +1471,34 @@ export function App() {
     }
     audioRef.current?.unlock();
     shellRef.current?.queueCommand({ type: "FIRE" });
+  };
+
+  const copyDeliveryReport = () => {
+    if (!deliveryReport) {
+      return;
+    }
+
+    audioRef.current?.unlock();
+    const clipboard = navigator.clipboard;
+    if (!clipboard) {
+      return;
+    }
+
+    void clipboard
+      .writeText(deliveryReport)
+      .then(() => {
+        setDeliveryReportCopied(true);
+        pushScreenFeedback({
+          label: "Copied",
+          value: "Delivery report",
+          tone: "success",
+          intensity: "light",
+          durationMs: 320
+        });
+      })
+      .catch(() => {
+        setDeliveryReportCopied(false);
+      });
   };
 
   const openResultBoardTarget = () => {
@@ -1729,6 +1812,17 @@ export function App() {
           </span>
           <strong>{targetCompass.label}</strong>
           <small>{targetCompass.distance}</small>
+        </div>
+      ) : null}
+
+      {courierLicenseCue ? (
+        <div
+          className={`courier-license-cue courier-license-${courierLicenseCue.tone}`}
+          aria-label={`${courierLicenseCue.label}: ${courierLicenseCue.value}`}
+        >
+          <Flag size={15} />
+          <span>{courierLicenseCue.label}</span>
+          <strong>{courierLicenseCue.value}</strong>
         </div>
       ) : null}
 
@@ -2616,7 +2710,7 @@ export function App() {
           <span className={`result-icon result-icon-${resultOutcomePresentation?.tone ?? "success"}`} aria-hidden="true">
             {resultOutcomePresentation?.icon === "alert" ? <ShieldAlert size={28} /> : <Trophy size={28} />}
           </span>
-          <h2>{hud.status === "delivered" ? "Delivered" : "Failed"}</h2>
+          <h2>{resultTitle}</h2>
           <p>{hud.status === "crashed" ? buildCrashReasonLabel(hud) : hud.landingRating ?? statusLabel(hud.status)}</p>
           {resultOverlayDensity?.showCrashDebrief && crashDebrief ? (
             <div className={`crash-debrief crash-debrief-${crashDebrief.tone}`} aria-label={`${crashDebrief.label}: ${crashDebrief.value}`}>
@@ -2845,7 +2939,7 @@ export function App() {
               <small>{resultCampaignMilestonePrompt.detail}</small>
             </div>
           ) : null}
-          <div className={`result-actions result-actions-${resultActionsLayout}`}>
+          <div className={`result-actions ${deliveryReport ? "result-actions-share" : `result-actions-${resultActionsLayout}`}`}>
             <button
               type="button"
               className={`result-button result-button-retry result-button-retry-${resultRetryAction.tone}`}
@@ -2854,6 +2948,16 @@ export function App() {
               <RotateCcw size={18} />
               {resultRetryAction.label}
             </button>
+            {deliveryReport ? (
+              <button
+                type="button"
+                className={`result-button result-button-share ${deliveryReportCopied ? "result-button-share-copied" : ""}`}
+                onClick={copyDeliveryReport}
+              >
+                <Satellite size={18} />
+                {deliveryReportCopied ? "Copied" : "Copy"}
+              </button>
+            ) : null}
             {hud.status === "delivered" && resultOverlayDensity?.showBoardAction && resultBoardAction ? (
               <button
                 type="button"
@@ -3009,6 +3113,10 @@ function getBestRunStorage(): Pick<Storage, "getItem" | "setItem"> | undefined {
   } catch {
     return undefined;
   }
+}
+
+function readCourierLicenseIssued(storage: Pick<Storage, "getItem"> | undefined): boolean {
+  return storage?.getItem(COURIER_LICENSE_STORAGE_KEY) === "issued";
 }
 
 function readBestRunsByContract(
