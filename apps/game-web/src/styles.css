@@ -752,6 +752,60 @@ button {
   opacity: 0.86;
 }
 
+.mobile-action-dock {
+  position: absolute;
+  right: max(14px, env(safe-area-inset-right));
+  bottom: max(18px, calc(env(safe-area-inset-bottom) + 12px));
+  z-index: 5;
+  display: none;
+  grid-template-columns: repeat(3, 52px);
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.mobile-action-button {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  background: rgba(8, 13, 28, 0.72);
+  color: #ffffff;
+  box-shadow:
+    0 12px 26px rgba(0, 0, 0, 0.24),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  touch-action: manipulation;
+}
+
+.mobile-action-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.36;
+}
+
+.mobile-action-held {
+  transform: translateY(1px);
+  filter: brightness(1.2);
+}
+
+.mobile-action-brake {
+  border-color: rgba(255, 111, 145, 0.4);
+  background: rgba(255, 111, 145, 0.16);
+  color: #ffd8df;
+}
+
+.mobile-action-boost {
+  border-color: rgba(255, 209, 102, 0.44);
+  background: rgba(255, 209, 102, 0.16);
+  color: #fff1c7;
+}
+
+.mobile-action-fire {
+  border-color: rgba(124, 225, 255, 0.42);
+  background: rgba(124, 225, 255, 0.15);
+  color: #d9fbff;
+}
+
 @media (pointer: coarse) {
   .touch-flight-pad-active,
   .touch-flight-pad-precision,
@@ -6600,25 +6654,35 @@ button {
 
   .touch-flight-pad {
     right: auto;
-    bottom: max(18px, env(safe-area-inset-bottom));
+    bottom: max(96px, calc(env(safe-area-inset-bottom) + 84px));
     left: 50%;
-    width: min(68vw, 340px);
-    height: min(68vw, 340px);
+    width: min(calc(100vw - 28px), 420px);
+    height: 112px;
+    border-radius: 8px;
     transform: translateX(-50%);
   }
 
   .touch-flight-pad-ring {
+    border-radius: 8px;
     border-width: 2px;
+    background:
+      linear-gradient(90deg, rgba(124, 225, 255, 0.08), rgba(8, 13, 28, 0.22), rgba(255, 209, 102, 0.07)),
+      radial-gradient(circle at center, rgba(124, 225, 255, 0.08), rgba(8, 13, 28, 0.08) 62%, rgba(124, 225, 255, 0.04));
   }
 
   .touch-flight-pad-stick {
-    width: 76px;
-    height: 76px;
+    width: 36px;
+    height: 36px;
   }
 
   .touch-flight-pad-vector {
-    width: 42%;
-    height: 42%;
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+  }
+
+  .mobile-action-dock {
+    display: grid;
   }
 
   .perk-selector {
@@ -6647,19 +6711,48 @@ button {
     right: 10px;
     left: 10px;
     gap: 8px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+
+  .brand-lockup {
+    display: none;
   }
 
   .brand-lockup p {
     display: none;
   }
 
+  .route-progress-rail {
+    display: none;
+  }
+
   .hud-metrics {
+    grid-column: 1;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    order: 1;
     gap: 6px;
   }
 
+  .hud-actions {
+    grid-column: 2;
+    order: 1;
+  }
+
+  .hud-actions .boost-button,
+  .hud-actions .brake-button {
+    display: none;
+  }
+
   .metric {
+    grid-template-columns: 1fr;
     min-height: 38px;
     padding: 7px;
+    place-items: center;
+  }
+
+  .metric svg {
+    display: none;
   }
 
   .metric span {
@@ -6667,22 +6760,20 @@ button {
   }
 
   .run-panel {
-    right: 10px;
-    bottom: 10px;
-    width: calc(100vw - 20px);
-  }
-
-  .run-panel-focused {
-    right: auto;
-    bottom: max(14px, calc(env(safe-area-inset-bottom) + 12px));
-    left: 50%;
-    width: min(320px, calc(100vw - 20px));
+    display: none;
   }
 
   .dock-pulse,
   .pickup-pulse {
-    bottom: max(132px, calc(env(safe-area-inset-bottom) + 126px));
+    bottom: max(210px, calc(env(safe-area-inset-bottom) + 196px));
     min-width: min(286px, calc(100vw - 24px));
+    min-height: 40px;
+    padding: 8px 12px;
+  }
+
+  .dock-pulse small,
+  .pickup-pulse small {
+    display: none;
   }
 
   .target-compass {
@@ -6691,19 +6782,31 @@ button {
   }
 
   .touch-flight-pad {
-    bottom: max(18px, env(safe-area-inset-bottom));
-    width: min(76vw, 320px);
-    height: min(76vw, 320px);
+    bottom: max(88px, calc(env(safe-area-inset-bottom) + 84px));
+    width: min(calc(100vw - 24px), 366px);
+    height: 104px;
   }
 
   .touch-flight-pad-stick {
-    width: 72px;
-    height: 72px;
+    width: 34px;
+    height: 34px;
   }
 
   .touch-flight-pad-vector {
-    width: 42%;
-    height: 42%;
+    width: 44px;
+    height: 44px;
+  }
+
+  .mobile-action-dock {
+    right: max(12px, env(safe-area-inset-right));
+    bottom: max(16px, calc(env(safe-area-inset-bottom) + 10px));
+    grid-template-columns: repeat(3, 50px);
+    gap: 8px;
+  }
+
+  .mobile-action-button {
+    width: 50px;
+    height: 50px;
   }
 
   .perk-card span {
@@ -6765,12 +6868,38 @@ button {
   }
 
   .pause-overlay {
-    width: calc(100vw - 20px);
-    padding: 16px;
+    top: auto;
+    bottom: max(92px, calc(env(safe-area-inset-bottom) + 84px));
+    width: calc(100vw - 24px);
+    max-height: min(38vh, 260px);
+    gap: 8px;
+    padding: 12px;
+    transform: translateX(-50%);
+  }
+
+  .pause-overlay p,
+  .pause-stats {
+    display: none;
+  }
+
+  .pause-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .pause-overlay h2 {
+    font-size: 1.02rem;
   }
 
   .pause-actions {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .pause-button {
+    min-height: 42px;
+    padding: 8px;
+    font-size: 0.78rem;
   }
 
   .preflight-stats span {
@@ -6785,5 +6914,49 @@ button {
 
   .contract-selector {
     grid-template-columns: 1fr;
+  }
+
+  .result-overlay {
+    top: auto;
+    bottom: max(92px, calc(env(safe-area-inset-bottom) + 84px));
+    width: calc(100vw - 24px);
+    max-height: min(38vh, 260px);
+    gap: 7px;
+    overflow-y: hidden;
+    padding: 12px;
+    transform: translateX(-50%);
+  }
+
+  .result-overlay-focused {
+    width: calc(100vw - 24px);
+    padding: 12px;
+  }
+
+  .result-icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .result-overlay h2 {
+    font-size: 1.08rem;
+  }
+
+  .result-overlay p {
+    font-size: 0.82rem;
+    line-height: 1.2;
+  }
+
+  .result-overlay .crash-debrief {
+    display: none;
+  }
+
+  .result-actions {
+    gap: 6px;
+  }
+
+  .result-button {
+    min-height: 42px;
+    padding: 8px 12px;
+    font-size: 0.86rem;
   }
 }

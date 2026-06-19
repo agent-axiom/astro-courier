@@ -37,6 +37,8 @@ export type TouchPadGeometryInput = {
 
 export type TouchPadGeometry = {
   size: number;
+  width: number;
+  height: number;
   bottom: number;
   center: TouchPoint;
 };
@@ -123,20 +125,25 @@ export function buildTouchPointerVisual(input: TouchPointerVisualInput): TouchPo
 
 export function buildTouchPadGeometry(input: TouchPadGeometryInput): TouchPadGeometry {
   const safeAreaBottom = input.safeAreaBottom ?? 0;
-  const bottom = input.viewportWidth <= 760 ? Math.max(18, safeAreaBottom) : Math.max(28, safeAreaBottom + 24);
-  const size =
-    input.viewportWidth <= 480
-      ? Math.min(input.viewportWidth * 0.76, 320)
-      : input.viewportWidth <= 760
-        ? Math.min(input.viewportWidth * 0.68, 340)
-        : 116;
+  const isPhone = input.viewportWidth <= 480;
+  const isTablet = input.viewportWidth <= 760;
+  const width = isPhone ? Math.min(input.viewportWidth - 24, 366) : isTablet ? Math.min(input.viewportWidth - 28, 420) : 116;
+  const height = isPhone ? 104 : isTablet ? 112 : 116;
+  const bottom = isPhone
+    ? Math.max(88, safeAreaBottom + 84)
+    : isTablet
+      ? Math.max(96, safeAreaBottom + 84)
+      : Math.max(28, safeAreaBottom + 24);
+  const size = height;
 
   return {
     size: round(size, 2),
+    width: round(width, 2),
+    height: round(height, 2),
     bottom: round(bottom, 2),
     center: {
       x: round(input.viewportWidth / 2, 2),
-      y: round(input.viewportHeight - bottom - size / 2, 2)
+      y: round(input.viewportHeight - bottom - height / 2, 2)
     }
   };
 }

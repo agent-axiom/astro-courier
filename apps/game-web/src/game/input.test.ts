@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { KeyboardInput, commandsFromGamepadState, commandsFromKeyboardState, commandsFromPointer } from "./input";
+import {
+  KeyboardInput,
+  commandsFromGamepadState,
+  commandsFromKeyboardState,
+  commandsFromPointer,
+  resolvePointerCommandCenter
+} from "./input";
 
 describe("pointer input mapping", () => {
   it("maps an active pointer to aim and thrust commands", () => {
@@ -36,6 +42,34 @@ describe("pointer input mapping", () => {
       { type: "AIM", angle: 0 },
       { type: "THRUST", amount: 0.3 }
     ]);
+  });
+
+  it("uses the bottom steering zone as the command center on phone touch input", () => {
+    expect(
+      resolvePointerCommandCenter({
+        pointerType: "touch",
+        viewportWidth: 390,
+        viewportHeight: 844,
+        targetRect: { left: 0, top: 0, width: 390, height: 844 }
+      })
+    ).toEqual({
+      x: 195,
+      y: 704
+    });
+  });
+
+  it("keeps desktop mouse aiming centered on the canvas", () => {
+    expect(
+      resolvePointerCommandCenter({
+        pointerType: "mouse",
+        viewportWidth: 1280,
+        viewportHeight: 720,
+        targetRect: { left: 40, top: 20, width: 1000, height: 640 }
+      })
+    ).toEqual({
+      x: 540,
+      y: 340
+    });
   });
 });
 

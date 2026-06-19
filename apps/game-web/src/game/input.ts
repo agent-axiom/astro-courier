@@ -1,4 +1,5 @@
 import type { PlayerCommand } from "@astro-courier/shared";
+import { buildTouchPadGeometry } from "./touchControls";
 
 const turnStep = 0.11;
 const pointerDeadZone = 10;
@@ -19,6 +20,13 @@ export type PointerCommandInput = {
   active: boolean;
   center: ScreenPoint;
   pointer: ScreenPoint;
+};
+
+export type PointerCommandCenterInput = {
+  pointerType?: string;
+  viewportWidth: number;
+  viewportHeight: number;
+  targetRect: Pick<DOMRect, "left" | "top" | "width" | "height">;
 };
 
 export type GamepadButtonSnapshot = {
@@ -53,6 +61,21 @@ export function commandsFromPointer(input: PointerCommandInput): PlayerCommand[]
     { type: "AIM", angle: Math.atan2(dy, dx) },
     { type: "THRUST", amount: round(Math.min(1, distance / fullThrustDistance), 2) }
   ];
+}
+
+export function resolvePointerCommandCenter(input: PointerCommandCenterInput): ScreenPoint {
+  const shouldUseTouchZone = input.pointerType === "touch" || input.viewportWidth <= 760;
+  if (shouldUseTouchZone) {
+    return buildTouchPadGeometry({
+      viewportWidth: input.viewportWidth,
+      viewportHeight: input.viewportHeight
+    }).center;
+  }
+
+  return {
+    x: input.targetRect.left + input.targetRect.width / 2,
+    y: input.targetRect.top + input.targetRect.height / 2
+  };
 }
 
 export function commandsFromKeyboardState(pressed: ReadonlySet<string>, currentRotation: number): PlayerCommand[] {
@@ -115,6 +138,7 @@ export class KeyboardInput {
   private gamepadBoostPressed = false;
   private gamepadFirePressed = false;
   private pointer: ScreenPoint = { x: 0, y: 0 };
+  private pointerType = "";
 
   constructor(target: Window) {
     this.target = target;
@@ -202,17 +226,20 @@ export class KeyboardInput {
 
   private readonly handlePointerDown = (event: PointerEvent) => {
     this.pointerActive = true;
+    this.pointerType = event.pointerType;
     this.pointer = { x: event.clientX, y: event.clientY };
     this.pointerTarget?.setPointerCapture(event.pointerId);
   };
 
   private readonly handlePointerMove = (event: PointerEvent) => {
     if (!this.pointerActive) return;
+    this.pointerType = event.pointerType;
     this.pointer = { x: event.clientX, y: event.clientY };
   };
 
   private readonly handlePointerUp = () => {
     this.pointerActive = false;
+    this.pointerType = "";
   };
 
   private activeGamepad(): GamepadCommandInput | undefined {
@@ -245,10 +272,12 @@ export class KeyboardInput {
     const rect = this.pointerTarget.getBoundingClientRect();
     return commandsFromPointer({
       active: this.pointerActive,
-      center: {
-        x: rect.left + rect.width / 2,
-        y: rect.top + rect.height / 2
-      },
+      center: resolvePointerCommandCenter({
+        pointerType: this.pointerType,
+        viewportWidth: this.target.innerWidth,
+        viewportHeight: this.target.innerHeight,
+        targetRect: rect
+      }),
       pointer: this.pointer
     });
   }

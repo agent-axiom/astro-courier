@@ -143,7 +143,7 @@ describe("responsive game layout CSS", () => {
     expect(styles).toContain(".dock-pulse-assist");
     expect(styles).toContain(".docking-lane-soft");
     expect(styles).toMatch(/\.dock-pulse::after[\s\S]*width: calc\(var\(--dock-pulse-progress\) \* 100%\);/);
-    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.dock-pulse[\s\S]*bottom: max\(132px, calc\(env\(safe-area-inset-bottom\) \+ 126px\)\);/);
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.dock-pulse[\s\S]*bottom: max\(210px, calc\(env\(safe-area-inset-bottom\) \+ 196px\)\);/);
   });
 
   it("defines a large lightweight pickup pulse for first cargo contact", () => {
@@ -157,7 +157,7 @@ describe("responsive game layout CSS", () => {
     expect(styles).toContain(".pickup-pulse-warning");
     expect(styles).toContain(".pickup-pulse-assist");
     expect(styles).toMatch(/\.pickup-pulse::after[\s\S]*width: calc\(var\(--pickup-pulse-progress\) \* 100%\);/);
-    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.pickup-pulse[\s\S]*bottom: max\(132px, calc\(env\(safe-area-inset-bottom\) \+ 126px\)\);/);
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.pickup-pulse[\s\S]*bottom: max\(210px, calc\(env\(safe-area-inset-bottom\) \+ 196px\)\);/);
   });
 
   it("defines a lightweight visual target compass over the playfield", () => {
@@ -194,10 +194,39 @@ describe("responsive game layout CSS", () => {
   });
 
   it("turns mobile touch control into a large bottom steering zone", () => {
-    expect(styles).toMatch(/@media \(max-width: 760px\)[\s\S]*\.touch-flight-pad[\s\S]*width: min\(68vw, 340px\);/);
-    expect(styles).toMatch(/@media \(max-width: 760px\)[\s\S]*\.touch-flight-pad[\s\S]*height: min\(68vw, 340px\);/);
-    expect(styles).toMatch(/@media \(max-width: 760px\)[\s\S]*\.touch-flight-pad[\s\S]*bottom: max\(18px, env\(safe-area-inset-bottom\)\);/);
-    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.touch-flight-pad[\s\S]*width: min\(76vw, 320px\);/);
+    expect(styles).toMatch(/@media \(max-width: 760px\)[\s\S]*\.touch-flight-pad[\s\S]*width: min\(calc\(100vw - 28px\), 420px\);/);
+    expect(styles).toMatch(/@media \(max-width: 760px\)[\s\S]*\.touch-flight-pad[\s\S]*height: 112px;/);
+    expect(styles).toMatch(/@media \(max-width: 760px\)[\s\S]*\.touch-flight-pad[\s\S]*bottom: max\(96px, calc\(env\(safe-area-inset-bottom\) \+ 84px\)\);/);
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.touch-flight-pad[\s\S]*height: 104px;/);
+  });
+
+  it("turns mobile result and pause overlays into compact bottom sheets", () => {
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.result-overlay[\s\S]*top: auto;/);
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.result-overlay[\s\S]*bottom: max\(92px, calc\(env\(safe-area-inset-bottom\) \+ 84px\)\);/);
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.result-overlay[\s\S]*max-height: min\(38vh, 260px\);/);
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.result-overlay \.crash-debrief[\s\S]*display: none;/);
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.pause-overlay p,[\s\S]*\.pause-stats[\s\S]*display: none;/);
+  });
+
+  it("keeps verbose live panels off phone screens during active flight", () => {
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.run-panel[\s\S]*display: none;/);
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.dock-pulse small,[\s\S]*\.pickup-pulse small[\s\S]*display: none;/);
+  });
+
+  it("compresses the active phone HUD into one metric row above gameplay", () => {
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.brand-lockup[\s\S]*display: none;/);
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.route-progress-rail[\s\S]*display: none;/);
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.hud-metrics[\s\S]*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/);
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.hud-actions \.boost-button,[\s\S]*\.hud-actions \.brake-button[\s\S]*display: none;/);
+  });
+
+  it("defines an icon-only mobile action dock", () => {
+    expect(styles).toContain(".mobile-action-dock");
+    expect(styles).toMatch(/\.mobile-action-dock[\s\S]*display: none;/);
+    expect(styles).toMatch(/@media \(max-width: 760px\)[\s\S]*\.mobile-action-dock[\s\S]*display: grid;/);
+    expect(styles).toContain(".mobile-action-brake");
+    expect(styles).toContain(".mobile-action-boost");
+    expect(styles).toContain(".mobile-action-fire");
   });
 
   it("maps touch pointer CSS variables into live stick and vector motion", () => {

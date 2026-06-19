@@ -125,24 +125,28 @@ describe("touch pointer visual", () => {
 });
 
 describe("touch pad geometry", () => {
-  it("centers mobile steering in the large bottom pad instead of the screen center", () => {
+  it("centers phone steering in a low bottom zone instead of a huge joystick disk", () => {
     expect(buildTouchPadGeometry({ viewportWidth: 390, viewportHeight: 844 })).toEqual({
-      size: 296.4,
-      bottom: 18,
+      size: 104,
+      width: 366,
+      height: 104,
+      bottom: 88,
       center: {
         x: 195,
-        y: 677.8
+        y: 704
       }
     });
   });
 
-  it("keeps tablet steering close to the visible bottom control", () => {
+  it("keeps tablet steering close to a visible lower steering strip", () => {
     expect(buildTouchPadGeometry({ viewportWidth: 760, viewportHeight: 1024 })).toEqual({
-      size: 340,
-      bottom: 18,
+      size: 112,
+      width: 420,
+      height: 112,
+      bottom: 96,
       center: {
         x: 380,
-        y: 836
+        y: 872
       }
     });
   });
@@ -163,5 +167,13 @@ describe("touch flight pad wiring", () => {
     expect(appSource).toContain('"--touch-vector-angle": `${touchPointer.angleDeg}deg`');
     expect(appSource).toContain('"--touch-vector-strength": touchPointer.strength');
     expect(appSource).toContain("style={touchPointerStyle}");
+  });
+
+  it("renders explicit icon-only mobile action buttons for brake, boost, and fire", () => {
+    expect(appSource).toContain('className="mobile-action-dock"');
+    expect(appSource).toContain("mobile-action-brake");
+    expect(appSource).toContain("mobile-action-boost");
+    expect(appSource).toContain("mobile-action-fire");
+    expect(appSource).toContain('shellRef.current?.queueCommand({ type: "FIRE" })');
   });
 });

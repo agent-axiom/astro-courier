@@ -282,6 +282,7 @@ export function App() {
   const [audioMuted, setAudioMuted] = useState(false);
   const [screenFeedback, setScreenFeedback] = useState<ActiveScreenFeedback | undefined>(undefined);
   const [touchPointer, setTouchPointer] = useState(idleTouchPointer);
+  const [mobileBrakeHeld, setMobileBrakeHeld] = useState(false);
   const [runFeed, setRunFeed] = useState<RunFeedEntry[]>([]);
   const [resultDismissed, setResultDismissed] = useState(false);
   const [bestRun, setBestRun] = useState<BestRun | undefined>(() => {
@@ -437,6 +438,12 @@ export function App() {
   useEffect(() => {
     if (hud.status === "flying" || hud.status === "paused") {
       setResultDismissed(false);
+    }
+  }, [hud.status]);
+
+  useEffect(() => {
+    if (hud.status !== "flying") {
+      setMobileBrakeHeld(false);
     }
   }, [hud.status]);
 
@@ -779,6 +786,24 @@ export function App() {
     status: hud.status
   });
   const canBrake = canUseImpulseControl({ action: "brake", fuel: hud.fuel, paused, preflightOpen, status: hud.status });
+  useEffect(() => {
+    if (!mobileBrakeHeld) {
+      return undefined;
+    }
+
+    const intervalId = window.setInterval(() => {
+      shellRef.current?.queueCommand({ type: "BRAKE", amount: 1 });
+    }, 50);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [mobileBrakeHeld]);
+  useEffect(() => {
+    if (!canBrake) {
+      setMobileBrakeHeld(false);
+    }
+  }, [canBrake]);
   const boostPresentation = buildBoostControlPresentation({
     canBoost,
     boostCooldownSeconds: hud.boostCooldownSeconds,
@@ -1360,6 +1385,39 @@ export function App() {
     }
   };
 
+  const beginMobileBrake = (event: { preventDefault: () => void }) => {
+    event.preventDefault();
+    if (!canBrake) {
+      return;
+    }
+    audioRef.current?.unlock();
+    shellRef.current?.queueCommand({ type: "BRAKE", amount: 1 });
+    setMobileBrakeHeld(true);
+  };
+
+  const endMobileBrake = (event?: { preventDefault: () => void }) => {
+    event?.preventDefault();
+    setMobileBrakeHeld(false);
+  };
+
+  const tapMobileBoost = (event: { preventDefault: () => void }) => {
+    event.preventDefault();
+    if (!canBoost) {
+      return;
+    }
+    audioRef.current?.unlock();
+    shellRef.current?.queueCommand({ type: "BOOST" });
+  };
+
+  const tapMobileFire = (event: { preventDefault: () => void }) => {
+    event.preventDefault();
+    if (hud.status !== "flying" || preflightOpen || paused) {
+      return;
+    }
+    audioRef.current?.unlock();
+    shellRef.current?.queueCommand({ type: "FIRE" });
+  };
+
   const openResultBoardTarget = () => {
     audioRef.current?.unlock();
     if (!resultBoardAction) {
@@ -1465,6 +1523,44 @@ export function App() {
           <span className="touch-flight-pad-ring" />
           <span className="touch-flight-pad-stick" />
           <span className="touch-flight-pad-vector" />
+        </div>
+      ) : null}
+
+      {touchFlightPad.visible ? (
+        <div className="mobile-action-dock" aria-label="Mobile flight actions">
+          <button
+            type="button"
+            className={`mobile-action-button mobile-action-brake ${mobileBrakeHeld ? "mobile-action-held" : ""}`}
+            aria-label={brakePresentation.label}
+            title={brakePresentation.label}
+            disabled={!canBrake}
+            onPointerDown={beginMobileBrake}
+            onPointerUp={endMobileBrake}
+            onPointerCancel={endMobileBrake}
+            onPointerLeave={endMobileBrake}
+          >
+            <OctagonMinus size={22} />
+          </button>
+          <button
+            type="button"
+            className="mobile-action-button mobile-action-boost"
+            aria-label={boostPresentation.label}
+            title={boostPresentation.label}
+            disabled={!canBoost}
+            onPointerDown={tapMobileBoost}
+          >
+            <Zap size={22} />
+          </button>
+          <button
+            type="button"
+            className="mobile-action-button mobile-action-fire"
+            aria-label="Fire"
+            title="Fire"
+            disabled={hud.weaponCooldownSeconds > 0 || paused}
+            onPointerDown={tapMobileFire}
+          >
+            <Crosshair size={22} />
+          </button>
         </div>
       ) : null}
 
