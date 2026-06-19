@@ -463,6 +463,52 @@ describe("deterministic Astro Courier simulation", () => {
     expect(summarizeRun(world).scoreBreakdown.styleBonus).toBeGreaterThan(0);
   });
 
+  it("awards a direct-hit style chip for damaging an interceptor without destroying it", () => {
+    const world = createWorldFromSystem(starterSystem, "direct-hit-seed");
+    const combat = combatWorld(world);
+    combat.enemies = [testEnemy("interceptor-a", { x: 154, y: 0 }, { hp: 40 })];
+    combat.ship.position = { x: 120, y: 0 };
+    combat.ship.velocity = { x: 0, y: 0 };
+    combat.ship.rotation = 0;
+    combat.ship.targetRotation = 0;
+
+    stepWorld(world, 1 / 60, fireCommand());
+
+    expect(combat.enemies).toHaveLength(1);
+    expect(combat.enemies[0].hp).toBe(20);
+    expect(world.lastMilestone).toBe("Direct Hit");
+    expect(world.lastStyleAward).toBe(35);
+    expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(35);
+    expect(snapshotWorld(world).styleMultiplier).toBe(1.25);
+  });
+
+  it("multiplies an interceptor finish after a direct-hit chain starter", () => {
+    const world = createWorldFromSystem(starterSystem, "direct-hit-chain-seed");
+    const combat = combatWorld(world);
+    combat.enemies = [testEnemy("interceptor-a", { x: 154, y: 0 }, { hp: 40 })];
+    combat.ship.position = { x: 120, y: 0 };
+    combat.ship.velocity = { x: 0, y: 0 };
+    combat.ship.rotation = 0;
+    combat.ship.targetRotation = 0;
+
+    stepWorld(world, 1 / 60, fireCommand());
+    combat.ship.weaponCooldownSeconds = 0;
+    combat.ship.position = { x: 120, y: 0 };
+    combat.ship.velocity = { x: 0, y: 0 };
+    combat.ship.rotation = 0;
+    combat.ship.targetRotation = 0;
+    combat.enemies[0].position = { x: 154, y: 0 };
+    combat.enemies[0].velocity = { x: 0, y: 0 };
+
+    stepWorld(world, 1 / 60, fireCommand());
+
+    expect(combat.enemies).toHaveLength(0);
+    expect(world.lastMilestone).toBe("Interceptor Down");
+    expect(world.lastStyleAward).toBe(113);
+    expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(148);
+    expect(snapshotWorld(world).styleMultiplier).toBe(1.5);
+  });
+
   it("lets enemy shots damage the player and crash the run at zero HP", () => {
     const world = createWorldFromSystem(starterSystem, "enemy-shot-seed");
     const combat = combatWorld(world);

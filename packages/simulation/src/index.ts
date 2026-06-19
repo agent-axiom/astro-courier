@@ -338,6 +338,7 @@ const ENEMY_PROJECTILE_SPEED = 66;
 const ENEMY_PROJECTILE_DAMAGE = 8;
 const ENEMY_PROJECTILE_RADIUS = 5;
 const ENEMY_PROJECTILE_MAX_AGE_SECONDS = 2.4;
+const ENEMY_HIT_STYLE_BONUS = 35;
 const ENEMY_STYLE_BONUS = 90;
 const ENEMY_WAKE_DISTANCE = 430;
 const ENEMY_FIRE_DISTANCE = 220;
@@ -1150,6 +1151,8 @@ function resolvePlayerProjectileHits(world: SimulationWorld): void {
     target.hp = round(Math.max(0, target.hp - projectile.damage), 3);
     if (target.hp <= 0) {
       destroyedEnemyIds.add(target.id);
+    } else {
+      awardStyle(world, ENEMY_HIT_STYLE_BONUS, "Direct Hit");
     }
   }
 
