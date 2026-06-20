@@ -120,7 +120,7 @@ export type RouteBoardCampaignMilestoneTarget = {
 };
 
 export type RouteBoardTarget = {
-  label: "Next clear" | "Comet chase" | "Ghost chase" | "Board status";
+  label: "Next clear" | "Bonus clear" | "Puzzle clear" | "Comet chase" | "Ghost chase" | "Board status";
   value: string;
   detail?: string;
   tone: "clear" | "comet" | "ghost" | "complete";
@@ -134,11 +134,11 @@ export type RouteBoardMastery = {
 };
 
 export type RouteBoardSelectionAction = {
-  label: "Open route" | "Chase comet" | "Capture ghost";
+  label: "Open route" | "Open bonus" | "Open puzzle" | "Chase comet" | "Capture ghost";
   contractId: string;
 };
 
-export type RouteBoardRecommendationBadge = "Next" | "Comet" | "Ghost" | "Relay";
+export type RouteBoardRecommendationBadge = "Next" | "Bonus" | "Puzzle" | "Comet" | "Ghost" | "Relay";
 
 export type RouteMarkReceipt = {
   label: "Route mark";
@@ -147,6 +147,9 @@ export type RouteMarkReceipt = {
 };
 
 type BestRunStorage = Pick<Storage, "getItem" | "setItem">;
+
+const bonusRouteIds = new Set(["asteroid-labyrinth"]);
+const puzzleRouteIds = new Set(["gravity-lockpick", "solar-thread"]);
 
 export function getBestRun(storage: BestRunStorage, contractKey: string): BestRun | undefined {
   const raw = storage.getItem(storageKey(contractKey));
@@ -473,7 +476,7 @@ export function buildRouteBoardTarget(
   const unclearedContract = contracts.find((contract) => !bestRunsByContract[contract.id]);
   if (unclearedContract) {
     return {
-      label: "Next clear",
+      label: routeClearTargetLabel(unclearedContract.id),
       value: `Clear ${unclearedContract.title}`,
       tone: "clear",
       contractId: unclearedContract.id
@@ -569,11 +572,25 @@ export function buildRouteBoardSelectionAction(
     return { label: "Chase comet", contractId: routeBoardTarget.contractId };
   }
 
+  if (isBonusRoute(routeBoardTarget.contractId)) {
+    return { label: "Open bonus", contractId: routeBoardTarget.contractId };
+  }
+
+  if (isPuzzleRoute(routeBoardTarget.contractId)) {
+    return { label: "Open puzzle", contractId: routeBoardTarget.contractId };
+  }
+
   return { label: "Open route", contractId: routeBoardTarget.contractId };
 }
 
 export function buildRouteBoardRecommendationBadge(routeBoardTarget: RouteBoardTarget): RouteBoardRecommendationBadge | undefined {
   if (routeBoardTarget.tone === "clear") {
+    if (isBonusRoute(routeBoardTarget.contractId)) {
+      return "Bonus";
+    }
+    if (isPuzzleRoute(routeBoardTarget.contractId)) {
+      return "Puzzle";
+    }
     if (routeBoardTarget.contractId === "chain-relay") {
       return "Relay";
     }
@@ -586,6 +603,24 @@ export function buildRouteBoardRecommendationBadge(routeBoardTarget: RouteBoardT
     return "Ghost";
   }
   return undefined;
+}
+
+function routeClearTargetLabel(contractId: string): RouteBoardTarget["label"] {
+  if (isBonusRoute(contractId)) {
+    return "Bonus clear";
+  }
+  if (isPuzzleRoute(contractId)) {
+    return "Puzzle clear";
+  }
+  return "Next clear";
+}
+
+function isBonusRoute(contractId: string | undefined): boolean {
+  return contractId !== undefined && bonusRouteIds.has(contractId);
+}
+
+function isPuzzleRoute(contractId: string | undefined): boolean {
+  return contractId !== undefined && puzzleRouteIds.has(contractId);
 }
 
 export function buildBestRunDelta(input: BestRunDeltaInput): BestRunDelta | undefined {

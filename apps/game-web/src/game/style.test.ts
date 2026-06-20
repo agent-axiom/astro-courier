@@ -62,6 +62,24 @@ describe("live style reward HUD copy", () => {
     });
   });
 
+  it("treats maze chain as a fresh combo style moment", () => {
+    expect(
+      buildLiveStyleReward({
+        styleBonus: 2266,
+        lastStyleAward: 840,
+        lastMilestone: "Maze Chain",
+        styleMultiplier: 2,
+        styleChainSecondsRemaining: 4
+      })
+    ).toEqual({
+      label: "Style hit",
+      value: "+840 hit / +2266 bank / x2.00",
+      fresh: true,
+      tone: "fresh",
+      chainProgress: 1
+    });
+  });
+
   it("treats needle thread as a fresh style moment", () => {
     expect(
       buildLiveStyleReward({

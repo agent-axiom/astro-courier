@@ -324,16 +324,21 @@ export type RiskGateVisualInput = Pick<SimulationSnapshot, "status" | "tick"> & 
   cleared: boolean;
   speed: number;
   speedThreshold: number;
+  sequenceIndex?: number;
+  sequenceTotal?: number;
 };
 
 export type RiskGateVisual = {
   color: number;
-  tone: "setup" | "ready";
+  tone: "setup" | "ready" | "maze";
   alpha: number;
   width: number;
   radiusOffset: number;
   markerRadius: number;
   spin: number;
+  laneAlpha: number;
+  laneWidth: number;
+  sequenceLabel?: string;
 };
 
 export function riskGateVisual(input: RiskGateVisualInput): RiskGateVisual | undefined {
@@ -342,15 +347,21 @@ export function riskGateVisual(input: RiskGateVisualInput): RiskGateVisual | und
   }
 
   const ready = input.speed >= input.speedThreshold;
+  const maze = !ready && (input.sequenceTotal ?? 0) >= 4;
   const wave = (Math.sin(input.tick * 0.12) + 1) / 2;
   return {
-    color: ready ? 0xffd166 : 0x7ce1ff,
-    tone: ready ? "ready" : "setup",
+    color: ready ? 0xffd166 : maze ? 0x9fe8c9 : 0x7ce1ff,
+    tone: ready ? "ready" : maze ? "maze" : "setup",
     alpha: round((ready ? 0.48 : 0.3) + wave * (ready ? 0.2 : 0.1), 2),
     width: round(ready ? 2.4 + wave * 0.7 : 1.4 + wave * 0.4, 2),
     radiusOffset: round(wave * (ready ? 5 : 3), 2),
     markerRadius: round(ready ? 3.8 + wave * 0.8 : 2.8 + wave * 0.5, 2),
-    spin: round(positiveModulo(input.tick * (ready ? 0.026 : 0.014), 1) * Math.PI * 2, 3)
+    spin: round(positiveModulo(input.tick * (ready ? 0.026 : 0.014), 1) * Math.PI * 2, 3),
+    laneAlpha: maze ? 0.3 : ready ? 0.22 : 0.12,
+    laneWidth: maze ? 1.6 : ready ? 1.3 : 1,
+    ...(maze && input.sequenceIndex !== undefined && input.sequenceTotal
+      ? { sequenceLabel: `${input.sequenceIndex + 1}/${input.sequenceTotal}` }
+      : {})
   };
 }
 
@@ -1454,6 +1465,18 @@ function styleShockwaveSpec(milestone?: string):
     };
   }
 
+  if (milestone === "Maze Chain") {
+    return {
+      color: 0x9fe8c9,
+      baseRadius: 34,
+      radiusPulse: 44,
+      baseAlpha: 0.2,
+      alphaPulse: 0.34,
+      baseWidth: 2.5,
+      widthPulse: 3.4
+    };
+  }
+
   if (milestone === "Quick Pickup") {
     return {
       color: 0x8ee6b8,
@@ -1928,19 +1951,39 @@ class PixiRenderer implements AstroPixiRenderer {
 
   private drawRiskGates(snapshot: SimulationSnapshot, project: (point: Vec2) => Vec2): void {
     const speed = Math.hypot(snapshot.ship.velocity.x, snapshot.ship.velocity.y);
-    for (const gate of snapshot.riskGates) {
+    const activeGates = snapshot.riskGates.filter((gate) => !gate.cleared);
+    for (const [sequenceIndex, gate] of activeGates.entries()) {
       const visual = riskGateVisual({
         status: snapshot.status,
         tick: snapshot.tick,
         cleared: gate.cleared,
         speed,
-        speedThreshold: gate.speedThreshold
+        speedThreshold: gate.speedThreshold,
+        sequenceIndex,
+        sequenceTotal: activeGates.length
       });
       if (!visual) {
         continue;
       }
 
       const center = project(gate.position);
+      const nextGate = activeGates[sequenceIndex + 1];
+      if (nextGate && visual.laneAlpha > 0) {
+        const nextCenter = project(nextGate.position);
+        this.guidance.moveTo(center.x, center.y).lineTo(nextCenter.x, nextCenter.y).stroke({
+          color: visual.color,
+          width: visual.laneWidth,
+          alpha: visual.laneAlpha
+        });
+        const angle = Math.atan2(nextCenter.y - center.y, nextCenter.x - center.x);
+        const mid = { x: (center.x + nextCenter.x) / 2, y: (center.y + nextCenter.y) / 2 };
+        this.guidance
+          .moveTo(mid.x + Math.cos(angle) * 8, mid.y + Math.sin(angle) * 8)
+          .lineTo(mid.x + Math.cos(angle + 2.45) * 6, mid.y + Math.sin(angle + 2.45) * 6)
+          .lineTo(mid.x + Math.cos(angle - 2.45) * 6, mid.y + Math.sin(angle - 2.45) * 6)
+          .closePath()
+          .fill({ color: visual.color, alpha: Math.min(0.55, visual.laneAlpha + 0.14) });
+      }
       const radius = gate.radius + visual.radiusOffset;
       this.guidance.circle(center.x, center.y, radius).stroke({
         color: visual.color,

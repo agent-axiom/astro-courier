@@ -202,6 +202,25 @@ describe("risk gate visual", () => {
       color: 0xffd166
     });
   });
+
+  it("adds a lane cue for multi-gate route puzzles", () => {
+    expect(
+      riskGateVisual({
+        status: "paused",
+        cleared: false,
+        speed: 26,
+        speedThreshold: 34,
+        sequenceIndex: 2,
+        sequenceTotal: 5,
+        tick: 12
+      })
+    ).toMatchObject({
+      tone: "maze",
+      laneAlpha: 0.3,
+      laneWidth: 1.6,
+      sequenceLabel: "3/5"
+    });
+  });
 });
 
 describe("screen shake offset", () => {
@@ -1509,14 +1528,17 @@ describe("boost burst visual", () => {
     const skim = boostBurstVisual({ status: "flying", lastMilestone: "Clean Hazard Skim", tick: 6 });
     const thread = boostBurstVisual({ status: "flying", lastMilestone: "Needle Thread", tick: 6 });
     const sling = boostBurstVisual({ status: "flying", lastMilestone: "Gravity Sling", tick: 6 });
+    const maze = boostBurstVisual({ status: "flying", lastMilestone: "Maze Chain", tick: 6 });
     const finish = boostBurstVisual({ status: "delivered", lastMilestone: "Chain Finish", tick: 6 });
 
     expect(skim).toMatchObject({ color: 0xffd166 });
     expect(thread).toMatchObject({ color: 0xf8e59a });
     expect(sling).toMatchObject({ color: 0x7ce1ff });
+    expect(maze).toMatchObject({ color: 0x9fe8c9 });
     expect(finish).toMatchObject({ color: 0x8ee6b8 });
     expect(thread?.radius).toBeGreaterThan(skim?.radius ?? 0);
     expect(sling?.radius).toBeGreaterThan(thread?.radius ?? 0);
+    expect(maze?.radius).toBeGreaterThan(sling?.radius ?? 0);
     expect(finish?.radius).toBeGreaterThan(sling?.radius ?? 0);
     expect(thread?.alpha).toBeGreaterThanOrEqual(skim?.alpha ?? 0);
   });

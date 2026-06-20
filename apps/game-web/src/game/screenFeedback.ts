@@ -339,6 +339,9 @@ export function buildScreenFeedback(
   if (events.includes("chain-save")) {
     return { label: "Chain saved", value: "Combo restored", accent: "chain", tone: "style", intensity: "medium", durationMs: 440 };
   }
+  if (events.includes("combo-burst")) {
+    return buildStyleMilestoneFeedback(milestone ?? "Maze Chain");
+  }
   if (events.includes("fuel-critical")) {
     return { label: "Fuel critical", value: "Coast now", tone: "warning", intensity: "medium", durationMs: 440 };
   }
@@ -387,6 +390,8 @@ function buildStyleMilestoneFeedback(milestone: string | undefined): ScreenFeedb
       return { label: "Eco drift", value: "Fuel banked", tone: "style", intensity: "medium", durationMs: 420 };
     case "Chain Finish":
       return { label: "Chain finish", value: "Combo delivered", accent: "chain", tone: "style", intensity: "heavy", durationMs: 560 };
+    case "Maze Chain":
+      return { label: "Maze chain", value: "Combo locked", accent: "chain", tone: "style", intensity: "heavy", durationMs: 540 };
     case "Express Finish":
       return { label: "Express finish", value: "Time banked", tone: "style", intensity: "heavy", durationMs: 520 };
     case "Damage Control":

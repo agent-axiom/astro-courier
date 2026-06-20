@@ -949,6 +949,33 @@ describe("route board next target copy", () => {
     ).toEqual({ label: "Next clear", value: "Clear Return Leg", tone: "clear", contractId: "return-leg" });
   });
 
+  it("calls out unopened bonus and puzzle routes distinctly", () => {
+    const puzzleContracts = [
+      { id: "first-light-delivery", title: "First Light" },
+      { id: "asteroid-labyrinth", title: "Asteroid Labyrinth" },
+      { id: "gravity-lockpick", title: "Gravity Lockpick" },
+      { id: "solar-thread", title: "Solar Thread" }
+    ];
+
+    expect(
+      buildRouteBoardTarget(puzzleContracts, {
+        "first-light-delivery": { score: 1800, elapsedSeconds: 34.2, medal: "silver" },
+        "asteroid-labyrinth": undefined,
+        "gravity-lockpick": undefined,
+        "solar-thread": undefined
+      })
+    ).toEqual({ label: "Bonus clear", value: "Clear Asteroid Labyrinth", tone: "clear", contractId: "asteroid-labyrinth" });
+
+    expect(
+      buildRouteBoardTarget(puzzleContracts, {
+        "first-light-delivery": { score: 1800, elapsedSeconds: 34.2, medal: "silver" },
+        "asteroid-labyrinth": { score: 2200, elapsedSeconds: 38.1, medal: "gold" },
+        "gravity-lockpick": undefined,
+        "solar-thread": undefined
+      })
+    ).toEqual({ label: "Puzzle clear", value: "Clear Gravity Lockpick", tone: "clear", contractId: "gravity-lockpick" });
+  });
+
   it("switches to comet chase once every route is cleared", () => {
     expect(
       buildRouteBoardTarget(contracts, {
@@ -1075,6 +1102,22 @@ describe("route board target selection action", () => {
     ).toEqual({ label: "Open route", contractId: "return-leg" });
   });
 
+  it("uses compact bonus and puzzle copy for special clear targets", () => {
+    expect(
+      buildRouteBoardSelectionAction(
+        { label: "Bonus clear", value: "Clear Asteroid Labyrinth", tone: "clear", contractId: "asteroid-labyrinth" },
+        "first-light-delivery"
+      )
+    ).toEqual({ label: "Open bonus", contractId: "asteroid-labyrinth" });
+
+    expect(
+      buildRouteBoardSelectionAction(
+        { label: "Puzzle clear", value: "Clear Solar Thread", tone: "clear", contractId: "solar-thread" },
+        "first-light-delivery"
+      )
+    ).toEqual({ label: "Open puzzle", contractId: "solar-thread" });
+  });
+
   it("uses chase copy when a comet target is on a different route", () => {
     expect(
       buildRouteBoardSelectionAction(
@@ -1128,6 +1171,26 @@ describe("route board recommendation badge", () => {
         contractId: "chain-relay"
       })
     ).toBe("Relay");
+  });
+
+  it("labels bonus and puzzle clear targets distinctly", () => {
+    expect(
+      buildRouteBoardRecommendationBadge({
+        label: "Bonus clear",
+        value: "Clear Asteroid Labyrinth",
+        tone: "clear",
+        contractId: "asteroid-labyrinth"
+      })
+    ).toBe("Bonus");
+
+    expect(
+      buildRouteBoardRecommendationBadge({
+        label: "Puzzle clear",
+        value: "Clear Solar Thread",
+        tone: "clear",
+        contractId: "solar-thread"
+      })
+    ).toBe("Puzzle");
   });
 
   it("labels comet targets as comet badges", () => {

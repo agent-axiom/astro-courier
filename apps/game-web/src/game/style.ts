@@ -95,6 +95,7 @@ const styleMilestones = new Set([
   "Perfect Approach",
   "Eco Drift",
   "Chain Finish",
+  "Maze Chain",
   "Express Finish",
   "Damage Control",
   "Last Drop",

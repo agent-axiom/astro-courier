@@ -220,6 +220,15 @@ function buildRoutePuzzleGoal(input: PreflightPuzzleGoalInput): PreflightPuzzleG
     };
   }
 
+  if (input.contractId === "solar-thread") {
+    return {
+      label: "Thread",
+      value: "Solar gap",
+      detail: `${HAZARD_THREAD_SPEED_THRESHOLD}+ speed`,
+      tone: "risk"
+    };
+  }
+
   if (input.contractId === "asteroid-sprint" || (input.hazardSeverityMultiplier ?? 1) >= 1.25) {
     return {
       label: "Thread",
@@ -234,6 +243,15 @@ function buildRoutePuzzleGoal(input: PreflightPuzzleGoalInput): PreflightPuzzleG
       label: "Sling",
       value: `${GRAVITY_SLING_SPEED_THRESHOLD}+ speed`,
       detail: `+${GRAVITY_SLING_STYLE_BONUS}`,
+      tone: "style"
+    };
+  }
+
+  if (input.contractId === "gravity-lockpick") {
+    return {
+      label: "Sling",
+      value: "Lockpick",
+      detail: "One arc",
       tone: "style"
     };
   }

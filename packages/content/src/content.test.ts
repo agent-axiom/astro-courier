@@ -14,6 +14,8 @@ describe("content schemas", () => {
       "asteroid-sprint",
       "asteroid-labyrinth",
       "gravity-slingshot",
+      "gravity-lockpick",
+      "solar-thread",
       "chain-relay",
       "antimatter-drift",
       "last-drop-run"
@@ -46,6 +48,30 @@ describe("content schemas", () => {
       },
       medalTimes: { bronze: 76, silver: 44, gold: 26 }
     });
+    expect(parsed.contracts.find((contract) => contract.id === "gravity-lockpick")).toMatchObject({
+      title: "Gravity Lockpick",
+      riskLabel: "Orbit Key",
+      rewardLabel: "Clean arc bonuses",
+      cargoId: "bottled-starlight",
+      hazardSeverityMultiplier: 1.1,
+      shipStart: {
+        position: [88, -205],
+        velocity: [48, -2],
+        rotation: 0.18,
+        fuel: 68
+      },
+      medalTimes: { bronze: 58, silver: 36, gold: 22 }
+    });
+    expect(parsed.contracts.find((contract) => contract.id === "solar-thread")).toMatchObject({
+      title: "Solar Thread",
+      riskLabel: "Solar Wind",
+      rewardLabel: "Gate chain bonuses",
+      cargoId: "midnight-medicine",
+      hazardSeverityMultiplier: 1.35,
+      riskGateCount: 3,
+      medalTimes: { bronze: 62, silver: 38, gold: 23 }
+    });
+    expect(parsed.contracts.find((contract) => contract.id === "solar-thread")?.hazards).toHaveLength(3);
     expect(parsed.contracts.find((contract) => contract.id === "chain-relay")).toMatchObject({
       title: "Chain Relay",
       riskLabel: "Chain Timer",

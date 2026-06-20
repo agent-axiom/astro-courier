@@ -283,6 +283,34 @@ describe("GameShell lifecycle", () => {
         medalTimes: { bronze: 76, silver: 44, gold: 26 }
       },
       {
+        id: "gravity-lockpick",
+        title: "Gravity Lockpick",
+        briefing: "Use one clean orbit arc to unlock the north pad, load, then glide out before the line collapses.",
+        riskLabel: "Orbit Key",
+        rewardLabel: "Clean arc bonuses",
+        pickupLabel: "Luma North Pad",
+        destinationLabel: "Tea Station Dock A",
+        cargoName: "Bottled Starlight",
+        cargoKind: "fragile",
+        cargoFragility: 0.8,
+        hazardSeverityMultiplier: 1.1,
+        medalTimes: { bronze: 58, silver: 36, gold: 22 }
+      },
+      {
+        id: "solar-thread",
+        title: "Solar Thread",
+        briefing: "Slip through three solar wind seams at speed, keep the medicine cool, and finish the chain clean.",
+        riskLabel: "Solar Wind",
+        rewardLabel: "Gate chain bonuses",
+        pickupLabel: "Luma North Pad",
+        destinationLabel: "Tea Station Dock A",
+        cargoName: "Midnight Medicine",
+        cargoKind: "time-sensitive",
+        cargoFragility: 0.9,
+        hazardSeverityMultiplier: 1.35,
+        medalTimes: { bronze: 62, silver: 38, gold: 23 }
+      },
+      {
         id: "chain-relay",
         title: "Chain Relay",
         briefing: "Launch fast, skim the asteroid field, and carry the style chain all the way into Tea Station.",

@@ -18,6 +18,7 @@ import {
   LANDING_ASSIST_FUEL_COST,
   NO_BRAKE_STYLE_BONUS,
   QUICK_PICKUP_STYLE_BONUS,
+  MAZE_GATE_CHAIN_STYLE_BONUS,
   RISK_GATE_SPEED_THRESHOLD,
   RISK_GATE_STYLE_BONUS,
   STYLE_CHAIN_WINDOW_SECONDS,
@@ -384,6 +385,60 @@ describe("deterministic Astro Courier simulation", () => {
       "risk-gate-maze-wall-d"
     ]);
     expect(snapshot.riskGates.every((gate) => gate.speedThreshold === RISK_GATE_SPEED_THRESHOLD)).toBe(true);
+  });
+
+  it("awards a maze chain bonus after every asteroid labyrinth gate is cleared", () => {
+    const systemWithLabyrinth: SystemContent = {
+      ...starterSystem,
+      hazards: [
+        { id: "field-a", type: "asteroid_field", position: [70, -105], radius: 24, severity: 0.35 },
+        { id: "field-b", type: "asteroid_field", position: [112, -42], radius: 24, severity: 0.35 },
+        { id: "field-c", type: "asteroid_field", position: [154, -118], radius: 24, severity: 0.35 },
+        { id: "field-d", type: "asteroid_field", position: [198, -44], radius: 24, severity: 0.35 },
+        { id: "field-e", type: "asteroid_field", position: [230, -105], radius: 24, severity: 0.35 }
+      ],
+      contracts: [
+        ...starterSystem.contracts,
+        {
+          id: "asteroid-labyrinth",
+          title: "Asteroid Labyrinth",
+          briefing: "Read the asteroid maze.",
+          riskLabel: "Asteroid Maze",
+          rewardLabel: "Maze gate bonuses",
+          pickupId: "north-pad",
+          destinationId: "dock-a",
+          cargoId: "bottled-starlight",
+          hazardSeverityMultiplier: 1.55,
+          riskGateCount: 5,
+          medalTimes: { bronze: 86, silver: 54, gold: 32 }
+        }
+      ]
+    };
+    const world = createWorldFromSystem(systemWithLabyrinth, "maze-chain-seed", { contractId: "asteroid-labyrinth" });
+    world.gravitySources = [];
+    world.landingPads = [];
+
+    for (const gate of world.riskGates) {
+      world.ship.position = { ...gate.position };
+      world.ship.velocity = { x: gate.speedThreshold + 8, y: 0 };
+      stepWorld(world, 1 / 60, [], { combat: false });
+    }
+
+    expect(world.clearedRiskGateIds).toHaveLength(5);
+    expect(world.lastMilestone).toBe("Maze Chain");
+    const expectedGateChainBonus =
+      RISK_GATE_STYLE_BONUS +
+      Math.round(RISK_GATE_STYLE_BONUS * 1.25) +
+      Math.round(RISK_GATE_STYLE_BONUS * 1.5) +
+      Math.round(RISK_GATE_STYLE_BONUS * 1.75) +
+      Math.round(RISK_GATE_STYLE_BONUS * 2);
+    const expectedMazeChainBonus = Math.round(MAZE_GATE_CHAIN_STYLE_BONUS * 2);
+    expect(world.lastStyleAward).toBe(expectedMazeChainBonus);
+    expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(expectedGateChainBonus + expectedMazeChainBonus);
+
+    stepWorld(world, 1 / 60, [], { combat: false });
+
+    expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(expectedGateChainBonus + expectedMazeChainBonus);
   });
 
   it("lets afterburner trade more fuel for a stronger boost", () => {

@@ -182,6 +182,44 @@ describe("preflight puzzle goals", () => {
     ]);
   });
 
+  it("keeps the gravity lockpick route as a compact orbit puzzle", () => {
+    expect(
+      buildPreflightPuzzleGoals({
+        contractId: "gravity-lockpick",
+        targetDistanceLabel: "231m",
+        goldSeconds: 22,
+        hazardSeverityMultiplier: 1.1,
+        interceptorCount: 1,
+        riskGateCount: 0,
+        clearedRiskGateCount: 0
+      })
+    ).toEqual([
+      { label: "Route", value: "231m", tone: "route" },
+      { label: "Sling", value: "Lockpick", detail: "One arc", tone: "style" },
+      { label: "Fire", value: "1 ship", detail: "+35 tags", tone: "combat" }
+    ]);
+  });
+
+  it("keeps solar thread focused on a short three-gate chain", () => {
+    expect(
+      buildPreflightPuzzleGoals({
+        contractId: "solar-thread",
+        targetDistanceLabel: "287m",
+        goldSeconds: 23,
+        hazardSeverityMultiplier: 1.35,
+        interceptorCount: 2,
+        riskGateCount: 3,
+        clearedRiskGateCount: 1,
+        nextRiskGateDistance: 94,
+        nextRiskGateStyleBonus: 190
+      })
+    ).toEqual([
+      { label: "Route", value: "287m", tone: "route" },
+      { label: "Thread", value: "Solar gap", detail: "42+ speed", tone: "risk" },
+      { label: "Gate", value: "1/3", detail: "94m", tone: "risk" }
+    ]);
+  });
+
   it("keeps fragile special routes readable as one-rule puzzles", () => {
     expect(
       buildPreflightPuzzleGoals({

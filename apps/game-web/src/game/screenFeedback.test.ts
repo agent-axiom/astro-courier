@@ -619,6 +619,14 @@ describe("screen feedback", () => {
       intensity: "medium",
       durationMs: 440
     });
+    expect(buildMilestoneScreenFeedback("Maze Chain")).toEqual({
+      label: "Maze chain",
+      value: "Combo locked",
+      accent: "chain",
+      tone: "style",
+      intensity: "heavy",
+      durationMs: 540
+    });
     expect(buildMilestoneScreenFeedback("Chain Finish")).toEqual({
       label: "Chain finish",
       value: "Combo delivered",

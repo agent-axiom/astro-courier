@@ -210,6 +210,7 @@ export type SimulationWorld = {
   styleChainSecondsRemaining: number;
   launchBurstSecondsRemaining: number;
   launchBurstAwarded: boolean;
+  mazeGateChainAwarded: boolean;
   skimmedHazardIds: string[];
   slungGravitySourceIds: string[];
   riskGates: RiskGateState[];
@@ -300,6 +301,7 @@ export const ANTIMATTER_DRIFT_STYLE_BONUS = 210;
 export const RISK_GATE_RADIUS = 28;
 export const RISK_GATE_SPEED_THRESHOLD = 34;
 export const RISK_GATE_STYLE_BONUS = 190;
+export const MAZE_GATE_CHAIN_STYLE_BONUS = 420;
 export const CONTROLLED_DOCK_SPEED_RATIO = 0.7;
 export const EMERGENCY_SHIELD_REBOUND_DAMAGE = 0.22;
 const SHIELD_CRATE_MAX_HP = 125;
@@ -457,6 +459,7 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
     styleChainSecondsRemaining: 0,
     launchBurstSecondsRemaining: 0,
     launchBurstAwarded: false,
+    mazeGateChainAwarded: false,
     skimmedHazardIds: [],
     slungGravitySourceIds: [],
     riskGates: createRiskGates(system, activeContract, hazards),
@@ -1337,8 +1340,22 @@ function updateRiskGates(world: SimulationWorld): void {
     gate.cleared = true;
     world.clearedRiskGateIds.push(gate.id);
     awardStyle(world, gate.styleBonus, "Risk Gate");
+    awardMazeGateChain(world);
     return;
   }
+}
+
+function awardMazeGateChain(world: SimulationWorld): void {
+  if (world.mazeGateChainAwarded || world.activeContract.id !== "asteroid-labyrinth" || world.riskGates.length < 5) {
+    return;
+  }
+
+  if (world.riskGates.some((gate) => !gate.cleared)) {
+    return;
+  }
+
+  world.mazeGateChainAwarded = true;
+  awardStyle(world, MAZE_GATE_CHAIN_STYLE_BONUS, "Maze Chain");
 }
 
 function applyLandingAssist(world: SimulationWorld): void {

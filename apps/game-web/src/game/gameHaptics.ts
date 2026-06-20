@@ -92,6 +92,9 @@ export function hapticPatternForEvents(events: readonly GameAudioEvent[]): Hapti
   if (events.includes("tempo-clutch")) {
     return [10, 16, 10];
   }
+  if (events.includes("combo-burst")) {
+    return [14, 12, 22];
+  }
   if (events.includes("last-drop-armed")) {
     return [18, 18, 28];
   }
