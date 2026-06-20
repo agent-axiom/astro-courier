@@ -5,7 +5,7 @@ describe("result overlay density", () => {
   it("keeps crash results focused on a compact cause and retry instead of report stats", () => {
     expect(buildResultOverlayDensity({ status: "crashed" })).toEqual({
       showDetailedScore: false,
-      showCrashDebrief: true,
+      showCrashDebrief: false,
       showRunGrade: false,
       showResultSummary: false,
       showQuickStats: false,

@@ -41,6 +41,14 @@ describe("preflight overlay density wiring", () => {
     expect(appSource).toContain("renderPreflightPuzzleGoalIcon(goal)");
   });
 
+  it("wires optional training from the first preflight without forcing a tutorial", () => {
+    expect(appSource).toContain("buildTrainingFlightAction({");
+    expect(appSource).toContain("trainingContract: hud.trainingContractOption");
+    expect(appSource).toContain("trainingFlightAction ? (");
+    expect(appSource).toContain('className="preflight-training-button"');
+    expect(appSource).toContain("openTrainingFlight");
+  });
+
   it("renders compact ship upgrade progression in preflight", () => {
     expect(appSource).toContain("const shipUpgradeTrack = buildShipUpgradeTrack(hud.contractOptions, bestRunsByContract)");
     expect(appSource).toContain("const shipUpgradeSummary = buildShipUpgradeSummary(shipUpgradeTrack)");

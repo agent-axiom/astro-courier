@@ -56,9 +56,6 @@ export const enemyWaveSchema = z
     drones: z.number().int().min(0).max(8).optional(),
     fighters: z.number().int().min(0).max(8).optional(),
     brutes: z.number().int().min(0).max(4).optional()
-  })
-  .refine((wave) => (wave.drones ?? 0) + (wave.fighters ?? 0) + (wave.brutes ?? 0) > 0, {
-    message: "enemyWave must contain at least one ship"
   });
 
 export const contractSchema = z.object({

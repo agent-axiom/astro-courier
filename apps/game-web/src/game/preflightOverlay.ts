@@ -1,4 +1,5 @@
 import type { RunStatus } from "@astro-courier/shared";
+import { TRAINING_FLIGHT_CONTRACT_ID } from "./contracts";
 
 export type PreflightOverlayDensityInput = {
   status: RunStatus;
@@ -28,6 +29,36 @@ export type PreflightOverlayDensity = {
   showSignatureManeuver: boolean;
   showBonusStack: boolean;
 };
+
+export type TrainingFlightContract = {
+  id: string;
+  title: string;
+};
+
+export type TrainingFlightActionInput = {
+  status: RunStatus;
+  preflightOpen: boolean;
+  currentContractId: string;
+  trainingContract?: TrainingFlightContract;
+};
+
+export type TrainingFlightAction = {
+  label: "Training";
+  value: "Practice flight";
+  contractId: string;
+};
+
+export function buildTrainingFlightAction(input: TrainingFlightActionInput): TrainingFlightAction | undefined {
+  if (!input.preflightOpen || input.status !== "paused" || !input.trainingContract || input.currentContractId === input.trainingContract.id) {
+    return undefined;
+  }
+
+  return {
+    label: "Training",
+    value: "Practice flight",
+    contractId: input.trainingContract.id
+  };
+}
 
 export function buildPreflightOverlayDensity(input: PreflightOverlayDensityInput): PreflightOverlayDensity {
   const hasRouteHistory = input.savedRouteCount > 0;
@@ -64,8 +95,8 @@ export function buildPreflightOverlayDensity(input: PreflightOverlayDensityInput
       mode: "poster",
       showContractTitle: false,
       showContractBriefing: false,
-      showControlPrimer: false,
-      showLaunchSummary: false,
+      showControlPrimer: true,
+      showLaunchSummary: true,
       showCargoManifest: false,
       showRoutePlanBriefing: false,
       showProgressMeta: false,

@@ -184,6 +184,32 @@ describe("route progress rail presentation", () => {
   });
 });
 
+describe("route focus readout", () => {
+  it("states the base courier loop as pickup to dock", () => {
+    expect(
+      buildRouteFocusReadout({
+        status: "flying",
+        objectivePhase: "pickup"
+      })
+    ).toEqual({
+      label: "Route focus",
+      value: "Pickup -> Dock",
+      tone: "speed"
+    });
+
+    expect(
+      buildRouteFocusReadout({
+        status: "flying",
+        objectivePhase: "delivery"
+      })
+    ).toEqual({
+      label: "Route focus",
+      value: "Dock the cargo",
+      tone: "precision"
+    });
+  });
+});
+
 describe("express finish readout", () => {
   it("surfaces the clean gold-pace delivery window", () => {
     expect(
@@ -362,6 +388,23 @@ describe("tactical cue", () => {
       label: "Tactical cue",
       value: "Fuel critical / coast",
       tone: "urgent"
+    });
+  });
+
+  it("warns with a black-hole countdown once fuel is depleted", () => {
+    expect(
+      buildTacticalCue({
+        status: "flying",
+        objectivePhase: "delivery",
+        hazardDangerLevel: "inside",
+        fuel: 0,
+        maxFuel: 100,
+        fuelDepletedCountdownSeconds: 7.4
+      })
+    ).toEqual({
+      label: "Tactical cue",
+      value: "Black hole / 7.4s",
+      tone: "danger"
     });
   });
 

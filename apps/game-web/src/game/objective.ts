@@ -114,6 +114,7 @@ export type TacticalCueInput = {
   fuelUsed?: number;
   fuel?: number;
   maxFuel?: number;
+  fuelDepletedCountdownSeconds?: number;
   quickPickupSecondsRemaining?: number;
   quickPickupBonus?: number;
   launchBurstSecondsRemaining?: number;
@@ -370,7 +371,7 @@ export function buildRouteFocusReadout(input: RouteFocusReadoutInput): RouteFocu
 
   return {
     label: "Route focus",
-    value: input.objectivePhase === "pickup" ? "Load cargo / rush pickup" : "Clean delivery / soft dock",
+    value: input.objectivePhase === "pickup" ? "Pickup -> Dock" : "Dock the cargo",
     tone: input.objectivePhase === "pickup" ? "speed" : "precision"
   };
 }
@@ -378,6 +379,14 @@ export function buildRouteFocusReadout(input: RouteFocusReadoutInput): RouteFocu
 export function buildTacticalCue(input: TacticalCueInput): TacticalCue | undefined {
   if (input.status !== "flying") {
     return undefined;
+  }
+
+  if (isFuelDepletedCountdownActive(input)) {
+    return {
+      label: "Tactical cue",
+      value: `Black hole / ${formatSeconds(input.fuelDepletedCountdownSeconds)}`,
+      tone: "danger"
+    };
   }
 
   if (input.hazardDangerLevel === "inside") {
@@ -577,6 +586,10 @@ function hasFuelReserve(input: TacticalCueInput): boolean {
 
 function isFuelCritical(input: TacticalCueInput): boolean {
   return input.maxFuel !== undefined && input.maxFuel > 0 && input.fuel !== undefined && input.fuel / input.maxFuel <= FUEL_CRITICAL_RATIO;
+}
+
+function isFuelDepletedCountdownActive(input: TacticalCueInput): boolean {
+  return input.fuel !== undefined && input.fuel <= 0 && input.fuelDepletedCountdownSeconds !== undefined;
 }
 
 function isLastDropReady(input: TacticalCueInput): boolean {

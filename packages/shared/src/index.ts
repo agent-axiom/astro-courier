@@ -109,6 +109,7 @@ export type SimulationSnapshot = {
   elapsedSeconds: number;
   score: number;
   crashReason?: CrashReason;
+  fuelDepletedCountdownSeconds?: number;
   blackHole?: {
     position: Vec2;
     radius: number;

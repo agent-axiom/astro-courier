@@ -105,10 +105,11 @@ describe("responsive game layout CSS", () => {
     expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.preflight-overlay-focused \.control-primer[\s\S]*display: none;/);
   });
 
-  it("defines an icon-only first launch control primer", () => {
+  it("defines a labeled first launch control primer", () => {
     expect(styles).toContain(".control-primer");
     expect(styles).toMatch(/\.control-primer[\s\S]*grid-template-columns: repeat\(5, minmax\(0, 1fr\)\);/);
-    expect(styles).toMatch(/\.control-primer span[\s\S]*aspect-ratio: 1;/);
+    expect(styles).toMatch(/\.control-primer span[\s\S]*grid-template-rows: 18px auto;/);
+    expect(styles).toContain(".control-primer small");
   });
 
   it("defines a dedicated fuel-clutch screen feedback accent", () => {
@@ -138,6 +139,18 @@ describe("responsive game layout CSS", () => {
   it("defines a dedicated dry-fuel boost control tone", () => {
     expect(styles).toContain(".boost-button-fuel");
     expect(styles).toContain("rgba(255, 111, 145");
+  });
+
+  it("keeps first-time control labels visible on mobile and preflight", () => {
+    expect(styles).toContain(".touch-flight-pad-label");
+    expect(styles).toContain(".mobile-action-button small");
+    expect(styles).toContain(".control-primer small");
+  });
+
+  it("styles the opt-in training launch as a compact secondary action", () => {
+    expect(styles).toContain(".preflight-training-button");
+    expect(styles).toMatch(/\.preflight-training-button[\s\S]*min-height: 38px;/);
+    expect(styles).toMatch(/\.preflight-training-button[\s\S]*grid-template-columns: 16px auto;/);
   });
 
   it("defines tone-aware route tempo HUD chips", () => {

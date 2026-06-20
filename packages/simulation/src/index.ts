@@ -828,6 +828,7 @@ export function snapshotWorld(world: SimulationWorld): SimulationSnapshot {
     elapsedSeconds: world.elapsedSeconds,
     score: world.score,
     crashReason: world.crashReason,
+    fuelDepletedCountdownSeconds: fuelDepletedCountdownSeconds(world),
     blackHole: blackHoleSnapshot(world),
     activePerk: world.activePerk,
     objectiveTarget: getObjectiveTarget(world),
@@ -1151,6 +1152,14 @@ function blackHoleSnapshot(world: SimulationWorld): SimulationSnapshot["blackHol
     pullRadius: DRY_FUEL_BLACK_HOLE_PULL_RADIUS,
     intensity: 1
   };
+}
+
+function fuelDepletedCountdownSeconds(world: SimulationWorld): number | undefined {
+  if (world.status !== "flying" || world.ship.fuel > 0) {
+    return undefined;
+  }
+
+  return round(Math.max(0, DRY_FUEL_BLACK_HOLE_SECONDS - world.dryFuelSeconds), 1);
 }
 
 function isBrakeSensitiveCargo(cargoKind: string): boolean {

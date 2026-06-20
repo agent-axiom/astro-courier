@@ -10,6 +10,7 @@ describe("content schemas", () => {
     expect(parsed.contracts[0]?.id).toBe("first-light-delivery");
     expect(parsed.contracts.map((contract) => contract.id)).toEqual([
       "first-light-delivery",
+      "training-flight",
       "return-leg",
       "asteroid-sprint",
       "asteroid-labyrinth",
@@ -22,6 +23,30 @@ describe("content schemas", () => {
       "antimatter-drift",
       "last-drop-run"
     ]);
+    expect(parsed.contracts[0]).toMatchObject({
+      id: "first-light-delivery",
+      shipStart: {
+        position: [180, 20],
+        velocity: [0, 12],
+        rotation: 1.5707963267948966,
+        fuel: 135
+      },
+      enemyWave: { drones: 0, fighters: 0, brutes: 0 }
+    });
+    expect(parsed.contracts[0]?.briefing.toLowerCase()).not.toContain("tutorial");
+    expect(parsed.contracts.find((contract) => contract.id === "training-flight")).toMatchObject({
+      title: "Training Flight",
+      riskLabel: "Practice",
+      rewardLabel: "Control feel",
+      enemyWave: { drones: 0, fighters: 0, brutes: 0 },
+      shipStart: {
+        position: [130, -132],
+        velocity: [0, 0],
+        rotation: 0,
+        fuel: 160
+      },
+      medalTimes: { bronze: 120, silver: 90, gold: 60 }
+    });
     expect(parsed.planets.find((planet) => planet.id === "black-forge")).toMatchObject({
       name: "Forge Prime",
       visualTheme: "black_metal",

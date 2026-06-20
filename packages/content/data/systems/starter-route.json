@@ -85,13 +85,50 @@
       "briefing": "Run the standard Luma courier line. Load cleanly, protect the bottle, and dock with fuel to spare.",
       "riskLabel": "Training Route",
       "rewardLabel": "Clean delivery bonuses",
+      "shipStart": {
+        "position": [180, 20],
+        "velocity": [0, 12],
+        "rotation": 1.5707963267948966,
+        "fuel": 135
+      },
       "pickupId": "north-pad",
       "destinationId": "dock-a",
       "cargoId": "bottled-starlight",
+      "enemyWave": {
+        "drones": 0,
+        "fighters": 0,
+        "brutes": 0
+      },
       "medalTimes": {
         "bronze": 90,
         "silver": 55,
         "gold": 35
+      }
+    },
+    {
+      "id": "training-flight",
+      "title": "Training Flight",
+      "briefing": "Practice one calm pickup and dock. No timer pressure, no patrol, just learn the ship.",
+      "riskLabel": "Practice",
+      "rewardLabel": "Control feel",
+      "shipStart": {
+        "position": [130, -132],
+        "velocity": [0, 0],
+        "rotation": 0,
+        "fuel": 160
+      },
+      "pickupId": "north-pad",
+      "destinationId": "dock-a",
+      "cargoId": "bottled-starlight",
+      "enemyWave": {
+        "drones": 0,
+        "fighters": 0,
+        "brutes": 0
+      },
+      "medalTimes": {
+        "bronze": 120,
+        "silver": 90,
+        "gold": 60
       }
     },
     {

@@ -735,6 +735,22 @@ button {
     transform 80ms ease-out;
 }
 
+.touch-flight-pad-label {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  width: max-content;
+  max-width: calc(100% - 16px);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(8, 13, 28, 0.58);
+  color: rgba(248, 251, 255, 0.86);
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 1;
+  transform: translateX(-50%);
+}
+
 .touch-flight-pad-touching .touch-flight-pad-ring {
   box-shadow:
     0 0 0 1px rgba(124, 225, 255, 0.2) inset,
@@ -813,9 +829,10 @@ button {
 
 .mobile-action-button {
   display: grid;
+  grid-template-rows: 24px auto;
   place-items: center;
   width: 52px;
-  height: 52px;
+  height: 58px;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 8px;
   background: rgba(8, 13, 28, 0.72);
@@ -824,6 +841,16 @@ button {
     0 12px 26px rgba(0, 0, 0, 0.24),
     inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   touch-action: manipulation;
+}
+
+.mobile-action-button small {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 0.55rem;
+  font-weight: 900;
+  line-height: 1;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
 }
 
 .mobile-action-button:disabled {
@@ -3510,6 +3537,39 @@ button {
   object-fit: cover;
 }
 
+.preflight-training-button {
+  display: inline-grid;
+  grid-template-columns: 16px auto;
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
+  min-height: 38px;
+  gap: 7px;
+  margin-top: -2px;
+  padding: 9px 14px;
+  border: 1px solid rgba(124, 225, 255, 0.34);
+  border-radius: 8px;
+  background: rgba(19, 30, 50, 0.7);
+  color: #ccefff;
+  font-size: 0.82rem;
+  font-weight: 860;
+  letter-spacing: 0;
+  cursor: pointer;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22), 0 0 24px rgba(124, 225, 255, 0.08);
+  transition:
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.preflight-training-button:hover,
+.preflight-training-button:focus-visible {
+  border-color: rgba(124, 225, 255, 0.72);
+  color: #ffffff;
+  outline: none;
+  transform: translateY(-1px);
+}
+
 .perk-selector {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -3930,13 +3990,26 @@ button {
 
 .control-primer span {
   display: grid;
+  grid-template-rows: 18px auto;
   place-items: center;
-  aspect-ratio: 1;
+  min-height: 48px;
   min-width: 0;
+  padding: 6px 4px;
   border: 1px solid rgba(124, 225, 255, 0.18);
   border-radius: 7px;
   background: rgba(124, 225, 255, 0.1);
   color: #d8fbff;
+}
+
+.control-primer small {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 0.56rem;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
 }
 
 .control-primer span:nth-child(3) {

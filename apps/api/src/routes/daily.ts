@@ -9,6 +9,7 @@ const dailyDispatchQuerySchema = z.object({
 });
 
 const knownSystems = new Map([[starterRoute.id, validateSystemContent(starterRoute)]]);
+const trainingFlightContractId = "training-flight";
 
 export function registerDailyRoutes(server: FastifyInstance): void {
   server.get("/daily/dispatch", async (request, reply) => {
@@ -34,7 +35,14 @@ export function registerDailyRoutes(server: FastifyInstance): void {
 
     const dayStart = Date.parse(`${parsed.data.date}T00:00:00Z`);
     const dayNumber = Math.floor(dayStart / 86_400_000);
-    const contract = system.contracts[dayNumber % system.contracts.length];
+    const careerContracts = system.contracts.filter((contract) => contract.id !== trainingFlightContractId);
+    const contract = careerContracts[dayNumber % careerContracts.length];
+    if (!contract) {
+      return reply.status(404).send({
+        accepted: false,
+        reason: "no-daily-contracts"
+      });
+    }
 
     return reply.send({
       label: "Daily dispatch",

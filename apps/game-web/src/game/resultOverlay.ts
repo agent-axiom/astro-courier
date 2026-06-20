@@ -24,7 +24,7 @@ export type ResultOverlayDensity = {
 export function buildResultOverlayDensity(input: ResultOverlayDensityInput): ResultOverlayDensity {
   return {
     showDetailedScore: false,
-    showCrashDebrief: input.status === "crashed",
+    showCrashDebrief: false,
     showRunGrade: false,
     showResultSummary: false,
     showQuickStats: false,

@@ -31,6 +31,8 @@ describe("result overlay density wiring", () => {
   it("wires a compact shareable delivery report action into the result overlay", () => {
     expect(appSource).toContain('from "./game/deliveryReport"');
     expect(appSource).toContain("const deliveryReport = runFinished");
+    expect(appSource).toContain("const showDeliveryReportAction = Boolean(resultOverlayDensity?.showRunReceipts && deliveryReport)");
+    expect(appSource).toContain("showDeliveryReportAction && deliveryReport");
     expect(appSource).toContain("copyDeliveryReport");
     expect(appSource).toContain("result-button-share");
   });

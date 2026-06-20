@@ -122,7 +122,7 @@ import {
 import { buildHazardPressureReadout } from "./game/hazard";
 import { buildResultOverlayDensity } from "./game/resultOverlay";
 import { buildLiveHudDensity } from "./game/liveHudDensity";
-import { buildPreflightOverlayDensity } from "./game/preflightOverlay";
+import { buildPreflightOverlayDensity, buildTrainingFlightAction } from "./game/preflightOverlay";
 import { buildTopHudDensity, buildTopHudSpeedTone } from "./game/topHudDensity";
 import {
   buildResultActionsLayout,
@@ -156,7 +156,15 @@ import { createGameAudioController, type GameAudioController } from "./game/game
 import { createGameMusicController, type GameMusicController } from "./game/gameMusic";
 import { createGameHapticsController, type GameHapticsController } from "./game/gameHaptics";
 import { buildAudioTogglePresentation } from "./game/audioControls";
-import { buildTouchFlightPadPresentation, buildTouchPadGeometry, buildTouchPointerVisual, resolveTouchSteeringOrigin } from "./game/touchControls";
+import {
+  buildFlightControlPrimerItems,
+  buildMobileActionLabels,
+  buildTouchFlightPadPresentation,
+  buildTouchPadGeometry,
+  buildTouchPointerVisual,
+  resolveTouchSteeringOrigin,
+  type FlightControlPrimerItem
+} from "./game/touchControls";
 import { buildPauseOverlayPresentation, type PauseOverlayActionId } from "./game/pauseOverlay";
 import { resolvePublicAssetPath } from "./game/publicAssets";
 import {
@@ -211,10 +219,12 @@ const initialHud: HudState = {
   cargoFragility: 0.8,
   hazardSeverityMultiplier: undefined,
   contractOptions: [],
+  trainingContractOption: undefined,
   elapsedSeconds: 0,
   score: 0,
   fuel: 100,
   maxFuel: 100,
+  fuelDepletedCountdownSeconds: undefined,
   shipHp: 100,
   shipMaxHp: 100,
   weaponCooldownSeconds: 0,
@@ -710,6 +720,12 @@ export function App() {
     savedRouteCount: Object.values(bestRunsByContract).filter(Boolean).length,
     dailyStreak: dailyProgress?.streak
   });
+  const trainingFlightAction = buildTrainingFlightAction({
+    status: hud.status,
+    preflightOpen: overlays.preflight,
+    currentContractId: hud.contractId,
+    trainingContract: hud.trainingContractOption
+  });
   const focusedPreflight = preflightOverlayDensity.mode === "poster" || preflightOverlayDensity.mode === "focused";
   const pauseOverlay = buildPauseOverlayPresentation({
     status: hud.status,
@@ -730,6 +746,8 @@ export function App() {
     styleMultiplier: hud.styleMultiplier,
     styleChainSecondsRemaining: hud.styleChainSecondsRemaining
   });
+  const controlPrimerItems = buildFlightControlPrimerItems();
+  const mobileActionLabels = buildMobileActionLabels();
   const touchPointerStyle = {
     "--touch-stick-x": `${touchPointer.offsetX}px`,
     "--touch-stick-y": `${touchPointer.offsetY}px`,
@@ -907,6 +925,7 @@ export function App() {
     fuelUsed: hud.fuelUsed,
     fuel: hud.fuel,
     maxFuel: hud.maxFuel,
+    fuelDepletedCountdownSeconds: hud.fuelDepletedCountdownSeconds,
     quickPickupSecondsRemaining: hud.quickPickupSecondsRemaining,
     quickPickupBonus: hud.quickPickupBonus,
     launchBurstSecondsRemaining: hud.launchBurstSecondsRemaining,
@@ -1254,6 +1273,7 @@ export function App() {
     hud.status === "delivered" || hud.status === "crashed"
       ? buildResultActionsLayout({ status: hud.status, hasBoardAction: Boolean(resultBoardAction) && Boolean(resultOverlayDensity?.showBoardAction) })
       : "solo";
+  const showDeliveryReportAction = Boolean(resultOverlayDensity?.showRunReceipts && deliveryReport);
   const retryTarget = buildRetryTarget({
     status: hud.status,
     contractId: hud.contractId,
@@ -1463,6 +1483,12 @@ export function App() {
     }
   };
 
+  const openTrainingFlight = () => {
+    if (trainingFlightAction) {
+      openContractBriefing(trainingFlightAction.contractId);
+    }
+  };
+
   const restartActiveRun = () => {
     audioRef.current?.unlock();
     void musicRef.current?.playGameplay({ forceNewTrack: true });
@@ -1664,6 +1690,7 @@ export function App() {
           <span className="touch-flight-pad-ring" />
           <span className="touch-flight-pad-stick" />
           <span className="touch-flight-pad-vector" />
+          <span className="touch-flight-pad-label">{mobileActionLabels.steering}</span>
         </div>
       ) : null}
 
@@ -1681,6 +1708,7 @@ export function App() {
             onPointerLeave={endMobileBrake}
           >
             <OctagonMinus size={22} />
+            <small>{mobileActionLabels.brake}</small>
           </button>
           <button
             type="button"
@@ -1691,6 +1719,7 @@ export function App() {
             onPointerDown={tapMobileBoost}
           >
             <Zap size={22} />
+            <small>{mobileActionLabels.boost}</small>
           </button>
           <button
             type="button"
@@ -1701,6 +1730,7 @@ export function App() {
             onPointerDown={tapMobileFire}
           >
             <Crosshair size={22} />
+            <small>{mobileActionLabels.fire}</small>
           </button>
         </div>
       ) : null}
@@ -2183,13 +2213,21 @@ export function App() {
       {overlays.preflight ? (
         <section className={`preflight-overlay preflight-overlay-${preflightOverlayDensity.mode}`} aria-label="Launch briefing">
           {focusedPreflight ? (
-            <button type="button" className="preflight-cover-art preflight-cover-launch" aria-label="Launch Astro Courier" onClick={launchContract}>
-              <img src={coverArtSrc} alt="Astro Courier" loading="eager" />
-              <span className="preflight-cover-cta" aria-hidden="true">
-                <Play size={18} />
-                <span>Launch</span>
-              </span>
-            </button>
+            <>
+              <button type="button" className="preflight-cover-art preflight-cover-launch" aria-label="Launch Astro Courier" onClick={launchContract}>
+                <img src={coverArtSrc} alt="Astro Courier" loading="eager" />
+                <span className="preflight-cover-cta" aria-hidden="true">
+                  <Play size={18} />
+                  <span>Launch</span>
+                </span>
+              </button>
+              {trainingFlightAction ? (
+                <button type="button" className="preflight-training-button" aria-label={`${trainingFlightAction.label}: ${trainingFlightAction.value}`} onClick={openTrainingFlight}>
+                  <Target size={16} />
+                  <span>{trainingFlightAction.label}</span>
+                </button>
+              ) : null}
+            </>
           ) : (
             <div className="preflight-cover-art">
               <img src={coverArtSrc} alt="Astro Courier" loading="eager" />
@@ -2329,21 +2367,12 @@ export function App() {
           ) : null}
           {preflightOverlayDensity.showControlPrimer ? (
             <div className="control-primer" aria-label="Flight controls">
-              <span aria-label="Aim" title="Aim">
-                <Target size={18} />
-              </span>
-              <span aria-label="Thrust" title="Thrust">
-                <ArrowRight size={18} />
-              </span>
-              <span aria-label="Brake" title="Brake">
-                <OctagonMinus size={18} />
-              </span>
-              <span aria-label="Boost" title="Boost">
-                <Zap size={18} />
-              </span>
-              <span aria-label="Fire" title="Fire: J / Enter">
-                <Crosshair size={18} />
-              </span>
+              {controlPrimerItems.map((item) => (
+                <span key={item.id} aria-label={`${item.label}: ${item.detail}`} title={`${item.label}: ${item.detail}`}>
+                  {renderControlPrimerIcon(item)}
+                  <small>{item.label}</small>
+                </span>
+              ))}
             </div>
           ) : null}
           {preflightOverlayDensity.showBonusStack ? (
@@ -3002,7 +3031,7 @@ export function App() {
               <small>{resultCampaignMilestonePrompt.detail}</small>
             </div>
           ) : null}
-          <div className={`result-actions ${deliveryReport || routeUnlockAction ? "result-actions-share" : `result-actions-${resultActionsLayout}`}`}>
+          <div className={`result-actions ${showDeliveryReportAction || routeUnlockAction ? "result-actions-share" : `result-actions-${resultActionsLayout}`}`}>
             <button
               type="button"
               className={`result-button result-button-retry result-button-retry-${resultRetryAction.tone}`}
@@ -3025,7 +3054,7 @@ export function App() {
                 </span>
               </button>
             ) : null}
-            {deliveryReport ? (
+            {showDeliveryReportAction && deliveryReport ? (
               <button
                 type="button"
                 className={`result-button result-button-share ${deliveryReportCopied ? "result-button-share-copied" : ""}`}
@@ -3079,6 +3108,14 @@ function renderPreflightPuzzleGoalIcon(goal: PreflightPuzzleGoal): React.ReactNo
   if (goal.label === "Brake") return <OctagonMinus size={16} />;
   if (goal.label === "Fuel") return <Gauge size={16} />;
   return <Crosshair size={16} />;
+}
+
+function renderControlPrimerIcon(item: FlightControlPrimerItem): React.ReactNode {
+  if (item.id === "aim") return <Target size={18} />;
+  if (item.id === "thrust") return <ArrowRight size={18} />;
+  if (item.id === "brake") return <OctagonMinus size={18} />;
+  if (item.id === "boost") return <Zap size={18} />;
+  return <Crosshair size={18} />;
 }
 
 function Metric({ icon, label, value, tone, showLabel }: MetricProps) {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildPreflightOverlayDensity } from "./preflightOverlay";
+import { buildPreflightOverlayDensity, buildTrainingFlightAction } from "./preflightOverlay";
 
 describe("preflight overlay density", () => {
   it("keeps a fresh first launch focused for fast play", () => {
@@ -13,8 +13,8 @@ describe("preflight overlay density", () => {
       mode: "poster",
       showContractTitle: false,
       showContractBriefing: false,
-      showControlPrimer: false,
-      showLaunchSummary: false,
+      showControlPrimer: true,
+      showLaunchSummary: true,
       showCargoManifest: false,
       showRoutePlanBriefing: false,
       showProgressMeta: false,
@@ -30,6 +30,52 @@ describe("preflight overlay density", () => {
       showSignatureManeuver: false,
       showBonusStack: false
     });
+  });
+
+  it("keeps the first launch concise without hiding the route goal", () => {
+    const density = buildPreflightOverlayDensity({
+      status: "paused",
+      preflightOpen: true,
+      savedRouteCount: 0
+    });
+
+    expect(density.showLaunchSummary).toBe(true);
+    expect(density.showControlPrimer).toBe(true);
+    expect(density.showContractBriefing).toBe(false);
+    expect(density.showBonusStack).toBe(false);
+  });
+
+  it("offers training as an explicit opt-in from preflight only", () => {
+    expect(
+      buildTrainingFlightAction({
+        status: "paused",
+        preflightOpen: true,
+        currentContractId: "first-light-delivery",
+        trainingContract: { id: "training-flight", title: "Training Flight" }
+      })
+    ).toEqual({
+      label: "Training",
+      value: "Practice flight",
+      contractId: "training-flight"
+    });
+
+    expect(
+      buildTrainingFlightAction({
+        status: "paused",
+        preflightOpen: true,
+        currentContractId: "training-flight",
+        trainingContract: { id: "training-flight", title: "Training Flight" }
+      })
+    ).toBeUndefined();
+
+    expect(
+      buildTrainingFlightAction({
+        status: "flying",
+        preflightOpen: false,
+        currentContractId: "first-light-delivery",
+        trainingContract: { id: "training-flight", title: "Training Flight" }
+      })
+    ).toBeUndefined();
   });
 
   it("keeps early route history lightweight with one next-route target", () => {

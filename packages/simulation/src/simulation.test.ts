@@ -294,11 +294,19 @@ describe("deterministic Astro Courier simulation", () => {
     const world = createWorldFromSystem(starterSystem, "dry-fuel-seed");
     world.ship.fuel = 0;
 
-    for (let tick = 0; tick < 18 * 60 - 1; tick += 1) {
+    for (let tick = 0; tick < 17 * 60; tick += 1) {
       stepWorld(world, 1 / 60, []);
     }
 
     expect(world.status).toBe("flying");
+    expect(snapshotWorld(world).fuelDepletedCountdownSeconds).toBe(1);
+
+    for (let tick = 0; tick < 60 - 1; tick += 1) {
+      stepWorld(world, 1 / 60, []);
+    }
+
+    expect(world.status).toBe("flying");
+    expect(snapshotWorld(world).fuelDepletedCountdownSeconds).toBe(0);
 
     stepWorld(world, 1 / 60, []);
 
@@ -378,6 +386,31 @@ describe("deterministic Astro Courier simulation", () => {
       hp: 78,
       radius: 20
     });
+  });
+
+  it("allows calm opt-in contracts to disable the default enemy patrol", () => {
+    const calmSystem: SystemContent = {
+      ...starterSystem,
+      contracts: [
+        ...starterSystem.contracts,
+        {
+          id: "training-flight",
+          title: "Training Flight",
+          briefing: "Practice launch, pickup, and dock.",
+          riskLabel: "No Patrol",
+          rewardLabel: "Control practice",
+          pickupId: "north-pad",
+          destinationId: "dock-a",
+          cargoId: "bottled-starlight",
+          enemyWave: { drones: 0, fighters: 0, brutes: 0 },
+          medalTimes: { bronze: 120, silver: 90, gold: 60 }
+        }
+      ]
+    };
+
+    const world = createWorldFromSystem(calmSystem, "calm-training-seed", { contractId: "training-flight" });
+
+    expect(combatSnapshot(world).enemies).toEqual([]);
   });
 
   it("starts with a selected run perk and deterministic risk gates", () => {

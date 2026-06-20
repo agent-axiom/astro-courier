@@ -2,6 +2,8 @@ export type ContractIdentity = {
   id: string;
 };
 
+export const TRAINING_FLIGHT_CONTRACT_ID = "training-flight";
+
 export type DailyDispatchContract = ContractIdentity & {
   title: string;
 };

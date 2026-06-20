@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { GameShell } from "./GameShell";
+import { GameShell, type HudState } from "./GameShell";
 import type { AstroPixiRenderer } from "@astro-courier/renderer-pixi";
 import type { SimulationWorld } from "@astro-courier/simulation";
 import type { InputSource } from "./input";
@@ -70,10 +70,11 @@ describe("GameShell lifecycle", () => {
     expect(onHud.mock.calls[0]?.[0].quickPickupSecondsRemaining).toBe(12);
     expect(onHud.mock.calls[0]?.[0].quickPickupBonus).toBe(180);
     expect(onHud.mock.calls[0]?.[0].fuelUsed).toBe(0);
+    expect(onHud.mock.calls[0]?.[0].maxFuel).toBe(135);
     expect(onHud.mock.calls[0]?.[0].hazardSeverity).toBe(0.2);
     expect(onHud.mock.calls[0]?.[0].shipHp).toBe(100);
     expect(onHud.mock.calls[0]?.[0].shipMaxHp).toBe(100);
-    expect(onHud.mock.calls[0]?.[0].interceptorCount).toBe(2);
+    expect(onHud.mock.calls[0]?.[0].interceptorCount).toBe(0);
     expect(onHud.mock.calls[0]?.[0].enemyDirectorMode).toBe("local");
     expect(input.commands).not.toHaveBeenCalled();
     expect(renderer.render).toHaveBeenCalled();
@@ -378,6 +379,48 @@ describe("GameShell lifecycle", () => {
         medalTimes: { bronze: 72, silver: 44, gold: 27 }
       }
     ]);
+  });
+
+  it("keeps the optional training flight out of the career route list while allowing opt-in selection", async () => {
+    const { renderer, input } = createShellDoubles();
+    const onHud = vi.fn();
+    vi.stubGlobal("requestAnimationFrame", vi.fn(() => 7));
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    vi.spyOn(performance, "now").mockReturnValue(1000);
+
+    const shell = new GameShell({
+      mount: {} as HTMLElement,
+      onHud,
+      renderer,
+      input,
+      initialPaused: true
+    });
+
+    await shell.start();
+    const latestHud = onHud.mock.calls.at(-1)?.[0] as HudState;
+
+    expect(latestHud.contractOptions.map((contract) => contract.id)).not.toContain("training-flight");
+    expect(latestHud.trainingContractOption).toMatchObject({
+      id: "training-flight",
+      title: "Training Flight",
+      riskLabel: "Practice",
+      rewardLabel: "Control feel",
+      medalTimes: { bronze: 120, silver: 90, gold: 60 }
+    });
+
+    (shell as GameShell & { selectContract: (contractId: string) => void }).selectContract("training-flight");
+
+    expect(onHud.mock.calls.at(-1)?.[0]).toMatchObject({
+      status: "paused",
+      contractId: "training-flight",
+      contractTitle: "Training Flight",
+      contractRiskLabel: "Practice",
+      contractRewardLabel: "Control feel",
+      pickupLabel: "Luma North Pad",
+      destinationLabel: "Tea Station Dock A",
+      paceSecondsRemaining: 60,
+      interceptorCount: 0
+    });
   });
 
   it("can switch contracts with a daily replay seed while waiting in preflight mode", async () => {
@@ -793,11 +836,12 @@ describe("GameShell lifecycle", () => {
     shell.queueCommand({ type: "BOOST" });
     frame(1167);
     const fuelAfterBoost = onHud.mock.calls.at(-1)?.[0].fuel;
+    const maxFuel = onHud.mock.calls.at(-1)?.[0].maxFuel ?? 0;
     frame(1267);
     const fuelAfterNextFrame = onHud.mock.calls.at(-1)?.[0].fuel;
 
     expect(onHud.mock.calls.at(-2)?.[0].lastMilestone).toBe("Boost Burn");
-    expect(fuelAfterBoost).toBeLessThan(100);
+    expect(fuelAfterBoost).toBeLessThan(maxFuel);
     expect(onHud.mock.calls.at(-2)?.[0].fuelUsed).toBeGreaterThan(0);
     expect(fuelAfterNextFrame).toBe(fuelAfterBoost);
   });

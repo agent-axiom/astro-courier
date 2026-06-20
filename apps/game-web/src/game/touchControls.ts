@@ -5,6 +5,19 @@ export type TouchPoint = {
   y: number;
 };
 
+export type FlightControlPrimerItem = {
+  id: "aim" | "thrust" | "brake" | "boost" | "fire";
+  label: string;
+  detail: string;
+};
+
+export type MobileActionLabels = {
+  steering: string;
+  brake: string;
+  boost: string;
+  fire: string;
+};
+
 export type TouchFlightPadPresentation = {
   visible: boolean;
   tone: "active" | "danger" | "idle" | "opportunity" | "precision";
@@ -55,6 +68,25 @@ export type TouchSteeringOriginInput = {
   geometry: TouchPadGeometry;
   pointer: TouchPoint;
 };
+
+export function buildFlightControlPrimerItems(): FlightControlPrimerItem[] {
+  return [
+    { id: "aim", label: "Aim", detail: "Mouse / drag" },
+    { id: "thrust", label: "Thrust", detail: "Hold to fly" },
+    { id: "brake", label: "Brake", detail: "Slow down" },
+    { id: "boost", label: "Boost", detail: "Tap burst" },
+    { id: "fire", label: "Fire", detail: "Shoot" }
+  ];
+}
+
+export function buildMobileActionLabels(): MobileActionLabels {
+  return {
+    steering: "Drag to fly",
+    brake: "Brake",
+    boost: "Boost",
+    fire: "Fire"
+  };
+}
 
 export function buildTouchFlightPadPresentation(input: TouchFlightPadPresentationInput): TouchFlightPadPresentation {
   const visible = input.status === "flying" && !input.preflightOpen;

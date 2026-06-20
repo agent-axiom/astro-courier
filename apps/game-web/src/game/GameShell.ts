@@ -33,6 +33,7 @@ import { calculateContractPace, type ContractPaceTier } from "./pace";
 import { normalizeAngle } from "./bearing";
 import { forecastTrajectoryHazardRisk, type TrajectoryRiskForecast, type TrajectoryRiskLevel } from "./trajectoryRisk";
 import type { EnemyDirectorClient, EnemyDirectorResult } from "./enemyDirector";
+import { TRAINING_FLIGHT_CONTRACT_ID } from "./contracts";
 
 export type HudState = {
   status: RunStatus;
@@ -50,10 +51,12 @@ export type HudState = {
   cargoFragility: number;
   hazardSeverityMultiplier?: number;
   contractOptions: ContractOption[];
+  trainingContractOption?: ContractOption;
   elapsedSeconds: number;
   score: number;
   fuel: number;
   maxFuel: number;
+  fuelDepletedCountdownSeconds?: number;
   shipHp: number;
   shipMaxHp: number;
   weaponCooldownSeconds: number;
@@ -197,7 +200,12 @@ export class GameShell {
   private readonly input: InputSource;
   private readonly enemyDirector?: EnemyDirectorClient;
   private readonly system = validateSystemContent(starterRoute);
-  private readonly contractOptionList = this.system.contracts.map((contract) => this.contractOption(contract));
+  private readonly contractOptionList = this.system.contracts
+    .filter((contract) => contract.id !== TRAINING_FLIGHT_CONTRACT_ID)
+    .map((contract) => this.contractOption(contract));
+  private readonly trainingContractOption = this.system.contracts
+    .filter((contract) => contract.id === TRAINING_FLIGHT_CONTRACT_ID)
+    .map((contract) => this.contractOption(contract))[0];
   private world: SimulationWorld;
   private rafId = 0;
   private accumulator = 0;
@@ -546,10 +554,12 @@ export class GameShell {
       cargoFragility: activeContract.cargoFragility,
       hazardSeverityMultiplier: activeContract.hazardSeverityMultiplier,
       contractOptions: this.contractOptions(),
+      trainingContractOption: this.trainingContractOption,
       elapsedSeconds: result.elapsedSeconds,
       score: result.score,
       fuel: this.world.ship.fuel,
       maxFuel: this.world.ship.maxFuel,
+      fuelDepletedCountdownSeconds: snapshot.fuelDepletedCountdownSeconds,
       shipHp: snapshot.ship.hp,
       shipMaxHp: snapshot.ship.maxHp,
       weaponCooldownSeconds: snapshot.ship.weaponCooldownSeconds,
