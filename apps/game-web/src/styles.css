@@ -3605,9 +3605,44 @@ button {
   text-align: left;
 }
 
+.preflight-mini-goal-pace {
+  border-color: rgba(255, 209, 102, 0.2);
+  background: rgba(255, 209, 102, 0.08);
+}
+
+.preflight-mini-goal-risk {
+  border-color: rgba(255, 111, 145, 0.22);
+  background: rgba(255, 111, 145, 0.08);
+}
+
+.preflight-mini-goal-style {
+  border-color: rgba(255, 209, 102, 0.24);
+  background: rgba(255, 209, 102, 0.09);
+}
+
+.preflight-mini-goal-clutch {
+  border-color: rgba(255, 209, 102, 0.24);
+  background: rgba(255, 111, 145, 0.09);
+}
+
+.preflight-mini-goal-combat {
+  border-color: rgba(124, 225, 255, 0.24);
+  background: rgba(124, 225, 255, 0.09);
+}
+
 .preflight-mini-goals svg {
   grid-row: 1 / 3;
   color: #7ce1ff;
+}
+
+.preflight-mini-goal-risk svg,
+.preflight-mini-goal-clutch svg {
+  color: #ff9fb8;
+}
+
+.preflight-mini-goal-pace svg,
+.preflight-mini-goal-style svg {
+  color: #ffd166;
 }
 
 .preflight-mini-goals small,

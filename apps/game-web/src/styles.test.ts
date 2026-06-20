@@ -85,6 +85,9 @@ describe("responsive game layout CSS", () => {
     expect(styles).toMatch(/\.perk-card[\s\S]*grid-template-columns: 17px minmax\(0, 1fr\);/);
     expect(styles).toContain(".perk-card-active");
     expect(styles).toContain(".preflight-mini-goals");
+    expect(styles).toContain(".preflight-mini-goal-risk");
+    expect(styles).toContain(".preflight-mini-goal-combat");
+    expect(styles).toContain(".preflight-mini-goal-clutch");
     expect(styles).toMatch(/@media \(max-width: 760px\)[\s\S]*\.perk-selector[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\);/);
   });
 

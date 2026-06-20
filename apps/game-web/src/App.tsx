@@ -92,7 +92,12 @@ import {
   buildTacticalCue
 } from "./game/objective";
 import { buildFlightDirector } from "./game/flightDirector";
-import { buildPreflightBonusObjectives, buildPreflightMasteryTargets } from "./game/mastery";
+import {
+  buildPreflightBonusObjectives,
+  buildPreflightMasteryTargets,
+  buildPreflightPuzzleGoals,
+  type PreflightPuzzleGoal
+} from "./game/mastery";
 import {
   buildApproachRewardReadout,
   buildDockingLanePresentation,
@@ -1073,6 +1078,17 @@ export function App() {
   const styleChipStyle = { "--style-chain-progress": liveStyleReward?.chainProgress ?? 0 } as CSSProperties;
   const styleChainMeterStyle = { "--style-chain-meter-progress": styleChainMeter?.progress ?? 0 } as CSSProperties;
   const preflightMasteryTargets = buildPreflightMasteryTargets({ goldSeconds: hud.paceSecondsRemaining });
+  const preflightPuzzleGoals = buildPreflightPuzzleGoals({
+    contractId: hud.contractId,
+    targetDistanceLabel,
+    goldSeconds: hud.paceSecondsRemaining,
+    hazardSeverityMultiplier: hud.hazardSeverityMultiplier,
+    interceptorCount: hud.interceptorCount,
+    riskGateCount: hud.riskGateCount,
+    clearedRiskGateCount: hud.clearedRiskGateCount,
+    nextRiskGateDistance: hud.nextRiskGateDistance,
+    nextRiskGateStyleBonus: hud.nextRiskGateStyleBonus
+  });
   const preflightBonusObjectives = buildPreflightBonusObjectives({
     contractId: hud.contractId,
     quickPickupBonus: hud.quickPickupBonus,
@@ -2198,32 +2214,18 @@ export function App() {
             </div>
           ) : null}
           <div className="preflight-mini-goals" aria-label="Launch goals">
-            <span>
-              <MapPin size={16} />
-              <small>Target</small>
-              <strong>{targetDistanceLabel}</strong>
-            </span>
-            <span>
-              <Trophy size={16} />
-              <small>Gold</small>
-              <strong>{Math.max(0, Math.round(hud.paceSecondsRemaining))}s</strong>
-            </span>
-            {hud.riskGateCount > 0 ? (
-              <span>
-                <Star size={16} />
-                <small>Gate</small>
-                <strong>
-                  {hud.clearedRiskGateCount}/{hud.riskGateCount}
-                </strong>
-                <b>{hud.nextRiskGateDistance === undefined ? `+${hud.nextRiskGateStyleBonus ?? 0}` : `${hud.nextRiskGateDistance}m`}</b>
+            {preflightPuzzleGoals.map((goal) => (
+              <span
+                key={goal.label}
+                className={`preflight-mini-goal-${goal.tone}`}
+                aria-label={`${goal.label}: ${goal.value}${goal.detail ? `. ${goal.detail}` : ""}`}
+              >
+                {renderPreflightPuzzleGoalIcon(goal)}
+                <small>{goal.label}</small>
+                <strong>{goal.value}</strong>
+                {goal.detail ? <b>{goal.detail}</b> : null}
               </span>
-            ) : (
-              <span>
-                <Crosshair size={16} />
-                <small>Shots</small>
-                <strong>{hud.interceptorCount}</strong>
-              </span>
-            )}
+            ))}
           </div>
           <div className="preflight-kicker">{preflightKicker}</div>
           {preflightOverlayDensity.showContractTitle ? <h2>{hud.contractTitle}</h2> : null}
@@ -3032,6 +3034,16 @@ type MetricProps = {
   tone: "normal" | "warning" | "danger";
   showLabel: boolean;
 };
+
+function renderPreflightPuzzleGoalIcon(goal: PreflightPuzzleGoal): React.ReactNode {
+  if (goal.label === "Route") return <MapPin size={16} />;
+  if (goal.label === "Clock") return <Trophy size={16} />;
+  if (goal.label === "Thread" || goal.label === "Gate") return <ShieldAlert size={16} />;
+  if (goal.label === "Sling" || goal.label === "Chain" || goal.label === "Comet") return <Star size={16} />;
+  if (goal.label === "Brake") return <OctagonMinus size={16} />;
+  if (goal.label === "Fuel") return <Gauge size={16} />;
+  return <Crosshair size={16} />;
+}
 
 function Metric({ icon, label, value, tone, showLabel }: MetricProps) {
   return (

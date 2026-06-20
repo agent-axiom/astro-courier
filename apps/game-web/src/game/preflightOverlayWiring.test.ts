@@ -35,6 +35,12 @@ describe("preflight overlay density wiring", () => {
     expect(appSource).toContain("<span>Launch</span>");
   });
 
+  it("renders preflight mini goals from mission puzzle goals", () => {
+    expect(appSource).toContain("const preflightPuzzleGoals = buildPreflightPuzzleGoals({");
+    expect(appSource).toContain("preflightPuzzleGoals.map((goal) =>");
+    expect(appSource).toContain("renderPreflightPuzzleGoalIcon(goal)");
+  });
+
   it("wires the first-run courier license cue without opening a tutorial panel", () => {
     expect(appSource).toContain('from "./game/courierLicense"');
     expect(appSource).toContain("const courierLicenseCue = buildCourierLicenseCue({");

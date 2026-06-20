@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildPreflightBonusObjectives, buildPreflightMasteryTargets } from "./mastery";
+import { buildPreflightBonusObjectives, buildPreflightMasteryTargets, buildPreflightPuzzleGoals } from "./mastery";
 
 describe("preflight mastery targets", () => {
   it("summarizes gold time and comet mastery conditions", () => {
@@ -104,5 +104,85 @@ describe("preflight bonus objectives", () => {
       { label: "No brake", value: "+150 / no manual brake" },
       { label: "Last Drop", value: "+170 / <=5% fuel" }
     ]);
+  });
+});
+
+describe("preflight puzzle goals", () => {
+  it("keeps the standard route briefing to three compact launch goals", () => {
+    expect(
+      buildPreflightPuzzleGoals({
+        contractId: "first-light-delivery",
+        targetDistanceLabel: "216m",
+        goldSeconds: 35,
+        interceptorCount: 2,
+        riskGateCount: 0,
+        clearedRiskGateCount: 0
+      })
+    ).toEqual([
+      { label: "Route", value: "216m", tone: "route" },
+      { label: "Clock", value: "35s", detail: "Gold", tone: "pace" },
+      { label: "Fire", value: "2 ships", detail: "+35 tags", tone: "combat" }
+    ]);
+  });
+
+  it("turns asteroid routes into a thread puzzle with gate pressure", () => {
+    expect(
+      buildPreflightPuzzleGoals({
+        contractId: "asteroid-sprint",
+        targetDistanceLabel: "318m",
+        goldSeconds: 24.6,
+        hazardSeverityMultiplier: 1.45,
+        interceptorCount: 2,
+        riskGateCount: 2,
+        clearedRiskGateCount: 0,
+        nextRiskGateDistance: 140,
+        nextRiskGateStyleBonus: 190
+      })
+    ).toEqual([
+      { label: "Route", value: "318m", tone: "route" },
+      { label: "Thread", value: "42+ speed", detail: "Asteroid line", tone: "risk" },
+      { label: "Gate", value: "0/2", detail: "140m", tone: "risk" }
+    ]);
+  });
+
+  it("surfaces gravity sling routes as an arc puzzle", () => {
+    expect(
+      buildPreflightPuzzleGoals({
+        contractId: "gravity-slingshot",
+        targetDistanceLabel: "280m",
+        goldSeconds: 31,
+        interceptorCount: 1,
+        riskGateCount: 0,
+        clearedRiskGateCount: 0
+      })
+    ).toEqual([
+      { label: "Route", value: "280m", tone: "route" },
+      { label: "Sling", value: "54+ speed", detail: "+240", tone: "style" },
+      { label: "Fire", value: "1 ship", detail: "+35 tags", tone: "combat" }
+    ]);
+  });
+
+  it("keeps fragile special routes readable as one-rule puzzles", () => {
+    expect(
+      buildPreflightPuzzleGoals({
+        contractId: "antimatter-drift",
+        targetDistanceLabel: "242m",
+        goldSeconds: 28,
+        interceptorCount: 0,
+        riskGateCount: 0,
+        clearedRiskGateCount: 0
+      })[1]
+    ).toEqual({ label: "Brake", value: "No brake", detail: "Clean dock", tone: "clutch" });
+
+    expect(
+      buildPreflightPuzzleGoals({
+        contractId: "last-drop-run",
+        targetDistanceLabel: "260m",
+        goldSeconds: 33,
+        interceptorCount: 0,
+        riskGateCount: 0,
+        clearedRiskGateCount: 0
+      })[1]
+    ).toEqual({ label: "Fuel", value: "<=5%", detail: "Soft dock", tone: "clutch" });
   });
 });
