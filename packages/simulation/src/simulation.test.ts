@@ -228,6 +228,15 @@ describe("deterministic Astro Courier simulation", () => {
     });
   });
 
+  it("preserves gravity source visual themes in snapshots", () => {
+    const world = createWorldFromSystem(starterSystem, "gravity-theme-seed");
+
+    expect(snapshotWorld(world).gravitySources[0]).toMatchObject({
+      id: "luma",
+      visualTheme: "blue_garden"
+    });
+  });
+
   it("does not award gravity sling style for a rough near-surface pickup", () => {
     const world = createWorldFromSystem(starterSystem, "gravity-sling-crash-seed");
     world.ship.position = { x: 0, y: -74 };
@@ -291,6 +300,57 @@ describe("deterministic Astro Courier simulation", () => {
     expect(snapshot.enemies.every((enemy) => enemy.hp > 0 && enemy.maxHp >= enemy.hp)).toBe(true);
     expect(snapshot.playerProjectiles).toEqual([]);
     expect(snapshot.enemyProjectiles).toEqual([]);
+  });
+
+  it("spawns mixed enemy archetypes with distinct combat stats", () => {
+    const world = createWorldFromSystem(starterSystem, "combat-role-seed");
+    const snapshot = combatSnapshot(world);
+
+    expect(snapshot.enemies.map((enemy) => enemy.archetype)).toEqual(["fighter", "drone"]);
+    expect(snapshot.enemies[0]).toMatchObject({
+      archetype: "fighter",
+      hp: 40,
+      maxHp: 40,
+      radius: 14
+    });
+    expect(snapshot.enemies[1]).toMatchObject({
+      archetype: "drone",
+      hp: 22,
+      maxHp: 22,
+      radius: 10
+    });
+    expect(combatWorld(world).enemies[1].maxSpeed).toBeGreaterThan(combatWorld(world).enemies[0].maxSpeed);
+  });
+
+  it("uses contract enemy waves to create larger combat missions", () => {
+    const waveSystem: SystemContent = {
+      ...starterSystem,
+      contracts: [
+        ...starterSystem.contracts,
+        {
+          id: "swarm-test",
+          title: "Swarm Test",
+          briefing: "Survive a larger enemy wave.",
+          riskLabel: "Enemy Wave",
+          rewardLabel: "Combat style bonuses",
+          pickupId: "north-pad",
+          destinationId: "dock-a",
+          cargoId: "bottled-starlight",
+          enemyWave: { drones: 3, fighters: 2, brutes: 1 },
+          medalTimes: { bronze: 82, silver: 50, gold: 30 }
+        }
+      ]
+    };
+
+    const world = createWorldFromSystem(waveSystem, "combat-wave-seed", { contractId: "swarm-test" });
+    const snapshot = combatSnapshot(world);
+
+    expect(snapshot.enemies.map((enemy) => enemy.archetype)).toEqual(["fighter", "fighter", "drone", "drone", "drone", "brute"]);
+    expect(new Set(snapshot.enemies.map((enemy) => enemy.id)).size).toBe(6);
+    expect(snapshot.enemies.find((enemy) => enemy.archetype === "brute")).toMatchObject({
+      hp: 78,
+      radius: 20
+    });
   });
 
   it("starts with a selected run perk and deterministic risk gates", () => {
@@ -2530,12 +2590,17 @@ describe("deterministic Astro Courier simulation", () => {
 
 type CombatEnemyForTest = {
   id: string;
+  archetype: "drone" | "fighter" | "brute";
   position: Vec2;
   velocity: Vec2;
   rotation: number;
   hp: number;
   maxHp: number;
   radius: number;
+  maxSpeed: number;
+  acceleration: number;
+  projectileDamage: number;
+  fireCooldownBaseSeconds: number;
   fireCooldownSeconds: number;
   contactCooldownSeconds: number;
   policy: "patrol" | "chase" | "evade";
@@ -2592,12 +2657,17 @@ function distanceBetweenTest(left: Vec2, right: Vec2): number {
 function testEnemy(id: string, position: Vec2, options: { hp?: number } = {}): CombatEnemyForTest {
   return {
     id,
+    archetype: "fighter",
     position,
     velocity: { x: 0, y: 0 },
     rotation: 0,
     hp: options.hp ?? 40,
     maxHp: 40,
     radius: 14,
+    maxSpeed: 26,
+    acceleration: 17,
+    projectileDamage: 8,
+    fireCooldownBaseSeconds: 4.4,
     fireCooldownSeconds: 999,
     contactCooldownSeconds: 0,
     policy: "patrol"

@@ -51,6 +51,16 @@ export const contractShipStartSchema = z.object({
   fuel: z.number().positive().optional()
 });
 
+export const enemyWaveSchema = z
+  .object({
+    drones: z.number().int().min(0).max(8).optional(),
+    fighters: z.number().int().min(0).max(8).optional(),
+    brutes: z.number().int().min(0).max(4).optional()
+  })
+  .refine((wave) => (wave.drones ?? 0) + (wave.fighters ?? 0) + (wave.brutes ?? 0) > 0, {
+    message: "enemyWave must contain at least one ship"
+  });
+
 export const contractSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1),
@@ -64,6 +74,7 @@ export const contractSchema = z.object({
   hazardSeverityMultiplier: z.number().positive().max(3).optional(),
   hazards: z.array(hazardSchema).optional(),
   riskGateCount: z.number().int().min(0).max(12).optional(),
+  enemyWave: enemyWaveSchema.optional(),
   medalTimes: z
     .object({
       bronze: z.number().positive(),

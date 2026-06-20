@@ -58,6 +58,15 @@ describe("enemy director worker", () => {
       const body = JSON.parse(String(init.body));
       expect(body.model).toBe("gpt-5.4-mini");
       expect(body.text.format.type).toBe("json_schema");
+      expect(body.max_output_tokens).toBe(120);
+      expect(JSON.parse(body.input[1].content)).toMatchObject({
+        quality: "standard",
+        enemies: [
+          {
+            archetype: "fighter"
+          }
+        ]
+      });
       expect(init.headers).toMatchObject({
         Authorization: "Bearer test-openai-key",
         "Content-Type": "application/json"
@@ -68,7 +77,7 @@ describe("enemy director worker", () => {
             aggression: 3,
             flank: -2,
             fireBias: 2,
-            retreatHp: -10,
+            retreatHp: 100,
             focus: "player"
           })
         }),
@@ -93,8 +102,62 @@ describe("enemy director worker", () => {
         aggression: 1,
         flank: -1,
         fireBias: 1,
-        retreatHp: 0,
+        retreatHp: 78,
         focus: "player"
+      }
+    });
+  });
+
+  it("uses a larger OpenAI budget and wider enemy slice for cinematic quality", async () => {
+    const fetchOpenAI = vi.fn(async (_url: string, init: RequestInit) => {
+      const body = JSON.parse(String(init.body));
+      const userState = JSON.parse(body.input[1].content);
+
+      expect(body.max_output_tokens).toBe(220);
+      expect(userState.quality).toBe("cinematic");
+      expect(userState.enemies).toHaveLength(6);
+      return new Response(
+        JSON.stringify({
+          output_text: JSON.stringify({
+            aggression: 0.72,
+            flank: 0.35,
+            fireBias: 0.62,
+            retreatHp: 22,
+            focus: "objective"
+          })
+        }),
+        { status: 200 }
+      );
+    });
+    const worker = createEnemyDirectorWorker({ fetchOpenAI });
+
+    const response = await worker.fetch(
+      new Request(endpoint, {
+        method: "POST",
+        body: JSON.stringify({
+          ...validDirectorRequest(),
+          quality: "cinematic",
+          enemies: Array.from({ length: 6 }, (_, index) => ({
+            id: `enemy-${index}`,
+            archetype: index === 5 ? "brute" : "drone",
+            hp: 20,
+            position: { x: 180 + index * 12, y: -10 },
+            distance: 64 + index
+          }))
+        })
+      }),
+      testEnv()
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      mode: "openai",
+      policy: {
+        aggression: 0.72,
+        flank: 0.35,
+        fireBias: 0.62,
+        retreatHp: 22,
+        focus: "objective"
       }
     });
   });
@@ -146,6 +209,7 @@ function validDirectorRequest() {
     enemies: [
       {
         id: "interceptor-a",
+        archetype: "fighter",
         hp: 40,
         position: { x: 180, y: -10 },
         distance: 64

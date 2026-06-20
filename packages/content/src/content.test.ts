@@ -17,9 +17,16 @@ describe("content schemas", () => {
       "gravity-lockpick",
       "solar-thread",
       "chain-relay",
+      "interceptor-swarm",
+      "black-forge-capture",
       "antimatter-drift",
       "last-drop-run"
     ]);
+    expect(parsed.planets.find((planet) => planet.id === "black-forge")).toMatchObject({
+      name: "Forge Prime",
+      visualTheme: "black_metal",
+      radius: 58
+    });
     expect(parsed.contracts.find((contract) => contract.id === "asteroid-sprint")?.briefing ?? "").toContain("asteroid");
     expect(parsed.contracts.find((contract) => contract.id === "asteroid-sprint")?.riskLabel).toBe("Asteroid Field");
     expect(parsed.contracts.find((contract) => contract.id === "asteroid-sprint")?.rewardLabel).toBe("Skim style bonuses");
@@ -80,6 +87,23 @@ describe("content schemas", () => {
       hazardSeverityMultiplier: 1.3,
       medalTimes: { bronze: 64, silver: 38, gold: 22 }
     });
+    expect(parsed.contracts.find((contract) => contract.id === "interceptor-swarm")).toMatchObject({
+      title: "Interceptor Swarm",
+      riskLabel: "Enemy Wave",
+      rewardLabel: "Combat style bonuses",
+      cargoId: "midnight-medicine",
+      enemyWave: { drones: 4, fighters: 2, brutes: 0 },
+      medalTimes: { bronze: 82, silver: 50, gold: 30 }
+    });
+    expect(parsed.contracts.find((contract) => contract.id === "black-forge-capture")).toMatchObject({
+      title: "Black Forge Capture",
+      riskLabel: "Raid Objective",
+      rewardLabel: "Capture bonuses",
+      destinationId: "forge-dock",
+      cargoId: "capture-beacon",
+      enemyWave: { drones: 2, fighters: 2, brutes: 1 },
+      medalTimes: { bronze: 96, silver: 58, gold: 36 }
+    });
     expect(parsed.contracts.find((contract) => contract.id === "antimatter-drift")).toMatchObject({
       title: "Antimatter Drift",
       riskLabel: "Unstable Cargo",
@@ -125,6 +149,11 @@ describe("content schemas", () => {
       name: "Labyrinth Relay Core",
       kind: "magnetic",
       fragility: 0.85
+    });
+    expect(parsed.cargo.find((cargo) => cargo.id === "capture-beacon")).toMatchObject({
+      name: "Capture Beacon",
+      kind: "magnetic",
+      fragility: 0.82
     });
     expect(parsed.contracts.find((contract) => contract.id === "return-leg")?.shipStart?.position).toEqual([360, -140]);
     expect(parsed.planets[0]?.landingPads[0]?.allowedApproachSpeed).toBeGreaterThan(0);

@@ -12,7 +12,10 @@ export type EnemyDirectorWorkerDeps = {
   fetchOpenAI?: (url: string, init: RequestInit) => Promise<Response>;
 };
 
+type EnemyDirectorQuality = "standard" | "cinematic";
+
 type EnemyDirectorRequest = {
+  quality: EnemyDirectorQuality;
   tick: number;
   objectivePhase: "pickup" | "delivery" | "complete";
   ship: {
@@ -22,6 +25,7 @@ type EnemyDirectorRequest = {
   };
   enemies: Array<{
     id: string;
+    archetype?: "drone" | "fighter" | "brute";
     hp: number;
     position: Vec2;
     distance: number;
@@ -96,7 +100,10 @@ async function readDirectorRequest(request: Request): Promise<EnemyDirectorReque
     if (!isDirectorRequest(body)) {
       return undefined;
     }
-    return body;
+    return {
+      ...body,
+      quality: body.quality ?? "standard"
+    };
   } catch {
     return undefined;
   }
@@ -109,6 +116,7 @@ function isDirectorRequest(value: unknown): value is EnemyDirectorRequest {
   const candidate = value as EnemyDirectorRequest;
   return (
     Number.isFinite(candidate.tick) &&
+    (candidate.quality === undefined || candidate.quality === "standard" || candidate.quality === "cinematic") &&
     (candidate.objectivePhase === "pickup" || candidate.objectivePhase === "delivery" || candidate.objectivePhase === "complete") &&
     isShip(candidate.ship) &&
     Array.isArray(candidate.enemies) &&
@@ -131,6 +139,10 @@ function isEnemy(value: unknown): value is EnemyDirectorRequest["enemies"][numbe
   const candidate = value as EnemyDirectorRequest["enemies"][number];
   return (
     typeof candidate.id === "string" &&
+    (candidate.archetype === undefined ||
+      candidate.archetype === "drone" ||
+      candidate.archetype === "fighter" ||
+      candidate.archetype === "brute") &&
     Number.isFinite(candidate.hp) &&
     Number.isFinite(candidate.distance) &&
     isVec2(candidate.position)
@@ -180,21 +192,28 @@ async function requestOpenAIPolicy(
 }
 
 function buildOpenAIRequest(model: string, directorRequest: EnemyDirectorRequest) {
+  const quality = directorRequest.quality;
+  const enemyLimit = quality === "cinematic" ? 8 : 4;
+  const maxOutputTokens = quality === "cinematic" ? 220 : 120;
   return {
     model,
+    max_output_tokens: maxOutputTokens,
     input: [
       {
         role: "system",
         content:
-          "You are the Astro Courier enemy director. Return only compact JSON. Tune enemies for fun pressure, not unfair hits."
+          quality === "cinematic"
+            ? "You are the Astro Courier enemy director. Return only compact JSON. Coordinate varied enemy archetypes for cinematic pressure, readable flanks, and fair recoveries."
+            : "You are the Astro Courier enemy director. Return only compact JSON. Tune enemies for fun pressure, not unfair hits."
       },
       {
         role: "user",
         content: JSON.stringify({
+          quality,
           tick: directorRequest.tick,
           phase: directorRequest.objectivePhase,
           ship: directorRequest.ship,
-          enemies: directorRequest.enemies.slice(0, 4)
+          enemies: directorRequest.enemies.slice(0, enemyLimit)
         })
       }
     ],
@@ -211,7 +230,7 @@ function buildOpenAIRequest(model: string, directorRequest: EnemyDirectorRequest
             aggression: { type: "number", minimum: 0, maximum: 1 },
             flank: { type: "number", minimum: -1, maximum: 1 },
             fireBias: { type: "number", minimum: 0, maximum: 1 },
-            retreatHp: { type: "number", minimum: 0, maximum: 40 },
+            retreatHp: { type: "number", minimum: 0, maximum: 78 },
             focus: { type: "string", enum: ["cargo", "player", "objective"] }
           }
         }
@@ -244,7 +263,7 @@ function clampPolicy(policy: Partial<EnemyDirectorPolicy>): EnemyDirectorPolicy 
     aggression: clampNumber(policy.aggression, 0, 1, fallbackPolicy.aggression),
     flank: clampNumber(policy.flank, -1, 1, fallbackPolicy.flank),
     fireBias: clampNumber(policy.fireBias, 0, 1, fallbackPolicy.fireBias),
-    retreatHp: clampNumber(policy.retreatHp, 0, 40, fallbackPolicy.retreatHp),
+    retreatHp: clampNumber(policy.retreatHp, 0, 78, fallbackPolicy.retreatHp),
     focus: policy.focus === "player" || policy.focus === "objective" || policy.focus === "cargo" ? policy.focus : fallbackPolicy.focus
   };
 }

@@ -325,6 +325,33 @@ describe("GameShell lifecycle", () => {
         medalTimes: { bronze: 64, silver: 38, gold: 22 }
       },
       {
+        id: "interceptor-swarm",
+        title: "Interceptor Swarm",
+        briefing: "Carry medicine through a light raider screen. Keep moving, burst fire, and do not let drones box the lane.",
+        riskLabel: "Enemy Wave",
+        rewardLabel: "Combat style bonuses",
+        pickupLabel: "Luma North Pad",
+        destinationLabel: "Tea Station Dock A",
+        cargoName: "Midnight Medicine",
+        cargoKind: "time-sensitive",
+        cargoFragility: 0.9,
+        medalTimes: { bronze: 82, silver: 50, gold: 30 }
+      },
+      {
+        id: "black-forge-capture",
+        title: "Black Forge Capture",
+        briefing: "Plant a capture beacon on Forge Prime. Break through the raider guard, touch the black-metal dock, and leave the beacon armed.",
+        riskLabel: "Raid Objective",
+        rewardLabel: "Capture bonuses",
+        pickupLabel: "Luma North Pad",
+        destinationLabel: "Forge Prime Forge Dock",
+        cargoName: "Capture Beacon",
+        cargoKind: "magnetic",
+        cargoFragility: 0.82,
+        hazardSeverityMultiplier: 1.25,
+        medalTimes: { bronze: 96, silver: 58, gold: 36 }
+      },
+      {
         id: "antimatter-drift",
         title: "Antimatter Drift",
         briefing: "Carry an unstable antimatter vial on a lean tank. Brake taps rattle the containment, so coast the arc and dock clean.",

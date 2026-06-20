@@ -20,6 +20,8 @@ import {
   buildRouteBoardSelectionAction,
   buildRouteBoardTarget,
   buildRouteMarkReceipt,
+  buildShipUpgradeSummary,
+  buildShipUpgradeTrack,
   getBestRun,
   recordBestRun
 } from "./bestRun";
@@ -592,6 +594,58 @@ describe("route board campaign progress copy", () => {
       detail: "12/12 route marks",
       tone: "complete",
       progress: 1
+    });
+  });
+});
+
+describe("ship upgrade progression copy", () => {
+  const contracts = [
+    { id: "first-light-delivery" },
+    { id: "return-leg" },
+    { id: "asteroid-sprint" },
+    { id: "gravity-slingshot" },
+    { id: "black-forge-capture" }
+  ];
+
+  it("starts with the boost tune online and points at the next upgrade", () => {
+    const track = buildShipUpgradeTrack(contracts, {});
+
+    expect(track).toEqual([
+      { id: "boost-tune", label: "Boost Tune", value: "Boost", requiredMarks: 0, marksRemaining: 0, unlocked: true, tone: "online" },
+      { id: "reinforced-hull", label: "Reinforced Hull", value: "+HP", requiredMarks: 3, marksRemaining: 3, unlocked: false, tone: "next" },
+      { id: "pulse-rail", label: "Pulse Rail", value: "Shot", requiredMarks: 7, marksRemaining: 7, unlocked: false, tone: "locked" },
+      { id: "mag-clamp", label: "Mag Clamp", value: "Pickup", requiredMarks: 12, marksRemaining: 12, unlocked: false, tone: "locked" },
+      { id: "forge-core", label: "Forge Core", value: "Raid", requiredMarks: 18, marksRemaining: 18, unlocked: false, tone: "locked" }
+    ]);
+    expect(buildShipUpgradeSummary(track)).toEqual({
+      label: "Ship rank",
+      value: "1/5 online",
+      detail: "3 marks to Reinforced Hull",
+      tone: "starter"
+    });
+  });
+
+  it("unlocks upgrade tiers from route marks and marks the next tier", () => {
+    const track = buildShipUpgradeTrack(contracts, {
+      "first-light-delivery": {
+        score: 3200,
+        elapsedSeconds: 22.4,
+        medal: "comet",
+        ghostTrail: [
+          { x: 0, y: 0 },
+          { x: 12, y: 8 }
+        ]
+      },
+      "return-leg": { score: 2900, elapsedSeconds: 28.1, medal: "comet" },
+      "asteroid-sprint": { score: 1700, elapsedSeconds: 41.2, medal: "silver" }
+    });
+
+    expect(track.map((item) => item.tone)).toEqual(["online", "online", "next", "locked", "locked"]);
+    expect(buildShipUpgradeSummary(track)).toEqual({
+      label: "Ship rank",
+      value: "2/5 online",
+      detail: "1 mark to Pulse Rail",
+      tone: "upgrade"
     });
   });
 });

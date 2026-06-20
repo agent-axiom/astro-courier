@@ -44,6 +44,8 @@ export type ScoreBreakdown = {
   total: number;
 };
 
+export type EnemyShipArchetype = "drone" | "fighter" | "brute";
+
 export type EnemyDirectorPolicy = {
   aggression: number;
   flank: number;
@@ -142,6 +144,7 @@ export type SimulationSnapshot = {
   };
   enemies: Array<{
     id: string;
+    archetype: EnemyShipArchetype;
     position: Vec2;
     velocity: Vec2;
     rotation: number;
@@ -169,6 +172,7 @@ export type SimulationSnapshot = {
   gravitySources: Array<{
     id: string;
     name: string;
+    visualTheme: string;
     position: Vec2;
     radius: number;
     influenceRadius: number;

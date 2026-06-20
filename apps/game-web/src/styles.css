@@ -3583,6 +3583,114 @@ button {
   color: #8ee6b8;
 }
 
+.ship-upgrade-track {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.72fr) minmax(0, 1.28fr);
+  align-items: stretch;
+  gap: 7px;
+  width: min(100%, 620px);
+  justify-self: center;
+}
+
+.ship-upgrade-summary,
+.ship-upgrade-chip {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 7px;
+  background: rgba(10, 18, 36, 0.68);
+  color: #eaf4ff;
+}
+
+.ship-upgrade-summary {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  align-items: center;
+  gap: 3px 7px;
+  min-height: 44px;
+  padding: 7px 9px;
+}
+
+.ship-upgrade-summary svg {
+  grid-row: 1 / 3;
+  color: #ffd166;
+}
+
+.ship-upgrade-summary span,
+.ship-upgrade-summary strong,
+.ship-upgrade-chip small,
+.ship-upgrade-chip strong {
+  min-width: 0;
+  overflow: hidden;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ship-upgrade-summary span {
+  font-size: 0.68rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.ship-upgrade-summary strong {
+  color: #b9c6df;
+  font-size: 0.67rem;
+  font-weight: 850;
+}
+
+.ship-upgrade-list {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.ship-upgrade-chip {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr);
+  align-items: center;
+  gap: 2px 5px;
+  min-height: 44px;
+  padding: 7px;
+}
+
+.ship-upgrade-chip svg {
+  grid-row: 1 / 3;
+}
+
+.ship-upgrade-chip small {
+  color: #b9c6df;
+  font-size: 0.58rem;
+  font-weight: 850;
+}
+
+.ship-upgrade-chip strong {
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 950;
+}
+
+.ship-upgrade-chip-online {
+  border-color: rgba(142, 230, 184, 0.48);
+  background: rgba(42, 111, 86, 0.23);
+}
+
+.ship-upgrade-chip-online svg {
+  color: #8ee6b8;
+}
+
+.ship-upgrade-chip-next {
+  border-color: rgba(255, 209, 102, 0.6);
+  background: rgba(255, 209, 102, 0.13);
+}
+
+.ship-upgrade-chip-next svg,
+.ship-upgrade-chip-next strong {
+  color: #ffd166;
+}
+
+.ship-upgrade-chip-locked {
+  opacity: 0.56;
+}
+
 .preflight-mini-goals {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -6733,6 +6841,7 @@ button {
   .preflight-kicker,
   .preflight-cover-art,
   .perk-selector,
+  .ship-upgrade-track,
   .preflight-mini-goals,
   .preflight-overlay h2,
   .preflight-overlay p,
@@ -7059,6 +7168,41 @@ button {
   .perk-selector {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 6px;
+  }
+
+  .ship-upgrade-track {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .ship-upgrade-summary {
+    display: none;
+  }
+
+  .ship-upgrade-list {
+    gap: 5px;
+  }
+
+  .ship-upgrade-chip {
+    grid-template-columns: 1fr;
+    min-height: 36px;
+    place-items: center;
+    gap: 2px;
+    padding: 5px 4px;
+  }
+
+  .ship-upgrade-chip svg {
+    grid-row: auto;
+  }
+
+  .ship-upgrade-chip small {
+    display: none;
+  }
+
+  .ship-upgrade-chip strong {
+    max-width: 100%;
+    font-size: 0.58rem;
+    text-align: center;
   }
 
   .perk-card {

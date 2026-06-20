@@ -45,11 +45,14 @@ import {
   buildRouteBoardSelectionAction,
   buildRouteBoardTarget,
   buildRouteMarkReceipt,
+  buildShipUpgradeSummary,
+  buildShipUpgradeTrack,
   getBestRun,
   recordBestRun,
   type BestRun,
   type RouteBoardCampaignMilestoneReceipt,
-  type RouteMarkReceipt
+  type RouteMarkReceipt,
+  type ShipUpgradeTrackItem
 } from "./game/bestRun";
 import { GameShell, type HudState } from "./game/GameShell";
 import { createEnemyDirectorClient } from "./game/enemyDirector";
@@ -341,7 +344,11 @@ export function App() {
     const shell = new GameShell({
       mount: canvasMountRef.current,
       onHud: setHud,
-      enemyDirector: createEnemyDirectorClient(import.meta.env.VITE_ENEMY_DIRECTOR_URL as string | undefined),
+      enemyDirector: createEnemyDirectorClient(
+        import.meta.env.VITE_ENEMY_DIRECTOR_URL as string | undefined,
+        undefined,
+        import.meta.env.VITE_ENEMY_DIRECTOR_QUALITY === "cinematic" ? "cinematic" : "standard"
+      ),
       initialPaused: true
     });
     shellRef.current = shell;
@@ -1159,6 +1166,8 @@ export function App() {
   const routeBoardCampaignMilestoneTarget = buildRouteBoardCampaignMilestoneTarget(hud.contractOptions, bestRunsByContract);
   const routeBoardMastery = buildRouteBoardMastery(hud.contractOptions, bestRunsByContract);
   const routeBoardTarget = buildRouteBoardTarget(hud.contractOptions, bestRunsByContract);
+  const shipUpgradeTrack = buildShipUpgradeTrack(hud.contractOptions, bestRunsByContract);
+  const shipUpgradeSummary = buildShipUpgradeSummary(shipUpgradeTrack);
   const routeTargetSelectionAction = buildRouteBoardSelectionAction(routeBoardTarget, hud.contractId);
   const currentDate = new Date();
   const dailyDispatch = buildDailyDispatch({ contracts: hud.contractOptions, now: currentDate });
@@ -2213,6 +2222,25 @@ export function App() {
               ))}
             </div>
           ) : null}
+          <div
+            className={`ship-upgrade-track ship-upgrade-track-${shipUpgradeSummary.tone}`}
+            aria-label={`${shipUpgradeSummary.label}: ${shipUpgradeSummary.value}. ${shipUpgradeSummary.detail}`}
+          >
+            <div className="ship-upgrade-summary">
+              <Star size={15} />
+              <span>{shipUpgradeSummary.value}</span>
+              <strong>{shipUpgradeSummary.detail}</strong>
+            </div>
+            <div className="ship-upgrade-list" aria-hidden="true">
+              {shipUpgradeTrack.map((upgrade) => (
+                <span key={upgrade.id} className={`ship-upgrade-chip ship-upgrade-chip-${upgrade.tone}`}>
+                  {renderShipUpgradeIcon(upgrade)}
+                  <small>{upgrade.label}</small>
+                  <strong>{upgrade.unlocked ? upgrade.value : `${upgrade.marksRemaining}`}</strong>
+                </span>
+              ))}
+            </div>
+          </div>
           <div className="preflight-mini-goals" aria-label="Launch goals">
             {preflightPuzzleGoals.map((goal) => (
               <span
@@ -3034,6 +3062,14 @@ type MetricProps = {
   tone: "normal" | "warning" | "danger";
   showLabel: boolean;
 };
+
+function renderShipUpgradeIcon(upgrade: ShipUpgradeTrackItem): React.ReactNode {
+  if (upgrade.id === "reinforced-hull") return <ShieldAlert size={15} />;
+  if (upgrade.id === "pulse-rail") return <Crosshair size={15} />;
+  if (upgrade.id === "mag-clamp") return <PackageCheck size={15} />;
+  if (upgrade.id === "forge-core") return <Target size={15} />;
+  return <Zap size={15} />;
+}
 
 function renderPreflightPuzzleGoalIcon(goal: PreflightPuzzleGoal): React.ReactNode {
   if (goal.label === "Route") return <MapPin size={16} />;

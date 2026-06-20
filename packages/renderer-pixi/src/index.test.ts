@@ -10,6 +10,7 @@ import {
   enemyShipVisual,
   ghostTrailSegmentVisual,
   ghostTrailPointVisual,
+  gravitySourceVisual,
   gravitySurfaceRimVisual,
   gravitySurfaceWarningVisual,
   gravitySlingCueVisual,
@@ -112,6 +113,29 @@ describe("combat visuals", () => {
     expect(enemyShipVisual({ policy: "evade", hp: 8, maxHp: 40 })).toMatchObject({
       color: 0xffd166,
       alpha: 0.55
+    });
+  });
+
+  it("distinguishes enemy archetypes by silhouette, scale, and accent", () => {
+    expect(enemyShipVisual({ archetype: "drone", policy: "chase", hp: 22, maxHp: 22 })).toMatchObject({
+      archetype: "drone",
+      silhouette: "dart",
+      radius: 11,
+      wingScale: 0.72,
+      beamColor: 0x7ce1ff
+    });
+    expect(enemyShipVisual({ archetype: "fighter", policy: "chase", hp: 40, maxHp: 40 })).toMatchObject({
+      archetype: "fighter",
+      silhouette: "blade",
+      radius: 16,
+      wingScale: 0.9
+    });
+    expect(enemyShipVisual({ archetype: "brute", policy: "chase", hp: 78, maxHp: 78 })).toMatchObject({
+      archetype: "brute",
+      silhouette: "breaker",
+      radius: 22,
+      wingScale: 1.18,
+      beamColor: 0xffd166
     });
   });
 
@@ -774,6 +798,7 @@ describe("trajectory gravity sling signal", () => {
     {
       id: "luma",
       name: "Luma",
+      visualTheme: "blue_garden",
       position: { x: 0, y: 0 },
       radius: 64,
       influenceRadius: 360
@@ -1139,6 +1164,20 @@ describe("gravity sling cue visual", () => {
     expect(ready?.width).toBeGreaterThan(setup?.width ?? 0);
     expect(ready?.alpha).toBeGreaterThan(setup?.alpha ?? 0);
     expect(ready?.dashRadius).toBeGreaterThan(setup?.dashRadius ?? 0);
+  });
+});
+
+describe("gravity source visual", () => {
+  it("uses a black-metal palette for artificial capture planets", () => {
+    expect(gravitySourceVisual("black_metal")).toEqual({
+      haloColor: 0x171923,
+      bodyColor: 0x05070c,
+      highlightColor: 0x8ee6ff,
+      rimColor: 0xd7fbff,
+      craterColor: 0x2b2f3a,
+      haloAlpha: 0.72,
+      highlightAlpha: 0.22
+    });
   });
 });
 

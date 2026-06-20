@@ -41,6 +41,14 @@ describe("preflight overlay density wiring", () => {
     expect(appSource).toContain("renderPreflightPuzzleGoalIcon(goal)");
   });
 
+  it("renders compact ship upgrade progression in preflight", () => {
+    expect(appSource).toContain("const shipUpgradeTrack = buildShipUpgradeTrack(hud.contractOptions, bestRunsByContract)");
+    expect(appSource).toContain("const shipUpgradeSummary = buildShipUpgradeSummary(shipUpgradeTrack)");
+    expect(appSource).toContain('className={`ship-upgrade-track ship-upgrade-track-${shipUpgradeSummary.tone}`}');
+    expect(appSource).toContain("shipUpgradeTrack.map((upgrade) =>");
+    expect(appSource).toContain("renderShipUpgradeIcon(upgrade)");
+  });
+
   it("wires the first-run courier license cue without opening a tutorial panel", () => {
     expect(appSource).toContain('from "./game/courierLicense"');
     expect(appSource).toContain("const courierLicenseCue = buildCourierLicenseCue({");

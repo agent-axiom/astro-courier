@@ -71,3 +71,5 @@ Then set the GitHub repository variable `VITE_ENEMY_DIRECTOR_URL` to:
 ```text
 https://astro-courier-enemy-director.<your-subdomain>.workers.dev/enemy-director
 ```
+
+Optional: set `VITE_ENEMY_DIRECTOR_QUALITY=cinematic` to let the Worker send a wider enemy snapshot and a larger OpenAI response budget for richer combat direction.

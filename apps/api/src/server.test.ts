@@ -131,11 +131,11 @@ describe("Astro Courier API", () => {
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({
       label: "Daily dispatch",
-      value: "Chain Relay",
+      value: "Return Leg",
       systemId: "starter-route",
       date: "2026-06-13",
-      contractId: "chain-relay",
-      seed: "daily-2026-06-13-chain-relay",
+      contractId: "return-leg",
+      seed: "daily-2026-06-13-return-leg",
       resetsAt: "2026-06-14T00:00:00.000Z"
     });
   });

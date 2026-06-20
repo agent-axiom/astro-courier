@@ -31,6 +31,25 @@
           "requiredAngleTolerance": 0.75
         }
       ]
+    },
+    {
+      "id": "black-forge",
+      "name": "Forge Prime",
+      "position": [660, -260],
+      "radius": 58,
+      "gravityMass": 920,
+      "influenceRadius": 260,
+      "visualTheme": "black_metal",
+      "landingPads": [
+        {
+          "id": "forge-dock",
+          "position": [590, -260],
+          "normalAngle": 3.141592653589793,
+          "radius": 22,
+          "allowedApproachSpeed": 34,
+          "requiredAngleTolerance": 0.82
+        }
+      ]
     }
   ],
   "stations": [
@@ -272,6 +291,76 @@
       }
     },
     {
+      "id": "interceptor-swarm",
+      "title": "Interceptor Swarm",
+      "briefing": "Carry medicine through a light raider screen. Keep moving, burst fire, and do not let drones box the lane.",
+      "riskLabel": "Enemy Wave",
+      "rewardLabel": "Combat style bonuses",
+      "shipStart": {
+        "position": [170, 18],
+        "velocity": [8, 22],
+        "rotation": 1.5707963267948966,
+        "fuel": 82
+      },
+      "pickupId": "north-pad",
+      "destinationId": "dock-a",
+      "cargoId": "midnight-medicine",
+      "enemyWave": {
+        "drones": 4,
+        "fighters": 2,
+        "brutes": 0
+      },
+      "medalTimes": {
+        "bronze": 82,
+        "silver": 50,
+        "gold": 30
+      }
+    },
+    {
+      "id": "black-forge-capture",
+      "title": "Black Forge Capture",
+      "briefing": "Plant a capture beacon on Forge Prime. Break through the raider guard, touch the black-metal dock, and leave the beacon armed.",
+      "riskLabel": "Raid Objective",
+      "rewardLabel": "Capture bonuses",
+      "shipStart": {
+        "position": [185, 18],
+        "velocity": [10, 24],
+        "rotation": 1.5707963267948966,
+        "fuel": 94
+      },
+      "pickupId": "north-pad",
+      "destinationId": "forge-dock",
+      "cargoId": "capture-beacon",
+      "hazardSeverityMultiplier": 1.25,
+      "riskGateCount": 2,
+      "enemyWave": {
+        "drones": 2,
+        "fighters": 2,
+        "brutes": 1
+      },
+      "hazards": [
+        {
+          "id": "forge-radiation-a",
+          "type": "radiation",
+          "position": [505, -205],
+          "radius": 42,
+          "severity": 0.46
+        },
+        {
+          "id": "forge-ripple-b",
+          "type": "gravity_ripple",
+          "position": [612, -330],
+          "radius": 48,
+          "severity": 0.5
+        }
+      ],
+      "medalTimes": {
+        "bronze": 96,
+        "silver": 58,
+        "gold": 36
+      }
+    },
+    {
       "id": "antimatter-drift",
       "title": "Antimatter Drift",
       "briefing": "Carry an unstable antimatter vial on a lean tank. Brake taps rattle the containment, so coast the arc and dock clean.",
@@ -344,6 +433,12 @@
       "name": "Labyrinth Relay Core",
       "kind": "magnetic",
       "fragility": 0.85
+    },
+    {
+      "id": "capture-beacon",
+      "name": "Capture Beacon",
+      "kind": "magnetic",
+      "fragility": 0.82
     }
   ]
 }

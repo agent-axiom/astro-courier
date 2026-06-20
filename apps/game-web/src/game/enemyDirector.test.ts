@@ -9,7 +9,8 @@ describe("enemy director client", () => {
   });
 
   it("builds a reduced request from a simulation snapshot", () => {
-    expect(buildEnemyDirectorRequest(testSnapshot())).toEqual({
+    expect(buildEnemyDirectorRequest(testSnapshot(), "cinematic")).toEqual({
+      quality: "cinematic",
       tick: 240,
       objectivePhase: "delivery",
       ship: {
@@ -20,6 +21,7 @@ describe("enemy director client", () => {
       enemies: [
         {
           id: "interceptor-a",
+          archetype: "fighter",
           hp: 30,
           position: { x: 40, y: 60 },
           distance: 50
@@ -33,6 +35,7 @@ describe("enemy director client", () => {
       expect(_url).toBe("https://director.example/enemy-director");
       expect(init.method).toBe("POST");
       expect(JSON.parse(String(init.body))).toMatchObject({
+        quality: "standard",
         tick: 240,
         objectivePhase: "delivery"
       });
@@ -61,6 +64,29 @@ describe("enemy director client", () => {
         focus: "player"
       }
     });
+  });
+
+  it("can request a cinematic director budget", async () => {
+    const fetchImpl = vi.fn(async (_url: string, init: RequestInit) => {
+      expect(JSON.parse(String(init.body))).toMatchObject({
+        quality: "cinematic"
+      });
+      return new Response(
+        JSON.stringify({
+          mode: "fallback",
+          policy: {
+            aggression: 0.45,
+            flank: 0,
+            fireBias: 0.4,
+            retreatHp: 28,
+            focus: "cargo"
+          }
+        })
+      );
+    });
+    const client = createEnemyDirectorClient("https://director.example/enemy-director", fetchImpl, "cinematic");
+
+    await client?.requestPolicy(testSnapshot());
   });
 
   it("falls back silently when the worker is unavailable", async () => {
@@ -105,6 +131,7 @@ function testSnapshot(): SimulationSnapshot {
     enemies: [
       {
         id: "interceptor-a",
+        archetype: "fighter",
         position: { x: 40, y: 60 },
         velocity: { x: 0, y: 0 },
         rotation: 0,

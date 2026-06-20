@@ -146,10 +146,36 @@ export type RouteMarkReceipt = {
   tone: "clear" | "comet" | "ghost";
 };
 
+export type ShipUpgradeId = "boost-tune" | "reinforced-hull" | "pulse-rail" | "mag-clamp" | "forge-core";
+
+export type ShipUpgradeTrackItem = {
+  id: ShipUpgradeId;
+  label: "Boost Tune" | "Reinforced Hull" | "Pulse Rail" | "Mag Clamp" | "Forge Core";
+  value: "Boost" | "+HP" | "Shot" | "Pickup" | "Raid";
+  requiredMarks: number;
+  marksRemaining: number;
+  unlocked: boolean;
+  tone: "online" | "next" | "locked";
+};
+
+export type ShipUpgradeSummary = {
+  label: "Ship rank";
+  value: `${number}/${number} online`;
+  detail: "All systems online" | `${number} mark to ${ShipUpgradeTrackItem["label"]}` | `${number} marks to ${ShipUpgradeTrackItem["label"]}`;
+  tone: "starter" | "upgrade" | "complete";
+};
+
 type BestRunStorage = Pick<Storage, "getItem" | "setItem">;
 
 const bonusRouteIds = new Set(["asteroid-labyrinth"]);
 const puzzleRouteIds = new Set(["gravity-lockpick", "solar-thread"]);
+const shipUpgradeMilestones: readonly Omit<ShipUpgradeTrackItem, "marksRemaining" | "unlocked" | "tone">[] = [
+  { id: "boost-tune", label: "Boost Tune", value: "Boost", requiredMarks: 0 },
+  { id: "reinforced-hull", label: "Reinforced Hull", value: "+HP", requiredMarks: 3 },
+  { id: "pulse-rail", label: "Pulse Rail", value: "Shot", requiredMarks: 7 },
+  { id: "mag-clamp", label: "Mag Clamp", value: "Pickup", requiredMarks: 12 },
+  { id: "forge-core", label: "Forge Core", value: "Raid", requiredMarks: 18 }
+];
 
 export function getBestRun(storage: BestRunStorage, contractKey: string): BestRun | undefined {
   const raw = storage.getItem(storageKey(contractKey));
@@ -418,6 +444,46 @@ export function buildRouteBoardCampaignProgress(
     detail: `${earnedMarks}/${totalMarks} route marks`,
     tone: progress >= 0.75 ? "mastery" : "progress",
     progress
+  };
+}
+
+export function buildShipUpgradeTrack(
+  contracts: readonly RouteBoardContract[],
+  bestRunsByContract: Readonly<Record<string, BestRun | undefined>>
+): ShipUpgradeTrackItem[] {
+  const earnedMarks = routeMarksEarned(contracts, bestRunsByContract);
+  const nextLockedIndex = shipUpgradeMilestones.findIndex((upgrade) => earnedMarks < upgrade.requiredMarks);
+
+  return shipUpgradeMilestones.map((upgrade, index) => {
+    const unlocked = earnedMarks >= upgrade.requiredMarks;
+    return {
+      ...upgrade,
+      marksRemaining: Math.max(0, upgrade.requiredMarks - earnedMarks),
+      unlocked,
+      tone: unlocked ? "online" : index === nextLockedIndex ? "next" : "locked"
+    };
+  });
+}
+
+export function buildShipUpgradeSummary(track: readonly ShipUpgradeTrackItem[]): ShipUpgradeSummary {
+  const unlockedCount = track.filter((item) => item.unlocked).length;
+  const next = track.find((item) => !item.unlocked);
+  if (!next) {
+    return {
+      label: "Ship rank",
+      value: `${unlockedCount}/${track.length} online`,
+      detail: "All systems online",
+      tone: "complete"
+    };
+  }
+
+  const marksToGo = Math.max(1, next.marksRemaining);
+  const markLabel: "mark" | "marks" = marksToGo === 1 ? "mark" : "marks";
+  return {
+    label: "Ship rank",
+    value: `${unlockedCount}/${track.length} online`,
+    detail: `${marksToGo} ${markLabel} to ${next.label}`,
+    tone: unlockedCount <= 1 ? "starter" : "upgrade"
   };
 }
 
@@ -735,6 +801,13 @@ function routeMarks(bestRun: BestRun | undefined): number {
   }
 
   return 1 + (bestRun.medal === "comet" ? 1 : 0) + (hasReplayTrail(bestRun) ? 1 : 0);
+}
+
+function routeMarksEarned(
+  contracts: readonly RouteBoardContract[],
+  bestRunsByContract: Readonly<Record<string, BestRun | undefined>>
+): number {
+  return contracts.reduce((total, contract) => total + routeMarks(bestRunsByContract[contract.id]), 0);
 }
 
 const campaignMilestones: readonly (RouteBoardCampaignMilestoneReceipt & { progress: number })[] = [

@@ -1,4 +1,4 @@
-import type { LandingGuidanceStatus, SimulationSnapshot, Vec2 } from "@astro-courier/shared";
+import type { EnemyShipArchetype, LandingGuidanceStatus, SimulationSnapshot, Vec2 } from "@astro-courier/shared";
 import { Application, Container, Graphics } from "pixi.js";
 
 export type AstroPixiRenderer = {
@@ -930,16 +930,20 @@ export type CombatShipVisual = {
 };
 
 export type EnemyShipVisualInput = {
+  archetype?: EnemyShipArchetype;
   policy: "patrol" | "chase" | "evade";
   hp: number;
   maxHp: number;
 };
 
 export type EnemyShipVisual = {
+  archetype: EnemyShipArchetype;
+  silhouette: "dart" | "blade" | "breaker";
   color: number;
   beamColor: number;
   alpha: number;
   radius: number;
+  wingScale: number;
   warningAlpha: number;
 };
 
@@ -1004,6 +1008,16 @@ export type ShipBoostReadinessVisual = {
   alpha: number;
   progress: number;
   segments: number;
+};
+
+export type GravitySourceVisual = {
+  haloColor: number;
+  bodyColor: number;
+  highlightColor: number;
+  rimColor: number;
+  craterColor: number;
+  haloAlpha: number;
+  highlightAlpha: number;
 };
 
 export type ShipShieldReserveVisualInput = Pick<SimulationSnapshot, "status" | "emergencyShieldAvailable" | "tick">;
@@ -1123,30 +1137,95 @@ export function combatShipVisual(input: CombatShipVisualInput): CombatShipVisual
 export function enemyShipVisual(input: EnemyShipVisualInput): EnemyShipVisual {
   const hpRatio = input.maxHp > 0 ? clamp(input.hp / input.maxHp, 0, 1) : 0;
   const lowHp = hpRatio <= 0.35;
+  const archetype = input.archetype ?? "fighter";
+  const archetypeVisual = enemyArchetypeVisual(archetype);
+  const { chaseColor, chaseBeamColor, ...baseVisual } = archetypeVisual;
   if (input.policy === "evade" || lowHp) {
     return {
+      ...baseVisual,
       color: 0xffd166,
       beamColor: 0xfff0ad,
       alpha: 0.55,
-      radius: 15,
       warningAlpha: 0.32
     };
   }
   if (input.policy === "chase") {
     return {
-      color: 0xff6f91,
-      beamColor: 0xffb3c7,
+      ...baseVisual,
+      color: chaseColor,
+      beamColor: chaseBeamColor,
       alpha: 0.9,
-      radius: 16,
       warningAlpha: 0.18
     };
   }
   return {
-    color: 0xb36bff,
-    beamColor: 0xff7ab6,
+    ...baseVisual,
     alpha: 0.88,
-    radius: 15,
     warningAlpha: 0
+  };
+}
+
+function enemyArchetypeVisual(archetype: EnemyShipArchetype): Omit<EnemyShipVisual, "alpha" | "warningAlpha"> & {
+  chaseColor: number;
+  chaseBeamColor: number;
+} {
+  if (archetype === "drone") {
+    return {
+      archetype,
+      silhouette: "dart",
+      color: 0x5cc8ff,
+      chaseColor: 0x7ce1ff,
+      chaseBeamColor: 0x7ce1ff,
+      beamColor: 0x7ce1ff,
+      radius: 11,
+      wingScale: 0.72
+    };
+  }
+  if (archetype === "brute") {
+    return {
+      archetype,
+      silhouette: "breaker",
+      color: 0xd5683f,
+      chaseColor: 0xff8a3d,
+      chaseBeamColor: 0xffd166,
+      beamColor: 0xffd166,
+      radius: 22,
+      wingScale: 1.18
+    };
+  }
+  return {
+    archetype,
+    silhouette: "blade",
+    color: 0xb36bff,
+    chaseColor: 0xff6f91,
+    chaseBeamColor: 0xffb3c7,
+    beamColor: 0xff7ab6,
+    radius: 16,
+    wingScale: 0.9
+  };
+}
+
+export function gravitySourceVisual(visualTheme: string | undefined): GravitySourceVisual {
+  if (visualTheme === "black_metal") {
+    return {
+      haloColor: 0x171923,
+      bodyColor: 0x05070c,
+      highlightColor: 0x8ee6ff,
+      rimColor: 0xd7fbff,
+      craterColor: 0x2b2f3a,
+      haloAlpha: 0.72,
+      highlightAlpha: 0.22
+    };
+  }
+
+  return {
+    haloColor: 0x254a86,
+    bodyColor: 0x66c8ff,
+    highlightColor: 0xd7fbff,
+    rimColor: 0x9ce8ff,
+    craterColor: 0x4fa8d8,
+    haloAlpha: 0.45,
+    highlightAlpha: 0.35
   };
 }
 
@@ -2012,6 +2091,7 @@ class PixiRenderer implements AstroPixiRenderer {
 
     for (const source of snapshot.gravitySources) {
       const center = project(source.position);
+      const sourceVisual = gravitySourceVisual(source.visualTheme);
       const distanceToShip = Math.hypot(snapshot.ship.position.x - source.position.x, snapshot.ship.position.y - source.position.y);
       const surfaceWarning = gravitySurfaceWarningVisual({
         status: snapshot.status,
@@ -2019,14 +2099,18 @@ class PixiRenderer implements AstroPixiRenderer {
         radius: source.radius,
         tick: snapshot.tick
       });
-      this.world.circle(center.x, center.y, source.radius + 8).fill({ color: 0x254a86, alpha: 0.45 });
-      this.world.circle(center.x, center.y, source.radius).fill(0x66c8ff);
+      this.world.circle(center.x, center.y, source.radius + 8).fill({ color: sourceVisual.haloColor, alpha: sourceVisual.haloAlpha });
+      this.world.circle(center.x, center.y, source.radius).fill(sourceVisual.bodyColor);
+      this.world.circle(center.x + source.radius * 0.22, center.y + source.radius * 0.18, source.radius * 0.16).fill({
+        color: sourceVisual.craterColor,
+        alpha: source.visualTheme === "black_metal" ? 0.62 : 0.24
+      });
       this.world.circle(center.x - source.radius * 0.25, center.y - source.radius * 0.3, source.radius * 0.28).fill({
-        color: 0xd7fbff,
-        alpha: 0.35
+        color: sourceVisual.highlightColor,
+        alpha: sourceVisual.highlightAlpha
       });
       this.world.circle(center.x, center.y, source.radius).stroke({
-        color: gravitySurfaceRim.color,
+        color: source.visualTheme === "black_metal" ? sourceVisual.rimColor : gravitySurfaceRim.color,
         width: gravitySurfaceRim.width,
         alpha: gravitySurfaceRim.alpha
       });
@@ -2159,12 +2243,12 @@ class PixiRenderer implements AstroPixiRenderer {
         y: center.y + Math.sin(angle) * visual.radius
       };
       const left = {
-        x: center.x + Math.cos(angle + 2.35) * visual.radius * 0.9,
-        y: center.y + Math.sin(angle + 2.35) * visual.radius * 0.9
+        x: center.x + Math.cos(angle + 2.35) * visual.radius * visual.wingScale,
+        y: center.y + Math.sin(angle + 2.35) * visual.radius * visual.wingScale
       };
       const right = {
-        x: center.x + Math.cos(angle - 2.35) * visual.radius * 0.9,
-        y: center.y + Math.sin(angle - 2.35) * visual.radius * 0.9
+        x: center.x + Math.cos(angle - 2.35) * visual.radius * visual.wingScale,
+        y: center.y + Math.sin(angle - 2.35) * visual.radius * visual.wingScale
       };
       this.combat.circle(center.x, center.y, visual.radius + 11).fill({ color: visual.beamColor, alpha: 0.08 + visual.warningAlpha * 0.22 });
       this.combat.moveTo(nose.x, nose.y).lineTo(left.x, left.y).lineTo(right.x, right.y).closePath().fill({

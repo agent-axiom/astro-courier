@@ -1,6 +1,7 @@
 import type { EnemyDirectorPolicy, ObjectivePhase, SimulationSnapshot, Vec2 } from "@astro-courier/shared";
 
 export type EnemyDirectorMode = "openai" | "fallback";
+export type EnemyDirectorQuality = "standard" | "cinematic";
 
 export type EnemyDirectorResult = {
   mode: EnemyDirectorMode;
@@ -8,6 +9,7 @@ export type EnemyDirectorResult = {
 };
 
 export type EnemyDirectorRequest = {
+  quality: EnemyDirectorQuality;
   tick: number;
   objectivePhase: ObjectivePhase;
   ship: {
@@ -17,6 +19,7 @@ export type EnemyDirectorRequest = {
   };
   enemies: Array<{
     id: string;
+    archetype: SimulationSnapshot["enemies"][number]["archetype"];
     hp: number;
     position: Vec2;
     distance: number;
@@ -31,22 +34,24 @@ type FetchDirector = (url: string, init: RequestInit) => Promise<Response>;
 
 export function createEnemyDirectorClient(
   url: string | undefined,
-  fetchImpl: FetchDirector = (target, init) => fetch(target, init)
+  fetchImpl?: FetchDirector,
+  quality: EnemyDirectorQuality = "standard"
 ): EnemyDirectorClient | undefined {
   const endpoint = url?.trim();
   if (!endpoint) {
     return undefined;
   }
+  const directorFetch = fetchImpl ?? ((target: string, init: RequestInit) => fetch(target, init));
 
   return {
     async requestPolicy(snapshot) {
       try {
-        const response = await fetchImpl(endpoint, {
+        const response = await directorFetch(endpoint, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify(buildEnemyDirectorRequest(snapshot))
+          body: JSON.stringify(buildEnemyDirectorRequest(snapshot, quality))
         });
         if (!response.ok) {
           return undefined;
@@ -63,8 +68,9 @@ export function createEnemyDirectorClient(
   };
 }
 
-export function buildEnemyDirectorRequest(snapshot: SimulationSnapshot): EnemyDirectorRequest {
+export function buildEnemyDirectorRequest(snapshot: SimulationSnapshot, quality: EnemyDirectorQuality = "standard"): EnemyDirectorRequest {
   return {
+    quality,
     tick: snapshot.tick,
     objectivePhase: snapshot.objectivePhase,
     ship: {
@@ -74,6 +80,7 @@ export function buildEnemyDirectorRequest(snapshot: SimulationSnapshot): EnemyDi
     },
     enemies: snapshot.enemies.map((enemy) => ({
       id: enemy.id,
+      archetype: enemy.archetype,
       hp: enemy.hp,
       position: { ...enemy.position },
       distance: round(distanceBetween(snapshot.ship.position, enemy.position), 3)

@@ -1,6 +1,7 @@
 import type {
   CrashReason,
   EnemyDirectorPolicy,
+  EnemyShipArchetype,
   InputFrame,
   LandingRating,
   LandingGuidanceStatus,
@@ -53,6 +54,12 @@ export type HazardContent = {
   severity: number;
 };
 
+export type EnemyWaveContent = {
+  drones?: number;
+  fighters?: number;
+  brutes?: number;
+};
+
 export type ContractContent = {
   id: string;
   title: string;
@@ -71,6 +78,7 @@ export type ContractContent = {
   hazardSeverityMultiplier?: number;
   hazards?: HazardContent[];
   riskGateCount?: number;
+  enemyWave?: EnemyWaveContent;
   medalTimes: {
     bronze: number;
     silver: number;
@@ -109,6 +117,7 @@ export type SystemContent = {
 export type GravitySourceState = {
   id: string;
   name: string;
+  visualTheme: string;
   position: Vec2;
   radius: number;
   gravityMass: number;
@@ -148,12 +157,17 @@ export type EnemyPolicyMode = "patrol" | "chase" | "evade";
 
 export type EnemyShipState = {
   id: string;
+  archetype: EnemyShipArchetype;
   position: Vec2;
   velocity: Vec2;
   rotation: number;
   hp: number;
   maxHp: number;
   radius: number;
+  maxSpeed: number;
+  acceleration: number;
+  projectileDamage: number;
+  fireCooldownBaseSeconds: number;
   fireCooldownSeconds: number;
   contactCooldownSeconds: number;
   policy: EnemyPolicyMode;
@@ -335,21 +349,14 @@ const PLAYER_PROJECTILE_RADIUS = 4;
 const PULSE_SHOT_DAMAGE = 42;
 const PULSE_SHOT_RADIUS = 6;
 const PLAYER_PROJECTILE_MAX_AGE_SECONDS = 1.5;
-const ENEMY_MAX_HP = 40;
-const ENEMY_RADIUS = 14;
-const ENEMY_FIRE_COOLDOWN_SECONDS = 4.4;
 const ENEMY_PROJECTILE_SPEED = 66;
-const ENEMY_PROJECTILE_DAMAGE = 8;
 const ENEMY_PROJECTILE_RADIUS = 5;
 const ENEMY_PROJECTILE_MAX_AGE_SECONDS = 2.4;
 export const ENEMY_HIT_STYLE_BONUS = 35;
 const ENEMY_STYLE_BONUS = 90;
 const ENEMY_WAKE_DISTANCE = 430;
 const ENEMY_FIRE_DISTANCE = 220;
-const ENEMY_ACCELERATION = 17;
-const ENEMY_MAX_SPEED = 26;
 const SHIP_COMBAT_RADIUS = 10;
-const ENEMY_STANDOFF_DISTANCE = ENEMY_RADIUS + SHIP_COMBAT_RADIUS + 42;
 const ENEMY_STANDOFF_SLOW_RANGE = 46;
 const ENEMY_CONTACT_COOLDOWN_SECONDS = 0.55;
 const ENEMY_CONTACT_BASE_DAMAGE = 7;
@@ -359,6 +366,43 @@ const ENEMY_CONTACT_ENEMY_DAMAGE_MULTIPLIER = 1.25;
 const ENEMY_CONTACT_PUSH_OUT = 1.5;
 const ENEMY_CONTACT_REBOUND_SPEED = 18;
 const ENEMY_CONTACT_SHIP_IMPULSE = 5;
+const ENEMY_ARCHETYPE_STATS: Record<
+  EnemyShipArchetype,
+  {
+    maxHp: number;
+    radius: number;
+    acceleration: number;
+    maxSpeed: number;
+    fireCooldownSeconds: number;
+    projectileDamage: number;
+  }
+> = {
+  drone: {
+    maxHp: 22,
+    radius: 10,
+    acceleration: 24,
+    maxSpeed: 34,
+    fireCooldownSeconds: 3.2,
+    projectileDamage: 5
+  },
+  fighter: {
+    maxHp: 40,
+    radius: 14,
+    acceleration: 17,
+    maxSpeed: 26,
+    fireCooldownSeconds: 4.4,
+    projectileDamage: 8
+  },
+  brute: {
+    maxHp: 78,
+    radius: 20,
+    acceleration: 12,
+    maxSpeed: 18,
+    fireCooldownSeconds: 5.2,
+    projectileDamage: 14
+  }
+};
+const ENEMY_MAX_HP = ENEMY_ARCHETYPE_STATS.brute.maxHp;
 
 export function calculateHazardSkimStyleBonus(severity: number): number {
   return Math.round(HAZARD_SKIM_BASE_BONUS + clamp(severity, 0, 1) * HAZARD_SKIM_SEVERITY_BONUS);
@@ -473,6 +517,7 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
     gravitySources: system.planets.map((planet) => ({
       id: planet.id,
       name: planet.name,
+      visualTheme: planet.visualTheme,
       position: toVec2(planet.position),
       radius: planet.radius,
       gravityMass: planet.gravityMass,
@@ -512,10 +557,37 @@ function createEnemyPatrol(system: SystemContent, activeContract: ContractConten
   const flank = { x: -routeDirection.y, y: routeDirection.x };
   const midpoint = scale(add(pickup, destination), 0.5);
   const seedShift = deterministicUnit(`${system.id}:${activeContract.id}:interceptors`) - 0.5;
+  const wave = enemyWaveArchetypes(activeContract.enemyWave);
 
+  if (!activeContract.enemyWave) {
+    return [
+      createEnemyShip("interceptor-a", add(add(midpoint, scale(flank, 220)), scale(routeDirection, seedShift * 80)), 0.35, "fighter"),
+      createEnemyShip("interceptor-b", add(add(midpoint, scale(flank, -190)), scale(routeDirection, 90 + seedShift * 60)), -0.2, "drone")
+    ];
+  }
+
+  return wave.map((archetype, index) => {
+    const progress = wave.length === 1 ? 0.52 : 0.24 + (index / Math.max(1, wave.length - 1)) * 0.58;
+    const laneSign = index % 2 === 0 ? 1 : -1;
+    const laneSpacing = 150 + (index % 3) * 42 + (archetype === "brute" ? 28 : 0);
+    const localShift = deterministicUnit(`${system.id}:${activeContract.id}:${archetype}:${index}`) - 0.5;
+    const position = add(
+      add(pickup, scale(routeDirection, progress * routeDistance + localShift * 74)),
+      scale(flank, laneSign * laneSpacing)
+    );
+    const drift = laneSign * (0.18 + index * 0.07) + localShift * 0.35;
+    return createEnemyShip(`wave-${archetype}-${index + 1}`, position, drift, archetype);
+  });
+}
+
+function enemyWaveArchetypes(wave: EnemyWaveContent | undefined): EnemyShipArchetype[] {
+  const fighters = wave?.fighters ?? 1;
+  const drones = wave?.drones ?? 1;
+  const brutes = wave?.brutes ?? 0;
   return [
-    createEnemyShip("interceptor-a", add(add(midpoint, scale(flank, 220)), scale(routeDirection, seedShift * 80)), 0.35),
-    createEnemyShip("interceptor-b", add(add(midpoint, scale(flank, -190)), scale(routeDirection, 90 + seedShift * 60)), -0.2)
+    ...Array<EnemyShipArchetype>(Math.max(0, fighters)).fill("fighter"),
+    ...Array<EnemyShipArchetype>(Math.max(0, drones)).fill("drone"),
+    ...Array<EnemyShipArchetype>(Math.max(0, brutes)).fill("brute")
   ];
 }
 
@@ -560,16 +632,22 @@ function createRiskGates(system: SystemContent, activeContract: ContractContent,
   });
 }
 
-function createEnemyShip(id: string, position: Vec2, drift: number): EnemyShipState {
+function createEnemyShip(id: string, position: Vec2, drift: number, archetype: EnemyShipArchetype = "fighter"): EnemyShipState {
+  const stats = ENEMY_ARCHETYPE_STATS[archetype];
   return {
     id,
+    archetype,
     position,
     velocity: { x: Math.cos(drift) * 5, y: Math.sin(drift) * 5 },
     rotation: drift,
-    hp: ENEMY_MAX_HP,
-    maxHp: ENEMY_MAX_HP,
-    radius: ENEMY_RADIUS,
-    fireCooldownSeconds: ENEMY_FIRE_COOLDOWN_SECONDS,
+    hp: stats.maxHp,
+    maxHp: stats.maxHp,
+    radius: stats.radius,
+    maxSpeed: stats.maxSpeed,
+    acceleration: stats.acceleration,
+    projectileDamage: stats.projectileDamage,
+    fireCooldownBaseSeconds: stats.fireCooldownSeconds,
+    fireCooldownSeconds: stats.fireCooldownSeconds,
     contactCooldownSeconds: 0,
     policy: "patrol"
   };
@@ -768,6 +846,7 @@ export function snapshotWorld(world: SimulationWorld): SimulationSnapshot {
     },
     enemies: world.enemies.map((enemy) => ({
       id: enemy.id,
+      archetype: enemy.archetype,
       position: { ...enemy.position },
       velocity: { ...enemy.velocity },
       rotation: enemy.rotation,
@@ -795,6 +874,7 @@ export function snapshotWorld(world: SimulationWorld): SimulationSnapshot {
     gravitySources: world.gravitySources.map((source) => ({
       id: source.id,
       name: source.name,
+      visualTheme: source.visualTheme,
       position: { ...source.position },
       radius: source.radius,
       influenceRadius: source.influenceRadius
@@ -1086,7 +1166,8 @@ function updateEnemies(world: SimulationWorld, fixedDt: number): void {
     const lowHp = enemy.hp <= policy.retreatHp;
     const waking = distance <= ENEMY_WAKE_DISTANCE;
     enemy.policy = lowHp ? "evade" : waking ? "chase" : "patrol";
-    const standoffSlowDistance = ENEMY_STANDOFF_DISTANCE + ENEMY_STANDOFF_SLOW_RANGE;
+    const standoffDistance = enemy.radius + SHIP_COMBAT_RADIUS + 42;
+    const standoffSlowDistance = standoffDistance + ENEMY_STANDOFF_SLOW_RANGE;
     const inboundSpeed = dot(enemy.velocity, direction);
     if (!lowHp && distance < standoffSlowDistance && inboundSpeed > 0) {
       const slowFactor = clamp((standoffSlowDistance - distance) / ENEMY_STANDOFF_SLOW_RANGE, 0, 0.86);
@@ -1103,13 +1184,13 @@ function updateEnemies(world: SimulationWorld, fixedDt: number): void {
         : enemy.policy === "chase"
           ? normalizeVector(
               add(
-                scale(direction, distance < ENEMY_STANDOFF_DISTANCE ? -1.85 : 1 + policy.aggression),
+                scale(direction, distance < standoffDistance ? -1.85 : 1 + policy.aggression),
                 scale(flankAxis, distance < standoffSlowDistance ? 1.15 : 0.45)
               )
             )
           : normalizeVector({ x: Math.cos(world.tick * 0.01 + enemy.position.x), y: Math.sin(world.tick * 0.01 + enemy.position.y) });
-    enemy.velocity = add(enemy.velocity, scale(desired, ENEMY_ACCELERATION * fixedDt));
-    enemy.velocity = limitVector(enemy.velocity, ENEMY_MAX_SPEED);
+    enemy.velocity = add(enemy.velocity, scale(desired, enemy.acceleration * fixedDt));
+    enemy.velocity = limitVector(enemy.velocity, enemy.maxSpeed);
     enemy.position = add(enemy.position, scale(enemy.velocity, fixedDt));
     enemy.rotation = normalizeAngle(Math.atan2(enemy.velocity.y || direction.y, enemy.velocity.x || direction.x));
 
@@ -1125,7 +1206,7 @@ function fireEnemyProjectile(
   directionToShip: Vec2,
   policy: EnemyDirectorPolicy
 ): void {
-  const fireBiasCooldown = ENEMY_FIRE_COOLDOWN_SECONDS * (1.15 - policy.fireBias * 0.35);
+  const fireBiasCooldown = enemy.fireCooldownBaseSeconds * (1.15 - policy.fireBias * 0.35);
   enemy.fireCooldownSeconds = round(clamp(fireBiasCooldown, 0.9, 2.4), 6);
   world.enemyProjectiles.push({
     id: `${enemy.id}-shot-${world.tick}-${world.enemyProjectiles.length}`,
@@ -1133,7 +1214,7 @@ function fireEnemyProjectile(
     position: add(enemy.position, scale(directionToShip, enemy.radius + 5)),
     velocity: add(enemy.velocity, scale(directionToShip, ENEMY_PROJECTILE_SPEED)),
     radius: ENEMY_PROJECTILE_RADIUS,
-    damage: ENEMY_PROJECTILE_DAMAGE,
+    damage: enemy.projectileDamage,
     ageSeconds: 0,
     maxAgeSeconds: ENEMY_PROJECTILE_MAX_AGE_SECONDS
   });
