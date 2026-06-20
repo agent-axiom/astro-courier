@@ -320,6 +320,72 @@ describe("deterministic Astro Courier simulation", () => {
     });
   });
 
+  it("builds the asteroid labyrinth with contract-only maze hazards and five risk gates", () => {
+    const systemWithLabyrinth: SystemContent = {
+      ...starterSystem,
+      hazards: [
+        {
+          id: "training-asteroids",
+          type: "asteroid_field",
+          position: [140, -70],
+          radius: 40,
+          severity: 0.2
+        }
+      ],
+      contracts: [
+        ...starterSystem.contracts,
+        {
+          id: "asteroid-labyrinth",
+          title: "Asteroid Labyrinth",
+          briefing: "Read the asteroid maze.",
+          riskLabel: "Asteroid Maze",
+          rewardLabel: "Maze gate bonuses",
+          pickupId: "north-pad",
+          destinationId: "dock-a",
+          cargoId: "labyrinth-relay-core",
+          hazardSeverityMultiplier: 1.55,
+          riskGateCount: 5,
+          hazards: [
+            { id: "maze-wall-a", type: "asteroid_field", position: [70, -125], radius: 26, severity: 0.5 },
+            { id: "maze-wall-b", type: "asteroid_field", position: [115, -30], radius: 30, severity: 0.48 },
+            { id: "maze-wall-c", type: "asteroid_field", position: [165, -145], radius: 28, severity: 0.52 },
+            { id: "maze-wall-d", type: "asteroid_field", position: [210, -36], radius: 30, severity: 0.5 },
+            { id: "maze-wall-e", type: "asteroid_field", position: [235, -132], radius: 24, severity: 0.46 },
+            { id: "maze-wall-f", type: "asteroid_field", position: [250, -54], radius: 22, severity: 0.44 }
+          ],
+          medalTimes: { bronze: 86, silver: 54, gold: 32 }
+        }
+      ],
+      cargo: [
+        ...starterSystem.cargo,
+        {
+          id: "labyrinth-relay-core",
+          name: "Labyrinth Relay Core",
+          kind: "magnetic",
+          fragility: 0.85
+        }
+      ]
+    };
+    const baseline = createWorldFromSystem(systemWithLabyrinth, "labyrinth-baseline-seed");
+    const labyrinth = createWorldFromSystem(systemWithLabyrinth, "labyrinth-seed", { contractId: "asteroid-labyrinth" });
+    const snapshot = snapshotWorld(labyrinth);
+
+    expect(baseline.hazards).toHaveLength(1);
+    expect(labyrinth.activeContract.title).toBe("Asteroid Labyrinth");
+    expect(labyrinth.activeCargo.name).toBe("Labyrinth Relay Core");
+    expect(labyrinth.hazards).toHaveLength(7);
+    expect(labyrinth.hazards.filter((hazard) => hazard.id.startsWith("maze-"))).toHaveLength(6);
+    expect(snapshot.riskGates).toHaveLength(5);
+    expect(snapshot.riskGates.map((gate) => gate.id)).toEqual([
+      "risk-gate-training-asteroids",
+      "risk-gate-maze-wall-a",
+      "risk-gate-maze-wall-b",
+      "risk-gate-maze-wall-c",
+      "risk-gate-maze-wall-d"
+    ]);
+    expect(snapshot.riskGates.every((gate) => gate.speedThreshold === RISK_GATE_SPEED_THRESHOLD)).toBe(true);
+  });
+
   it("lets afterburner trade more fuel for a stronger boost", () => {
     const baseline = createWorldFromSystem(starterSystem, "baseline-boost-seed", { perkId: "shield-crate" });
     const afterburner = createWorldFromSystem(starterSystem, "afterburner-boost-seed", { perkId: "afterburner" });

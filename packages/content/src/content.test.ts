@@ -12,6 +12,7 @@ describe("content schemas", () => {
       "first-light-delivery",
       "return-leg",
       "asteroid-sprint",
+      "asteroid-labyrinth",
       "gravity-slingshot",
       "chain-relay",
       "antimatter-drift",
@@ -22,6 +23,16 @@ describe("content schemas", () => {
     expect(parsed.contracts.find((contract) => contract.id === "asteroid-sprint")?.rewardLabel).toBe("Skim style bonuses");
     expect(parsed.contracts.find((contract) => contract.id === "asteroid-sprint")?.cargoId).toBe("volatile-comet-ice");
     expect(parsed.contracts.find((contract) => contract.id === "asteroid-sprint")?.hazardSeverityMultiplier).toBe(1.45);
+    expect(parsed.contracts.find((contract) => contract.id === "asteroid-labyrinth")).toMatchObject({
+      title: "Asteroid Labyrinth",
+      riskLabel: "Asteroid Maze",
+      rewardLabel: "Maze gate bonuses",
+      cargoId: "labyrinth-relay-core",
+      hazardSeverityMultiplier: 1.55,
+      riskGateCount: 5,
+      medalTimes: { bronze: 86, silver: 54, gold: 32 }
+    });
+    expect(parsed.contracts.find((contract) => contract.id === "asteroid-labyrinth")?.hazards).toHaveLength(6);
     expect(parsed.contracts.find((contract) => contract.id === "gravity-slingshot")).toMatchObject({
       title: "Gravity Slingshot",
       riskLabel: "Gravity Entry",
@@ -83,6 +94,11 @@ describe("content schemas", () => {
       name: "Unstable Antimatter Vial",
       kind: "unstable",
       fragility: 0.95
+    });
+    expect(parsed.cargo.find((cargo) => cargo.id === "labyrinth-relay-core")).toMatchObject({
+      name: "Labyrinth Relay Core",
+      kind: "magnetic",
+      fragility: 0.85
     });
     expect(parsed.contracts.find((contract) => contract.id === "return-leg")?.shipStart?.position).toEqual([360, -140]);
     expect(parsed.planets[0]?.landingPads[0]?.allowedApproachSpeed).toBeGreaterThan(0);

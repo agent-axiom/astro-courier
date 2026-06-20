@@ -62,6 +62,8 @@ export const contractSchema = z.object({
   destinationId: z.string().min(1),
   cargoId: z.string().min(1),
   hazardSeverityMultiplier: z.number().positive().max(3).optional(),
+  hazards: z.array(hazardSchema).optional(),
+  riskGateCount: z.number().int().min(0).max(12).optional(),
   medalTimes: z
     .object({
       bronze: z.number().positive(),

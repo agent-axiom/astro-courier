@@ -255,6 +255,20 @@ describe("GameShell lifecycle", () => {
         medalTimes: { bronze: 70, silver: 42, gold: 24 }
       },
       {
+        id: "asteroid-labyrinth",
+        title: "Asteroid Labyrinth",
+        briefing: "Read the asteroid maze, clear five gates, keep the relay core intact, and dock clean.",
+        riskLabel: "Asteroid Maze",
+        rewardLabel: "Maze gate bonuses",
+        pickupLabel: "Luma North Pad",
+        destinationLabel: "Tea Station Dock A",
+        cargoName: "Labyrinth Relay Core",
+        cargoKind: "magnetic",
+        cargoFragility: 0.85,
+        hazardSeverityMultiplier: 1.55,
+        medalTimes: { bronze: 86, silver: 54, gold: 32 }
+      },
+      {
         id: "gravity-slingshot",
         title: "Gravity Slingshot",
         briefing: "Enter above Luma with lateral speed, catch the north pad, then ride the gravity arc out to Tea Station.",
@@ -522,6 +536,49 @@ describe("GameShell lifecycle", () => {
         cargoKind: "volatile",
         cargoFragility: 1,
         hazardSeverityMultiplier: 1.45
+      })
+    );
+  });
+
+  it("publishes the asteroid labyrinth bonus route with maze gate pressure", async () => {
+    const { renderer, input } = createShellDoubles();
+    const onHud = vi.fn();
+    vi.stubGlobal("requestAnimationFrame", vi.fn(() => 7));
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    vi.spyOn(performance, "now").mockReturnValue(1000);
+
+    const shell = new GameShell({
+      mount: {} as HTMLElement,
+      onHud,
+      renderer,
+      input,
+      initialPaused: true
+    });
+
+    await shell.start();
+    (shell as GameShell & { selectContract: (contractId: string) => void }).selectContract("asteroid-labyrinth");
+
+    expect(onHud.mock.calls.at(-1)?.[0]).toMatchObject({
+      status: "paused",
+      contractId: "asteroid-labyrinth",
+      contractTitle: "Asteroid Labyrinth",
+      contractRiskLabel: "Asteroid Maze",
+      contractRewardLabel: "Maze gate bonuses",
+      cargoName: "Labyrinth Relay Core",
+      cargoKind: "magnetic",
+      cargoFragility: 0.85,
+      hazardSeverityMultiplier: 1.55,
+      riskGateCount: 5,
+      clearedRiskGateCount: 0,
+      paceSecondsRemaining: 32
+    });
+    expect(onHud.mock.calls.at(-1)?.[0].nextRiskGateDistance).toBeGreaterThan(0);
+    expect(onHud.mock.calls.at(-1)?.[0].contractOptions).toContainEqual(
+      expect.objectContaining({
+        id: "asteroid-labyrinth",
+        title: "Asteroid Labyrinth",
+        riskLabel: "Asteroid Maze",
+        rewardLabel: "Maze gate bonuses"
       })
     );
   });

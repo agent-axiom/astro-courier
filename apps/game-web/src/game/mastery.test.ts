@@ -145,6 +145,26 @@ describe("preflight puzzle goals", () => {
     ]);
   });
 
+  it("turns the asteroid labyrinth bonus route into a maze puzzle", () => {
+    expect(
+      buildPreflightPuzzleGoals({
+        contractId: "asteroid-labyrinth",
+        targetDistanceLabel: "320m",
+        goldSeconds: 32,
+        hazardSeverityMultiplier: 1.55,
+        interceptorCount: 2,
+        riskGateCount: 5,
+        clearedRiskGateCount: 0,
+        nextRiskGateDistance: 84,
+        nextRiskGateStyleBonus: 190
+      })
+    ).toEqual([
+      { label: "Route", value: "320m", tone: "route" },
+      { label: "Maze", value: "5 gates", detail: "Thread gaps", tone: "risk" },
+      { label: "Gate", value: "0/5", detail: "84m", tone: "risk" }
+    ]);
+  });
+
   it("surfaces gravity sling routes as an arc puzzle", () => {
     expect(
       buildPreflightPuzzleGoals({

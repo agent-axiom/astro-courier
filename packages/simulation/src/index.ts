@@ -69,6 +69,8 @@ export type ContractContent = {
   destinationId: string;
   cargoId: string;
   hazardSeverityMultiplier?: number;
+  hazards?: HazardContent[];
+  riskGateCount?: number;
   medalTimes: {
     bronze: number;
     silver: number;
@@ -408,7 +410,8 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
   const shipStartPosition = toVec2(shipPosition);
   const activePerk = options.perkId ?? "afterburner";
   const shipMaxHp = activePerk === "shield-crate" ? SHIELD_CRATE_MAX_HP : SHIP_MAX_HP;
-  const hazards = system.hazards.map((hazard) => ({
+  const contractHazards = activeContract.hazards ?? [];
+  const hazards = [...system.hazards, ...contractHazards].map((hazard) => ({
     id: hazard.id,
     type: hazard.type,
     position: toVec2(hazard.position),
@@ -529,7 +532,12 @@ function createRiskGates(system: SystemContent, activeContract: ContractContent,
   const routeDirection = scale(route, 1 / routeDistance);
   const routeNormal = { x: -routeDirection.y, y: routeDirection.x };
 
-  return hazards.slice(0, 2).map((hazard) => {
+  const gateCount = activeContract.riskGateCount ?? 2;
+  if (gateCount <= 0) {
+    return [];
+  }
+
+  return hazards.slice(0, gateCount).map((hazard) => {
     const hazardRouteOffset = subtract(hazard.position, pickup);
     const projection = dot(hazardRouteOffset, routeDirection);
     const progress = clamp(projection / routeDistance, 0.18, 0.82);

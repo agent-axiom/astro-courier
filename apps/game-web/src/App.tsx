@@ -3038,7 +3038,7 @@ type MetricProps = {
 function renderPreflightPuzzleGoalIcon(goal: PreflightPuzzleGoal): React.ReactNode {
   if (goal.label === "Route") return <MapPin size={16} />;
   if (goal.label === "Clock") return <Trophy size={16} />;
-  if (goal.label === "Thread" || goal.label === "Gate") return <ShieldAlert size={16} />;
+  if (goal.label === "Maze" || goal.label === "Thread" || goal.label === "Gate") return <ShieldAlert size={16} />;
   if (goal.label === "Sling" || goal.label === "Chain" || goal.label === "Comet") return <Star size={16} />;
   if (goal.label === "Brake") return <OctagonMinus size={16} />;
   if (goal.label === "Fuel") return <Gauge size={16} />;

@@ -112,6 +112,67 @@
       }
     },
     {
+      "id": "asteroid-labyrinth",
+      "title": "Asteroid Labyrinth",
+      "briefing": "Read the asteroid maze, clear five gates, keep the relay core intact, and dock clean.",
+      "riskLabel": "Asteroid Maze",
+      "rewardLabel": "Maze gate bonuses",
+      "pickupId": "north-pad",
+      "destinationId": "dock-a",
+      "cargoId": "labyrinth-relay-core",
+      "hazardSeverityMultiplier": 1.55,
+      "riskGateCount": 5,
+      "hazards": [
+        {
+          "id": "maze-wall-a",
+          "type": "asteroid_field",
+          "position": [90, -160],
+          "radius": 46,
+          "severity": 0.52
+        },
+        {
+          "id": "maze-wall-b",
+          "type": "asteroid_field",
+          "position": [140, -45],
+          "radius": 48,
+          "severity": 0.5
+        },
+        {
+          "id": "maze-wall-c",
+          "type": "asteroid_field",
+          "position": [210, -185],
+          "radius": 44,
+          "severity": 0.54
+        },
+        {
+          "id": "maze-wall-d",
+          "type": "asteroid_field",
+          "position": [285, -48],
+          "radius": 50,
+          "severity": 0.52
+        },
+        {
+          "id": "maze-wall-e",
+          "type": "asteroid_field",
+          "position": [345, -175],
+          "radius": 46,
+          "severity": 0.48
+        },
+        {
+          "id": "maze-wall-f",
+          "type": "asteroid_field",
+          "position": [390, -78],
+          "radius": 34,
+          "severity": 0.46
+        }
+      ],
+      "medalTimes": {
+        "bronze": 86,
+        "silver": 54,
+        "gold": 32
+      }
+    },
+    {
       "id": "gravity-slingshot",
       "title": "Gravity Slingshot",
       "briefing": "Enter above Luma with lateral speed, catch the north pad, then ride the gravity arc out to Tea Station.",
@@ -215,6 +276,12 @@
       "name": "Unstable Antimatter Vial",
       "kind": "unstable",
       "fragility": 0.95
+    },
+    {
+      "id": "labyrinth-relay-core",
+      "name": "Labyrinth Relay Core",
+      "kind": "magnetic",
+      "fragility": 0.85
     }
   ]
 }

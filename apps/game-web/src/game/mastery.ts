@@ -59,7 +59,7 @@ export type PreflightPuzzleGoalInput = {
 };
 
 export type PreflightPuzzleGoal = {
-  label: "Route" | "Clock" | "Thread" | "Sling" | "Chain" | "Brake" | "Fuel" | "Gate" | "Fire" | "Comet";
+  label: "Route" | "Clock" | "Maze" | "Thread" | "Sling" | "Chain" | "Brake" | "Fuel" | "Gate" | "Fire" | "Comet";
   value: string;
   detail?: string;
   tone: "route" | "pace" | "risk" | "style" | "clutch" | "combat";
@@ -211,6 +211,15 @@ export function buildPreflightBonusObjectives(input: PreflightBonusObjectiveInpu
 }
 
 function buildRoutePuzzleGoal(input: PreflightPuzzleGoalInput): PreflightPuzzleGoal {
+  if (input.contractId === "asteroid-labyrinth") {
+    return {
+      label: "Maze",
+      value: `${input.riskGateCount} gates`,
+      detail: "Thread gaps",
+      tone: "risk"
+    };
+  }
+
   if (input.contractId === "asteroid-sprint" || (input.hazardSeverityMultiplier ?? 1) >= 1.25) {
     return {
       label: "Thread",

@@ -617,6 +617,9 @@ describe("contract rotation", () => {
     expect(buildContractPreflightKicker({ contractId: "chain-relay", goldSeconds: 22, hazardSeverityMultiplier: 1.3 })).toBe(
       "Chain Contract"
     );
+    expect(buildContractPreflightKicker({ contractId: "asteroid-labyrinth", goldSeconds: 32, hazardSeverityMultiplier: 1.55 })).toBe(
+      "Bonus Contract"
+    );
     expect(buildContractPreflightKicker({ contractId: "antimatter-drift", goldSeconds: 28 })).toBe("Antimatter Contract");
     expect(buildContractPreflightKicker({ contractId: "last-drop-run", goldSeconds: 27 })).toBe("Last Drop Contract");
   });
@@ -664,6 +667,22 @@ describe("contract rotation", () => {
     ).toEqual({
       label: "Route plan",
       value: "Thread field, cash danger",
+      tone: "danger"
+    });
+  });
+
+  it("calls out asteroid labyrinth routing before generic danger handling", () => {
+    expect(
+      buildContractRoutePlan({
+        contractId: "asteroid-labyrinth",
+        cargoKind: "magnetic",
+        cargoFragility: 0.85,
+        hazardSeverityMultiplier: 1.55,
+        goldSeconds: 32
+      })
+    ).toEqual({
+      label: "Route plan",
+      value: "Read gaps, thread gates",
       tone: "danger"
     });
   });
@@ -866,6 +885,20 @@ describe("contract rotation", () => {
       detail: "Coast clean; brake rattles cargo",
       tone: "precision"
     });
+    expect(
+      buildContractSignatureManeuver({
+        contractId: "asteroid-labyrinth",
+        cargoKind: "magnetic",
+        cargoFragility: 0.85,
+        hazardSeverityMultiplier: 1.55,
+        goldSeconds: 32
+      })
+    ).toEqual({
+      label: "Signature move",
+      value: "Maze Thread",
+      detail: "Read the gaps, clear every gate",
+      tone: "danger"
+    });
   });
 
   it("falls back to pressure-based signature maneuvers for generic routes", () => {
@@ -944,6 +977,20 @@ describe("contract rotation", () => {
       { label: "Drift", value: "+210 style", tone: "style" },
       { label: "Brake", value: "No taps", tone: "precision" },
       { label: "Cargo", value: "Brake sensitive", tone: "cargo" }
+    ]);
+
+    expect(
+      buildContractModifiers({
+        contractId: "asteroid-labyrinth",
+        cargoKind: "magnetic",
+        cargoFragility: 0.85,
+        hazardSeverityMultiplier: 1.55,
+        goldSeconds: 32
+      })
+    ).toEqual([
+      { label: "Maze", value: "5 gates", tone: "danger" },
+      { label: "Thread", value: "Clean gaps", tone: "precision" },
+      { label: "Pace", value: "Gold 32s", tone: "speed" }
     ]);
   });
 
@@ -1026,6 +1073,19 @@ describe("contract option hooks", () => {
       label: "Pick for",
       value: "No-brake drift mastery",
       tone: "precision"
+    });
+    expect(
+      buildContractOptionHook({
+        contractId: "asteroid-labyrinth",
+        cargoKind: "magnetic",
+        cargoFragility: 0.85,
+        hazardSeverityMultiplier: 1.55,
+        goldSeconds: 32
+      })
+    ).toEqual({
+      label: "Pick for",
+      value: "Asteroid maze puzzle",
+      tone: "danger"
     });
   });
 

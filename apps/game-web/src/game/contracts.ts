@@ -601,6 +601,10 @@ export function buildContractPreflightKicker(input: ContractPreflightKickerInput
     return "Asteroid Contract";
   }
 
+  if (input.contractId === "asteroid-labyrinth") {
+    return "Bonus Contract";
+  }
+
   if (input.contractId === "chain-relay") {
     return "Chain Contract";
   }
@@ -645,6 +649,14 @@ export function buildContractRoutePlan(input: ContractRoutePlanInput): ContractR
     return {
       label: "Route plan",
       value: "Thread field, cash danger",
+      tone: "danger"
+    };
+  }
+
+  if (input.contractId === "asteroid-labyrinth") {
+    return {
+      label: "Route plan",
+      value: "Read gaps, thread gates",
       tone: "danger"
     };
   }
@@ -706,7 +718,12 @@ export function buildContractRoutePlan(input: ContractRoutePlanInput): ContractR
 
 export function buildRoutePressureBriefing(input: ContractRoutePlanInput): RoutePressureBriefing {
   const hazardLoad = input.hazardSeverityMultiplier ?? 1;
-  if (input.contractId === "asteroid-sprint" || input.contractId === "chain-relay" || (hazardLoad >= 1.25 && input.goldSeconds <= 25)) {
+  if (
+    input.contractId === "asteroid-sprint" ||
+    input.contractId === "asteroid-labyrinth" ||
+    input.contractId === "chain-relay" ||
+    (hazardLoad >= 1.25 && input.goldSeconds <= 25)
+  ) {
     return {
       label: "Route pressure",
       value: "High risk / high payout",
@@ -819,6 +836,14 @@ export function buildContractOptionHook(input: ContractRoutePlanInput): Contract
     };
   }
 
+  if (input.contractId === "asteroid-labyrinth") {
+    return {
+      label: "Pick for",
+      value: "Asteroid maze puzzle",
+      tone: "danger"
+    };
+  }
+
   if (input.contractId === "asteroid-sprint" || ((input.hazardSeverityMultiplier ?? 1) >= 1.25 && input.goldSeconds <= 25)) {
     return {
       label: "Pick for",
@@ -912,6 +937,15 @@ export function buildContractSignatureManeuver(input: ContractRoutePlanInput): C
     };
   }
 
+  if (input.contractId === "asteroid-labyrinth") {
+    return {
+      label: "Signature move",
+      value: "Maze Thread",
+      detail: "Read the gaps, clear every gate",
+      tone: "danger"
+    };
+  }
+
   if (input.contractId === "return-leg") {
     return {
       label: "Signature move",
@@ -986,6 +1020,14 @@ export function buildContractModifiers(input: ContractRoutePlanInput): ContractM
     return [
       { label: "Thread", value: "Needle pay", tone: "danger" },
       { label: "Hazard", value: formatHazardField(input.hazardSeverityMultiplier), tone: "danger" },
+      { label: "Pace", value: `Gold ${input.goldSeconds}s`, tone: "speed" }
+    ];
+  }
+
+  if (input.contractId === "asteroid-labyrinth") {
+    return [
+      { label: "Maze", value: "5 gates", tone: "danger" },
+      { label: "Thread", value: "Clean gaps", tone: "precision" },
       { label: "Pace", value: `Gold ${input.goldSeconds}s`, tone: "speed" }
     ];
   }
