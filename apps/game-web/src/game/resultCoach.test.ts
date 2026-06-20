@@ -206,6 +206,25 @@ describe("result coach", () => {
     });
   });
 
+  it("coaches dry-fuel black-hole crashes toward fuel reserve management", () => {
+    expect(
+      buildResultCoach({
+        status: "crashed",
+        crashReason: "Fuel Depleted",
+        medal: "none",
+        grade: "F",
+        cargoDamage: 1,
+        fuel: 0,
+        maxFuel: 100,
+        scoreBreakdown: baseBreakdown
+      })
+    ).toEqual({
+      label: "Next run",
+      value: "Save a fuel reserve",
+      tone: "danger"
+    });
+  });
+
   it("coaches damaged deliveries toward safer hazard lines", () => {
     expect(
       buildResultCoach({

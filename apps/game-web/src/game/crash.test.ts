@@ -26,6 +26,15 @@ describe("crash reason labels", () => {
     expect(buildCrashReasonLabel({ contractId: "gravity-slingshot", crashReason: "Hull Collision" })).toBe("Clipped gravity well");
   });
 
+  it("labels dry-fuel singularity failures directly", () => {
+    expect(buildCrashReasonLabel({ crashReason: "Fuel Depleted" })).toBe("Fuel gone");
+    expect(buildCrashDebrief({ crashReason: "Fuel Depleted" })).toEqual({
+      label: "Cause",
+      value: "No fuel",
+      tone: "review"
+    });
+  });
+
   it("labels close target hull collisions as missed pad approaches", () => {
     expect(buildCrashReasonLabel({ contractId: "gravity-slingshot", crashReason: "Hull Collision", targetDistance: 54 })).toBe("Missed landing pad");
     expect(buildCrashDebrief({ contractId: "gravity-slingshot", crashReason: "Hull Collision", targetDistance: 54 })).toEqual({

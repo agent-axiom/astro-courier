@@ -209,6 +209,23 @@ describe("result stat formatting", () => {
       value: "Route failed / hull contact",
       tone: "failure"
     });
+
+    expect(
+      buildRunIdentityReceipt({
+        status: "crashed",
+        crashReason: "Fuel Depleted",
+        medal: "none",
+        grade: "F",
+        cargoDamage: 1,
+        fuel: 0,
+        maxFuel: 100,
+        scoreBreakdown: baseBreakdown
+      })
+    ).toEqual({
+      label: "Run identity",
+      value: "Route failed / dry tank",
+      tone: "failure"
+    });
   });
 
   it("calls out gold express comet near-misses as elite result identities", () => {

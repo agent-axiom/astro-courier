@@ -79,6 +79,14 @@ export function buildRetryTarget(input: RetryTargetInput): RetryTarget {
       };
     }
 
+    if (input.crashReason === "Fuel Depleted") {
+      return {
+        label: "Retry target",
+        value: "Keep fuel reserve",
+        tone: "danger"
+      };
+    }
+
     if (input.crashReason === "Hull Collision") {
       if (input.targetDistance !== undefined && input.targetDistance <= closeTargetHullCollisionDistance) {
         return {

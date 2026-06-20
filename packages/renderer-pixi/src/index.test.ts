@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   boostBurstVisual,
   boostSparkVisual,
+  blackHoleVisual,
   cameraFocus,
   cameraZoom,
   combatShipVisual,
@@ -89,6 +90,33 @@ describe("camera focus", () => {
 });
 
 describe("combat visuals", () => {
+  it("renders dry-fuel black holes as a compact singularity effect", () => {
+    expect(blackHoleVisual({ status: "flying", tick: 12 })).toBeUndefined();
+    expect(
+      blackHoleVisual({
+        status: "crashed",
+        tick: 12,
+        blackHole: {
+          position: { x: 10, y: 20 },
+          radius: 66,
+          pullRadius: 170,
+          intensity: 1
+        }
+      })
+    ).toEqual({
+      coreRadius: 66,
+      pullRadius: 170,
+      ringRadius: 82.8,
+      coreColor: 0x02030a,
+      ringColor: 0x9b5cff,
+      haloColor: 0x101424,
+      coreAlpha: 0.98,
+      ringAlpha: 0.74,
+      pullAlpha: 0.2,
+      rotation: 1.2
+    });
+  });
+
   it("keeps the courier ship bright while showing HP pressure", () => {
     expect(combatShipVisual({ status: "flying", hp: 100, maxHp: 100 })).toEqual({
       bodyColor: 0xffb13b,

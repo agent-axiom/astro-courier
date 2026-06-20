@@ -43,7 +43,7 @@ const resultSchema = z.object({
   landingRating: z
     .enum(["Perfect Landing", "Soft Landing", "Spicy Landing", "Cargo Survived Somehow", "Insurance Event"])
     .optional(),
-  crashReason: z.enum(["Hard Landing", "Misaligned Dock", "Hull Collision"]).optional(),
+  crashReason: z.enum(["Hard Landing", "Misaligned Dock", "Hull Collision", "Fuel Depleted"]).optional(),
   scoreBreakdown: scoreBreakdownSchema
 });
 

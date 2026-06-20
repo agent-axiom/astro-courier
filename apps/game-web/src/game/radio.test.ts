@@ -605,6 +605,7 @@ describe("radio feedback copy", () => {
     expect(buildRadioMessage({ ...baseHud, status: "crashed", landingRating: "Insurance Event" })).toContain("Insurance");
     expect(buildRadioMessage({ ...baseHud, status: "crashed", crashReason: "Hard Landing" })).toContain("Bleed speed");
     expect(buildRadioMessage({ ...baseHud, status: "crashed", crashReason: "Misaligned Dock" })).toContain("Align ship");
+    expect(buildRadioMessage({ ...baseHud, status: "crashed", crashReason: "Fuel Depleted" })).toContain("Fuel depleted");
   });
 
   it("explains emergency shield rebounds as a spent one-time save", () => {

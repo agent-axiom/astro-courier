@@ -230,6 +230,7 @@ export type SimulationWorld = {
   riskGates: RiskGateState[];
   clearedRiskGateIds: string[];
   manualBrakeUsed: boolean;
+  dryFuelSeconds: number;
   fuelUsed: number;
   emergencyShieldUsed: boolean;
   pulseShotAvailable: boolean;
@@ -318,6 +319,7 @@ export const RISK_GATE_STYLE_BONUS = 190;
 export const MAZE_GATE_CHAIN_STYLE_BONUS = 420;
 export const CONTROLLED_DOCK_SPEED_RATIO = 0.7;
 export const EMERGENCY_SHIELD_REBOUND_DAMAGE = 0.22;
+export const DRY_FUEL_BLACK_HOLE_SECONDS = 18;
 const SHIELD_CRATE_MAX_HP = 125;
 const SHIELD_CRATE_REBOUND_DAMAGE = 0.08;
 const CATASTROPHIC_DOCK_SPEED_RATIO = 1.85;
@@ -366,6 +368,8 @@ const ENEMY_CONTACT_ENEMY_DAMAGE_MULTIPLIER = 1.25;
 const ENEMY_CONTACT_PUSH_OUT = 1.5;
 const ENEMY_CONTACT_REBOUND_SPEED = 18;
 const ENEMY_CONTACT_SHIP_IMPULSE = 5;
+const DRY_FUEL_BLACK_HOLE_RADIUS = 66;
+const DRY_FUEL_BLACK_HOLE_PULL_RADIUS = 170;
 const ENEMY_ARCHETYPE_STATS: Record<
   EnemyShipArchetype,
   {
@@ -509,6 +513,7 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
     riskGates: createRiskGates(system, activeContract, hazards),
     clearedRiskGateIds: [],
     manualBrakeUsed: false,
+    dryFuelSeconds: 0,
     fuelUsed: 0,
     emergencyShieldUsed: false,
     pulseShotAvailable: activePerk === "pulse-shot",
@@ -739,6 +744,7 @@ export function stepWorld(
   updateHazards(world, fixedDt);
   updateRiskGates(world);
   resolveLandingOrCrash(world);
+  updateDryFuelBlackHole(world, fixedDt);
   updateScore(world);
 
   world.tick += 1;
@@ -821,6 +827,8 @@ export function snapshotWorld(world: SimulationWorld): SimulationSnapshot {
     launchBurstSecondsRemaining: round(world.launchBurstSecondsRemaining, 3),
     elapsedSeconds: world.elapsedSeconds,
     score: world.score,
+    crashReason: world.crashReason,
+    blackHole: blackHoleSnapshot(world),
     activePerk: world.activePerk,
     objectiveTarget: getObjectiveTarget(world),
     gravitySlingOpportunity: getGravitySlingOpportunity(world),
@@ -1105,6 +1113,44 @@ function applyCargoHandlingStress(world: SimulationWorld, fixedDt: number, brake
     0,
     1
   );
+}
+
+function updateDryFuelBlackHole(world: SimulationWorld, fixedDt: number): void {
+  if (world.status !== "flying") {
+    return;
+  }
+
+  if (world.ship.fuel > 0) {
+    world.dryFuelSeconds = 0;
+    return;
+  }
+
+  world.ship.fuel = 0;
+  world.dryFuelSeconds = round(world.dryFuelSeconds + fixedDt, 6);
+  if (world.dryFuelSeconds < DRY_FUEL_BLACK_HOLE_SECONDS) {
+    return;
+  }
+
+  world.status = "crashed";
+  world.landingRating = "Insurance Event";
+  world.crashReason = "Fuel Depleted";
+  world.lastMilestone = "Black Hole";
+  world.ship.hp = 0;
+  world.ship.cargoDamage = 1;
+  world.ship.velocity = scale(world.ship.velocity, 0.15);
+}
+
+function blackHoleSnapshot(world: SimulationWorld): SimulationSnapshot["blackHole"] {
+  if (world.crashReason !== "Fuel Depleted") {
+    return undefined;
+  }
+
+  return {
+    position: { ...world.ship.position },
+    radius: DRY_FUEL_BLACK_HOLE_RADIUS,
+    pullRadius: DRY_FUEL_BLACK_HOLE_PULL_RADIUS,
+    intensity: 1
+  };
 }
 
 function isBrakeSensitiveCargo(cargoKind: string): boolean {

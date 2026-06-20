@@ -1020,6 +1020,21 @@ export type GravitySourceVisual = {
   highlightAlpha: number;
 };
 
+export type BlackHoleVisualInput = Pick<SimulationSnapshot, "status" | "tick" | "blackHole">;
+
+export type BlackHoleVisual = {
+  coreRadius: number;
+  pullRadius: number;
+  ringRadius: number;
+  coreColor: number;
+  ringColor: number;
+  haloColor: number;
+  coreAlpha: number;
+  ringAlpha: number;
+  pullAlpha: number;
+  rotation: number;
+};
+
 export type ShipShieldReserveVisualInput = Pick<SimulationSnapshot, "status" | "emergencyShieldAvailable" | "tick">;
 
 export type ShipShieldReserveVisual = {
@@ -1226,6 +1241,26 @@ export function gravitySourceVisual(visualTheme: string | undefined): GravitySou
     craterColor: 0x4fa8d8,
     haloAlpha: 0.45,
     highlightAlpha: 0.35
+  };
+}
+
+export function blackHoleVisual(input: BlackHoleVisualInput): BlackHoleVisual | undefined {
+  if (input.status !== "crashed" || !input.blackHole) {
+    return undefined;
+  }
+
+  const intensity = clamp(input.blackHole.intensity, 0, 1);
+  return {
+    coreRadius: round(input.blackHole.radius * intensity, 2),
+    pullRadius: round(input.blackHole.pullRadius * intensity, 2),
+    ringRadius: round(input.blackHole.radius * 1.2545 * intensity, 2),
+    coreColor: 0x02030a,
+    ringColor: 0x9b5cff,
+    haloColor: 0x101424,
+    coreAlpha: round(0.82 + intensity * 0.16, 2),
+    ringAlpha: round(0.5 + intensity * 0.24, 2),
+    pullAlpha: round(0.1 + intensity * 0.1, 2),
+    rotation: round(input.tick * 0.1, 2)
   };
 }
 
@@ -1680,6 +1715,7 @@ class PixiRenderer implements AstroPixiRenderer {
   private readonly hazards = new Graphics();
   private readonly combat = new Graphics();
   private readonly ship = new Graphics();
+  private readonly blackHole = new Graphics();
   private readonly screenFx = new Graphics();
   private readonly stars: Star[] = createStars(140);
   private destroyed = false;
@@ -1713,6 +1749,7 @@ class PixiRenderer implements AstroPixiRenderer {
       this.hazards,
       this.combat,
       this.ship,
+      this.blackHole,
       this.screenFx
     );
   }
@@ -1741,6 +1778,7 @@ class PixiRenderer implements AstroPixiRenderer {
     this.drawHazards(snapshot, project);
     this.drawCombat(snapshot, project);
     this.drawShip(snapshot, project);
+    this.drawBlackHole(snapshot, project);
     this.drawScreenFx(snapshot, viewport);
   }
 
@@ -2556,6 +2594,39 @@ class PixiRenderer implements AstroPixiRenderer {
         alpha: trail.alpha
       });
     }
+  }
+
+  private drawBlackHole(snapshot: SimulationSnapshot, project: (point: Vec2) => Vec2): void {
+    this.blackHole.clear();
+    const visual = blackHoleVisual(snapshot);
+    if (!visual || !snapshot.blackHole) {
+      return;
+    }
+
+    const center = project(snapshot.blackHole.position);
+    this.blackHole.circle(center.x, center.y, visual.pullRadius).stroke({
+      color: visual.haloColor,
+      width: 7,
+      alpha: visual.pullAlpha
+    });
+    this.blackHole.circle(center.x, center.y, visual.ringRadius).stroke({
+      color: visual.ringColor,
+      width: 5,
+      alpha: visual.ringAlpha
+    });
+    this.blackHole.circle(center.x, center.y, visual.ringRadius * 0.72).stroke({
+      color: 0x7ce1ff,
+      width: 1.6,
+      alpha: visual.ringAlpha * 0.42
+    });
+    this.blackHole.circle(center.x, center.y, visual.coreRadius).fill({
+      color: visual.coreColor,
+      alpha: visual.coreAlpha
+    });
+    this.blackHole.circle(center.x + Math.cos(visual.rotation) * visual.coreRadius * 0.18, center.y, visual.coreRadius * 0.18).fill({
+      color: 0x000000,
+      alpha: 0.92
+    });
   }
 
   private drawScreenFx(snapshot: SimulationSnapshot, viewport: { width: number; height: number }): void {

@@ -290,6 +290,33 @@ describe("deterministic Astro Courier simulation", () => {
     expect(world.ship.fuel).toBeLessThan(fuelAfterFirstBoost);
   });
 
+  it("ends a dry-fuel drift with a black-hole crash after eighteen seconds", () => {
+    const world = createWorldFromSystem(starterSystem, "dry-fuel-seed");
+    world.ship.fuel = 0;
+
+    for (let tick = 0; tick < 18 * 60 - 1; tick += 1) {
+      stepWorld(world, 1 / 60, []);
+    }
+
+    expect(world.status).toBe("flying");
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(world.status).toBe("crashed");
+    expect(world.crashReason).toBe("Fuel Depleted");
+    expect(world.ship.hp).toBe(0);
+    expect(world.ship.cargoDamage).toBe(1);
+    expect(snapshotWorld(world)).toMatchObject({
+      crashReason: "Fuel Depleted",
+      blackHole: {
+        position: world.ship.position,
+        radius: 66,
+        pullRadius: 170,
+        intensity: 1
+      }
+    });
+  });
+
   it("starts runs with ship HP and a small interceptor patrol", () => {
     const world = createWorldFromSystem(starterSystem, "combat-seed");
     const snapshot = combatSnapshot(world);

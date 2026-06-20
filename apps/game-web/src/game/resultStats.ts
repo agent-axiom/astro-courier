@@ -143,7 +143,12 @@ export function buildRunIdentityReceipt(input: RunIdentityReceiptInput): RunIden
   if (input.status === "crashed") {
     return {
       label: "Run identity",
-      value: input.crashReason === "Hull Collision" ? "Route failed / hull contact" : "Route failed / final approach",
+      value:
+        input.crashReason === "Hull Collision"
+          ? "Route failed / hull contact"
+          : input.crashReason === "Fuel Depleted"
+          ? "Route failed / dry tank"
+          : "Route failed / final approach",
       tone: "failure"
     };
   }

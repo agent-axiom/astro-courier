@@ -29,7 +29,7 @@ export type LandingRating =
   | "Cargo Survived Somehow"
   | "Insurance Event";
 export type RunMedal = "none" | "bronze" | "silver" | "gold" | "comet";
-export type CrashReason = "Hard Landing" | "Misaligned Dock" | "Hull Collision";
+export type CrashReason = "Hard Landing" | "Misaligned Dock" | "Hull Collision" | "Fuel Depleted";
 export type RunGrade = "S" | "A" | "B" | "C" | "D" | "F";
 
 export type ScoreBreakdown = {
@@ -108,6 +108,13 @@ export type SimulationSnapshot = {
   launchBurstSecondsRemaining: number;
   elapsedSeconds: number;
   score: number;
+  crashReason?: CrashReason;
+  blackHole?: {
+    position: Vec2;
+    radius: number;
+    pullRadius: number;
+    intensity: number;
+  };
   objectiveTarget?: {
     id: string;
     role: "pickup" | "destination" | "neutral";

@@ -39,6 +39,7 @@ export function buildRadioMessage(hud: HudState, context: RadioMessageContext = 
   if (hud.status === "crashed") {
     if (hud.crashReason === "Hard Landing") return "Insurance desk reports: hard landing. Bleed speed before contact.";
     if (hud.crashReason === "Misaligned Dock") return "Insurance desk reports: dock alignment failed. Align ship before contact.";
+    if (hud.crashReason === "Fuel Depleted") return "Fuel depleted. Keep a reserve or finish before the singularity.";
     if (isCloseTargetHullCollision(hud)) {
       return "Insurance desk reports: missed landing pad. Re-enter the dock ring.";
     }

@@ -22,6 +22,10 @@ export function buildCrashReasonLabel(input: CrashReasonLabelInput): string {
     return "Dock angle missed";
   }
 
+  if (input.crashReason === "Fuel Depleted") {
+    return "Fuel gone";
+  }
+
   if (input.crashReason === "Hull Collision") {
     if (isCloseTargetHullCollision(input)) {
       return "Missed landing pad";
@@ -53,6 +57,14 @@ export function buildCrashDebrief(input: CrashReasonLabelInput): CrashDebrief {
       label: "Cause",
       value: "Alignment",
       tone: "dock"
+    };
+  }
+
+  if (input.crashReason === "Fuel Depleted") {
+    return {
+      label: "Cause",
+      value: "No fuel",
+      tone: "review"
     };
   }
 

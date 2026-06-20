@@ -149,6 +149,14 @@ export function buildResultCoach(input: ResultCoachInput): ResultCoach {
       };
     }
 
+    if (input.crashReason === "Fuel Depleted") {
+      return {
+        label: "Next run",
+        value: "Save a fuel reserve",
+        tone: "danger"
+      };
+    }
+
     if (isCloseTargetHullCollision(input)) {
       return {
         label: "Next run",

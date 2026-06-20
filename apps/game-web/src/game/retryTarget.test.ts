@@ -78,6 +78,25 @@ describe("result retry target", () => {
     });
   });
 
+  it("turns dry-fuel black-hole crashes into a concrete reserve target", () => {
+    expect(
+      buildRetryTarget({
+        status: "crashed",
+        crashReason: "Fuel Depleted",
+        medal: "none",
+        elapsedSeconds: 24.2,
+        goldSeconds: 30,
+        score: 0,
+        isNewBest: false,
+        bestRun: undefined
+      })
+    ).toEqual({
+      label: "Retry target",
+      value: "Keep fuel reserve",
+      tone: "danger"
+    });
+  });
+
   it("turns gravity route hull collisions into a sling-lane target", () => {
     expect(
       buildRetryTarget({
