@@ -73,10 +73,13 @@ type EnemyDirectorPolicy = {
   focus: "cargo" | "player" | "objective";
 };
 
+type EnemyDirectorModifier = "none" | "ambush" | "lowFuel" | "heavyEscort" | "meteorBurst" | "quietLane";
+
 type EnemyDirectorDirective = {
   formation: "screen" | "pincer" | "ambush" | "retreat";
   missileDoctrine: "hold" | "single" | "salvo";
   tempo: "calm" | "push" | "spike";
+  modifier: EnemyDirectorModifier;
   pressure: number;
   hint?: string;
 };
@@ -98,6 +101,7 @@ const fallbackDirective: EnemyDirectorDirective = {
   formation: "screen",
   missileDoctrine: "hold",
   tempo: "calm",
+  modifier: "none",
   pressure: 0.4,
   hint: "screen"
 };
@@ -478,8 +482,8 @@ function buildOpenAIRequest(model: string, directorRequest: EnemyDirectorRequest
         role: "system",
         content:
           quality === "cinematic"
-            ? "You are the Astro Courier enemy director. Return only compact JSON. Coordinate varied enemy archetypes, readable flanks, fair recoveries, and tempo beats: calm, push, or spike."
-            : "You are the Astro Courier enemy director. Return only compact JSON. Tune enemies for fun pressure, not unfair hits. Use tempo calm, push, or spike."
+            ? "You are the Astro Courier enemy director. Return only compact JSON. Coordinate varied enemy archetypes, readable flanks, fair recoveries, tempo beats, and one bounded mission modifier."
+            : "You are the Astro Courier enemy director. Return only compact JSON. Tune enemies for fun pressure, not unfair hits. Use one bounded mission modifier."
       },
       {
         role: "user",
@@ -517,11 +521,12 @@ function buildOpenAIRequest(model: string, directorRequest: EnemyDirectorRequest
             directive: {
               type: "object",
               additionalProperties: false,
-              required: ["formation", "missileDoctrine", "tempo", "pressure", "hint"],
+              required: ["formation", "missileDoctrine", "tempo", "modifier", "pressure", "hint"],
               properties: {
                 formation: { type: "string", enum: ["screen", "pincer", "ambush", "retreat"] },
                 missileDoctrine: { type: "string", enum: ["hold", "single", "salvo"] },
                 tempo: { type: "string", enum: ["calm", "push", "spike"] },
+                modifier: { type: "string", enum: ["none", "ambush", "lowFuel", "heavyEscort", "meteorBurst", "quietLane"] },
                 pressure: { type: "number", minimum: 0, maximum: 1 },
                 hint: { type: "string", maxLength: 32 }
               }
@@ -574,6 +579,15 @@ function clampDirective(directive: Partial<EnemyDirectorDirective> | undefined):
         : fallbackDirective.missileDoctrine,
     tempo:
       directive?.tempo === "push" || directive?.tempo === "spike" || directive?.tempo === "calm" ? directive.tempo : fallbackDirective.tempo,
+    modifier:
+      directive?.modifier === "ambush" ||
+      directive?.modifier === "lowFuel" ||
+      directive?.modifier === "heavyEscort" ||
+      directive?.modifier === "meteorBurst" ||
+      directive?.modifier === "quietLane" ||
+      directive?.modifier === "none"
+        ? directive.modifier
+        : fallbackDirective.modifier,
     pressure: clampNumber(directive?.pressure, 0, 1, fallbackDirective.pressure),
     hint: typeof directive?.hint === "string" && directive.hint.trim() ? directive.hint.trim().slice(0, 32) : fallbackDirective.hint
   };

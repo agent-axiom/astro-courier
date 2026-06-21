@@ -121,11 +121,16 @@ function normalizeDirectorResult(value: unknown): EnemyDirectorResult | undefine
       ...candidate,
       directive: {
         ...candidate.directive,
-        tempo: candidate.directive.tempo ?? "calm"
+        tempo: candidate.directive.tempo ?? "calm",
+        modifier: normalizeModifier(candidate.directive.modifier)
       }
     };
   }
   return undefined;
+}
+
+function normalizeModifier(value: unknown): EnemyDirectorDirective["modifier"] {
+  return value === "ambush" || value === "lowFuel" || value === "heavyEscort" || value === "meteorBurst" || value === "quietLane" ? value : "none";
 }
 
 function distanceBetween(left: Vec2, right: Vec2): number {

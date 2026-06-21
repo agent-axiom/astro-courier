@@ -59,6 +59,7 @@ describe("enemy director worker", () => {
       expect(body.model).toBe("gpt-5.4-mini");
       expect(body.text.format.type).toBe("json_schema");
       expect(body.text.format.schema.properties.directive.required).toContain("tempo");
+      expect(body.text.format.schema.properties.directive.required).toContain("modifier");
       expect(body.max_output_tokens).toBe(160);
       expect(JSON.parse(body.input[1].content)).toMatchObject({
         quality: "standard",
@@ -86,6 +87,7 @@ describe("enemy director worker", () => {
               formation: "pincer",
               missileDoctrine: "salvo",
               tempo: "spike",
+              modifier: "ambush",
               pressure: 3,
               hint: "wide pincer"
             }
@@ -119,6 +121,7 @@ describe("enemy director worker", () => {
         formation: "pincer",
         missileDoctrine: "salvo",
         tempo: "spike",
+        modifier: "ambush",
         pressure: 1,
         hint: "wide pincer"
       }
@@ -147,6 +150,7 @@ describe("enemy director worker", () => {
               formation: "ambush",
               missileDoctrine: "single",
               tempo: "push",
+              modifier: "heavyEscort",
               pressure: 0.66,
               hint: "ambush lane"
             }
@@ -189,6 +193,7 @@ describe("enemy director worker", () => {
         formation: "ambush",
         missileDoctrine: "single",
         tempo: "push",
+        modifier: "heavyEscort",
         pressure: 0.66,
         hint: "ambush lane"
       }
@@ -222,6 +227,7 @@ describe("enemy director worker", () => {
         formation: "screen",
         missileDoctrine: "hold",
         tempo: "calm",
+        modifier: "none",
         pressure: 0.4,
         hint: "screen"
       }

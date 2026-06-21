@@ -21,7 +21,7 @@ export type InputFrame = {
 export type RunStatus = "flying" | "delivered" | "crashed" | "paused";
 export type ObjectivePhase = "pickup" | "delivery" | "complete";
 export type LandingGuidanceStatus = "approach" | "too-fast" | "misaligned" | "ready";
-export type PlayerPerkId = "afterburner" | "shield-crate" | "pulse-shot" | "magnet-clamp";
+export type PlayerPerkId = "afterburner" | "shield-crate" | "pulse-shot" | "magnet-clamp" | "missile-rack";
 export type ShipUpgradeId = "boost-tune" | "reinforced-hull" | "pulse-rail" | "mag-clamp" | "forge-core";
 
 export type LandingRating =
@@ -57,10 +57,13 @@ export type EnemyDirectorPolicy = {
   focus: "cargo" | "player" | "objective";
 };
 
+export type EnemyDirectorModifier = "none" | "ambush" | "lowFuel" | "heavyEscort" | "meteorBurst" | "quietLane";
+
 export type EnemyDirectorDirective = {
   formation: "screen" | "pincer" | "ambush" | "retreat";
   missileDoctrine: "hold" | "single" | "salvo";
   tempo: "calm" | "push" | "spike";
+  modifier?: EnemyDirectorModifier;
   pressure: number;
   hint?: string;
 };

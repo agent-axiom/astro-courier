@@ -5,6 +5,7 @@ import {
   calculateHazardThreadStyleBonus,
   calculateHazardSkimStyleBonus,
   BOOST_COOLDOWN_SECONDS,
+  MISSILE_RACK_BOOST_COOLDOWN_MULTIPLIER,
   ECO_DRIFT_FUEL_USED_LIMIT,
   ECO_DRIFT_STYLE_BONUS,
   EXPRESS_FINISH_STYLE_BONUS,
@@ -894,6 +895,27 @@ describe("deterministic Astro Courier simulation", () => {
     expect(magnet.cargoOnboard).toBe(true);
   });
 
+  it("lets missile-rack trade boost cadence for two extra missiles", () => {
+    const baseline = createWorldFromSystem(starterSystem, "baseline-missile-rack-seed", { perkId: "shield-crate" });
+    const rack = createWorldFromSystem(starterSystem, "missile-rack-seed", { perkId: "missile-rack" });
+    for (const world of [baseline, rack]) {
+      world.gravitySources = [];
+      world.landingPads = [];
+      world.enemies = [];
+      world.ship.position = { x: 500, y: 500 };
+      world.ship.velocity = { x: 0, y: 0 };
+      world.ship.rotation = 0;
+      world.ship.targetRotation = 0;
+    }
+
+    stepWorld(baseline, 1 / 60, [{ type: "BOOST" }], { combat: false });
+    stepWorld(rack, 1 / 60, [{ type: "BOOST" }], { combat: false });
+
+    expect(rack.activePerk).toBe("missile-rack");
+    expect(rack.ship.missileAmmo).toBe(baseline.ship.missileAmmo + 2);
+    expect(rack.ship.boostCooldownSeconds).toBeCloseTo(BOOST_COOLDOWN_SECONDS * MISSILE_RACK_BOOST_COOLDOWN_MULTIPLIER, 3);
+  });
+
   it("turns unlocked ship upgrades into mechanical ship systems", () => {
     const baseline = createWorldFromSystem(starterSystem, "baseline-upgrade-seed", { perkId: "shield-crate" });
     const upgraded = createWorldFromSystem(starterSystem, "ship-upgrade-seed", {
@@ -1051,6 +1073,36 @@ describe("deterministic Astro Courier simulation", () => {
       hp: 36
     });
     expect(world.lastMilestone).toBe("Direct Hit");
+  });
+
+  it("lets player missiles break enemy armor before hull spillover", () => {
+    const world = createWorldFromSystem(starterSystem, "missile-armor-break-seed");
+    const combat = combatWorld(world);
+    combat.enemies = [testEnemy("armored-missile-target", { x: 154, y: 0 }, { hp: 120, armor: 10 })];
+    combat.ship.position = { x: 120, y: 0 };
+    combat.ship.velocity = { x: 0, y: 0 };
+    combat.playerProjectiles = [
+      {
+        id: "player-missile-hit",
+        owner: "player",
+        kind: "missile",
+        targetId: "armored-missile-target",
+        position: { x: 154, y: 0 },
+        velocity: { x: 0, y: 0 },
+        radius: 6,
+        damage: 54,
+        ageSeconds: 0,
+        maxAgeSeconds: 4
+      }
+    ];
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(combat.enemies).toHaveLength(1);
+    expect(combat.enemies[0]).toMatchObject({
+      armor: 4,
+      hp: 70
+    });
   });
 
   it("fires limited player homing missiles with a target lock", () => {

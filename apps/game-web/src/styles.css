@@ -2229,6 +2229,129 @@ button {
   color: #bff7d8;
 }
 
+.boss-loop-chip {
+  display: grid;
+  grid-template-columns: 16px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 7px;
+  font-size: 0.84rem;
+  font-weight: 890;
+}
+
+.boss-loop-chip span,
+.boss-loop-chip strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.boss-loop-chip span {
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.boss-loop-chip strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.boss-loop-breach {
+  border-color: rgba(124, 225, 255, 0.34);
+  background: rgba(124, 225, 255, 0.15);
+  color: #c6f6ff;
+}
+
+.boss-loop-danger {
+  border-color: rgba(255, 111, 145, 0.36);
+  background: rgba(255, 111, 145, 0.19);
+  color: #ffadc1;
+}
+
+.boss-loop-target {
+  border-color: rgba(255, 209, 102, 0.36);
+  background: rgba(255, 209, 102, 0.18);
+  color: #ffe19a;
+}
+
+.boss-loop-complete {
+  border-color: rgba(142, 230, 184, 0.34);
+  background: rgba(142, 230, 184, 0.17);
+  color: #bff7d8;
+}
+
+.ghost-coach-chip,
+.ghost-coach-toggle {
+  display: grid;
+  grid-template-columns: 16px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid rgba(124, 225, 255, 0.22);
+  border-radius: 7px;
+  background: rgba(124, 225, 255, 0.12);
+  color: #c6f6ff;
+  font-size: 0.84rem;
+  font-weight: 890;
+}
+
+.ghost-coach-toggle {
+  width: 100%;
+  cursor: pointer;
+}
+
+.ghost-coach-chip span,
+.ghost-coach-chip strong,
+.ghost-coach-toggle span,
+.ghost-coach-toggle strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.ghost-coach-chip span,
+.ghost-coach-toggle span {
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.ghost-coach-chip strong,
+.ghost-coach-toggle strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.ghost-coach-toggle-off {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(160, 196, 255, 0.08);
+  color: rgba(255, 255, 255, 0.74);
+}
+
+.ghost-coach-aim {
+  border-color: rgba(124, 225, 255, 0.28);
+  background: rgba(124, 225, 255, 0.14);
+}
+
+.ghost-coach-boost {
+  border-color: rgba(255, 209, 102, 0.34);
+  background: rgba(255, 209, 102, 0.17);
+  color: #ffe19a;
+}
+
+.ghost-coach-brake {
+  border-color: rgba(255, 111, 145, 0.34);
+  background: rgba(255, 111, 145, 0.17);
+  color: #ffadc1;
+}
+
+.ghost-coach-dock {
+  border-color: rgba(142, 230, 184, 0.34);
+  background: rgba(142, 230, 184, 0.16);
+  color: #bff7d8;
+}
+
 .route-focus-chip {
   display: grid;
   grid-template-columns: 16px auto 1fr;
@@ -4818,6 +4941,129 @@ button {
   color: #bff7d8;
 }
 
+.campaign-map {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  padding: 9px;
+  border: 1px solid rgba(124, 225, 255, 0.18);
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(12, 22, 42, 0.86), rgba(13, 13, 31, 0.78));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.campaign-map-summary {
+  display: grid;
+  grid-template-columns: 16px auto 1fr;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  font-size: 0.74rem;
+  font-weight: 850;
+}
+
+.campaign-map-summary span,
+.campaign-map-summary strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.1;
+}
+
+.campaign-map-summary span {
+  color: rgba(255, 255, 255, 0.72);
+  text-transform: uppercase;
+}
+
+.campaign-map-summary strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.campaign-map-sectors {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.campaign-sector {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.campaign-sector small {
+  min-width: 0;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.54rem;
+  font-weight: 850;
+  letter-spacing: 0;
+  line-height: 1;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.campaign-sector span {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.campaign-node {
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  background: rgba(160, 196, 255, 0.18);
+  box-shadow: 0 0 0 0 rgba(124, 225, 255, 0);
+  cursor: pointer;
+}
+
+.campaign-node:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.campaign-node-active {
+  border-color: rgba(124, 225, 255, 0.95);
+  background: #7ce1ff;
+  box-shadow: 0 0 18px rgba(124, 225, 255, 0.42);
+}
+
+.campaign-node-comet {
+  border-color: rgba(255, 209, 102, 0.94);
+  background: #ffd166;
+}
+
+.campaign-node-cleared {
+  border-color: rgba(142, 230, 184, 0.9);
+  background: #8ee6b8;
+}
+
+.campaign-node-next {
+  border-color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.campaign-node-locked {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.campaign-map-open {
+  border-color: rgba(124, 225, 255, 0.16);
+}
+
+.campaign-map-progress {
+  border-color: rgba(142, 230, 184, 0.2);
+}
+
+.campaign-map-complete {
+  border-color: rgba(255, 209, 102, 0.28);
+}
+
 .route-campaign-milestone-target {
   display: grid;
   grid-template-columns: 18px auto minmax(0, 1fr);
@@ -6832,6 +7078,58 @@ button {
   color: #ffe19a;
 }
 
+.daily-share {
+  display: grid;
+  grid-template-columns: 18px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 10px;
+  border: 1px solid rgba(124, 225, 255, 0.2);
+  border-radius: 7px;
+  background: rgba(124, 225, 255, 0.12);
+  color: #c6f6ff;
+  font-size: 0.8rem;
+  font-weight: 870;
+  text-align: left;
+}
+
+.daily-share span,
+.daily-share strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.daily-share span {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.daily-share strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.daily-share-failed {
+  border-color: rgba(255, 111, 145, 0.28);
+  background: rgba(255, 111, 145, 0.13);
+  color: #ffadc1;
+}
+
+.daily-share-new-best,
+.daily-share-clear {
+  border-color: rgba(124, 225, 255, 0.26);
+  background: rgba(124, 225, 255, 0.13);
+}
+
+.daily-share-gold,
+.daily-share-comet {
+  border-color: rgba(255, 209, 102, 0.32);
+  background: rgba(255, 209, 102, 0.16);
+  color: #ffe19a;
+}
+
 .daily-streak-receipt {
   display: grid;
   grid-template-columns: 18px auto 1fr;
@@ -7251,6 +7549,9 @@ button {
   .route-mastery-briefing,
   .route-campaign-briefing,
   .route-campaign-milestone-target,
+  .boss-loop-chip,
+  .ghost-coach-chip,
+  .ghost-coach-toggle,
   .route-target-briefing,
   .daily-dispatch-briefing,
   .contract-traits,
@@ -7734,6 +8035,8 @@ button {
   .preflight-overlay-expanded .route-mastery-briefing,
   .preflight-overlay-expanded .route-campaign-briefing,
   .preflight-overlay-expanded .route-campaign-milestone-target,
+  .preflight-overlay-expanded .boss-loop-chip,
+  .preflight-overlay-expanded .ghost-coach-chip,
   .preflight-overlay-expanded .route-target-briefing,
   .preflight-overlay-expanded .daily-dispatch-briefing,
   .preflight-overlay-expanded .cargo-risk-briefing,

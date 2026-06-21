@@ -28,6 +28,7 @@ export type FlightDirectorInput = {
   styleChainSecondsRemaining?: number;
   manualBrakeUsed?: boolean;
   interceptorCount?: number;
+  incomingMissileCount?: number;
   weaponCooldownSeconds?: number;
   missileAmmo?: number;
 };
@@ -66,6 +67,10 @@ export function buildFlightDirector(input: FlightDirectorInput): FlightDirector 
 
   if (input.lastMilestone === "Shield Rebound" && input.emergencyShieldAvailable === false) {
     return director("Recover line", "Shield spent", "urgent", 1);
+  }
+
+  if ((input.incomingMissileCount ?? 0) > 0 && (input.weaponCooldownSeconds ?? 0) <= 0) {
+    return director("Shoot missile", "Space cannon", "danger", 1);
   }
 
   if ((input.interceptorCount ?? 0) > 0 && (input.weaponCooldownSeconds ?? 0) <= 0) {

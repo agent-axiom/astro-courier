@@ -547,8 +547,25 @@ describe("GameShell lifecycle", () => {
       shipHp: 125,
       shipMaxHp: 125
     });
-    expect(onHud.mock.calls.at(-1)?.[0].perkOptions).toHaveLength(4);
+    expect(onHud.mock.calls.at(-1)?.[0].perkOptions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "missile-rack",
+          shortLabel: "Missiles",
+          stat: "5 rockets"
+        })
+      ])
+    );
+    expect(onHud.mock.calls.at(-1)?.[0].perkOptions).toHaveLength(5);
     expect((shell as unknown as { world: SimulationWorld }).world.activePerk).toBe("shield-crate");
+
+    shell.selectPerk("missile-rack");
+
+    expect(onHud.mock.calls.at(-1)?.[0]).toMatchObject({
+      status: "paused",
+      activePerk: "missile-rack",
+      missileAmmo: 5
+    });
   });
 
   it("can retarget the current paused contract to a daily replay seed", async () => {

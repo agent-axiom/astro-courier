@@ -310,6 +310,7 @@ const FUEL_BURN_PER_SECOND = 8;
 const BRAKE_BURN_PER_SECOND = 3;
 const RETRO_BRAKE_THRUST_RATIO = 0.72;
 export const BOOST_COOLDOWN_SECONDS = 1.15;
+export const MISSILE_RACK_BOOST_COOLDOWN_MULTIPLIER = 1.18;
 const BOOST_IMPULSE_SPEED = 24;
 const BOOST_FUEL_COST = 2;
 const AFTERBURNER_BOOST_IMPULSE_SPEED = 32;
@@ -378,6 +379,7 @@ const PLAYER_PROJECTILE_SPEED = 112;
 const PLAYER_PROJECTILE_DAMAGE = 20;
 const PLAYER_PROJECTILE_RADIUS = 4;
 const PLAYER_MISSILE_AMMO = 3;
+const MISSILE_RACK_BONUS_AMMO = 2;
 const REINFORCED_HULL_BONUS_HP = 15;
 const FORGE_CORE_MISSILE_BONUS = 1;
 const BOOST_TUNE_IMPULSE_MULTIPLIER = 1.08;
@@ -387,6 +389,7 @@ const PLAYER_MISSILE_DAMAGE = 54;
 const PLAYER_MISSILE_RADIUS = 6;
 const PLAYER_MISSILE_MAX_AGE_SECONDS = 4.4;
 const PLAYER_MISSILE_LOCK_DISTANCE = 420;
+const PLAYER_MISSILE_ARMOR_BREAK = 6;
 const PULSE_SHOT_DAMAGE = 42;
 const PULSE_SHOT_RADIUS = 6;
 const PLAYER_PROJECTILE_MAX_AGE_SECONDS = 1.5;
@@ -535,6 +538,7 @@ export function defaultEnemyDirectorDirective(): EnemyDirectorDirective {
     formation: "screen",
     missileDoctrine: "hold",
     tempo: "calm",
+    modifier: "none",
     pressure: 0.4,
     hint: "screen"
   };
@@ -562,11 +566,21 @@ export function clampEnemyDirectorDirective(directive: Partial<EnemyDirectorDire
       : fallback.missileDoctrine;
   const tempo =
     directive?.tempo === "push" || directive?.tempo === "spike" || directive?.tempo === "calm" ? directive.tempo : fallback.tempo;
+  const modifier =
+    directive?.modifier === "ambush" ||
+    directive?.modifier === "lowFuel" ||
+    directive?.modifier === "heavyEscort" ||
+    directive?.modifier === "meteorBurst" ||
+    directive?.modifier === "quietLane" ||
+    directive?.modifier === "none"
+      ? directive.modifier
+      : fallback.modifier;
   const hint = typeof directive?.hint === "string" && directive.hint.trim() ? directive.hint.trim().slice(0, 32) : fallback.hint;
   return {
     formation,
     missileDoctrine,
     tempo,
+    modifier,
     pressure: round(clamp(directive?.pressure ?? fallback.pressure, 0, 1), 3),
     hint
   };
@@ -612,7 +626,9 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
     (activePerk === "shield-crate" ? SHIELD_CRATE_MAX_HP : SHIP_MAX_HP) +
     (hasShipUpgrade(shipUpgrades, "reinforced-hull") ? REINFORCED_HULL_BONUS_HP : 0);
   const missileAmmo =
-    PLAYER_MISSILE_AMMO + (hasShipUpgrade(shipUpgrades, "forge-core") ? FORGE_CORE_MISSILE_BONUS : 0);
+    PLAYER_MISSILE_AMMO +
+    (activePerk === "missile-rack" ? MISSILE_RACK_BONUS_AMMO : 0) +
+    (hasShipUpgrade(shipUpgrades, "forge-core") ? FORGE_CORE_MISSILE_BONUS : 0);
   const contractHazards = activeContract.hazards ?? [];
   const stationPadRoles = new Map<string, NonNullable<StationContent["role"]>>();
   for (const station of system.stations) {
@@ -902,7 +918,7 @@ export function stepWorld(
         });
         world.ship.fuel -= fuelCost;
         world.fuelUsed += fuelCost;
-        world.ship.boostCooldownSeconds = BOOST_COOLDOWN_SECONDS;
+        world.ship.boostCooldownSeconds = boostCooldownSeconds(world);
         world.lastMilestone = "Boost Burn";
         if (canAwardLaunchBurst(world)) {
           world.launchBurstAwarded = true;
@@ -1263,6 +1279,10 @@ function boostFuelCost(world: Pick<SimulationWorld, "activePerk" | "shipUpgrades
 function boostImpulseSpeed(world: Pick<SimulationWorld, "activePerk" | "shipUpgrades">): number {
   const baseImpulse = world.activePerk === "afterburner" ? AFTERBURNER_BOOST_IMPULSE_SPEED : BOOST_IMPULSE_SPEED;
   return hasWorldShipUpgrade(world, "boost-tune") ? round(baseImpulse * BOOST_TUNE_IMPULSE_MULTIPLIER, 3) : baseImpulse;
+}
+
+function boostCooldownSeconds(world: Pick<SimulationWorld, "activePerk">): number {
+  return round(BOOST_COOLDOWN_SECONDS * (world.activePerk === "missile-rack" ? MISSILE_RACK_BOOST_COOLDOWN_MULTIPLIER : 1), 3);
 }
 
 function tickBoostCooldown(world: SimulationWorld, fixedDt: number): void {
@@ -1729,7 +1749,7 @@ function resolvePlayerProjectileHits(world: SimulationWorld): void {
       continue;
     }
 
-    applyDamageToEnemy(target, projectile.damage);
+    applyDamageToEnemy(target, projectile.damage, projectile.kind === "missile" ? PLAYER_MISSILE_ARMOR_BREAK : 0);
     if (target.hp <= 0) {
       destroyedEnemyIds.add(target.id);
     } else {
@@ -1744,7 +1764,7 @@ function resolvePlayerProjectileHits(world: SimulationWorld): void {
   world.playerProjectiles = remainingProjectiles;
 }
 
-function applyDamageToEnemy(enemy: EnemyShipState, rawDamage: number): number {
+function applyDamageToEnemy(enemy: EnemyShipState, rawDamage: number, armorBreak = 0): number {
   let remainingDamage = Math.max(0, rawDamage);
   const shieldDamage = Math.min(enemy.shield, remainingDamage);
   if (shieldDamage > 0) {
@@ -1754,6 +1774,11 @@ function applyDamageToEnemy(enemy: EnemyShipState, rawDamage: number): number {
 
   if (remainingDamage <= 0) {
     return shieldDamage;
+  }
+
+  const brokenArmor = Math.min(Math.max(0, enemy.armor), Math.max(0, armorBreak));
+  if (brokenArmor > 0) {
+    enemy.armor = round(Math.max(0, enemy.armor - brokenArmor), 3);
   }
 
   const hullDamage = Math.max(1, remainingDamage - Math.max(0, enemy.armor));

@@ -38,6 +38,27 @@ describe("flight director", () => {
     });
   });
 
+  it("prioritizes shooting down incoming missiles over ordinary enemy fire", () => {
+    expect(
+      buildFlightDirector({
+        status: "flying",
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        targetDistance: 260,
+        interceptorCount: 2,
+        incomingMissileCount: 1,
+        weaponCooldownSeconds: 0,
+        missileAmmo: 1
+      })
+    ).toEqual({
+      label: "Flight director",
+      action: "Shoot missile",
+      detail: "Space cannon",
+      tone: "danger",
+      progress: 1
+    });
+  });
+
   it("prioritizes immediate danger over pickup rush opportunities", () => {
     expect(
       buildFlightDirector({

@@ -73,6 +73,7 @@ describe("enemy director client", () => {
         formation: "pincer",
         missileDoctrine: "salvo",
         tempo: "calm",
+        modifier: "none",
         pressure: 0.8,
         hint: "pincer"
       }
@@ -98,6 +99,7 @@ describe("enemy director client", () => {
             formation: "screen",
             missileDoctrine: "hold",
             tempo: "push",
+            modifier: "meteorBurst",
             pressure: 0.4
           }
         })

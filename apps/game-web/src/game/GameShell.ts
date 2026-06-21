@@ -63,6 +63,7 @@ export type HudState = {
   weaponCooldownSeconds: number;
   missileAmmo: number;
   interceptorCount: number;
+  incomingMissileCount: number;
   enemyDirectorMode: "local" | "openai" | "fallback";
   fuelUsed: number;
   boostCooldownSeconds: number;
@@ -189,6 +190,14 @@ const perkOptionList: PerkOption[] = [
     shortLabel: "Pulse",
     summary: "Charged opener",
     stat: "42 dmg",
+    tone: "shot"
+  },
+  {
+    id: "missile-rack",
+    label: "Missile Rack",
+    shortLabel: "Missiles",
+    summary: "More rockets",
+    stat: "5 rockets",
     tone: "shot"
   },
   {
@@ -607,6 +616,7 @@ export class GameShell {
       weaponCooldownSeconds: snapshot.ship.weaponCooldownSeconds,
       missileAmmo: snapshot.ship.missileAmmo,
       interceptorCount: snapshot.enemies.length,
+      incomingMissileCount: snapshot.enemyProjectiles.filter((projectile) => projectile.kind === "missile").length,
       enemyDirectorMode: snapshot.enemyDirector.mode,
       fuelUsed: result.fuelUsed,
       boostCooldownSeconds: snapshot.ship.boostCooldownSeconds,

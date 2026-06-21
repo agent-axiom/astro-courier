@@ -56,6 +56,8 @@ import {
   type ShipUpgradeId,
   type ShipUpgradeTrackItem
 } from "./game/bestRun";
+import { buildBossLoop } from "./game/bossLoop";
+import { buildCampaignMap } from "./game/campaignMap";
 import { GameShell, type HudState } from "./game/GameShell";
 import { createEnemyDirectorClient } from "./game/enemyDirector";
 import { buildTargetCompassPresentation, formatBearingGuidance } from "./game/bearing";
@@ -157,6 +159,7 @@ import {
 import { createGameAudioController, type GameAudioController } from "./game/gameAudio";
 import { createGameMusicController, type GameMusicController } from "./game/gameMusic";
 import { createGameHapticsController, type GameHapticsController } from "./game/gameHaptics";
+import { buildGhostCoachCue } from "./game/ghostCoach";
 import { buildAudioTogglePresentation } from "./game/audioControls";
 import {
   buildFlightControlPrimerItems,
@@ -184,6 +187,7 @@ import {
   shouldIssueCourierLicense
 } from "./game/courierLicense";
 import { buildShareableDeliveryReport } from "./game/deliveryReport";
+import { buildDailyShare } from "./game/dailyShare";
 import {
   appendRunFeedUpdates,
   buildLaunchFeedUpdate,
@@ -244,6 +248,7 @@ const initialHud: HudState = {
   weaponCooldownSeconds: 0,
   missileAmmo: 3,
   interceptorCount: 2,
+  incomingMissileCount: 0,
   enemyDirectorMode: "local",
   fuelUsed: 0,
   boostCooldownSeconds: 0,
@@ -357,6 +362,7 @@ export function App() {
   const [cloudSaveStatus, setCloudSaveStatus] = useState<CloudSaveStatus>(() =>
     profileApiUrl ? (cloudSession ? { mode: "synced", displayName: cloudSession.player.displayName } : { mode: "idle" }) : { mode: "disabled" }
   );
+  const [ghostCoachEnabled, setGhostCoachEnabled] = useState(true);
   const cloudSaveStatusLabel = buildCloudSaveStatusLabel(cloudSaveStatus);
   const pushScreenFeedback = (feedback: ScreenFeedback | undefined) => {
     if (!feedback) {
@@ -1008,6 +1014,30 @@ export function App() {
     approachStreakSeconds: hud.approachStreakSeconds,
     manualBrakeUsed: hud.manualBrakeUsed
   });
+  const activeContractOption = hud.contractOptions.find((contract) => contract.id === hud.contractId);
+  const bossLoop = buildBossLoop({
+    contractId: hud.contractId,
+    missionType: activeContractOption?.missionType,
+    status: hud.status,
+    objectivePhase: hud.objectivePhase,
+    cargoOnboard: hud.cargoOnboard,
+    interceptorCount: hud.interceptorCount,
+    riskGateCount: hud.riskGateCount,
+    clearedRiskGateCount: hud.clearedRiskGateCount,
+    targetDistance: hud.targetDistance
+  });
+  const firstRouteBestRun = bestRunsByContract["first-light-delivery"];
+  const ghostCoachEligible = firstRouteBestRun === undefined && (hud.contractId === "first-light-delivery" || hud.contractId === "training-flight");
+  const ghostCoachCue = buildGhostCoachCue({
+    enabled: ghostCoachEnabled,
+    eligible: ghostCoachEligible,
+    status: hud.status,
+    objectivePhase: hud.objectivePhase,
+    cargoOnboard: hud.cargoOnboard,
+    targetDistance: hud.targetDistance,
+    landingStatus: hud.landingStatus,
+    speed: hud.speed
+  });
   const flightDirector = buildFlightDirector({
     status: hud.status,
     objectivePhase: hud.objectivePhase,
@@ -1030,6 +1060,7 @@ export function App() {
     styleChainSecondsRemaining: hud.styleChainSecondsRemaining,
     manualBrakeUsed: hud.manualBrakeUsed,
     interceptorCount: hud.interceptorCount,
+    incomingMissileCount: hud.incomingMissileCount,
     weaponCooldownSeconds: hud.weaponCooldownSeconds,
     missileAmmo: hud.missileAmmo
   });
@@ -1256,6 +1287,11 @@ export function App() {
     preflightOpen
   });
   const routeBoardProgress = buildRouteBoardProgress(hud.contractOptions, bestRunsByContract);
+  const campaignMap = buildCampaignMap({
+    contracts: hud.contractOptions,
+    activeContractId: hud.contractId,
+    bestRunsByContract
+  });
   const routeBoardCampaignProgress = buildRouteBoardCampaignProgress(hud.contractOptions, bestRunsByContract);
   const routeBoardCampaignMilestoneTarget = buildRouteBoardCampaignMilestoneTarget(hud.contractOptions, bestRunsByContract);
   const routeBoardMastery = buildRouteBoardMastery(hud.contractOptions, bestRunsByContract);
@@ -1288,6 +1324,21 @@ export function App() {
           isNewBest: newBest
         })
       : undefined;
+  const dailyShare =
+    hud.status === "delivered" || hud.status === "crashed"
+      ? buildDailyShare({
+          dispatch: dailyDispatch,
+          contractId: hud.contractId,
+          contractTitle: hud.contractTitle,
+          status: hud.status,
+          medal: hud.medal,
+          score: hud.score,
+          elapsedSeconds: hud.elapsedSeconds,
+          isNewBest: newBest,
+          url: GAME_PUBLIC_URL
+        })
+      : undefined;
+  const shareableDeliveryReport = dailyShare?.text ?? deliveryReport;
   const bestRunDelta = buildBestRunDelta({
     bestRun,
     run: { score: hud.score, elapsedSeconds: hud.elapsedSeconds, medal: hud.medal },
@@ -1351,7 +1402,7 @@ export function App() {
     hud.status === "delivered" || hud.status === "crashed"
       ? buildResultActionsLayout({ status: hud.status, hasBoardAction: Boolean(resultBoardAction) && Boolean(resultOverlayDensity?.showBoardAction) })
       : "solo";
-  const showDeliveryReportAction = Boolean(resultOverlayDensity?.showRunReceipts && deliveryReport);
+  const showDeliveryReportAction = Boolean(resultOverlayDensity?.showRunReceipts && shareableDeliveryReport);
   const retryTarget = buildRetryTarget({
     status: hud.status,
     contractId: hud.contractId,
@@ -1705,7 +1756,7 @@ export function App() {
   };
 
   const copyDeliveryReport = () => {
-    if (!deliveryReport) {
+    if (!shareableDeliveryReport) {
       return;
     }
 
@@ -1716,12 +1767,12 @@ export function App() {
     }
 
     void clipboard
-      .writeText(deliveryReport)
+      .writeText(shareableDeliveryReport)
       .then(() => {
         setDeliveryReportCopied(true);
         pushScreenFeedback({
           label: "Copied",
-          value: "Delivery report",
+          value: dailyShare ? "Daily share" : "Delivery report",
           tone: "success",
           intensity: "light",
           durationMs: 320
@@ -2235,6 +2286,20 @@ export function App() {
             <strong>{tacticalCue.value}</strong>
           </div>
         ) : null}
+        {liveHudDensity.showActionChips && bossLoop ? (
+          <div className={`boss-loop-chip boss-loop-${bossLoop.tone}`} aria-label={`${bossLoop.label}: ${bossLoop.action}. ${bossLoop.detail}`}>
+            <Flag size={16} />
+            <span>{bossLoop.action}</span>
+            <strong>{bossLoop.detail}</strong>
+          </div>
+        ) : null}
+        {liveHudDensity.showActionChips && ghostCoachCue ? (
+          <div className={`ghost-coach-chip ghost-coach-${ghostCoachCue.tone}`} aria-label={`${ghostCoachCue.label}: ${ghostCoachCue.action}. ${ghostCoachCue.detail}`}>
+            <Target size={16} />
+            <span>{ghostCoachCue.action}</span>
+            <strong>{ghostCoachCue.detail}</strong>
+          </div>
+        ) : null}
         {liveHudDensity.showPrimaryStatusRows ? (
           <div className="status-row">
             <span>Status</span>
@@ -2598,6 +2663,13 @@ export function App() {
               <strong>{routePressure.value}</strong>
             </div>
           ) : null}
+          {bossLoop ? (
+            <div className={`boss-loop-chip boss-loop-${bossLoop.tone}`} aria-label={`${bossLoop.label}: ${bossLoop.action}. ${bossLoop.detail}`}>
+              <Flag size={18} />
+              <span>{bossLoop.action}</span>
+              <strong>{bossLoop.detail}</strong>
+            </div>
+          ) : null}
           {preflightOverlayDensity.showSignatureManeuver ? (
             <div
               className={`signature-maneuver-briefing signature-maneuver-${signatureManeuver.tone}`}
@@ -2629,6 +2701,25 @@ export function App() {
                   <small>{item.label}</small>
                 </span>
               ))}
+            </div>
+          ) : null}
+          {ghostCoachEligible ? (
+            <button
+              type="button"
+              className={`ghost-coach-toggle ghost-coach-toggle-${ghostCoachEnabled ? "on" : "off"}`}
+              aria-pressed={ghostCoachEnabled}
+              onClick={() => setGhostCoachEnabled((enabled) => !enabled)}
+            >
+              <Target size={18} />
+              <span>Coach</span>
+              <strong>{ghostCoachEnabled ? "On" : "Off"}</strong>
+            </button>
+          ) : null}
+          {ghostCoachCue ? (
+            <div className={`ghost-coach-chip ghost-coach-${ghostCoachCue.tone}`} aria-label={`${ghostCoachCue.label}: ${ghostCoachCue.action}. ${ghostCoachCue.detail}`}>
+              <Target size={18} />
+              <span>{ghostCoachCue.action}</span>
+              <strong>{ghostCoachCue.detail}</strong>
             </div>
           ) : null}
           {preflightOverlayDensity.showBonusStack ? (
@@ -2684,6 +2775,36 @@ export function App() {
           ) : null}
           {preflightOverlayDensity.showRouteBoardStack && hud.contractOptions.length > 0 ? (
             <>
+              <div className={`campaign-map campaign-map-${campaignMap.summary.tone}`} aria-label={`${campaignMap.summary.label}: ${campaignMap.summary.value}. ${campaignMap.summary.detail}`}>
+                <div className="campaign-map-summary">
+                  <Route size={16} />
+                  <span>{campaignMap.summary.value}</span>
+                  <strong>{campaignMap.summary.detail}</strong>
+                </div>
+                <div className="campaign-map-sectors">
+                  {campaignMap.sectors.map((sector) => (
+                    <div key={sector.id} className={`campaign-sector campaign-sector-${sector.status}`}>
+                      <small>{sector.label}</small>
+                      <span>
+                        {sector.nodes.map((node) => (
+                          <button
+                            key={node.contractId}
+                            type="button"
+                            className={`campaign-node campaign-node-${node.status}`}
+                            title={node.title}
+                            aria-label={`${node.title}: ${node.status}`}
+                            disabled={node.status === "locked"}
+                            onClick={() => {
+                              const replaySeed = replaySeedForContract(node.contractId);
+                              shellRef.current?.selectContract(node.contractId, replaySeed ? { replaySeed } : undefined);
+                            }}
+                          />
+                        ))}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
               <div className="route-board" aria-label="Route board progress">
                 {routeBoardProgress.map((item) => (
                   <span key={item.label} className={`route-board-item route-board-${item.tone}`}>
@@ -3128,6 +3249,13 @@ export function App() {
               <strong>{dailyDispatchResult.value}</strong>
             </div>
           ) : null}
+          {resultOverlayDensity?.showRouteProgress && dailyShare ? (
+            <div className={`daily-share daily-share-${dailyShare.tone}`} aria-label={`${dailyShare.label}: ${dailyShare.value}. ${dailyShare.detail}`}>
+              <Satellite size={18} />
+              <span>{dailyShare.value}</span>
+              <strong>{dailyShare.detail}</strong>
+            </div>
+          ) : null}
           {resultOverlayDensity?.showRouteProgress && dailyProgressReceipt ? (
             <div
               className={`daily-streak-receipt daily-streak-${dailyProgressReceipt.tone}`}
@@ -3310,7 +3438,7 @@ export function App() {
                 </span>
               </button>
             ) : null}
-            {showDeliveryReportAction && deliveryReport ? (
+            {showDeliveryReportAction && shareableDeliveryReport ? (
               <button
                 type="button"
                 className={`result-button result-button-share ${deliveryReportCopied ? "result-button-share-copied" : ""}`}
