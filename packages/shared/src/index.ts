@@ -44,7 +44,7 @@ export type ScoreBreakdown = {
   total: number;
 };
 
-export type EnemyShipArchetype = "drone" | "fighter" | "brute";
+export type EnemyShipArchetype = "drone" | "fighter" | "brute" | "sentinel";
 
 export type EnemyDirectorPolicy = {
   aggression: number;

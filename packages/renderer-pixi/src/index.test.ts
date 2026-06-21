@@ -165,6 +165,13 @@ describe("combat visuals", () => {
       wingScale: 1.18,
       beamColor: 0xffd166
     });
+    expect(enemyShipVisual({ archetype: "sentinel", policy: "chase", hp: 120, maxHp: 120 })).toMatchObject({
+      archetype: "sentinel",
+      silhouette: "sentinel",
+      radius: 27,
+      wingScale: 1.32,
+      beamColor: 0x8ee6ff
+    });
   });
 
   it("uses distinct projectile colors for player and enemy fire", () => {

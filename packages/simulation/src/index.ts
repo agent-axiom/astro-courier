@@ -58,6 +58,7 @@ export type EnemyWaveContent = {
   drones?: number;
   fighters?: number;
   brutes?: number;
+  sentinels?: number;
 };
 
 export type ContractContent = {
@@ -404,9 +405,17 @@ const ENEMY_ARCHETYPE_STATS: Record<
     maxSpeed: 18,
     fireCooldownSeconds: 5.2,
     projectileDamage: 14
+  },
+  sentinel: {
+    maxHp: 120,
+    radius: 25,
+    acceleration: 9,
+    maxSpeed: 14,
+    fireCooldownSeconds: 4.8,
+    projectileDamage: 18
   }
 };
-const ENEMY_MAX_HP = ENEMY_ARCHETYPE_STATS.brute.maxHp;
+const ENEMY_MAX_HP = ENEMY_ARCHETYPE_STATS.sentinel.maxHp;
 
 export function calculateHazardSkimStyleBonus(severity: number): number {
   return Math.round(HAZARD_SKIM_BASE_BONUS + clamp(severity, 0, 1) * HAZARD_SKIM_SEVERITY_BONUS);
@@ -574,7 +583,7 @@ function createEnemyPatrol(system: SystemContent, activeContract: ContractConten
   return wave.map((archetype, index) => {
     const progress = wave.length === 1 ? 0.52 : 0.24 + (index / Math.max(1, wave.length - 1)) * 0.58;
     const laneSign = index % 2 === 0 ? 1 : -1;
-    const laneSpacing = 150 + (index % 3) * 42 + (archetype === "brute" ? 28 : 0);
+    const laneSpacing = 150 + (index % 3) * 42 + (archetype === "sentinel" ? 54 : archetype === "brute" ? 28 : 0);
     const localShift = deterministicUnit(`${system.id}:${activeContract.id}:${archetype}:${index}`) - 0.5;
     const position = add(
       add(pickup, scale(routeDirection, progress * routeDistance + localShift * 74)),
@@ -589,10 +598,12 @@ function enemyWaveArchetypes(wave: EnemyWaveContent | undefined): EnemyShipArche
   const fighters = wave?.fighters ?? 1;
   const drones = wave?.drones ?? 1;
   const brutes = wave?.brutes ?? 0;
+  const sentinels = wave?.sentinels ?? 0;
   return [
     ...Array<EnemyShipArchetype>(Math.max(0, fighters)).fill("fighter"),
     ...Array<EnemyShipArchetype>(Math.max(0, drones)).fill("drone"),
-    ...Array<EnemyShipArchetype>(Math.max(0, brutes)).fill("brute")
+    ...Array<EnemyShipArchetype>(Math.max(0, brutes)).fill("brute"),
+    ...Array<EnemyShipArchetype>(Math.max(0, sentinels)).fill("sentinel")
   ];
 }
 

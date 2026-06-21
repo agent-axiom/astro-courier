@@ -55,7 +55,8 @@ export const enemyWaveSchema = z
   .object({
     drones: z.number().int().min(0).max(8).optional(),
     fighters: z.number().int().min(0).max(8).optional(),
-    brutes: z.number().int().min(0).max(4).optional()
+    brutes: z.number().int().min(0).max(4).optional(),
+    sentinels: z.number().int().min(0).max(3).optional()
   });
 
 export const contractSchema = z.object({

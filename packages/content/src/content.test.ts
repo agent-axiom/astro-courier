@@ -20,6 +20,7 @@ describe("content schemas", () => {
       "chain-relay",
       "interceptor-swarm",
       "black-forge-capture",
+      "sentinel-siege",
       "antimatter-drift",
       "last-drop-run"
     ]);
@@ -117,17 +118,27 @@ describe("content schemas", () => {
       riskLabel: "Enemy Wave",
       rewardLabel: "Combat style bonuses",
       cargoId: "midnight-medicine",
-      enemyWave: { drones: 4, fighters: 2, brutes: 0 },
+      enemyWave: { drones: 5, fighters: 3, brutes: 1, sentinels: 0 },
       medalTimes: { bronze: 82, silver: 50, gold: 30 }
     });
     expect(parsed.contracts.find((contract) => contract.id === "black-forge-capture")).toMatchObject({
       title: "Black Forge Capture",
       riskLabel: "Raid Objective",
-      rewardLabel: "Capture bonuses",
+      rewardLabel: "Sentinel capture bonuses",
       destinationId: "forge-dock",
       cargoId: "capture-beacon",
-      enemyWave: { drones: 2, fighters: 2, brutes: 1 },
+      enemyWave: { drones: 3, fighters: 3, brutes: 1, sentinels: 1 },
       medalTimes: { bronze: 96, silver: 58, gold: 36 }
+    });
+    expect(parsed.contracts.find((contract) => contract.id === "sentinel-siege")).toMatchObject({
+      title: "Sentinel Siege",
+      riskLabel: "Sentinel Wing",
+      rewardLabel: "Heavy combat bonuses",
+      pickupId: "dock-a",
+      destinationId: "forge-dock",
+      cargoId: "capture-beacon",
+      enemyWave: { drones: 4, fighters: 4, brutes: 2, sentinels: 2 },
+      medalTimes: { bronze: 104, silver: 64, gold: 40 }
     });
     expect(parsed.contracts.find((contract) => contract.id === "antimatter-drift")).toMatchObject({
       title: "Antimatter Drift",

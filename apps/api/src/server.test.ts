@@ -174,11 +174,11 @@ describe("Astro Courier API", () => {
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({
       label: "Daily dispatch",
-      value: "Return Leg",
+      value: "Last Drop Run",
       systemId: "starter-route",
       date: "2026-06-13",
-      contractId: "return-leg",
-      seed: "daily-2026-06-13-return-leg",
+      contractId: "last-drop-run",
+      seed: "daily-2026-06-13-last-drop-run",
       resetsAt: "2026-06-14T00:00:00.000Z"
     });
   });

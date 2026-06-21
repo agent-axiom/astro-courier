@@ -49,7 +49,19 @@ describe("preflight overlay density wiring", () => {
     expect(appSource).toContain("openTrainingFlight");
   });
 
+  it("wires optional cloud sync into preflight without blocking local play", () => {
+    expect(appSource).toContain('from "./game/cloudSave"');
+    expect(appSource).toContain("createCloudSaveClient(profileApiUrl)");
+    expect(appSource).toContain("const cloudSaveStatusLabel = buildCloudSaveStatusLabel(cloudSaveStatus)");
+    expect(appSource).toContain("enableCloudSave");
+    expect(appSource).toContain('className={`preflight-cloud-button preflight-cloud-${cloudSaveStatusLabel.tone}`}');
+  });
+
   it("renders compact ship upgrade progression in preflight", () => {
+    expect(appSource).toContain('from "./game/hangar"');
+    expect(appSource).toContain("const hangarReadout = buildHangarReadout(shipUpgradeTrack)");
+    expect(appSource).toContain("hangarReadout.systems.map((system) =>");
+    expect(appSource).toContain('className={`hangar-strip hangar-strip-${hangarReadout.tone}`}');
     expect(appSource).toContain("const shipUpgradeTrack = buildShipUpgradeTrack(hud.contractOptions, bestRunsByContract)");
     expect(appSource).toContain("const shipUpgradeSummary = buildShipUpgradeSummary(shipUpgradeTrack)");
     expect(appSource).toContain('className={`ship-upgrade-track ship-upgrade-track-${shipUpgradeSummary.tone}`}');

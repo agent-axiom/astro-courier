@@ -619,6 +619,10 @@ export function buildContractPreflightKicker(input: ContractPreflightKickerInput
     return "Last Drop Contract";
   }
 
+  if (input.contractId === "black-forge-capture" || input.contractId === "sentinel-siege") {
+    return "Raid Contract";
+  }
+
   if ((input.hazardSeverityMultiplier ?? 1) >= 1.25) {
     return "Danger Contract";
   }
@@ -687,6 +691,22 @@ export function buildContractRoutePlan(input: ContractRoutePlanInput): ContractR
     };
   }
 
+  if (input.contractId === "black-forge-capture") {
+    return {
+      label: "Route plan",
+      value: "Break guard, dock Forge",
+      tone: "danger"
+    };
+  }
+
+  if (input.contractId === "sentinel-siege") {
+    return {
+      label: "Route plan",
+      value: "Open lane, capture Forge",
+      tone: "danger"
+    };
+  }
+
   if ((input.hazardSeverityMultiplier ?? 1) >= 1.25) {
     return {
       label: "Route plan",
@@ -724,6 +744,8 @@ export function buildRoutePressureBriefing(input: ContractRoutePlanInput): Route
     input.contractId === "asteroid-sprint" ||
     input.contractId === "asteroid-labyrinth" ||
     input.contractId === "chain-relay" ||
+    input.contractId === "black-forge-capture" ||
+    input.contractId === "sentinel-siege" ||
     (hazardLoad >= 1.25 && input.goldSeconds <= 25)
   ) {
     return {
@@ -846,6 +868,14 @@ export function buildContractOptionHook(input: ContractRoutePlanInput): Contract
     };
   }
 
+  if (input.contractId === "black-forge-capture" || input.contractId === "sentinel-siege") {
+    return {
+      label: "Pick for",
+      value: "Sentinel combat route",
+      tone: "danger"
+    };
+  }
+
   if (input.contractId === "asteroid-sprint" || ((input.hazardSeverityMultiplier ?? 1) >= 1.25 && input.goldSeconds <= 25)) {
     return {
       label: "Pick for",
@@ -948,6 +978,15 @@ export function buildContractSignatureManeuver(input: ContractRoutePlanInput): C
     };
   }
 
+  if (input.contractId === "black-forge-capture" || input.contractId === "sentinel-siege") {
+    return {
+      label: "Signature move",
+      value: "Sentinel Break",
+      detail: "Fire to open the Forge lane",
+      tone: "danger"
+    };
+  }
+
   if (input.contractId === "return-leg") {
     return {
       label: "Signature move",
@@ -1031,6 +1070,14 @@ export function buildContractModifiers(input: ContractRoutePlanInput): ContractM
       { label: "Maze", value: "5 gates", tone: "danger" },
       { label: "Thread", value: "Clean gaps", tone: "precision" },
       { label: "Pace", value: `Gold ${input.goldSeconds}s`, tone: "speed" }
+    ];
+  }
+
+  if (input.contractId === "black-forge-capture" || input.contractId === "sentinel-siege") {
+    return [
+      { label: "Raid", value: "Sentinel guard", tone: "danger" },
+      { label: "Fire", value: "Open lane", tone: "style" },
+      { label: "Dock", value: "Forge capture", tone: "precision" }
     ];
   }
 

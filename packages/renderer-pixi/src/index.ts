@@ -938,7 +938,7 @@ export type EnemyShipVisualInput = {
 
 export type EnemyShipVisual = {
   archetype: EnemyShipArchetype;
-  silhouette: "dart" | "blade" | "breaker";
+  silhouette: "dart" | "blade" | "breaker" | "sentinel";
   color: number;
   beamColor: number;
   alpha: number;
@@ -1206,6 +1206,18 @@ function enemyArchetypeVisual(archetype: EnemyShipArchetype): Omit<EnemyShipVisu
       beamColor: 0xffd166,
       radius: 22,
       wingScale: 1.18
+    };
+  }
+  if (archetype === "sentinel") {
+    return {
+      archetype,
+      silhouette: "sentinel",
+      color: 0x090d16,
+      chaseColor: 0x171923,
+      chaseBeamColor: 0x8ee6ff,
+      beamColor: 0x5cc8ff,
+      radius: 27,
+      wingScale: 1.32
     };
   }
   return {
@@ -2289,16 +2301,42 @@ class PixiRenderer implements AstroPixiRenderer {
         y: center.y + Math.sin(angle - 2.35) * visual.radius * visual.wingScale
       };
       this.combat.circle(center.x, center.y, visual.radius + 11).fill({ color: visual.beamColor, alpha: 0.08 + visual.warningAlpha * 0.22 });
-      this.combat.moveTo(nose.x, nose.y).lineTo(left.x, left.y).lineTo(right.x, right.y).closePath().fill({
-        color: visual.color,
-        alpha: visual.alpha
-      });
-      this.combat.moveTo(nose.x, nose.y).lineTo(left.x, left.y).lineTo(right.x, right.y).closePath().stroke({
-        color: visual.beamColor,
-        width: 1.6,
-        alpha: 0.62
-      });
-      this.combat.circle(center.x, center.y, 4).fill({ color: visual.beamColor, alpha: 0.86 });
+      if (visual.silhouette === "sentinel") {
+        const leftPanel = {
+          x: center.x + Math.cos(angle + Math.PI / 2) * visual.radius * 0.78,
+          y: center.y + Math.sin(angle + Math.PI / 2) * visual.radius * 0.78
+        };
+        const rightPanel = {
+          x: center.x + Math.cos(angle - Math.PI / 2) * visual.radius * 0.78,
+          y: center.y + Math.sin(angle - Math.PI / 2) * visual.radius * 0.78
+        };
+        const tail = {
+          x: center.x - Math.cos(angle) * visual.radius * 0.82,
+          y: center.y - Math.sin(angle) * visual.radius * 0.82
+        };
+        this.combat.moveTo(left.x, left.y).lineTo(leftPanel.x, leftPanel.y).lineTo(tail.x, tail.y).closePath().fill({
+          color: 0x0f1726,
+          alpha: visual.alpha
+        });
+        this.combat.moveTo(right.x, right.y).lineTo(rightPanel.x, rightPanel.y).lineTo(tail.x, tail.y).closePath().fill({
+          color: 0x111827,
+          alpha: visual.alpha
+        });
+        this.combat.circle(center.x, center.y, visual.radius * 0.68).fill({ color: visual.color, alpha: visual.alpha });
+        this.combat.circle(center.x, center.y, visual.radius * 0.68).stroke({ color: visual.beamColor, width: 1.8, alpha: 0.64 });
+        this.combat.circle(center.x + Math.cos(angle) * 4, center.y + Math.sin(angle) * 4, 5.2).fill({ color: visual.beamColor, alpha: 0.9 });
+      } else {
+        this.combat.moveTo(nose.x, nose.y).lineTo(left.x, left.y).lineTo(right.x, right.y).closePath().fill({
+          color: visual.color,
+          alpha: visual.alpha
+        });
+        this.combat.moveTo(nose.x, nose.y).lineTo(left.x, left.y).lineTo(right.x, right.y).closePath().stroke({
+          color: visual.beamColor,
+          width: 1.6,
+          alpha: 0.62
+        });
+        this.combat.circle(center.x, center.y, 4).fill({ color: visual.beamColor, alpha: 0.86 });
+      }
       if (enemy.hp < enemy.maxHp) {
         const hpRatio = enemy.maxHp > 0 ? enemy.hp / enemy.maxHp : 0;
         this.combat.circle(center.x, center.y, visual.radius + 7).stroke({

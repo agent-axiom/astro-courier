@@ -341,9 +341,9 @@ describe("GameShell lifecycle", () => {
       {
         id: "black-forge-capture",
         title: "Black Forge Capture",
-        briefing: "Plant a capture beacon on Forge Prime. Break through the raider guard, touch the black-metal dock, and leave the beacon armed.",
+        briefing: "Plant a capture beacon on the black-metal Forge Prime. Break the sentinel guard, touch the dock, and leave the beacon armed.",
         riskLabel: "Raid Objective",
-        rewardLabel: "Capture bonuses",
+        rewardLabel: "Sentinel capture bonuses",
         pickupLabel: "Luma North Pad",
         destinationLabel: "Forge Prime Forge Dock",
         cargoName: "Capture Beacon",
@@ -351,6 +351,20 @@ describe("GameShell lifecycle", () => {
         cargoFragility: 0.82,
         hazardSeverityMultiplier: 1.25,
         medalTimes: { bronze: 96, silver: 58, gold: 36 }
+      },
+      {
+        id: "sentinel-siege",
+        title: "Sentinel Siege",
+        briefing: "Launch from Tea Station, open a lane through the sentinel wing, and capture the black-metal Forge dock under fire.",
+        riskLabel: "Sentinel Wing",
+        rewardLabel: "Heavy combat bonuses",
+        pickupLabel: "Tea Station Dock A",
+        destinationLabel: "Forge Prime Forge Dock",
+        cargoName: "Capture Beacon",
+        cargoKind: "magnetic",
+        cargoFragility: 0.82,
+        hazardSeverityMultiplier: 1.35,
+        medalTimes: { bronze: 104, silver: 64, gold: 40 }
       },
       {
         id: "antimatter-drift",

@@ -343,9 +343,10 @@
       "destinationId": "dock-a",
       "cargoId": "midnight-medicine",
       "enemyWave": {
-        "drones": 4,
-        "fighters": 2,
-        "brutes": 0
+        "drones": 5,
+        "fighters": 3,
+        "brutes": 1,
+        "sentinels": 0
       },
       "medalTimes": {
         "bronze": 82,
@@ -356,9 +357,9 @@
     {
       "id": "black-forge-capture",
       "title": "Black Forge Capture",
-      "briefing": "Plant a capture beacon on Forge Prime. Break through the raider guard, touch the black-metal dock, and leave the beacon armed.",
+      "briefing": "Plant a capture beacon on the black-metal Forge Prime. Break the sentinel guard, touch the dock, and leave the beacon armed.",
       "riskLabel": "Raid Objective",
-      "rewardLabel": "Capture bonuses",
+      "rewardLabel": "Sentinel capture bonuses",
       "shipStart": {
         "position": [185, 18],
         "velocity": [10, 24],
@@ -371,9 +372,10 @@
       "hazardSeverityMultiplier": 1.25,
       "riskGateCount": 2,
       "enemyWave": {
-        "drones": 2,
-        "fighters": 2,
-        "brutes": 1
+        "drones": 3,
+        "fighters": 3,
+        "brutes": 1,
+        "sentinels": 1
       },
       "hazards": [
         {
@@ -395,6 +397,51 @@
         "bronze": 96,
         "silver": 58,
         "gold": 36
+      }
+    },
+    {
+      "id": "sentinel-siege",
+      "title": "Sentinel Siege",
+      "briefing": "Launch from Tea Station, open a lane through the sentinel wing, and capture the black-metal Forge dock under fire.",
+      "riskLabel": "Sentinel Wing",
+      "rewardLabel": "Heavy combat bonuses",
+      "shipStart": {
+        "position": [382, -132],
+        "velocity": [16, -8],
+        "rotation": -0.28,
+        "fuel": 104
+      },
+      "pickupId": "dock-a",
+      "destinationId": "forge-dock",
+      "cargoId": "capture-beacon",
+      "hazardSeverityMultiplier": 1.35,
+      "riskGateCount": 2,
+      "enemyWave": {
+        "drones": 4,
+        "fighters": 4,
+        "brutes": 2,
+        "sentinels": 2
+      },
+      "hazards": [
+        {
+          "id": "siege-radiation-a",
+          "type": "radiation",
+          "position": [506, -178],
+          "radius": 38,
+          "severity": 0.48
+        },
+        {
+          "id": "siege-ripple-b",
+          "type": "gravity_ripple",
+          "position": [620, -318],
+          "radius": 44,
+          "severity": 0.54
+        }
+      ],
+      "medalTimes": {
+        "bronze": 104,
+        "silver": 64,
+        "gold": 40
       }
     },
     {

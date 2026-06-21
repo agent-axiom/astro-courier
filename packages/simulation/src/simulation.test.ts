@@ -371,7 +371,7 @@ describe("deterministic Astro Courier simulation", () => {
           pickupId: "north-pad",
           destinationId: "dock-a",
           cargoId: "bottled-starlight",
-          enemyWave: { drones: 3, fighters: 2, brutes: 1 },
+          enemyWave: { drones: 3, fighters: 2, brutes: 1, sentinels: 1 },
           medalTimes: { bronze: 82, silver: 50, gold: 30 }
         }
       ]
@@ -380,11 +380,15 @@ describe("deterministic Astro Courier simulation", () => {
     const world = createWorldFromSystem(waveSystem, "combat-wave-seed", { contractId: "swarm-test" });
     const snapshot = combatSnapshot(world);
 
-    expect(snapshot.enemies.map((enemy) => enemy.archetype)).toEqual(["fighter", "fighter", "drone", "drone", "drone", "brute"]);
-    expect(new Set(snapshot.enemies.map((enemy) => enemy.id)).size).toBe(6);
+    expect(snapshot.enemies.map((enemy) => enemy.archetype)).toEqual(["fighter", "fighter", "drone", "drone", "drone", "brute", "sentinel"]);
+    expect(new Set(snapshot.enemies.map((enemy) => enemy.id)).size).toBe(7);
     expect(snapshot.enemies.find((enemy) => enemy.archetype === "brute")).toMatchObject({
       hp: 78,
       radius: 20
+    });
+    expect(snapshot.enemies.find((enemy) => enemy.archetype === "sentinel")).toMatchObject({
+      hp: 120,
+      radius: 25
     });
   });
 
@@ -2650,7 +2654,7 @@ describe("deterministic Astro Courier simulation", () => {
 
 type CombatEnemyForTest = {
   id: string;
-  archetype: "drone" | "fighter" | "brute";
+  archetype: "drone" | "fighter" | "brute" | "sentinel";
   position: Vec2;
   velocity: Vec2;
   rotation: number;

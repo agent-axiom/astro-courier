@@ -10,13 +10,13 @@ Playable build: https://agent-axiom.github.io/astro-courier/
 
 Astro Courier is a TypeScript web game built around short, replayable delivery runs. The player launches a route, collects cargo, reaches the destination pad, and tries to improve speed, fuel discipline, cargo safety, landing quality, and style rewards.
 
-The game includes contracts, route mastery, medals, best-run tracking, replay-style run feedback, daily dispatch progression, cargo risk, hazard pressure, combat interceptors, ship HP, player and enemy fire, adaptive game feel, keyboard/gamepad controls, and touch-friendly browser play.
+The game includes contracts, route mastery, medals, best-run tracking, optional cloud progress sync, a compact hangar progression strip, replay-style run feedback, daily dispatch progression, cargo risk, hazard pressure, combat interceptors, sentinel-class enemies, ship HP, player and enemy fire, adaptive game feel, keyboard/gamepad controls, and touch-friendly browser play.
 
 The project is organized as a pnpm monorepo with separate apps and packages for the web game, simulation, renderer, content, shared types, API, and the optional enemy director Worker.
 
 ## How to play
 
-Open the playable link, press `Launch`, pick up the cargo, and dock at the destination pad. Better runs come from faster routes, cleaner landings, less cargo damage, smarter fuel use, and riskier flight paths that still stay under control.
+Open the playable link, press `Launch`, pick up the cargo, and dock at the destination pad. Better runs come from faster routes, cleaner landings, less cargo damage, smarter fuel use, combat control, and riskier flight paths that still stay under control.
 
 Keyboard controls:
 
@@ -73,3 +73,19 @@ https://astro-courier-enemy-director.<your-subdomain>.workers.dev/enemy-director
 ```
 
 Optional: set `VITE_ENEMY_DIRECTOR_QUALITY=cinematic` to let the Worker send a wider enemy snapshot and a larger OpenAI response budget for richer combat direction.
+
+## Optional Cloud Save
+
+The same Worker can also issue guest profile sessions and store progress snapshots in Cloudflare D1. Create the database, copy its `database_id` into `apps/enemy-director-worker/wrangler.toml`, run the migration, and set a token secret:
+
+```sh
+corepack pnpm dlx wrangler d1 create astro-courier-profile
+corepack pnpm dlx wrangler d1 execute astro-courier-profile --remote --file apps/enemy-director-worker/migrations/0001_player_progress.sql
+corepack pnpm dlx wrangler secret put PROFILE_TOKEN_SECRET --config apps/enemy-director-worker/wrangler.toml
+```
+
+Then set `VITE_PROFILE_API_URL` to the Worker base URL, for example:
+
+```text
+https://astro-courier-enemy-director.<your-subdomain>.workers.dev
+```

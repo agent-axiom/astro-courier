@@ -5,3 +5,8 @@ compatibility_date = "2026-06-17"
 [vars]
 ALLOWED_ORIGIN = "https://agent-axiom.github.io"
 OPENAI_MODEL = "gpt-5.4-mini"
+
+[[d1_databases]]
+binding = "PROFILE_DB"
+database_name = "astro-courier-profile"
+database_id = "replace-with-cloudflare-d1-database-id"

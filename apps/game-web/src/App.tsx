@@ -22,7 +22,7 @@ import {
   VolumeX,
   Zap
 } from "lucide-react";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { create } from "zustand";
 import {
   buildBestRunChase,
@@ -52,6 +52,7 @@ import {
   type BestRun,
   type RouteBoardCampaignMilestoneReceipt,
   type RouteMarkReceipt,
+  type ShipUpgradeId,
   type ShipUpgradeTrackItem
 } from "./game/bestRun";
 import { GameShell, type HudState } from "./game/GameShell";
@@ -190,6 +191,14 @@ import {
   type RunFeedEntry,
   type RunFeedSnapshot
 } from "./game/runFeed";
+import {
+  buildCloudProgressSnapshot,
+  buildCloudSaveStatusLabel,
+  createCloudSaveClient,
+  type CloudSaveSession,
+  type CloudSaveStatus
+} from "./game/cloudSave";
+import { buildHangarReadout } from "./game/hangar";
 
 type GameStore = {
   hud: HudState;
@@ -330,6 +339,12 @@ export function App() {
     return storage ? getDailyDispatchProgress(storage) : undefined;
   });
   const [dailyProgressReceipt, setDailyProgressReceipt] = useState<DailyDispatchProgressReceipt | undefined>(undefined);
+  const profileApiUrl =
+    (import.meta.env.VITE_PROFILE_API_URL as string | undefined) ?? (import.meta.env.VITE_ENEMY_DIRECTOR_URL as string | undefined);
+  const cloudSaveClient = useMemo(() => createCloudSaveClient(profileApiUrl), [profileApiUrl]);
+  const [cloudSession, setCloudSession] = useState<CloudSaveSession | undefined>(undefined);
+  const [cloudSaveStatus, setCloudSaveStatus] = useState<CloudSaveStatus>(() => (profileApiUrl ? { mode: "idle" } : { mode: "disabled" }));
+  const cloudSaveStatusLabel = buildCloudSaveStatusLabel(cloudSaveStatus);
   const pushScreenFeedback = (feedback: ScreenFeedback | undefined) => {
     if (!feedback) {
       return;
@@ -675,7 +690,20 @@ export function App() {
     setBestRun(result.best);
     setBestRunsByContract(nextBestRunsByContract);
     setNewBest(result.isNewBest);
-  }, [hud.contractId, hud.contractOptions, hud.elapsedSeconds, hud.medal, hud.score, hud.status]);
+    if (cloudSaveClient && cloudSession) {
+      setCloudSaveStatus({ mode: "syncing" });
+      const cloudSnapshot = buildCloudProgressSnapshot({
+        bestRunsByContract: nextBestRunsByContract,
+        unlockedContracts: hud.contractOptions.filter((contract) => nextBestRunsByContract[contract.id]).map((contract) => contract.id),
+        shipUpgrades: buildShipUpgradeTrack(hud.contractOptions, nextBestRunsByContract)
+          .filter((upgrade) => upgrade.unlocked)
+          .map((upgrade) => upgrade.label)
+      });
+      void cloudSaveClient.saveProgress(cloudSession, cloudSnapshot).then((saved) => {
+        setCloudSaveStatus(saved ? { mode: "synced", displayName: cloudSession.player.displayName } : { mode: "error" });
+      });
+    }
+  }, [cloudSaveClient, cloudSession, hud.contractId, hud.contractOptions, hud.elapsedSeconds, hud.medal, hud.score, hud.status]);
 
   const fuelRatio = hud.maxFuel > 0 ? hud.fuel / hud.maxFuel : 0;
   const hullRatio = hud.shipMaxHp > 0 ? hud.shipHp / hud.shipMaxHp : 0;
@@ -1187,6 +1215,7 @@ export function App() {
   const routeBoardTarget = buildRouteBoardTarget(hud.contractOptions, bestRunsByContract);
   const shipUpgradeTrack = buildShipUpgradeTrack(hud.contractOptions, bestRunsByContract);
   const shipUpgradeSummary = buildShipUpgradeSummary(shipUpgradeTrack);
+  const hangarReadout = buildHangarReadout(shipUpgradeTrack);
   const routeTargetSelectionAction = buildRouteBoardSelectionAction(routeBoardTarget, hud.contractId);
   const currentDate = new Date();
   const dailyDispatch = buildDailyDispatch({ contracts: hud.contractOptions, now: currentDate });
@@ -1487,6 +1516,31 @@ export function App() {
     if (trainingFlightAction) {
       openContractBriefing(trainingFlightAction.contractId);
     }
+  };
+
+  const enableCloudSave = async () => {
+    if (!cloudSaveClient) {
+      setCloudSaveStatus({ mode: "disabled" });
+      return;
+    }
+
+    setCloudSaveStatus({ mode: "syncing" });
+    const nextSession = cloudSession ?? (await cloudSaveClient.createGuestSession("Courier"));
+    if (!nextSession) {
+      setCloudSaveStatus({ mode: "error" });
+      return;
+    }
+
+    setCloudSession(nextSession);
+    const saved = await cloudSaveClient.saveProgress(
+      nextSession,
+      buildCloudProgressSnapshot({
+        bestRunsByContract,
+        unlockedContracts: hud.contractOptions.filter((contract) => bestRunsByContract[contract.id]).map((contract) => contract.id),
+        shipUpgrades: shipUpgradeTrack.filter((upgrade) => upgrade.unlocked).map((upgrade) => upgrade.label)
+      })
+    );
+    setCloudSaveStatus(saved ? { mode: "synced", displayName: nextSession.player.displayName } : { mode: "error" });
   };
 
   const restartActiveRun = () => {
@@ -2227,6 +2281,16 @@ export function App() {
                   <span>{trainingFlightAction.label}</span>
                 </button>
               ) : null}
+              <button
+                type="button"
+                className={`preflight-cloud-button preflight-cloud-${cloudSaveStatusLabel.tone}`}
+                aria-label={`${cloudSaveStatusLabel.label}: ${cloudSaveStatusLabel.value}`}
+                disabled={!cloudSaveClient || cloudSaveStatus.mode === "syncing"}
+                onClick={enableCloudSave}
+              >
+                <Satellite size={16} />
+                <span>{cloudSaveStatusLabel.value}</span>
+              </button>
             </>
           ) : (
             <div className="preflight-cover-art">
@@ -2260,6 +2324,28 @@ export function App() {
               ))}
             </div>
           ) : null}
+          <div
+            className={`hangar-strip hangar-strip-${hangarReadout.tone}`}
+            style={{ "--hangar-progress": hangarReadout.progress } as CSSProperties}
+            aria-label={`${hangarReadout.label}: ${hangarReadout.value}. ${hangarReadout.detail}`}
+          >
+            <div className="hangar-core">
+              <Zap size={16} />
+              <span>{hangarReadout.value}</span>
+              <strong>{hangarReadout.detail}</strong>
+            </div>
+            <div className="hangar-progress" aria-hidden="true">
+              <span />
+            </div>
+            <div className="hangar-systems" aria-hidden="true">
+              {hangarReadout.systems.map((system) => (
+                <span key={system.id} className={`hangar-system hangar-system-${system.tone}`} title={system.label}>
+                  {renderHangarSystemIcon(system.id)}
+                  <small>{system.value}</small>
+                </span>
+              ))}
+            </div>
+          </div>
           <div
             className={`ship-upgrade-track ship-upgrade-track-${shipUpgradeSummary.tone}`}
             aria-label={`${shipUpgradeSummary.label}: ${shipUpgradeSummary.value}. ${shipUpgradeSummary.detail}`}
@@ -3098,6 +3184,14 @@ function renderShipUpgradeIcon(upgrade: ShipUpgradeTrackItem): React.ReactNode {
   if (upgrade.id === "mag-clamp") return <PackageCheck size={15} />;
   if (upgrade.id === "forge-core") return <Target size={15} />;
   return <Zap size={15} />;
+}
+
+function renderHangarSystemIcon(systemId: ShipUpgradeId): React.ReactNode {
+  if (systemId === "reinforced-hull") return <ShieldAlert size={14} />;
+  if (systemId === "pulse-rail") return <Crosshair size={14} />;
+  if (systemId === "mag-clamp") return <PackageCheck size={14} />;
+  if (systemId === "forge-core") return <Target size={14} />;
+  return <Zap size={14} />;
 }
 
 function renderPreflightPuzzleGoalIcon(goal: PreflightPuzzleGoal): React.ReactNode {
