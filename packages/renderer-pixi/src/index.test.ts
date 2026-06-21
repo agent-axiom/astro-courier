@@ -74,14 +74,19 @@ describe("procedural art direction helpers", () => {
       secondaryColor: 0x6edb9a,
       atmosphereColor: 0x8ee6ff,
       detailCount: 8,
-      ringAlpha: 0
+      ringAlpha: 0,
+      lightAngle: expect.any(Number),
+      shadowAlpha: 0.28,
+      continentScale: 0.64
     });
     expect(planetSurfaceVisual({ visualTheme: "black_metal", radius: 58, status: "flying", tick: 8 })).toMatchObject({
       surfaceColor: 0x11131a,
       secondaryColor: 0x3c4254,
       atmosphereColor: 0xff6f91,
       detailCount: 6,
-      ringAlpha: 0.22
+      ringAlpha: 0.22,
+      shadowAlpha: 0.42,
+      continentScale: 0.36
     });
   });
 
@@ -97,7 +102,39 @@ describe("procedural art direction helpers", () => {
       cockpitColor: 0x92f4ff,
       cargoColor: 0xffb13b,
       engineColor: 0x7ce1ff,
-      panelAlpha: 0.62
+      panelAlpha: 0.62,
+      rimColor: 0xfff2c7,
+      wingSpan: 1.18,
+      noseLength: 1.28
+    });
+  });
+
+  it("keeps cartoon-realistic enemy silhouettes readable by archetype", () => {
+    expect(
+      enemyShipVisual({
+        archetype: "drone",
+        hp: 22,
+        maxHp: 22,
+        policy: "patrol"
+      })
+    ).toMatchObject({
+      silhouette: "drone",
+      armorBandColor: 0x7ce1ff,
+      engineGlowColor: 0x8ee6b8,
+      cockpitScale: 0.45
+    });
+    expect(
+      enemyShipVisual({
+        archetype: "sentinel",
+        hp: 80,
+        maxHp: 120,
+        policy: "chase"
+      })
+    ).toMatchObject({
+      silhouette: "sentinel",
+      armorBandColor: 0xff6f91,
+      engineGlowColor: 0xffd166,
+      cockpitScale: 0.62
     });
   });
 
@@ -124,6 +161,9 @@ describe("procedural art direction renderer wiring", () => {
     expect(rendererSource).toContain("const stationVisual = fuelStationVisual({");
     expect(rendererSource).toContain("const phenomenon = cosmicPhenomenonVisual({");
     expect(rendererSource).toContain("const hullDetail = shipHullDetailVisual({");
+    expect(rendererSource).toContain("surface.lightAngle");
+    expect(rendererSource).toContain("hullDetail.wingSpan");
+    expect(rendererSource).toContain("visual.armorBandColor");
   });
 });
 
@@ -232,20 +272,20 @@ describe("combat visuals", () => {
   it("distinguishes enemy archetypes by silhouette, scale, and accent", () => {
     expect(enemyShipVisual({ archetype: "drone", policy: "chase", hp: 22, maxHp: 22 })).toMatchObject({
       archetype: "drone",
-      silhouette: "dart",
+      silhouette: "drone",
       radius: 11,
       wingScale: 0.72,
       beamColor: 0x7ce1ff
     });
     expect(enemyShipVisual({ archetype: "fighter", policy: "chase", hp: 40, maxHp: 40 })).toMatchObject({
       archetype: "fighter",
-      silhouette: "blade",
+      silhouette: "fighter",
       radius: 16,
       wingScale: 0.9
     });
     expect(enemyShipVisual({ archetype: "brute", policy: "chase", hp: 78, maxHp: 78 })).toMatchObject({
       archetype: "brute",
-      silhouette: "breaker",
+      silhouette: "brute",
       radius: 22,
       wingScale: 1.18,
       beamColor: 0xffd166
@@ -271,6 +311,12 @@ describe("combat visuals", () => {
       glowColor: 0xffb3c7,
       radius: 5,
       alpha: 0.86
+    });
+    expect(projectileVisual({ owner: "player", kind: "missile" })).toEqual({
+      color: 0xffd166,
+      glowColor: 0xfff2c7,
+      radius: 6,
+      alpha: 0.92
     });
   });
 });

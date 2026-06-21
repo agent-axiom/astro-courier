@@ -18,13 +18,15 @@ describe("touch flight pad presentation", () => {
       { id: "thrust", label: "Thrust", detail: "Hold to fly" },
       { id: "brake", label: "Brake", detail: "Slow down" },
       { id: "boost", label: "Boost", detail: "Tap burst" },
-      { id: "fire", label: "Fire", detail: "Shoot" }
+      { id: "fire", label: "Fire", detail: "Shoot" },
+      { id: "missile", label: "Missile", detail: "Lock shot" }
     ]);
     expect(buildMobileActionLabels()).toEqual({
       steering: "Drag to fly",
       brake: "Brake",
       boost: "Boost",
-      fire: "Fire"
+      fire: "Fire",
+      missile: "Missile"
     });
   });
 
@@ -216,16 +218,18 @@ describe("touch flight pad wiring", () => {
     expect(appSource).toContain("style={touchPointerStyle}");
   });
 
-  it("renders explicit labeled mobile action buttons for brake, boost, and fire", () => {
+  it("renders explicit labeled mobile action buttons for brake, boost, fire, and missiles", () => {
     expect(appSource).toContain('className="mobile-action-dock"');
     expect(appSource).toContain('className="touch-flight-pad-label"');
     expect(appSource).toContain("mobile-action-brake");
     expect(appSource).toContain("mobile-action-boost");
     expect(appSource).toContain("mobile-action-fire");
+    expect(appSource).toContain("mobile-action-missile");
     expect(appSource).toContain("{mobileActionLabels.steering}");
     expect(appSource).toContain("{mobileActionLabels.brake}");
     expect(appSource).toContain("{mobileActionLabels.boost}");
     expect(appSource).toContain("{mobileActionLabels.fire}");
+    expect(appSource).toContain('shellRef.current?.queueCommand({ type: "MISSILE" })');
     expect(appSource).toContain('shellRef.current?.queueCommand({ type: "FIRE" })');
   });
 });

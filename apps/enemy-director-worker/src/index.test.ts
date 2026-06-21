@@ -58,7 +58,7 @@ describe("enemy director worker", () => {
       const body = JSON.parse(String(init.body));
       expect(body.model).toBe("gpt-5.4-mini");
       expect(body.text.format.type).toBe("json_schema");
-      expect(body.max_output_tokens).toBe(120);
+      expect(body.max_output_tokens).toBe(160);
       expect(JSON.parse(body.input[1].content)).toMatchObject({
         quality: "standard",
         enemies: [
@@ -74,11 +74,19 @@ describe("enemy director worker", () => {
       return new Response(
         JSON.stringify({
           output_text: JSON.stringify({
-            aggression: 3,
-            flank: -2,
-            fireBias: 2,
-            retreatHp: 100,
-            focus: "player"
+            policy: {
+              aggression: 3,
+              flank: -2,
+              fireBias: 2,
+              retreatHp: 100,
+              focus: "player"
+            },
+            directive: {
+              formation: "pincer",
+              missileDoctrine: "salvo",
+              pressure: 3,
+              hint: "wide pincer"
+            }
           })
         }),
         { status: 200 }
@@ -104,6 +112,12 @@ describe("enemy director worker", () => {
         fireBias: 1,
         retreatHp: 78,
         focus: "player"
+      },
+      directive: {
+        formation: "pincer",
+        missileDoctrine: "salvo",
+        pressure: 1,
+        hint: "wide pincer"
       }
     });
   });
@@ -113,17 +127,25 @@ describe("enemy director worker", () => {
       const body = JSON.parse(String(init.body));
       const userState = JSON.parse(body.input[1].content);
 
-      expect(body.max_output_tokens).toBe(220);
+      expect(body.max_output_tokens).toBe(260);
       expect(userState.quality).toBe("cinematic");
       expect(userState.enemies).toHaveLength(6);
       return new Response(
         JSON.stringify({
           output_text: JSON.stringify({
-            aggression: 0.72,
-            flank: 0.35,
-            fireBias: 0.62,
-            retreatHp: 22,
-            focus: "objective"
+            policy: {
+              aggression: 0.72,
+              flank: 0.35,
+              fireBias: 0.62,
+              retreatHp: 22,
+              focus: "objective"
+            },
+            directive: {
+              formation: "ambush",
+              missileDoctrine: "single",
+              pressure: 0.66,
+              hint: "ambush lane"
+            }
           })
         }),
         { status: 200 }
@@ -158,6 +180,12 @@ describe("enemy director worker", () => {
         fireBias: 0.62,
         retreatHp: 22,
         focus: "objective"
+      },
+      directive: {
+        formation: "ambush",
+        missileDoctrine: "single",
+        pressure: 0.66,
+        hint: "ambush lane"
       }
     });
   });
@@ -184,6 +212,12 @@ describe("enemy director worker", () => {
         fireBias: 0.4,
         retreatHp: 28,
         focus: "cargo"
+      },
+      directive: {
+        formation: "screen",
+        missileDoctrine: "hold",
+        pressure: 0.4,
+        hint: "screen"
       }
     });
   });

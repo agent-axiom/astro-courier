@@ -154,6 +154,12 @@ describe("GameShell lifecycle", () => {
           fireBias: 0.7,
           retreatHp: 16,
           focus: "player" as const
+        },
+        directive: {
+          formation: "pincer" as const,
+          missileDoctrine: "single" as const,
+          pressure: 0.7,
+          hint: "pincer"
         }
       }))
     };

@@ -10,6 +10,7 @@ const gamepadBrakeButtonIndex = 6;
 const gamepadThrustButtonIndex = 7;
 const gamepadBoostButtonIndex = 0;
 const gamepadFireButtonIndex = 2;
+const gamepadMissileButtonIndex = 3;
 
 export type ScreenPoint = {
   x: number;
@@ -137,8 +138,10 @@ export class KeyboardInput {
   private pointerActive = false;
   private boostQueued = false;
   private fireQueued = false;
+  private missileQueued = false;
   private gamepadBoostPressed = false;
   private gamepadFirePressed = false;
+  private gamepadMissilePressed = false;
   private pointer: ScreenPoint = { x: 0, y: 0 };
   private pointerOrigin?: ScreenPoint;
   private pointerType = "";
@@ -171,8 +174,10 @@ export class KeyboardInput {
     this.pointerOrigin = undefined;
     this.boostQueued = false;
     this.fireQueued = false;
+    this.missileQueued = false;
     this.gamepadBoostPressed = false;
     this.gamepadFirePressed = false;
+    this.gamepadMissilePressed = false;
   }
 
   commands(currentRotation: number): PlayerCommand[] {
@@ -189,11 +194,18 @@ export class KeyboardInput {
       commands.push({ type: "FIRE" });
       this.fireQueued = false;
     }
+    if (this.missileQueued) {
+      commands.push({ type: "MISSILE" });
+      this.missileQueued = false;
+    }
     if (this.takeGamepadBoost(gamepad)) {
       commands.push({ type: "BOOST" });
     }
     if (this.takeGamepadFire(gamepad)) {
       commands.push({ type: "FIRE" });
+    }
+    if (this.takeGamepadMissile(gamepad)) {
+      commands.push({ type: "MISSILE" });
     }
     return [...commands, ...this.pointerCommands()];
   }
@@ -208,6 +220,9 @@ export class KeyboardInput {
       }
       if ((event.code === "KeyJ" || event.code === "Enter") && !wasPressed) {
         this.fireQueued = true;
+      }
+      if (event.code === "KeyK" && !wasPressed) {
+        this.missileQueued = true;
       }
     }
   };
@@ -225,8 +240,10 @@ export class KeyboardInput {
     this.pointerOrigin = undefined;
     this.boostQueued = false;
     this.fireQueued = false;
+    this.missileQueued = false;
     this.gamepadBoostPressed = false;
     this.gamepadFirePressed = false;
+    this.gamepadMissilePressed = false;
   };
 
   private readonly handlePointerDown = (event: PointerEvent) => {
@@ -271,6 +288,13 @@ export class KeyboardInput {
     return shouldQueue;
   }
 
+  private takeGamepadMissile(gamepad: GamepadCommandInput | undefined): boolean {
+    const missilePressed = gamepad ? gamepadButtonValue(gamepad.buttons[gamepadMissileButtonIndex]) > 0 : false;
+    const shouldQueue = missilePressed && !this.gamepadMissilePressed;
+    this.gamepadMissilePressed = missilePressed;
+    return shouldQueue;
+  }
+
   private pointerCommands(): PlayerCommand[] {
     if (!this.pointerTarget) {
       return [];
@@ -304,6 +328,7 @@ function isGameKey(code: string): boolean {
     code === "Space" ||
     code === "KeyE" ||
     code === "KeyJ" ||
+    code === "KeyK" ||
     code === "Enter" ||
     code === "ShiftLeft" ||
     code === "ShiftRight"

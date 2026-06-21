@@ -172,6 +172,7 @@ describe("content schemas", () => {
       riskLabel: "Enemy Wave",
       rewardLabel: "Combat style bonuses",
       cargoId: "midnight-medicine",
+      difficultyTier: "hard",
       enemyWave: { drones: 5, fighters: 3, brutes: 1, sentinels: 0 },
       medalTimes: { bronze: 82, silver: 50, gold: 30 }
     });
@@ -181,6 +182,7 @@ describe("content schemas", () => {
       rewardLabel: "Sentinel capture bonuses",
       destinationId: "forge-dock",
       cargoId: "capture-beacon",
+      difficultyTier: "raid",
       enemyWave: { drones: 3, fighters: 3, brutes: 1, sentinels: 1 },
       medalTimes: { bronze: 96, silver: 58, gold: 36 }
     });
@@ -191,6 +193,7 @@ describe("content schemas", () => {
       pickupId: "dock-a",
       destinationId: "forge-dock",
       cargoId: "capture-beacon",
+      difficultyTier: "raid",
       enemyWave: { drones: 4, fighters: 4, brutes: 2, sentinels: 2 },
       medalTimes: { bronze: 104, silver: 64, gold: 40 }
     });

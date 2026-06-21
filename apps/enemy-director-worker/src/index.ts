@@ -73,12 +73,31 @@ type EnemyDirectorPolicy = {
   focus: "cargo" | "player" | "objective";
 };
 
+type EnemyDirectorDirective = {
+  formation: "screen" | "pincer" | "ambush" | "retreat";
+  missileDoctrine: "hold" | "single" | "salvo";
+  pressure: number;
+  hint?: string;
+};
+
+type EnemyDirectorBrain = {
+  policy: EnemyDirectorPolicy;
+  directive: EnemyDirectorDirective;
+};
+
 const fallbackPolicy: EnemyDirectorPolicy = {
   aggression: 0.45,
   flank: 0,
   fireBias: 0.4,
   retreatHp: 28,
   focus: "cargo"
+};
+
+const fallbackDirective: EnemyDirectorDirective = {
+  formation: "screen",
+  missileDoctrine: "hold",
+  pressure: 0.4,
+  hint: "screen"
 };
 
 const defaultModel = "gpt-5.4-mini";
@@ -124,12 +143,12 @@ export function createEnemyDirectorWorker(deps: EnemyDirectorWorkerDeps = {}): E
         return json({ error: "invalid_director_request" }, { status: 400, headers: cors });
       }
 
-      const policy = await requestOpenAIPolicy(fetchOpenAI, env, directorRequest);
-      if (!policy) {
-        return json({ mode: "fallback", policy: fallbackPolicy }, { status: 200, headers: cors });
+      const brain = await requestOpenAIPolicy(fetchOpenAI, env, directorRequest);
+      if (!brain) {
+        return json({ mode: "fallback", policy: fallbackPolicy, directive: fallbackDirective }, { status: 200, headers: cors });
       }
 
-      return json({ mode: "openai", policy }, { status: 200, headers: cors });
+      return json({ mode: "openai", policy: brain.policy, directive: brain.directive }, { status: 200, headers: cors });
     }
   };
 }
@@ -403,7 +422,7 @@ async function requestOpenAIPolicy(
   fetchOpenAI: (url: string, init: RequestInit) => Promise<Response>,
   env: EnemyDirectorEnv,
   directorRequest: EnemyDirectorRequest
-): Promise<EnemyDirectorPolicy | undefined> {
+): Promise<EnemyDirectorBrain | undefined> {
   if (!env.OPENAI_API_KEY) {
     return undefined;
   }
@@ -427,7 +446,17 @@ async function requestOpenAIPolicy(
     if (!outputText) {
       return undefined;
     }
-    return clampPolicy(JSON.parse(outputText) as Partial<EnemyDirectorPolicy>);
+    const parsed = JSON.parse(outputText) as Partial<EnemyDirectorBrain> & Partial<EnemyDirectorPolicy>;
+    if (parsed.policy) {
+      return {
+        policy: clampPolicy(parsed.policy),
+        directive: clampDirective(parsed.directive)
+      };
+    }
+    return {
+      policy: clampPolicy(parsed),
+      directive: fallbackDirective
+    };
   } catch {
     return undefined;
   }
@@ -436,7 +465,7 @@ async function requestOpenAIPolicy(
 function buildOpenAIRequest(model: string, directorRequest: EnemyDirectorRequest) {
   const quality = directorRequest.quality;
   const enemyLimit = quality === "cinematic" ? 8 : 4;
-  const maxOutputTokens = quality === "cinematic" ? 220 : 120;
+  const maxOutputTokens = quality === "cinematic" ? 260 : 160;
   return {
     model,
     max_output_tokens: maxOutputTokens,
@@ -467,13 +496,31 @@ function buildOpenAIRequest(model: string, directorRequest: EnemyDirectorRequest
         schema: {
           type: "object",
           additionalProperties: false,
-          required: ["aggression", "flank", "fireBias", "retreatHp", "focus"],
+          required: ["policy", "directive"],
           properties: {
-            aggression: { type: "number", minimum: 0, maximum: 1 },
-            flank: { type: "number", minimum: -1, maximum: 1 },
-            fireBias: { type: "number", minimum: 0, maximum: 1 },
-            retreatHp: { type: "number", minimum: 0, maximum: 78 },
-            focus: { type: "string", enum: ["cargo", "player", "objective"] }
+            policy: {
+              type: "object",
+              additionalProperties: false,
+              required: ["aggression", "flank", "fireBias", "retreatHp", "focus"],
+              properties: {
+                aggression: { type: "number", minimum: 0, maximum: 1 },
+                flank: { type: "number", minimum: -1, maximum: 1 },
+                fireBias: { type: "number", minimum: 0, maximum: 1 },
+                retreatHp: { type: "number", minimum: 0, maximum: 78 },
+                focus: { type: "string", enum: ["cargo", "player", "objective"] }
+              }
+            },
+            directive: {
+              type: "object",
+              additionalProperties: false,
+              required: ["formation", "missileDoctrine", "pressure", "hint"],
+              properties: {
+                formation: { type: "string", enum: ["screen", "pincer", "ambush", "retreat"] },
+                missileDoctrine: { type: "string", enum: ["hold", "single", "salvo"] },
+                pressure: { type: "number", minimum: 0, maximum: 1 },
+                hint: { type: "string", maxLength: 32 }
+              }
+            }
           }
         }
       }
@@ -507,6 +554,21 @@ function clampPolicy(policy: Partial<EnemyDirectorPolicy>): EnemyDirectorPolicy 
     fireBias: clampNumber(policy.fireBias, 0, 1, fallbackPolicy.fireBias),
     retreatHp: clampNumber(policy.retreatHp, 0, 78, fallbackPolicy.retreatHp),
     focus: policy.focus === "player" || policy.focus === "objective" || policy.focus === "cargo" ? policy.focus : fallbackPolicy.focus
+  };
+}
+
+function clampDirective(directive: Partial<EnemyDirectorDirective> | undefined): EnemyDirectorDirective {
+  return {
+    formation:
+      directive?.formation === "pincer" || directive?.formation === "ambush" || directive?.formation === "retreat" || directive?.formation === "screen"
+        ? directive.formation
+        : fallbackDirective.formation,
+    missileDoctrine:
+      directive?.missileDoctrine === "single" || directive?.missileDoctrine === "salvo" || directive?.missileDoctrine === "hold"
+        ? directive.missileDoctrine
+        : fallbackDirective.missileDoctrine,
+    pressure: clampNumber(directive?.pressure, 0, 1, fallbackDirective.pressure),
+    hint: typeof directive?.hint === "string" && directive.hint.trim() ? directive.hint.trim().slice(0, 32) : fallbackDirective.hint
   };
 }
 

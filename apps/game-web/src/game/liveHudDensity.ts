@@ -79,8 +79,8 @@ export function buildLiveHudDensity(input: LiveHudDensityInput): LiveHudDensity 
   return {
     visible: true,
     expanded,
-    showRadioMessage: expanded && !readyDockFocus,
-    showRouteTempo: expanded && !readyDockFocus,
+    showRadioMessage: false,
+    showRouteTempo: false,
     showPrimaryStatusRows: false,
     showActionChips: dangerPressure && !readyDockFocus,
     showDockingLane: dockingLaneFocus,

@@ -822,7 +822,7 @@ button {
   bottom: max(18px, calc(env(safe-area-inset-bottom) + 12px));
   z-index: 5;
   display: none;
-  grid-template-columns: repeat(3, 52px);
+  grid-template-columns: repeat(4, 52px);
   gap: 10px;
   pointer-events: auto;
 }
@@ -879,6 +879,12 @@ button {
   border-color: rgba(124, 225, 255, 0.42);
   background: rgba(124, 225, 255, 0.15);
   color: #d9fbff;
+}
+
+.mobile-action-missile {
+  border-color: rgba(255, 209, 102, 0.5);
+  background: rgba(255, 209, 102, 0.14);
+  color: #fff1c7;
 }
 
 @media (pointer: coarse) {
@@ -7487,12 +7493,12 @@ button {
   .mobile-action-dock {
     right: max(12px, env(safe-area-inset-right));
     bottom: max(16px, calc(env(safe-area-inset-bottom) + 10px));
-    grid-template-columns: repeat(3, 50px);
-    gap: 8px;
+    grid-template-columns: repeat(4, 46px);
+    gap: 7px;
   }
 
   .mobile-action-button {
-    width: 50px;
+    width: 46px;
     height: 50px;
   }
 

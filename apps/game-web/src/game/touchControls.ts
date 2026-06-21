@@ -6,7 +6,7 @@ export type TouchPoint = {
 };
 
 export type FlightControlPrimerItem = {
-  id: "aim" | "thrust" | "brake" | "boost" | "fire";
+  id: "aim" | "thrust" | "brake" | "boost" | "fire" | "missile";
   label: string;
   detail: string;
 };
@@ -16,6 +16,7 @@ export type MobileActionLabels = {
   brake: string;
   boost: string;
   fire: string;
+  missile: string;
 };
 
 export type TouchFlightPadPresentation = {
@@ -75,7 +76,8 @@ export function buildFlightControlPrimerItems(): FlightControlPrimerItem[] {
     { id: "thrust", label: "Thrust", detail: "Hold to fly" },
     { id: "brake", label: "Brake", detail: "Slow down" },
     { id: "boost", label: "Boost", detail: "Tap burst" },
-    { id: "fire", label: "Fire", detail: "Shoot" }
+    { id: "fire", label: "Fire", detail: "Shoot" },
+    { id: "missile", label: "Missile", detail: "Lock shot" }
   ];
 }
 
@@ -84,7 +86,8 @@ export function buildMobileActionLabels(): MobileActionLabels {
     steering: "Drag to fly",
     brake: "Brake",
     boost: "Boost",
-    fire: "Fire"
+    fire: "Fire",
+    missile: "Missile"
   };
 }
 

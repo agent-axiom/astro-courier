@@ -9,6 +9,7 @@ export type PlayerCommand =
   | { type: "BRAKE"; amount: number }
   | { type: "BOOST" }
   | { type: "FIRE" }
+  | { type: "MISSILE" }
   | { type: "INTERACT" }
   | { type: "PAUSE" };
 
@@ -45,6 +46,7 @@ export type ScoreBreakdown = {
 };
 
 export type EnemyShipArchetype = "drone" | "fighter" | "brute" | "sentinel";
+export type ContractDifficultyTier = "standard" | "hard" | "raid" | "boss";
 
 export type EnemyDirectorPolicy = {
   aggression: number;
@@ -52,6 +54,13 @@ export type EnemyDirectorPolicy = {
   fireBias: number;
   retreatHp: number;
   focus: "cargo" | "player" | "objective";
+};
+
+export type EnemyDirectorDirective = {
+  formation: "screen" | "pincer" | "ambush" | "retreat";
+  missileDoctrine: "hold" | "single" | "salvo";
+  pressure: number;
+  hint?: string;
 };
 
 export type RiskGateSnapshot = {
@@ -156,6 +165,7 @@ export type SimulationSnapshot = {
     hp: number;
     maxHp: number;
     weaponCooldownSeconds: number;
+    missileAmmo: number;
     boostCooldownSeconds: number;
     cargoDamage: number;
   };
@@ -167,6 +177,10 @@ export type SimulationSnapshot = {
     rotation: number;
     hp: number;
     maxHp: number;
+    armor: number;
+    shield: number;
+    maxShield: number;
+    difficultyTier: ContractDifficultyTier;
     radius: number;
     policy: "patrol" | "chase" | "evade";
   }>;
@@ -175,16 +189,21 @@ export type SimulationSnapshot = {
     position: Vec2;
     velocity: Vec2;
     radius: number;
+    kind: "bolt" | "missile";
+    targetId?: string;
   }>;
   enemyProjectiles: Array<{
     id: string;
     position: Vec2;
     velocity: Vec2;
     radius: number;
+    kind: "bolt" | "missile";
+    targetId?: string;
   }>;
   enemyDirector: {
     mode: "local" | "openai" | "fallback";
     policy: EnemyDirectorPolicy;
+    directive: EnemyDirectorDirective;
   };
   gravitySources: Array<{
     id: string;

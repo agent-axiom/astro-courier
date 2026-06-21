@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createCommandBuffer, checksumReplay } from "@astro-courier/engine";
-import type { PlayerCommand, Vec2 } from "@astro-courier/shared";
+import type { ContractDifficultyTier, PlayerCommand, Vec2 } from "@astro-courier/shared";
 import {
   calculateHazardThreadStyleBonus,
   calculateHazardSkimStyleBonus,
@@ -304,14 +304,26 @@ describe("deterministic Astro Courier simulation", () => {
     world.ship.rotation = 0;
     world.ship.targetRotation = 0;
 
-    stepWorld(world, 1 / 60, []);
+    stepWorld(world, 1 / 60, [], {
+      enemyDirectorDirective: {
+        formation: "screen",
+        missileDoctrine: "single",
+        pressure: 0.6
+      }
+    });
     const firstBreakdown = summarizeRun(world).scoreBreakdown;
 
     expect(world.lastMilestone).toBe("Gravity Sling");
     expect(world.lastStyleAward).toBe(GRAVITY_SLING_STYLE_BONUS);
     expect(firstBreakdown.styleBonus).toBe(GRAVITY_SLING_STYLE_BONUS);
 
-    stepWorld(world, 1 / 60, []);
+    stepWorld(world, 1 / 60, [], {
+      enemyDirectorDirective: {
+        formation: "screen",
+        missileDoctrine: "single",
+        pressure: 0.6
+      }
+    });
 
     expect(world.lastStyleAward).toBeUndefined();
     expect(summarizeRun(world).scoreBreakdown.styleBonus).toBe(firstBreakdown.styleBonus);
@@ -493,6 +505,48 @@ describe("deterministic Astro Courier simulation", () => {
     expect(snapshot.enemies.find((enemy) => enemy.archetype === "sentinel")).toMatchObject({
       hp: 120,
       radius: 25
+    });
+  });
+
+  it("scales enemy armor and shields by contract difficulty tier", () => {
+    const waveSystem: SystemContent = {
+      ...starterSystem,
+      contracts: [
+        ...starterSystem.contracts,
+        {
+          id: "armored-raid-test",
+          title: "Armored Raid Test",
+          briefing: "Raid armor should be visible and durable.",
+          riskLabel: "Raid",
+          rewardLabel: "Durability check",
+          pickupId: "north-pad",
+          destinationId: "dock-a",
+          cargoId: "bottled-starlight",
+          difficultyTier: "raid",
+          enemyWave: { drones: 0, fighters: 1, brutes: 1, sentinels: 1 },
+          medalTimes: { bronze: 82, silver: 50, gold: 30 }
+        }
+      ]
+    };
+
+    const world = createWorldFromSystem(waveSystem, "combat-armor-seed", { contractId: "armored-raid-test" });
+    const snapshot = combatSnapshot(world);
+    const fighter = snapshot.enemies.find((enemy) => enemy.archetype === "fighter");
+    const sentinel = snapshot.enemies.find((enemy) => enemy.archetype === "sentinel");
+
+    expect(fighter).toMatchObject({
+      difficultyTier: "raid",
+      armor: 5,
+      shield: 12,
+      maxShield: 12,
+      maxHp: 52
+    });
+    expect(sentinel).toMatchObject({
+      difficultyTier: "raid",
+      armor: 15,
+      shield: 36,
+      maxShield: 36,
+      maxHp: 156
     });
   });
 
@@ -831,6 +885,111 @@ describe("deterministic Astro Courier simulation", () => {
     expect(snapshotWorld(world).styleMultiplier).toBe(1.25);
   });
 
+  it("lets armor and shields absorb player shot damage before hull damage", () => {
+    const world = createWorldFromSystem(starterSystem, "armored-hit-seed");
+    const combat = combatWorld(world);
+    combat.enemies = [testEnemy("armored-interceptor-a", { x: 154, y: 0 }, { hp: 40, armor: 6, shield: 10 })];
+    combat.ship.position = { x: 120, y: 0 };
+    combat.ship.velocity = { x: 0, y: 0 };
+    combat.ship.rotation = 0;
+    combat.ship.targetRotation = 0;
+
+    stepWorld(world, 1 / 60, fireCommand());
+
+    expect(combat.enemies).toHaveLength(1);
+    expect(combat.enemies[0]).toMatchObject({
+      shield: 0,
+      hp: 36
+    });
+    expect(world.lastMilestone).toBe("Direct Hit");
+  });
+
+  it("fires limited player homing missiles with a target lock", () => {
+    const world = createWorldFromSystem(starterSystem, "player-missile-seed");
+    const combat = combatWorld(world);
+    combat.enemies = [testEnemy("locked-interceptor-a", { x: 260, y: 0 })];
+    combat.ship.position = { x: 120, y: 0 };
+    combat.ship.velocity = { x: 0, y: 0 };
+    combat.ship.rotation = 0;
+    combat.ship.targetRotation = 0;
+
+    stepWorld(world, 1 / 60, [{ type: "MISSILE" } as PlayerCommand]);
+
+    expect(combat.ship.missileAmmo).toBe(2);
+    expect(combat.playerProjectiles).toHaveLength(1);
+    expect(combat.playerProjectiles[0]).toMatchObject({
+      kind: "missile",
+      targetId: "locked-interceptor-a",
+      damage: 54
+    });
+  });
+
+  it("lets enemy ships spend limited homing missiles under combat pressure", () => {
+    const world = createWorldFromSystem(starterSystem, "enemy-missile-seed");
+    const combat = combatWorld(world);
+    combat.enemies = [
+      {
+        ...testEnemy("missile-fighter-a", { x: 260, y: 0 }),
+        missileAmmo: 1,
+        missileCooldownSeconds: 0
+      }
+    ];
+    combat.ship.position = { x: 120, y: 0 };
+    combat.ship.velocity = { x: 0, y: 0 };
+
+    stepWorld(world, 1 / 60, [], {
+      enemyDirectorDirective: {
+        formation: "screen",
+        missileDoctrine: "single",
+        pressure: 0.6
+      }
+    });
+
+    expect(combat.enemies[0].missileAmmo).toBe(0);
+    expect(combat.enemyProjectiles.some((projectile) => projectile.kind === "missile" && projectile.targetId === "player")).toBe(true);
+  });
+
+  it("allows regular shots to intercept homing missiles", () => {
+    const world = createWorldFromSystem(starterSystem, "missile-intercept-seed");
+    const combat = combatWorld(world);
+    combat.enemies = [];
+    combat.ship.position = { x: 120, y: 0 };
+    combat.ship.velocity = { x: 0, y: 0 };
+    combat.playerProjectiles = [
+      {
+        id: "player-shot-intercept",
+        owner: "player",
+        kind: "bolt",
+        position: { x: 150, y: 0 },
+        velocity: { x: 0, y: 0 },
+        radius: 4,
+        damage: 20,
+        ageSeconds: 0,
+        maxAgeSeconds: 1
+      }
+    ];
+    combat.enemyProjectiles = [
+      {
+        id: "enemy-missile-a",
+        owner: "enemy",
+        kind: "missile",
+        targetId: "player",
+        position: { x: 152, y: 0 },
+        velocity: { x: 0, y: 0 },
+        radius: 6,
+        damage: 42,
+        ageSeconds: 0,
+        maxAgeSeconds: 4
+      }
+    ];
+
+    stepWorld(world, 1 / 60, []);
+
+    expect(combat.playerProjectiles).toHaveLength(0);
+    expect(combat.enemyProjectiles).toHaveLength(0);
+    expect(world.lastMilestone).toBe("Missile Down");
+  });
+
   it("multiplies an interceptor finish after a direct-hit chain starter", () => {
     const world = createWorldFromSystem(starterSystem, "direct-hit-chain-seed");
     const combat = combatWorld(world);
@@ -869,6 +1028,7 @@ describe("deterministic Astro Courier simulation", () => {
       {
         id: "enemy-shot-a",
         owner: "enemy",
+        kind: "bolt",
         position: { x: 120, y: 0 },
         velocity: { x: 0, y: 0 },
         radius: 5,
@@ -2764,6 +2924,10 @@ type CombatEnemyForTest = {
   rotation: number;
   hp: number;
   maxHp: number;
+  armor: number;
+  shield: number;
+  maxShield: number;
+  difficultyTier: ContractDifficultyTier;
   radius: number;
   maxSpeed: number;
   acceleration: number;
@@ -2771,6 +2935,8 @@ type CombatEnemyForTest = {
   fireCooldownBaseSeconds: number;
   fireCooldownSeconds: number;
   contactCooldownSeconds: number;
+  missileAmmo: number;
+  missileCooldownSeconds: number;
   policy: "patrol" | "chase" | "evade";
 };
 
@@ -2781,6 +2947,8 @@ type CombatProjectileForTest = {
   velocity: Vec2;
   radius: number;
   damage: number;
+  kind: "bolt" | "missile";
+  targetId?: string;
   ageSeconds: number;
   maxAgeSeconds: number;
 };
@@ -2790,6 +2958,7 @@ type CombatWorldForTest = SimulationWorld & {
     hp: number;
     maxHp: number;
     weaponCooldownSeconds: number;
+    missileAmmo: number;
   };
   enemies: CombatEnemyForTest[];
   playerProjectiles: CombatProjectileForTest[];
@@ -2822,7 +2991,7 @@ function distanceBetweenTest(left: Vec2, right: Vec2): number {
   return Math.hypot(left.x - right.x, left.y - right.y);
 }
 
-function testEnemy(id: string, position: Vec2, options: { hp?: number } = {}): CombatEnemyForTest {
+function testEnemy(id: string, position: Vec2, options: { hp?: number; armor?: number; shield?: number } = {}): CombatEnemyForTest {
   return {
     id,
     archetype: "fighter",
@@ -2831,6 +3000,10 @@ function testEnemy(id: string, position: Vec2, options: { hp?: number } = {}): C
     rotation: 0,
     hp: options.hp ?? 40,
     maxHp: 40,
+    armor: options.armor ?? 0,
+    shield: options.shield ?? 0,
+    maxShield: options.shield ?? 0,
+    difficultyTier: "standard",
     radius: 14,
     maxSpeed: 26,
     acceleration: 17,
@@ -2838,6 +3011,8 @@ function testEnemy(id: string, position: Vec2, options: { hp?: number } = {}): C
     fireCooldownBaseSeconds: 4.4,
     fireCooldownSeconds: 999,
     contactCooldownSeconds: 0,
+    missileAmmo: 0,
+    missileCooldownSeconds: 999,
     policy: "patrol"
   };
 }

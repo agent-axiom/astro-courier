@@ -48,6 +48,12 @@ describe("enemy director client", () => {
             fireBias: 0.7,
             retreatHp: 14,
             focus: "player"
+          },
+          directive: {
+            formation: "pincer",
+            missileDoctrine: "salvo",
+            pressure: 0.8,
+            hint: "pincer"
           }
         })
       );
@@ -62,6 +68,12 @@ describe("enemy director client", () => {
         fireBias: 0.7,
         retreatHp: 14,
         focus: "player"
+      },
+      directive: {
+        formation: "pincer",
+        missileDoctrine: "salvo",
+        pressure: 0.8,
+        hint: "pincer"
       }
     });
   });
@@ -80,6 +92,11 @@ describe("enemy director client", () => {
             fireBias: 0.4,
             retreatHp: 28,
             focus: "cargo"
+          },
+          directive: {
+            formation: "screen",
+            missileDoctrine: "hold",
+            pressure: 0.4
           }
         })
       );
@@ -125,6 +142,7 @@ function testSnapshot(): SimulationSnapshot {
       hp: 82,
       maxHp: 100,
       weaponCooldownSeconds: 0,
+      missileAmmo: 3,
       boostCooldownSeconds: 0,
       cargoDamage: 0
     },
@@ -137,6 +155,10 @@ function testSnapshot(): SimulationSnapshot {
         rotation: 0,
         hp: 30,
         maxHp: 40,
+        armor: 4,
+        shield: 8,
+        maxShield: 8,
+        difficultyTier: "standard",
         radius: 14,
         policy: "chase"
       }
@@ -151,6 +173,11 @@ function testSnapshot(): SimulationSnapshot {
         fireBias: 0.4,
         retreatHp: 28,
         focus: "cargo"
+      },
+      directive: {
+        formation: "screen",
+        missileDoctrine: "hold",
+        pressure: 0.4
       }
     },
     gravitySources: [],

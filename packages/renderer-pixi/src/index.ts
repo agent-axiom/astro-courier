@@ -938,9 +938,12 @@ export type EnemyShipVisualInput = {
 
 export type EnemyShipVisual = {
   archetype: EnemyShipArchetype;
-  silhouette: "dart" | "blade" | "breaker" | "sentinel";
+  silhouette: "drone" | "fighter" | "brute" | "sentinel";
   color: number;
   beamColor: number;
+  armorBandColor: number;
+  engineGlowColor: number;
+  cockpitScale: number;
   alpha: number;
   radius: number;
   wingScale: number;
@@ -949,6 +952,7 @@ export type EnemyShipVisual = {
 
 export type ProjectileVisualInput = {
   owner: "player" | "enemy";
+  kind?: "bolt" | "missile";
 };
 
 export type ProjectileVisual = {
@@ -1144,6 +1148,9 @@ export type PlanetSurfaceVisual = {
   detailCount: number;
   ringAlpha: number;
   cloudAlpha: number;
+  lightAngle: number;
+  shadowAlpha: number;
+  continentScale: number;
   rotation: number;
 };
 
@@ -1171,6 +1178,9 @@ export type ShipHullDetailVisual = {
   cockpitColor: number;
   cargoColor: number;
   engineColor: number;
+  rimColor: number;
+  wingSpan: number;
+  noseLength: number;
   panelAlpha: number;
   damageAlpha: number;
 };
@@ -1238,6 +1248,9 @@ export function planetSurfaceVisual(input: PlanetSurfaceVisualInput): PlanetSurf
       detailCount: 6,
       ringAlpha: 0.22,
       cloudAlpha: 0.08,
+      lightAngle: -0.82,
+      shadowAlpha: 0.42,
+      continentScale: 0.36,
       rotation: round(positiveModulo(input.tick * 0.004, 1), 3)
     };
   }
@@ -1249,6 +1262,9 @@ export function planetSurfaceVisual(input: PlanetSurfaceVisualInput): PlanetSurf
     detailCount: Math.round(7 + pressure),
     ringAlpha: 0,
     cloudAlpha: input.status === "flying" ? 0.18 : 0.12,
+    lightAngle: -0.72,
+    shadowAlpha: 0.28,
+    continentScale: 0.64,
     rotation: round(positiveModulo(input.tick * 0.006, 1), 3)
   };
 }
@@ -1273,6 +1289,9 @@ export function shipHullDetailVisual(input: ShipHullDetailVisualInput): ShipHull
     cockpitColor: 0x92f4ff,
     cargoColor: damagePressure > 0.45 ? 0xff6f91 : 0xffb13b,
     engineColor: fuelPressure > 0.72 ? 0xffd166 : 0x7ce1ff,
+    rimColor: 0xfff2c7,
+    wingSpan: round(1.12 + clamp(input.fuelRatio, 0, 1) * 0.14, 2),
+    noseLength: round(1.18 + (1 - damagePressure) * 0.11, 2),
     panelAlpha: input.status === "flying" ? 0.62 : 0.42,
     damageAlpha: round(clamp(damagePressure * 0.74, 0, 0.74), 2)
   };
@@ -1392,11 +1411,14 @@ function enemyArchetypeVisual(archetype: EnemyShipArchetype): Omit<EnemyShipVisu
   if (archetype === "drone") {
     return {
       archetype,
-      silhouette: "dart",
+      silhouette: "drone",
       color: 0x5cc8ff,
       chaseColor: 0x7ce1ff,
       chaseBeamColor: 0x7ce1ff,
       beamColor: 0x7ce1ff,
+      armorBandColor: 0x7ce1ff,
+      engineGlowColor: 0x8ee6b8,
+      cockpitScale: 0.45,
       radius: 11,
       wingScale: 0.72
     };
@@ -1404,11 +1426,14 @@ function enemyArchetypeVisual(archetype: EnemyShipArchetype): Omit<EnemyShipVisu
   if (archetype === "brute") {
     return {
       archetype,
-      silhouette: "breaker",
+      silhouette: "brute",
       color: 0xd5683f,
       chaseColor: 0xff8a3d,
       chaseBeamColor: 0xffd166,
       beamColor: 0xffd166,
+      armorBandColor: 0xffd166,
+      engineGlowColor: 0xff8a3d,
+      cockpitScale: 0.54,
       radius: 22,
       wingScale: 1.18
     };
@@ -1421,17 +1446,23 @@ function enemyArchetypeVisual(archetype: EnemyShipArchetype): Omit<EnemyShipVisu
       chaseColor: 0x171923,
       chaseBeamColor: 0x8ee6ff,
       beamColor: 0x5cc8ff,
+      armorBandColor: 0xff6f91,
+      engineGlowColor: 0xffd166,
+      cockpitScale: 0.62,
       radius: 27,
       wingScale: 1.32
     };
   }
   return {
     archetype,
-    silhouette: "blade",
+    silhouette: "fighter",
     color: 0xb36bff,
     chaseColor: 0xff6f91,
     chaseBeamColor: 0xffb3c7,
     beamColor: 0xff7ab6,
+    armorBandColor: 0xff7ab6,
+    engineGlowColor: 0x7ce1ff,
+    cockpitScale: 0.5,
     radius: 16,
     wingScale: 0.9
   };
@@ -1482,6 +1513,14 @@ export function blackHoleVisual(input: BlackHoleVisualInput): BlackHoleVisual | 
 }
 
 export function projectileVisual(input: ProjectileVisualInput): ProjectileVisual {
+  if (input.kind === "missile") {
+    return {
+      color: input.owner === "player" ? 0xffd166 : 0xff8a3d,
+      glowColor: input.owner === "player" ? 0xfff2c7 : 0xffb3c7,
+      radius: 6,
+      alpha: 0.92
+    };
+  }
   if (input.owner === "player") {
     return {
       color: 0x7ce1ff,
@@ -2392,9 +2431,25 @@ class PixiRenderer implements AstroPixiRenderer {
       this.world.circle(center.x, center.y, source.radius + 10).fill({ color: surface.atmosphereColor, alpha: sourceVisual.haloAlpha * 0.38 });
       this.world.circle(center.x, center.y, source.radius + 8).fill({ color: sourceVisual.haloColor, alpha: sourceVisual.haloAlpha * 0.72 });
       this.world.circle(center.x, center.y, source.radius).fill(surface.surfaceColor);
-      this.world.circle(center.x - source.radius * 0.22, center.y + source.radius * 0.14, source.radius * 0.72).fill({
+      this.world.circle(center.x - source.radius * 0.22, center.y + source.radius * 0.14, source.radius * surface.continentScale).fill({
         color: surface.secondaryColor,
         alpha: source.visualTheme === "black_metal" ? 0.28 : 0.34
+      });
+      const lightPoint = {
+        x: center.x + Math.cos(surface.lightAngle) * source.radius * 0.32,
+        y: center.y + Math.sin(surface.lightAngle) * source.radius * 0.32
+      };
+      const shadowPoint = {
+        x: center.x - Math.cos(surface.lightAngle) * source.radius * 0.2,
+        y: center.y - Math.sin(surface.lightAngle) * source.radius * 0.2
+      };
+      this.world.circle(shadowPoint.x, shadowPoint.y, source.radius * 0.86).fill({
+        color: 0x030615,
+        alpha: surface.shadowAlpha
+      });
+      this.world.circle(lightPoint.x, lightPoint.y, source.radius * 0.22).fill({
+        color: sourceVisual.highlightColor,
+        alpha: Math.min(0.34, sourceVisual.highlightAlpha + 0.08)
       });
       this.world.circle(center.x + source.radius * 0.22, center.y + source.radius * 0.18, source.radius * 0.16).fill({
         color: surface.craterColor,
@@ -2579,16 +2634,24 @@ class PixiRenderer implements AstroPixiRenderer {
 
     for (const projectile of snapshot.playerProjectiles) {
       const point = project(projectile.position);
-      const visual = projectileVisual({ owner: "player" });
+      const visual = projectileVisual({ owner: "player", kind: projectile.kind });
       this.combat.circle(point.x, point.y, visual.radius + 5).fill({ color: visual.glowColor, alpha: visual.alpha * 0.18 });
       this.combat.circle(point.x, point.y, visual.radius).fill({ color: visual.color, alpha: visual.alpha });
+      if (projectile.kind === "missile") {
+        const tail = project(subtract(projectile.position, scale(normalizeVector(projectile.velocity), 18)));
+        this.combat.moveTo(tail.x, tail.y).lineTo(point.x, point.y).stroke({ color: visual.glowColor, width: 2, alpha: 0.54 });
+      }
     }
 
     for (const projectile of snapshot.enemyProjectiles) {
       const point = project(projectile.position);
-      const visual = projectileVisual({ owner: "enemy" });
+      const visual = projectileVisual({ owner: "enemy", kind: projectile.kind });
       this.combat.circle(point.x, point.y, visual.radius + 6).fill({ color: visual.glowColor, alpha: visual.alpha * 0.16 });
       this.combat.circle(point.x, point.y, visual.radius).fill({ color: visual.color, alpha: visual.alpha });
+      if (projectile.kind === "missile") {
+        const tail = project(subtract(projectile.position, scale(normalizeVector(projectile.velocity), 18)));
+        this.combat.moveTo(tail.x, tail.y).lineTo(point.x, point.y).stroke({ color: visual.glowColor, width: 2, alpha: 0.54 });
+      }
     }
 
     for (const enemy of snapshot.enemies) {
@@ -2596,8 +2659,8 @@ class PixiRenderer implements AstroPixiRenderer {
       const visual = enemyShipVisual(enemy);
       const angle = enemy.rotation;
       const nose = {
-        x: center.x + Math.cos(angle) * visual.radius,
-        y: center.y + Math.sin(angle) * visual.radius
+        x: center.x + Math.cos(angle) * visual.radius * 1.08,
+        y: center.y + Math.sin(angle) * visual.radius * 1.08
       };
       const left = {
         x: center.x + Math.cos(angle + 2.35) * visual.radius * visual.wingScale,
@@ -2608,6 +2671,10 @@ class PixiRenderer implements AstroPixiRenderer {
         y: center.y + Math.sin(angle - 2.35) * visual.radius * visual.wingScale
       };
       this.combat.circle(center.x, center.y, visual.radius + 11).fill({ color: visual.beamColor, alpha: 0.08 + visual.warningAlpha * 0.22 });
+      this.combat.circle(center.x - Math.cos(angle) * visual.radius * 0.56, center.y - Math.sin(angle) * visual.radius * 0.56, visual.radius * 0.2).fill({
+        color: visual.engineGlowColor,
+        alpha: 0.62 + visual.warningAlpha * 0.18
+      });
       if (visual.silhouette === "sentinel") {
         const leftPanel = {
           x: center.x + Math.cos(angle + Math.PI / 2) * visual.radius * 0.78,
@@ -2631,6 +2698,7 @@ class PixiRenderer implements AstroPixiRenderer {
         });
         this.combat.circle(center.x, center.y, visual.radius * 0.68).fill({ color: visual.color, alpha: visual.alpha });
         this.combat.circle(center.x, center.y, visual.radius * 0.68).stroke({ color: visual.beamColor, width: 1.8, alpha: 0.64 });
+        this.combat.circle(center.x, center.y, visual.radius * 0.42).stroke({ color: visual.armorBandColor, width: 2, alpha: 0.72 });
         this.combat.circle(center.x + Math.cos(angle) * 4, center.y + Math.sin(angle) * 4, 5.2).fill({ color: visual.beamColor, alpha: 0.9 });
       } else {
         this.combat.moveTo(nose.x, nose.y).lineTo(left.x, left.y).lineTo(right.x, right.y).closePath().fill({
@@ -2642,7 +2710,15 @@ class PixiRenderer implements AstroPixiRenderer {
           width: 1.6,
           alpha: 0.62
         });
-        this.combat.circle(center.x, center.y, 4).fill({ color: visual.beamColor, alpha: 0.86 });
+        this.combat.moveTo(left.x, left.y).lineTo(right.x, right.y).stroke({
+          color: visual.armorBandColor,
+          width: 2,
+          alpha: 0.54
+        });
+        this.combat.circle(center.x + Math.cos(angle) * visual.radius * 0.12, center.y + Math.sin(angle) * visual.radius * 0.12, visual.radius * visual.cockpitScale * 0.42).fill({
+          color: visual.beamColor,
+          alpha: 0.86
+        });
       }
       if (enemy.hp < enemy.maxHp) {
         const hpRatio = enemy.maxHp > 0 ? enemy.hp / enemy.maxHp : 0;
@@ -2690,6 +2766,12 @@ class PixiRenderer implements AstroPixiRenderer {
       fuelRatio,
       hpRatio
     });
+    nose.x = center.x + Math.cos(angle) * 19 * hullDetail.noseLength * shipScale;
+    nose.y = center.y + Math.sin(angle) * 19 * hullDetail.noseLength * shipScale;
+    left.x = center.x + Math.cos(angle + 2.45) * 15 * bank.leftWingScale * hullDetail.wingSpan * shipScale;
+    left.y = center.y + Math.sin(angle + 2.45) * 15 * bank.leftWingScale * hullDetail.wingSpan * shipScale;
+    right.x = center.x + Math.cos(angle - 2.45) * 15 * bank.rightWingScale * hullDetail.wingSpan * shipScale;
+    right.y = center.y + Math.sin(angle - 2.45) * 15 * bank.rightWingScale * hullDetail.wingSpan * shipScale;
     const trail = shipTrailVisual({
       status: snapshot.status,
       speed,
@@ -3186,6 +3268,31 @@ function clampToViewport(point: Vec2, viewport: { width: number; height: number 
   return {
     x: Math.min(viewport.width - inset, Math.max(inset, point.x)),
     y: Math.min(viewport.height - inset, Math.max(inset, point.y))
+  };
+}
+
+function subtract(left: Vec2, right: Vec2): Vec2 {
+  return {
+    x: left.x - right.x,
+    y: left.y - right.y
+  };
+}
+
+function scale(vector: Vec2, factor: number): Vec2 {
+  return {
+    x: vector.x * factor,
+    y: vector.y * factor
+  };
+}
+
+function normalizeVector(vector: Vec2): Vec2 {
+  const length = Math.hypot(vector.x, vector.y);
+  if (length <= 0) {
+    return { x: 1, y: 0 };
+  }
+  return {
+    x: vector.x / length,
+    y: vector.y / length
   };
 }
 

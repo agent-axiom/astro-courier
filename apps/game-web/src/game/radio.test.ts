@@ -40,6 +40,7 @@ const baseHud: HudState = {
   shipHp: 100,
   shipMaxHp: 100,
   weaponCooldownSeconds: 0,
+  missileAmmo: 3,
   interceptorCount: 2,
   enemyDirectorMode: "local",
   fuelUsed: 0,

@@ -1,4 +1,4 @@
-import type { EnemyDirectorPolicy, ObjectivePhase, SimulationSnapshot, Vec2 } from "@astro-courier/shared";
+import type { EnemyDirectorDirective, EnemyDirectorPolicy, ObjectivePhase, SimulationSnapshot, Vec2 } from "@astro-courier/shared";
 
 export type EnemyDirectorMode = "openai" | "fallback";
 export type EnemyDirectorQuality = "standard" | "cinematic";
@@ -6,6 +6,7 @@ export type EnemyDirectorQuality = "standard" | "cinematic";
 export type EnemyDirectorResult = {
   mode: EnemyDirectorMode;
   policy: EnemyDirectorPolicy;
+  directive: EnemyDirectorDirective;
 };
 
 export type EnemyDirectorRequest = {
@@ -96,11 +97,20 @@ function isDirectorResult(value: unknown): value is EnemyDirectorResult {
   return (
     (candidate.mode === "openai" || candidate.mode === "fallback") &&
     candidate.policy !== undefined &&
+    candidate.directive !== undefined &&
     Number.isFinite(candidate.policy.aggression) &&
     Number.isFinite(candidate.policy.flank) &&
     Number.isFinite(candidate.policy.fireBias) &&
     Number.isFinite(candidate.policy.retreatHp) &&
-    (candidate.policy.focus === "cargo" || candidate.policy.focus === "player" || candidate.policy.focus === "objective")
+    (candidate.policy.focus === "cargo" || candidate.policy.focus === "player" || candidate.policy.focus === "objective") &&
+    (candidate.directive.formation === "screen" ||
+      candidate.directive.formation === "pincer" ||
+      candidate.directive.formation === "ambush" ||
+      candidate.directive.formation === "retreat") &&
+    (candidate.directive.missileDoctrine === "hold" ||
+      candidate.directive.missileDoctrine === "single" ||
+      candidate.directive.missileDoctrine === "salvo") &&
+    Number.isFinite(candidate.directive.pressure)
   );
 }
 

@@ -60,6 +60,7 @@ export type HudState = {
   shipHp: number;
   shipMaxHp: number;
   weaponCooldownSeconds: number;
+  missileAmmo: number;
   interceptorCount: number;
   enemyDirectorMode: "local" | "openai" | "fallback";
   fuelUsed: number;
@@ -449,6 +450,7 @@ export class GameShell {
   private enemyDirectorStepOptions():
     | {
         enemyDirectorPolicy: NonNullable<EnemyDirectorResult>["policy"];
+        enemyDirectorDirective: NonNullable<EnemyDirectorResult>["directive"];
         enemyDirectorMode: NonNullable<EnemyDirectorResult>["mode"];
       }
     | undefined {
@@ -457,6 +459,7 @@ export class GameShell {
     }
     return {
       enemyDirectorPolicy: this.enemyDirectorResult.policy,
+      enemyDirectorDirective: this.enemyDirectorResult.directive,
       enemyDirectorMode: this.enemyDirectorResult.mode
     };
   }
@@ -483,6 +486,7 @@ export class GameShell {
         }
         this.enemyDirectorResult = result;
         this.world.enemyDirectorPolicy = result.policy;
+        this.world.enemyDirectorDirective = result.directive;
         this.world.enemyDirectorMode = result.mode;
         this.publishHud();
       })
@@ -569,6 +573,7 @@ export class GameShell {
       shipHp: snapshot.ship.hp,
       shipMaxHp: snapshot.ship.maxHp,
       weaponCooldownSeconds: snapshot.ship.weaponCooldownSeconds,
+      missileAmmo: snapshot.ship.missileAmmo,
       interceptorCount: snapshot.enemies.length,
       enemyDirectorMode: snapshot.enemyDirector.mode,
       fuelUsed: result.fuelUsed,

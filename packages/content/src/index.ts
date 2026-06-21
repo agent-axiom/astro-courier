@@ -66,6 +66,7 @@ export const contractSchema = z.object({
   briefing: z.string().min(1),
   riskLabel: z.string().min(1),
   rewardLabel: z.string().min(1),
+  difficultyTier: z.enum(["standard", "hard", "raid", "boss"]).optional(),
   missionType: z.enum(["standard", "longhaul"]).optional(),
   shipStart: contractShipStartSchema.optional(),
   pickupId: z.string().min(1),

@@ -11,6 +11,7 @@ import {
   Pause,
   Play,
   RotateCcw,
+  Rocket,
   Route,
   Satellite,
   ShieldAlert,
@@ -241,6 +242,7 @@ const initialHud: HudState = {
   shipHp: 100,
   shipMaxHp: 100,
   weaponCooldownSeconds: 0,
+  missileAmmo: 3,
   interceptorCount: 2,
   enemyDirectorMode: "local",
   fuelUsed: 0,
@@ -931,6 +933,7 @@ export function App() {
     status: hud.status
   });
   const canBrake = canUseImpulseControl({ action: "brake", fuel: hud.fuel, paused, preflightOpen, status: hud.status });
+  const canMissile = hud.status === "flying" && !preflightOpen && !paused && hud.missileAmmo > 0;
   useEffect(() => {
     if (!mobileBrakeHeld) {
       return undefined;
@@ -1687,6 +1690,15 @@ export function App() {
     shellRef.current?.queueCommand({ type: "FIRE" });
   };
 
+  const tapMobileMissile = (event: { preventDefault: () => void }) => {
+    event.preventDefault();
+    if (!canMissile) {
+      return;
+    }
+    audioRef.current?.unlock();
+    shellRef.current?.queueCommand({ type: "MISSILE" });
+  };
+
   const copyDeliveryReport = () => {
     if (!deliveryReport) {
       return;
@@ -1921,6 +1933,17 @@ export function App() {
           >
             <Crosshair size={22} />
             <small>{mobileActionLabels.fire}</small>
+          </button>
+          <button
+            type="button"
+            className="mobile-action-button mobile-action-missile"
+            aria-label={`Missile ${hud.missileAmmo}`}
+            title={`Missile ${hud.missileAmmo}`}
+            disabled={!canMissile}
+            onPointerDown={tapMobileMissile}
+          >
+            <Rocket size={22} />
+            <small>{hud.missileAmmo}</small>
           </button>
         </div>
       ) : null}
@@ -2406,7 +2429,7 @@ export function App() {
             <strong>{hud.score}</strong>
           </div>
         ) : null}
-        {hud.lastMilestone && !runFinished ? <div className="milestone">{hud.lastMilestone}</div> : null}
+        {liveHudDensity.showRunFeed && hud.lastMilestone && !runFinished ? <div className="milestone">{hud.lastMilestone}</div> : null}
         {hud.landingRating ? <div className="landing-rating">{hud.landingRating}</div> : null}
         </aside>
       ) : null}

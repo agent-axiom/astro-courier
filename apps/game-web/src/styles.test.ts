@@ -295,6 +295,7 @@ describe("responsive game layout CSS", () => {
     expect(styles).toContain(".mobile-action-brake");
     expect(styles).toContain(".mobile-action-boost");
     expect(styles).toContain(".mobile-action-fire");
+    expect(styles).toContain(".mobile-action-missile");
   });
 
   it("defines compact courier license and share report UI affordances", () => {

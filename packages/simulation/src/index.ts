@@ -1,5 +1,7 @@
 import type {
+  ContractDifficultyTier,
   CrashReason,
+  EnemyDirectorDirective,
   EnemyDirectorPolicy,
   EnemyShipArchetype,
   InputFrame,
@@ -77,6 +79,7 @@ export type ContractContent = {
   pickupId: string;
   destinationId: string;
   missionType?: "standard" | "longhaul";
+  difficultyTier?: ContractDifficultyTier;
   refuelStationIds?: string[];
   cargoId: string;
   hazardSeverityMultiplier?: number;
@@ -170,12 +173,18 @@ export type EnemyShipState = {
   rotation: number;
   hp: number;
   maxHp: number;
+  armor: number;
+  shield: number;
+  maxShield: number;
+  difficultyTier: ContractDifficultyTier;
   radius: number;
   maxSpeed: number;
   acceleration: number;
   projectileDamage: number;
   fireCooldownBaseSeconds: number;
   fireCooldownSeconds: number;
+  missileAmmo: number;
+  missileCooldownSeconds: number;
   contactCooldownSeconds: number;
   policy: EnemyPolicyMode;
 };
@@ -183,6 +192,8 @@ export type EnemyShipState = {
 export type ProjectileState = {
   id: string;
   owner: "player" | "enemy";
+  kind: "bolt" | "missile";
+  targetId?: string;
   position: Vec2;
   velocity: Vec2;
   radius: number;
@@ -201,6 +212,7 @@ export type ShipState = {
   hp: number;
   maxHp: number;
   weaponCooldownSeconds: number;
+  missileAmmo: number;
   boostCooldownSeconds: number;
   thrustPower: number;
   rotationPower: number;
@@ -252,6 +264,7 @@ export type SimulationWorld = {
   enemyProjectiles: ProjectileState[];
   enemyDirectorMode: "local" | "openai" | "fallback";
   enemyDirectorPolicy: EnemyDirectorPolicy;
+  enemyDirectorDirective: EnemyDirectorDirective;
   ship: ShipState;
 };
 
@@ -277,6 +290,7 @@ export type WorldReplayInput = {
 export type StepWorldOptions = {
   combat?: boolean;
   enemyDirectorPolicy?: EnemyDirectorPolicy;
+  enemyDirectorDirective?: EnemyDirectorDirective;
   enemyDirectorMode?: "local" | "openai" | "fallback";
 };
 
@@ -358,12 +372,25 @@ const PLAYER_WEAPON_COOLDOWN_SECONDS = 0.28;
 const PLAYER_PROJECTILE_SPEED = 112;
 const PLAYER_PROJECTILE_DAMAGE = 20;
 const PLAYER_PROJECTILE_RADIUS = 4;
+const PLAYER_MISSILE_AMMO = 3;
+const PLAYER_MISSILE_SPEED = 82;
+const PLAYER_MISSILE_DAMAGE = 54;
+const PLAYER_MISSILE_RADIUS = 6;
+const PLAYER_MISSILE_MAX_AGE_SECONDS = 4.4;
+const PLAYER_MISSILE_LOCK_DISTANCE = 420;
 const PULSE_SHOT_DAMAGE = 42;
 const PULSE_SHOT_RADIUS = 6;
 const PLAYER_PROJECTILE_MAX_AGE_SECONDS = 1.5;
 const ENEMY_PROJECTILE_SPEED = 66;
 const ENEMY_PROJECTILE_RADIUS = 5;
 const ENEMY_PROJECTILE_MAX_AGE_SECONDS = 2.4;
+const ENEMY_MISSILE_SPEED = 66;
+const ENEMY_MISSILE_DAMAGE = 42;
+const ENEMY_MISSILE_RADIUS = 6;
+const ENEMY_MISSILE_MAX_AGE_SECONDS = 4.6;
+const ENEMY_MISSILE_COOLDOWN_SECONDS = 5.5;
+const MISSILE_TURN_RATE = 3.8;
+const MISSILE_INTERCEPT_RADIUS = 9;
 export const ENEMY_HIT_STYLE_BONUS = 35;
 const ENEMY_STYLE_BONUS = 90;
 const ENEMY_WAKE_DISTANCE = 430;
@@ -384,47 +411,75 @@ const ENEMY_ARCHETYPE_STATS: Record<
   EnemyShipArchetype,
   {
     maxHp: number;
+    armor: number;
+    shield: number;
     radius: number;
     acceleration: number;
     maxSpeed: number;
     fireCooldownSeconds: number;
     projectileDamage: number;
+    missileAmmo: number;
   }
 > = {
   drone: {
     maxHp: 22,
+    armor: 1,
+    shield: 0,
     radius: 10,
     acceleration: 24,
     maxSpeed: 34,
     fireCooldownSeconds: 3.2,
-    projectileDamage: 5
+    projectileDamage: 5,
+    missileAmmo: 0
   },
   fighter: {
     maxHp: 40,
+    armor: 4,
+    shield: 8,
     radius: 14,
     acceleration: 17,
     maxSpeed: 26,
     fireCooldownSeconds: 4.4,
-    projectileDamage: 8
+    projectileDamage: 8,
+    missileAmmo: 1
   },
   brute: {
     maxHp: 78,
+    armor: 8,
+    shield: 14,
     radius: 20,
     acceleration: 12,
     maxSpeed: 18,
     fireCooldownSeconds: 5.2,
-    projectileDamage: 14
+    projectileDamage: 14,
+    missileAmmo: 1
   },
   sentinel: {
     maxHp: 120,
+    armor: 12,
+    shield: 24,
     radius: 25,
     acceleration: 9,
     maxSpeed: 14,
     fireCooldownSeconds: 4.8,
-    projectileDamage: 18
+    projectileDamage: 18,
+    missileAmmo: 2
   }
 };
 const ENEMY_MAX_HP = ENEMY_ARCHETYPE_STATS.sentinel.maxHp;
+const ENEMY_DIFFICULTY_SCALARS: Record<
+  ContractDifficultyTier,
+  {
+    hp: number;
+    armor: number;
+    shield: number;
+  }
+> = {
+  standard: { hp: 1, armor: 1, shield: 1 },
+  hard: { hp: 1.15, armor: 1.1, shield: 1.15 },
+  raid: { hp: 1.3, armor: 1.25, shield: 1.5 },
+  boss: { hp: 1.6, armor: 1.45, shield: 1.9 }
+};
 
 export function calculateHazardSkimStyleBonus(severity: number): number {
   return Math.round(HAZARD_SKIM_BASE_BONUS + clamp(severity, 0, 1) * HAZARD_SKIM_SEVERITY_BONUS);
@@ -444,6 +499,15 @@ export function defaultEnemyDirectorPolicy(): EnemyDirectorPolicy {
   };
 }
 
+export function defaultEnemyDirectorDirective(): EnemyDirectorDirective {
+  return {
+    formation: "screen",
+    missileDoctrine: "hold",
+    pressure: 0.4,
+    hint: "screen"
+  };
+}
+
 export function clampEnemyDirectorPolicy(policy: EnemyDirectorPolicy): EnemyDirectorPolicy {
   return {
     aggression: round(clamp(policy.aggression, 0, 1), 3),
@@ -451,6 +515,25 @@ export function clampEnemyDirectorPolicy(policy: EnemyDirectorPolicy): EnemyDire
     fireBias: round(clamp(policy.fireBias, 0, 1), 3),
     retreatHp: round(clamp(policy.retreatHp, 0, ENEMY_MAX_HP), 3),
     focus: policy.focus === "player" || policy.focus === "objective" ? policy.focus : "cargo"
+  };
+}
+
+export function clampEnemyDirectorDirective(directive: Partial<EnemyDirectorDirective> | undefined): EnemyDirectorDirective {
+  const fallback = defaultEnemyDirectorDirective();
+  const formation =
+    directive?.formation === "pincer" || directive?.formation === "ambush" || directive?.formation === "retreat" || directive?.formation === "screen"
+      ? directive.formation
+      : fallback.formation;
+  const missileDoctrine =
+    directive?.missileDoctrine === "single" || directive?.missileDoctrine === "salvo" || directive?.missileDoctrine === "hold"
+      ? directive.missileDoctrine
+      : fallback.missileDoctrine;
+  const hint = typeof directive?.hint === "string" && directive.hint.trim() ? directive.hint.trim().slice(0, 32) : fallback.hint;
+  return {
+    formation,
+    missileDoctrine,
+    pressure: round(clamp(directive?.pressure ?? fallback.pressure, 0, 1), 3),
+    hint
   };
 }
 
@@ -564,6 +647,7 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
     enemyProjectiles: [],
     enemyDirectorMode: "local",
     enemyDirectorPolicy: defaultEnemyDirectorPolicy(),
+    enemyDirectorDirective: defaultEnemyDirectorDirective(),
     ship: {
       position: shipStartPosition,
       velocity: toVec2(shipVelocity),
@@ -574,6 +658,7 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
       hp: shipMaxHp,
       maxHp: shipMaxHp,
       weaponCooldownSeconds: 0,
+      missileAmmo: PLAYER_MISSILE_AMMO,
       boostCooldownSeconds: 0,
       thrustPower: system.ship.thrustPower,
       rotationPower: system.ship.rotationPower,
@@ -592,11 +677,24 @@ function createEnemyPatrol(system: SystemContent, activeContract: ContractConten
   const midpoint = scale(add(pickup, destination), 0.5);
   const seedShift = deterministicUnit(`${system.id}:${activeContract.id}:interceptors`) - 0.5;
   const wave = enemyWaveArchetypes(activeContract.enemyWave);
+  const difficultyTier = activeContract.difficultyTier ?? "standard";
 
   if (!activeContract.enemyWave) {
     return [
-      createEnemyShip("interceptor-a", add(add(midpoint, scale(flank, 220)), scale(routeDirection, seedShift * 80)), 0.35, "fighter"),
-      createEnemyShip("interceptor-b", add(add(midpoint, scale(flank, -190)), scale(routeDirection, 90 + seedShift * 60)), -0.2, "drone")
+      createEnemyShip(
+        "interceptor-a",
+        add(add(midpoint, scale(flank, 220)), scale(routeDirection, seedShift * 80)),
+        0.35,
+        "fighter",
+        difficultyTier
+      ),
+      createEnemyShip(
+        "interceptor-b",
+        add(add(midpoint, scale(flank, -190)), scale(routeDirection, 90 + seedShift * 60)),
+        -0.2,
+        "drone",
+        difficultyTier
+      )
     ];
   }
 
@@ -610,7 +708,7 @@ function createEnemyPatrol(system: SystemContent, activeContract: ContractConten
       scale(flank, laneSign * laneSpacing)
     );
     const drift = laneSign * (0.18 + index * 0.07) + localShift * 0.35;
-    return createEnemyShip(`wave-${archetype}-${index + 1}`, position, drift, archetype);
+    return createEnemyShip(`wave-${archetype}-${index + 1}`, position, drift, archetype, difficultyTier);
   });
 }
 
@@ -668,22 +766,38 @@ function createRiskGates(system: SystemContent, activeContract: ContractContent,
   });
 }
 
-function createEnemyShip(id: string, position: Vec2, drift: number, archetype: EnemyShipArchetype = "fighter"): EnemyShipState {
+function createEnemyShip(
+  id: string,
+  position: Vec2,
+  drift: number,
+  archetype: EnemyShipArchetype = "fighter",
+  difficultyTier: ContractDifficultyTier = "standard"
+): EnemyShipState {
   const stats = ENEMY_ARCHETYPE_STATS[archetype];
+  const scalars = ENEMY_DIFFICULTY_SCALARS[difficultyTier] ?? ENEMY_DIFFICULTY_SCALARS.standard;
+  const maxHp = Math.round(stats.maxHp * scalars.hp);
+  const maxShield = Math.round(stats.shield * scalars.shield);
+  const missileLoadoutScale = difficultyTier === "standard" ? 0 : difficultyTier === "hard" ? 1 : 1.5;
   return {
     id,
     archetype,
     position,
     velocity: { x: Math.cos(drift) * 5, y: Math.sin(drift) * 5 },
     rotation: drift,
-    hp: stats.maxHp,
-    maxHp: stats.maxHp,
+    hp: maxHp,
+    maxHp,
+    armor: Math.round(stats.armor * scalars.armor),
+    shield: maxShield,
+    maxShield,
+    difficultyTier,
     radius: stats.radius,
     maxSpeed: stats.maxSpeed,
     acceleration: stats.acceleration,
     projectileDamage: stats.projectileDamage,
     fireCooldownBaseSeconds: stats.fireCooldownSeconds,
     fireCooldownSeconds: stats.fireCooldownSeconds,
+    missileAmmo: Math.max(0, Math.round(stats.missileAmmo * missileLoadoutScale)),
+    missileCooldownSeconds: ENEMY_MISSILE_COOLDOWN_SECONDS * 0.45,
     contactCooldownSeconds: 0,
     policy: "patrol"
   };
@@ -709,6 +823,10 @@ export function stepWorld(
   }
   if (options.enemyDirectorPolicy) {
     world.enemyDirectorPolicy = clampEnemyDirectorPolicy(options.enemyDirectorPolicy);
+    world.enemyDirectorMode = options.enemyDirectorMode ?? "openai";
+  }
+  if (options.enemyDirectorDirective) {
+    world.enemyDirectorDirective = clampEnemyDirectorDirective(options.enemyDirectorDirective);
     world.enemyDirectorMode = options.enemyDirectorMode ?? "openai";
   }
   world.lastMilestone = undefined;
@@ -754,6 +872,8 @@ export function stepWorld(
       }
     } else if (command.type === "FIRE") {
       firePlayerProjectile(world);
+    } else if (command.type === "MISSILE") {
+      firePlayerMissile(world);
     } else if (command.type === "PAUSE") {
       world.status = "paused";
       return world;
@@ -883,6 +1003,7 @@ export function snapshotWorld(world: SimulationWorld): SimulationSnapshot {
       hp: round(world.ship.hp, 3),
       maxHp: world.ship.maxHp,
       weaponCooldownSeconds: round(world.ship.weaponCooldownSeconds, 3),
+      missileAmmo: world.ship.missileAmmo,
       boostCooldownSeconds: round(world.ship.boostCooldownSeconds, 3),
       cargoDamage: world.ship.cargoDamage
     },
@@ -894,6 +1015,10 @@ export function snapshotWorld(world: SimulationWorld): SimulationSnapshot {
       rotation: enemy.rotation,
       hp: round(enemy.hp, 3),
       maxHp: enemy.maxHp,
+      armor: enemy.armor,
+      shield: round(enemy.shield, 3),
+      maxShield: enemy.maxShield,
+      difficultyTier: enemy.difficultyTier,
       radius: enemy.radius,
       policy: enemy.policy
     })),
@@ -901,17 +1026,22 @@ export function snapshotWorld(world: SimulationWorld): SimulationSnapshot {
       id: projectile.id,
       position: { ...projectile.position },
       velocity: { ...projectile.velocity },
-      radius: projectile.radius
+      radius: projectile.radius,
+      kind: projectile.kind ?? "bolt",
+      targetId: projectile.targetId
     })),
     enemyProjectiles: world.enemyProjectiles.map((projectile) => ({
       id: projectile.id,
       position: { ...projectile.position },
       velocity: { ...projectile.velocity },
-      radius: projectile.radius
+      radius: projectile.radius,
+      kind: projectile.kind ?? "bolt",
+      targetId: projectile.targetId
     })),
     enemyDirector: {
       mode: world.enemyDirectorMode,
-      policy: { ...world.enemyDirectorPolicy }
+      policy: { ...world.enemyDirectorPolicy },
+      directive: { ...world.enemyDirectorDirective }
     },
     gravitySources: world.gravitySources.map((source) => ({
       id: source.id,
@@ -1272,6 +1402,7 @@ function tickWeaponCooldown(world: SimulationWorld, fixedDt: number): void {
   world.ship.weaponCooldownSeconds = round(Math.max(0, world.ship.weaponCooldownSeconds - fixedDt), 6);
   for (const enemy of world.enemies) {
     enemy.fireCooldownSeconds = round(Math.max(0, enemy.fireCooldownSeconds - fixedDt), 6);
+    enemy.missileCooldownSeconds = round(Math.max(0, enemy.missileCooldownSeconds - fixedDt), 6);
     enemy.contactCooldownSeconds = round(Math.max(0, (enemy.contactCooldownSeconds ?? 0) - fixedDt), 6);
   }
 }
@@ -1287,6 +1418,7 @@ function firePlayerProjectile(world: SimulationWorld): void {
   world.playerProjectiles.push({
     id: `player-shot-${world.tick}-${world.playerProjectiles.length}`,
     owner: "player",
+    kind: "bolt",
     position: muzzle,
     velocity: add(world.ship.velocity, scale(forward, PLAYER_PROJECTILE_SPEED)),
     radius: chargedPulse ? PULSE_SHOT_RADIUS : PLAYER_PROJECTILE_RADIUS,
@@ -1300,11 +1432,49 @@ function firePlayerProjectile(world: SimulationWorld): void {
   world.ship.weaponCooldownSeconds = PLAYER_WEAPON_COOLDOWN_SECONDS;
 }
 
+function firePlayerMissile(world: SimulationWorld): void {
+  if (world.ship.missileAmmo <= 0 || world.ship.hp <= 0) {
+    return;
+  }
+
+  const target = nearestEnemyInLock(world, PLAYER_MISSILE_LOCK_DISTANCE);
+  if (!target) {
+    return;
+  }
+
+  const forward = { x: Math.cos(world.ship.rotation), y: Math.sin(world.ship.rotation) };
+  world.playerProjectiles.push({
+    id: `player-missile-${world.tick}-${world.playerProjectiles.length}`,
+    owner: "player",
+    kind: "missile",
+    targetId: target.id,
+    position: add(world.ship.position, scale(forward, 18)),
+    velocity: add(world.ship.velocity, scale(forward, PLAYER_MISSILE_SPEED)),
+    radius: PLAYER_MISSILE_RADIUS,
+    damage: PLAYER_MISSILE_DAMAGE,
+    ageSeconds: 0,
+    maxAgeSeconds: PLAYER_MISSILE_MAX_AGE_SECONDS
+  });
+  world.ship.missileAmmo -= 1;
+  world.lastMilestone = "Missile Lock";
+}
+
+function nearestEnemyInLock(world: SimulationWorld, lockDistance: number): EnemyShipState | undefined {
+  return world.enemies
+    .map((enemy) => ({
+      enemy,
+      distance: distanceBetween(world.ship.position, enemy.position)
+    }))
+    .filter((entry) => entry.distance <= lockDistance && entry.enemy.hp > 0)
+    .sort((left, right) => left.distance - right.distance)[0]?.enemy;
+}
+
 function updateCombat(world: SimulationWorld, fixedDt: number): void {
   updateEnemies(world, fixedDt);
   resolveEnemyHullContacts(world);
-  stepProjectiles(world.playerProjectiles, fixedDt);
-  stepProjectiles(world.enemyProjectiles, fixedDt);
+  stepProjectiles(world, world.playerProjectiles, fixedDt);
+  stepProjectiles(world, world.enemyProjectiles, fixedDt);
+  resolveProjectileInterceptions(world);
   resolvePlayerProjectileHits(world);
   resolveEnemyProjectileHits(world);
   cleanupProjectiles(world);
@@ -1312,6 +1482,7 @@ function updateCombat(world: SimulationWorld, fixedDt: number): void {
 
 function updateEnemies(world: SimulationWorld, fixedDt: number): void {
   const policy = clampEnemyDirectorPolicy(world.enemyDirectorPolicy);
+  const directive = clampEnemyDirectorDirective(world.enemyDirectorDirective);
   for (const enemy of world.enemies) {
     const toShip = subtract(world.ship.position, enemy.position);
     const distance = magnitude(toShip);
@@ -1328,8 +1499,8 @@ function updateEnemies(world: SimulationWorld, fixedDt: number): void {
     }
 
     const flankAxis = {
-      x: -direction.y * policy.flank,
-      y: direction.x * policy.flank
+      x: -direction.y * policy.flank * formationFlankMultiplier(directive.formation),
+      y: direction.x * policy.flank * formationFlankMultiplier(directive.formation)
     };
     const desired =
       enemy.policy === "evade"
@@ -1347,10 +1518,40 @@ function updateEnemies(world: SimulationWorld, fixedDt: number): void {
     enemy.position = add(enemy.position, scale(enemy.velocity, fixedDt));
     enemy.rotation = normalizeAngle(Math.atan2(enemy.velocity.y || direction.y, enemy.velocity.x || direction.x));
 
-    if (distance <= ENEMY_FIRE_DISTANCE && enemy.fireCooldownSeconds <= 0) {
-      fireEnemyProjectile(world, enemy, direction, policy);
+    if (distance <= ENEMY_FIRE_DISTANCE) {
+      if (canEnemyFireMissile(enemy, distance, policy, directive)) {
+        fireEnemyMissile(world, enemy, direction);
+      } else if (enemy.fireCooldownSeconds <= 0) {
+        fireEnemyProjectile(world, enemy, direction, policy);
+      }
     }
   }
+}
+
+function formationFlankMultiplier(formation: EnemyDirectorDirective["formation"]): number {
+  if (formation === "pincer") return 1.35;
+  if (formation === "ambush") return 1.15;
+  if (formation === "retreat") return 0.65;
+  return 1;
+}
+
+function canEnemyFireMissile(
+  enemy: EnemyShipState,
+  distance: number,
+  policy: EnemyDirectorPolicy,
+  directive: EnemyDirectorDirective
+): boolean {
+  if (directive.missileDoctrine === "hold") {
+    return false;
+  }
+  const pressureBias = directive.missileDoctrine === "salvo" ? directive.pressure * 0.22 : 0;
+  return (
+    enemy.missileAmmo > 0 &&
+    enemy.missileCooldownSeconds <= 0 &&
+    distance > 70 &&
+    policy.fireBias + pressureBias >= 0.35 &&
+    enemy.policy !== "evade"
+  );
 }
 
 function fireEnemyProjectile(
@@ -1364,6 +1565,7 @@ function fireEnemyProjectile(
   world.enemyProjectiles.push({
     id: `${enemy.id}-shot-${world.tick}-${world.enemyProjectiles.length}`,
     owner: "enemy",
+    kind: "bolt",
     position: add(enemy.position, scale(directionToShip, enemy.radius + 5)),
     velocity: add(enemy.velocity, scale(directionToShip, ENEMY_PROJECTILE_SPEED)),
     radius: ENEMY_PROJECTILE_RADIUS,
@@ -1373,10 +1575,83 @@ function fireEnemyProjectile(
   });
 }
 
-function stepProjectiles(projectiles: ProjectileState[], fixedDt: number): void {
+function fireEnemyMissile(world: SimulationWorld, enemy: EnemyShipState, directionToShip: Vec2): void {
+  enemy.missileAmmo -= 1;
+  enemy.missileCooldownSeconds = ENEMY_MISSILE_COOLDOWN_SECONDS;
+  enemy.fireCooldownSeconds = Math.max(enemy.fireCooldownSeconds, enemy.fireCooldownBaseSeconds * 0.65);
+  world.enemyProjectiles.push({
+    id: `${enemy.id}-missile-${world.tick}-${world.enemyProjectiles.length}`,
+    owner: "enemy",
+    kind: "missile",
+    targetId: "player",
+    position: add(enemy.position, scale(directionToShip, enemy.radius + 6)),
+    velocity: add(enemy.velocity, scale(directionToShip, ENEMY_MISSILE_SPEED)),
+    radius: ENEMY_MISSILE_RADIUS,
+    damage: ENEMY_MISSILE_DAMAGE,
+    ageSeconds: 0,
+    maxAgeSeconds: ENEMY_MISSILE_MAX_AGE_SECONDS
+  });
+}
+
+function stepProjectiles(world: SimulationWorld, projectiles: ProjectileState[], fixedDt: number): void {
   for (const projectile of projectiles) {
+    if (projectile.kind === "missile") {
+      projectile.velocity = homingMissileVelocity(world, projectile, fixedDt);
+    }
     projectile.position = add(projectile.position, scale(projectile.velocity, fixedDt));
     projectile.ageSeconds = round(projectile.ageSeconds + fixedDt, 6);
+  }
+}
+
+function homingMissileVelocity(world: SimulationWorld, projectile: ProjectileState, fixedDt: number): Vec2 {
+  const target =
+    projectile.owner === "player"
+      ? world.enemies.find((enemy) => enemy.id === projectile.targetId)
+      : projectile.targetId === "player"
+        ? world.ship
+        : undefined;
+  if (!target) {
+    return projectile.velocity;
+  }
+
+  const desired = normalizeVector(subtract(target.position, projectile.position));
+  if (magnitude(desired) <= 0) {
+    return projectile.velocity;
+  }
+  const speed = Math.max(projectile.owner === "player" ? PLAYER_MISSILE_SPEED : ENEMY_MISSILE_SPEED, magnitude(projectile.velocity));
+  const current = normalizeVector(projectile.velocity);
+  const blend = clamp(MISSILE_TURN_RATE * fixedDt, 0, 1);
+  return scale(normalizeVector(add(scale(current, 1 - blend), scale(desired, blend))), speed);
+}
+
+function resolveProjectileInterceptions(world: SimulationWorld): void {
+  const playerProjectilesToRemove = new Set<string>();
+  const enemyProjectilesToRemove = new Set<string>();
+
+  for (const playerProjectile of world.playerProjectiles) {
+    for (const enemyProjectile of world.enemyProjectiles) {
+      const playerKind = playerProjectile.kind ?? "bolt";
+      const enemyKind = enemyProjectile.kind ?? "bolt";
+      const playerCanIntercept = playerKind === "bolt" && enemyKind === "missile";
+      const enemyCanIntercept = playerKind === "missile" && enemyKind === "bolt";
+      if (!playerCanIntercept && !enemyCanIntercept) {
+        continue;
+      }
+      if (distanceBetween(playerProjectile.position, enemyProjectile.position) > playerProjectile.radius + enemyProjectile.radius + MISSILE_INTERCEPT_RADIUS) {
+        continue;
+      }
+      playerProjectilesToRemove.add(playerProjectile.id);
+      enemyProjectilesToRemove.add(enemyProjectile.id);
+      world.lastMilestone = "Missile Down";
+      awardStyle(world, ENEMY_HIT_STYLE_BONUS, "Missile Down");
+    }
+  }
+
+  if (playerProjectilesToRemove.size > 0) {
+    world.playerProjectiles = world.playerProjectiles.filter((projectile) => !playerProjectilesToRemove.has(projectile.id));
+  }
+  if (enemyProjectilesToRemove.size > 0) {
+    world.enemyProjectiles = world.enemyProjectiles.filter((projectile) => !enemyProjectilesToRemove.has(projectile.id));
   }
 }
 
@@ -1393,7 +1668,7 @@ function resolvePlayerProjectileHits(world: SimulationWorld): void {
       continue;
     }
 
-    target.hp = round(Math.max(0, target.hp - projectile.damage), 3);
+    applyDamageToEnemy(target, projectile.damage);
     if (target.hp <= 0) {
       destroyedEnemyIds.add(target.id);
     } else {
@@ -1406,6 +1681,23 @@ function resolvePlayerProjectileHits(world: SimulationWorld): void {
     awardStyle(world, ENEMY_STYLE_BONUS * destroyedEnemyIds.size, "Interceptor Down");
   }
   world.playerProjectiles = remainingProjectiles;
+}
+
+function applyDamageToEnemy(enemy: EnemyShipState, rawDamage: number): number {
+  let remainingDamage = Math.max(0, rawDamage);
+  const shieldDamage = Math.min(enemy.shield, remainingDamage);
+  if (shieldDamage > 0) {
+    enemy.shield = round(Math.max(0, enemy.shield - shieldDamage), 3);
+    remainingDamage = round(Math.max(0, remainingDamage - shieldDamage), 3);
+  }
+
+  if (remainingDamage <= 0) {
+    return shieldDamage;
+  }
+
+  const hullDamage = Math.max(1, remainingDamage - Math.max(0, enemy.armor));
+  enemy.hp = round(Math.max(0, enemy.hp - hullDamage), 3);
+  return round(shieldDamage + hullDamage, 3);
 }
 
 function resolveEnemyHullContacts(world: SimulationWorld): void {

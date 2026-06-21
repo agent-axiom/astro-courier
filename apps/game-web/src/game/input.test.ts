@@ -150,6 +150,26 @@ describe("keyboard input mapping", () => {
 
     expect(input.commands(0)).toEqual([{ type: "FIRE" }]);
   });
+
+  it("queues missiles once per keyboard press", () => {
+    const target = new FakeKeyboardTarget();
+    const input = new KeyboardInput(target as unknown as Window);
+    input.attach();
+
+    target.dispatch("keydown", "KeyK");
+
+    expect(input.commands(0)).toEqual([{ type: "MISSILE" }]);
+    expect(input.commands(0)).toEqual([]);
+
+    target.dispatch("keydown", "KeyK");
+
+    expect(input.commands(0)).toEqual([]);
+
+    target.dispatch("keyup", "KeyK");
+    target.dispatch("keydown", "KeyK");
+
+    expect(input.commands(0)).toEqual([{ type: "MISSILE" }]);
+  });
 });
 
 describe("gamepad input mapping", () => {
@@ -299,6 +319,23 @@ describe("gamepad input mapping", () => {
 
     target.setGamepads([{ axes: [0, 0], buttons: gamepadButtons({ 2: { pressed: true, value: 1 } }) }]);
     expect(input.commands(0)).toEqual([{ type: "FIRE" }]);
+  });
+
+  it("queues gamepad missiles once per top face-button press", () => {
+    const target = new FakeGamepadTarget();
+    const input = new KeyboardInput(target as unknown as Window);
+    input.attach();
+
+    target.setGamepads([{ axes: [0, 0], buttons: gamepadButtons({ 3: { pressed: true, value: 1 } }) }]);
+
+    expect(input.commands(0)).toEqual([{ type: "MISSILE" }]);
+    expect(input.commands(0)).toEqual([]);
+
+    target.setGamepads([{ axes: [0, 0], buttons: gamepadButtons({ 3: { pressed: false, value: 0 } }) }]);
+    expect(input.commands(0)).toEqual([]);
+
+    target.setGamepads([{ axes: [0, 0], buttons: gamepadButtons({ 3: { pressed: true, value: 1 } }) }]);
+    expect(input.commands(0)).toEqual([{ type: "MISSILE" }]);
   });
 });
 

@@ -311,7 +311,8 @@ describe("live HUD density", () => {
       })
     ).toMatchObject({
       expanded: true,
-      showRadioMessage: true,
+      showRadioMessage: false,
+      showRouteTempo: false,
       showActionChips: true,
       showTelemetryChips: true
     });
