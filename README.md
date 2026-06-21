@@ -10,7 +10,7 @@ Playable build: https://agent-axiom.github.io/astro-courier/
 
 Astro Courier is a TypeScript web game built around short, replayable delivery runs. The player launches a route, collects cargo, reaches the destination pad, and tries to improve speed, fuel discipline, cargo safety, landing quality, and style rewards.
 
-The game includes contracts, route mastery, medals, best-run tracking, optional cloud progress sync, a compact hangar progression strip, replay-style run feedback, daily dispatch progression, cargo risk, hazard pressure, combat interceptors, sentinel-class enemies, ship HP, player and enemy fire, adaptive game feel, keyboard/gamepad controls, and touch-friendly browser play.
+The game includes contracts, route mastery, medals, best-run tracking, optional Cloud Code progress restore, a compact mobile launch menu, replay-style run feedback, daily dispatch progression, cargo risk, hazard pressure, combat interceptors, sentinel-class enemies, ship HP, player and enemy fire, adaptive game feel, keyboard/gamepad controls, and touch-friendly browser play.
 
 The project is organized as a pnpm monorepo with separate apps and packages for the web game, simulation, renderer, content, shared types, API, and the optional enemy director Worker.
 
@@ -28,7 +28,7 @@ Keyboard controls:
 - `P` / `Esc`: pause
 - `R`: restart from result screen
 
-The game also supports gamepad input and a large touch steering pad on mobile browsers.
+The game also supports gamepad input and a large touch steering pad on mobile browsers. On phones, the preflight screen stays focused on the art, key choices, Cloud/Restore, and `Launch`.
 
 ## How Codex helped
 

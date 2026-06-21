@@ -61,6 +61,10 @@ describe("preflight overlay density wiring", () => {
     expect(appSource).toContain("restoreCloudSave");
     expect(appSource).toContain('className="preflight-cloud-code"');
     expect(appSource).toContain('className="preflight-cloud-restore"');
+    expect(appSource).toContain("cloudRestoreOpen");
+    expect(appSource).toContain("setCloudRestoreOpen(false)");
+    expect(appSource).toContain('className="preflight-cloud-restore-toggle"');
+    expect(appSource).toContain("cloudSaveClient ? (");
     expect(appSource).toContain('className={`preflight-cloud-button preflight-cloud-${cloudSaveStatusLabel.tone}`}');
   });
 

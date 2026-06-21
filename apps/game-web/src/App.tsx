@@ -351,6 +351,7 @@ export function App() {
     return storage ? readStoredCloudSaveSession(storage) : undefined;
   });
   const [cloudRestoreCode, setCloudRestoreCode] = useState("");
+  const [cloudRestoreOpen, setCloudRestoreOpen] = useState(false);
   const [cloudSaveStatus, setCloudSaveStatus] = useState<CloudSaveStatus>(() =>
     profileApiUrl ? (cloudSession ? { mode: "synced", displayName: cloudSession.player.displayName } : { mode: "idle" }) : { mode: "disabled" }
   );
@@ -1589,6 +1590,7 @@ export function App() {
       storeCloudSaveSession(storage, nextSession);
     }
     setCloudSession(nextSession);
+    setCloudRestoreOpen(false);
     const saved = await cloudSaveClient.saveProgress(
       nextSession,
       buildCloudProgressSnapshot({
@@ -1619,6 +1621,7 @@ export function App() {
     }
     setCloudSession(restored);
     setCloudRestoreCode("");
+    setCloudRestoreOpen(false);
     applyCloudProgressSnapshot(restored.progress);
     setCloudSaveStatus({ mode: "synced", displayName: restored.player.displayName });
   };
@@ -1794,6 +1797,58 @@ export function App() {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [hud.status, overlays.preflight, overlays.result, launchContract, paused, restartActiveRun, restartToBriefing]);
+
+  const preflightCloudControls = (
+    <div className="preflight-cloud-stack">
+      <div className="preflight-cloud-row">
+        <button
+          type="button"
+          className={`preflight-cloud-button preflight-cloud-${cloudSaveStatusLabel.tone}`}
+          aria-label={`${cloudSaveStatusLabel.label}: ${cloudSaveStatusLabel.value}`}
+          disabled={!cloudSaveClient || cloudSaveStatus.mode === "syncing"}
+          onClick={enableCloudSave}
+        >
+          <Satellite size={16} />
+          <span>{cloudSaveStatusLabel.value}</span>
+        </button>
+        {cloudSaveClient ? (
+          <button
+            type="button"
+            className="preflight-cloud-restore-toggle"
+            aria-expanded={cloudRestoreOpen}
+            aria-controls="preflight-cloud-restore"
+            onClick={() => setCloudRestoreOpen((open) => !open)}
+          >
+            <RotateCcw size={16} />
+            <span>Restore</span>
+          </button>
+        ) : null}
+      </div>
+      {cloudSession?.cloudCode ? (
+        <div className="preflight-cloud-code" aria-label={`Cloud code: ${cloudSession.cloudCode}`}>
+          <span>Code</span>
+          <strong>{cloudSession.cloudCode}</strong>
+        </div>
+      ) : null}
+      {cloudSaveClient && cloudRestoreOpen ? (
+        <form id="preflight-cloud-restore" className="preflight-cloud-restore" aria-label="Restore cloud progress" onSubmit={restoreCloudSave}>
+          <input
+            aria-label="Cloud code"
+            autoCapitalize="characters"
+            autoComplete="off"
+            inputMode="text"
+            maxLength={12}
+            placeholder="AC-CODE-2026"
+            value={cloudRestoreCode}
+            onChange={(event) => setCloudRestoreCode(event.target.value.toUpperCase())}
+          />
+          <button type="submit" disabled={cloudSaveStatus.mode === "syncing" || !cloudRestoreCode.trim()}>
+            Apply
+          </button>
+        </form>
+      ) : null}
+    </div>
+  );
 
   return (
     <main className={`app-shell app-intensity-${runIntensity} ${routeTempoShellClass}`}>
@@ -2361,47 +2416,13 @@ export function App() {
                   <span>{trainingFlightAction.label}</span>
                 </button>
               ) : null}
-              <div className="preflight-cloud-stack">
-                <button
-                  type="button"
-                  className={`preflight-cloud-button preflight-cloud-${cloudSaveStatusLabel.tone}`}
-                  aria-label={`${cloudSaveStatusLabel.label}: ${cloudSaveStatusLabel.value}`}
-                  disabled={!cloudSaveClient || cloudSaveStatus.mode === "syncing"}
-                  onClick={enableCloudSave}
-                >
-                  <Satellite size={16} />
-                  <span>{cloudSaveStatusLabel.value}</span>
-                </button>
-                {cloudSession?.cloudCode ? (
-                  <div className="preflight-cloud-code" aria-label={`Cloud code: ${cloudSession.cloudCode}`}>
-                    <span>Code</span>
-                    <strong>{cloudSession.cloudCode}</strong>
-                  </div>
-                ) : null}
-                {cloudSaveClient && !cloudSession ? (
-                  <form className="preflight-cloud-restore" aria-label="Restore cloud progress" onSubmit={restoreCloudSave}>
-                    <input
-                      aria-label="Cloud code"
-                      autoCapitalize="characters"
-                      autoComplete="off"
-                      inputMode="text"
-                      maxLength={12}
-                      placeholder="AC-CODE-2026"
-                      value={cloudRestoreCode}
-                      onChange={(event) => setCloudRestoreCode(event.target.value.toUpperCase())}
-                    />
-                    <button type="submit" disabled={cloudSaveStatus.mode === "syncing" || !cloudRestoreCode.trim()}>
-                      Restore
-                    </button>
-                  </form>
-                ) : null}
-              </div>
             </>
           ) : (
             <div className="preflight-cover-art">
               <img src={coverArtSrc} alt="Astro Courier" loading="eager" />
             </div>
           )}
+          {preflightCloudControls}
           {hud.perkOptions.length > 0 ? (
             <div className="perk-selector" aria-label="Courier loadout">
               {hud.perkOptions.map((perk) => (

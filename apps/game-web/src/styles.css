@@ -3570,7 +3570,17 @@ button {
   transform: translateY(-1px);
 }
 
-.preflight-cloud-button {
+.preflight-cloud-row {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(0, auto));
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+}
+
+.preflight-cloud-button,
+.preflight-cloud-restore-toggle {
   display: inline-grid;
   grid-template-columns: 16px minmax(0, auto);
   align-items: center;
@@ -3593,13 +3603,22 @@ button {
     transform 160ms ease;
 }
 
-.preflight-cloud-button span {
+.preflight-cloud-restore-toggle {
+  border-color: rgba(124, 225, 255, 0.24);
+  background: rgba(124, 225, 255, 0.09);
+  color: rgba(216, 248, 255, 0.82);
+}
+
+.preflight-cloud-button span,
+.preflight-cloud-restore-toggle span {
   min-width: 0;
   overflow-wrap: anywhere;
 }
 
 .preflight-cloud-button:hover,
-.preflight-cloud-button:focus-visible {
+.preflight-cloud-button:focus-visible,
+.preflight-cloud-restore-toggle:hover,
+.preflight-cloud-restore-toggle:focus-visible {
   border-color: rgba(255, 255, 255, 0.32);
   color: #ffffff;
   outline: none;
@@ -3617,7 +3636,7 @@ button {
   justify-items: center;
   gap: 7px;
   justify-self: center;
-  width: min(100%, 320px);
+  width: min(100%, 340px);
 }
 
 .preflight-cloud-code {
@@ -7448,14 +7467,31 @@ button {
   }
 
   .preflight-cloud-stack {
+    order: 2;
     gap: 5px;
     width: min(100%, 286px);
+  }
+
+  .preflight-cloud-row {
+    gap: 5px;
+  }
+
+  .preflight-cloud-button,
+  .preflight-cloud-restore-toggle {
+    min-height: 32px;
+    gap: 5px;
+    padding: 6px 9px;
+    font-size: 0.62rem;
   }
 
   .preflight-cloud-code {
     min-height: 26px;
     padding: 5px 8px;
     font-size: 0.62rem;
+  }
+
+  .preflight-cloud-restore {
+    gap: 5px;
   }
 
   .preflight-cloud-restore input,
@@ -7509,6 +7545,15 @@ button {
     align-items: center;
   }
 
+  .preflight-overlay-expanded {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-height: min(56vh, 430px);
+    overflow-y: auto;
+    text-align: center;
+  }
+
   .preflight-overlay-focused > * {
     flex: 0 0 auto;
   }
@@ -7529,8 +7574,32 @@ button {
     width: min(100%, 240px);
   }
 
-  .preflight-overlay-focused .preflight-cover-art {
+  .preflight-overlay-focused .preflight-cover-art,
+  .preflight-overlay-expanded .preflight-cover-art {
     width: min(100%, 180px);
+  }
+
+  .preflight-overlay-expanded .preflight-kicker,
+  .preflight-overlay-expanded p {
+    display: none;
+  }
+
+  .preflight-overlay-expanded h2 {
+    order: 3;
+    max-width: 100%;
+    margin: 0;
+    overflow-wrap: anywhere;
+    font-size: 1.05rem;
+  }
+
+  .preflight-overlay-expanded .preflight-button {
+    order: 20;
+    width: 100%;
+    min-height: 50px;
+  }
+
+  .preflight-overlay-expanded .preflight-button small {
+    display: none;
   }
 
   .preflight-cover-cta {
@@ -7551,7 +7620,14 @@ button {
     gap: 6px;
   }
 
+  .hangar-strip,
   .ship-upgrade-track {
+    display: none;
+  }
+
+  .preflight-overlay-expanded .hangar-strip,
+  .preflight-overlay-expanded .ship-upgrade-track,
+  .preflight-overlay-expanded .control-primer {
     display: none;
   }
 
@@ -7596,6 +7672,33 @@ button {
 
   .preflight-mini-goals strong {
     font-size: 0.74rem;
+  }
+
+  .preflight-overlay-expanded .cargo-manifest,
+  .preflight-overlay-expanded .route-plan-briefing,
+  .preflight-overlay-expanded .route-pressure-briefing,
+  .preflight-overlay-expanded .signature-maneuver-briefing,
+  .preflight-overlay-expanded .contract-modifiers,
+  .preflight-overlay-expanded .best-chase-briefing,
+  .preflight-overlay-expanded .route-mark-target-briefing,
+  .preflight-overlay-expanded .route-board,
+  .preflight-overlay-expanded .route-mastery-briefing,
+  .preflight-overlay-expanded .route-campaign-briefing,
+  .preflight-overlay-expanded .route-campaign-milestone-target,
+  .preflight-overlay-expanded .route-target-briefing,
+  .preflight-overlay-expanded .daily-dispatch-briefing,
+  .preflight-overlay-expanded .cargo-risk-briefing,
+  .preflight-overlay-expanded .hazard-load-briefing,
+  .preflight-overlay-expanded .danger-pay-briefing,
+  .preflight-overlay-expanded .rush-briefing {
+    display: none;
+  }
+
+  .preflight-overlay-expanded .contract-selector,
+  .preflight-overlay-expanded .contract-traits,
+  .preflight-overlay-expanded .bonus-objectives,
+  .preflight-overlay-expanded .preflight-stats {
+    display: none;
   }
 
   .route-target-briefing {

@@ -100,6 +100,7 @@ describe("responsive game layout CSS", () => {
   it("styles cloud code save and restore controls as a compact menu stack", () => {
     expect(styles).toContain(".preflight-cloud-stack");
     expect(styles).toContain(".preflight-cloud-code");
+    expect(styles).toContain(".preflight-cloud-restore-toggle");
     expect(styles).toContain(".preflight-cloud-restore");
     expect(styles).toMatch(/\.preflight-cloud-restore input[\s\S]*text-transform: uppercase;/);
   });
@@ -112,6 +113,7 @@ describe("responsive game layout CSS", () => {
     expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.preflight-overlay[\s\S]*max-height: min\(56vh, 430px\);/);
     expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.preflight-overlay-focused[\s\S]*display: flex;/);
     expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.preflight-overlay-focused > \*[\s\S]*flex: 0 0 auto;/);
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.hangar-strip,[\s\S]*\.ship-upgrade-track[\s\S]*display: none;/);
     expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.ship-upgrade-track[\s\S]*display: none;/);
     expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.preflight-overlay-focused \.preflight-cover-art[\s\S]*width: min\(100%, 180px\);/);
     expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.perk-selector[\s\S]*grid-template-columns: repeat\(4, minmax\(0, 1fr\)\);/);
@@ -119,6 +121,15 @@ describe("responsive game layout CSS", () => {
     expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.perk-card span,[\s\S]*\.preflight-mini-goals small,[\s\S]*\.preflight-mini-goals b[\s\S]*display: none;/);
     expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.route-target-briefing small[\s\S]*display: none;/);
     expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.preflight-overlay-focused \.control-primer[\s\S]*display: none;/);
+  });
+
+  it("keeps rich-history phone preflight as a launch-first sheet", () => {
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.preflight-overlay-expanded[\s\S]*display: flex;/);
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.preflight-overlay-expanded[\s\S]*flex-direction: column;/);
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.preflight-overlay-expanded \.preflight-cover-art[\s\S]*width: min\(100%, 180px\);/);
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.preflight-overlay-expanded \.preflight-button small[\s\S]*display: none;/);
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.preflight-overlay-expanded \.cargo-manifest,[\s\S]*\.preflight-overlay-expanded \.route-plan-briefing,[\s\S]*\.preflight-overlay-expanded \.route-pressure-briefing,[\s\S]*\.preflight-overlay-expanded \.signature-maneuver-briefing[\s\S]*display: none;/);
+    expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.preflight-overlay-expanded \.contract-selector,[\s\S]*\.preflight-overlay-expanded \.contract-traits,[\s\S]*\.preflight-overlay-expanded \.bonus-objectives,[\s\S]*\.preflight-overlay-expanded \.preflight-stats[\s\S]*display: none;/);
   });
 
   it("defines a labeled first launch control primer", () => {
