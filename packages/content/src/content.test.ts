@@ -16,6 +16,8 @@ describe("content schemas", () => {
       "asteroid-sprint",
       "asteroid-labyrinth",
       "nebula-longhaul",
+      "silent-courier",
+      "comet-chase",
       "rescue-pod-run",
       "convoy-escort",
       "gravity-slingshot",
@@ -77,6 +79,8 @@ describe("content schemas", () => {
       "standard",
       "standard",
       "longhaul",
+      "stealth",
+      "chase",
       "rescue",
       "escort",
       "standard",
@@ -112,6 +116,25 @@ describe("content schemas", () => {
       refuelStationIds: ["relay-fuel-pad"],
       hazardSeverityMultiplier: 1.25,
       medalTimes: { bronze: 210, silver: 148, gold: 104 }
+    });
+    expect(parsed.contracts.find((contract) => contract.id === "silent-courier")).toMatchObject({
+      title: "Silent Courier",
+      missionType: "stealth",
+      riskLabel: "Silent Run",
+      rewardLabel: "Quiet route bonuses",
+      cargoId: "midnight-medicine",
+      enemyWave: { drones: 0, fighters: 0, brutes: 0 },
+      medalTimes: { bronze: 96, silver: 62, gold: 40 }
+    });
+    expect(parsed.contracts.find((contract) => contract.id === "comet-chase")).toMatchObject({
+      title: "Comet Chase",
+      missionType: "chase",
+      riskLabel: "Moving Target",
+      rewardLabel: "Chase gate bonuses",
+      cargoId: "volatile-comet-ice",
+      riskGateCount: 4,
+      enemyWave: { scouts: 2, fighters: 1 },
+      medalTimes: { bronze: 88, silver: 56, gold: 34 }
     });
     expect(parsed.contracts.find((contract) => contract.id === "rescue-pod-run")).toMatchObject({
       title: "Rescue Pod Run",
@@ -196,7 +219,7 @@ describe("content schemas", () => {
       rewardLabel: "Combat style bonuses",
       cargoId: "midnight-medicine",
       difficultyTier: "hard",
-      enemyWave: { drones: 5, fighters: 3, brutes: 1, sentinels: 0 },
+      enemyWave: { scouts: 2, drones: 5, fighters: 3, gunships: 1, brutes: 1, sentinels: 0 },
       medalTimes: { bronze: 82, silver: 50, gold: 30 }
     });
     expect(parsed.contracts.find((contract) => contract.id === "black-forge-capture")).toMatchObject({
@@ -217,7 +240,7 @@ describe("content schemas", () => {
       destinationId: "forge-dock",
       cargoId: "capture-beacon",
       difficultyTier: "raid",
-      enemyWave: { drones: 4, fighters: 4, brutes: 2, sentinels: 2 },
+      enemyWave: { drones: 4, fighters: 4, gunships: 1, brutes: 2, tankers: 1, sentinels: 2, jammers: 1 },
       medalTimes: { bronze: 104, silver: 64, gold: 40 }
     });
     expect(parsed.contracts.find((contract) => contract.id === "forge-flagship-raid")).toMatchObject({
@@ -228,7 +251,7 @@ describe("content schemas", () => {
       destinationId: "forge-dock",
       cargoId: "capture-beacon",
       difficultyTier: "boss",
-      enemyWave: { drones: 2, fighters: 2, brutes: 1, sentinels: 1, guardians: 1, missileBoats: 2 },
+      enemyWave: { scouts: 2, drones: 2, fighters: 2, gunships: 1, brutes: 1, sentinels: 1, guardians: 1, missileBoats: 2, carriers: 1 },
       medalTimes: { bronze: 128, silver: 82, gold: 54 }
     });
     expect(parsed.contracts.find((contract) => contract.id === "antimatter-drift")).toMatchObject({

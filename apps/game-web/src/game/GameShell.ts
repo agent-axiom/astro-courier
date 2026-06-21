@@ -62,6 +62,7 @@ export type HudState = {
   shipMaxHp: number;
   weaponCooldownSeconds: number;
   missileAmmo: number;
+  empAmmo: number;
   interceptorCount: number;
   incomingMissileCount: number;
   enemyDirectorMode: "local" | "openai" | "fallback";
@@ -615,6 +616,7 @@ export class GameShell {
       shipMaxHp: snapshot.ship.maxHp,
       weaponCooldownSeconds: snapshot.ship.weaponCooldownSeconds,
       missileAmmo: snapshot.ship.missileAmmo,
+      empAmmo: snapshot.ship.empAmmo,
       interceptorCount: snapshot.enemies.length,
       incomingMissileCount: snapshot.enemyProjectiles.filter((projectile) => projectile.kind === "missile").length,
       enemyDirectorMode: snapshot.enemyDirector.mode,

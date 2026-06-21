@@ -10,7 +10,7 @@ Playable build: https://agent-axiom.github.io/astro-courier/
 
 Astro Courier is a TypeScript web game built around short, replayable delivery runs. The player launches a route, collects cargo, reaches the destination pad, and tries to improve speed, fuel discipline, cargo safety, landing quality, and style rewards.
 
-The game includes a compact campaign map, raid boss loops, contracts, rescue/escort/raid missions, route mastery, medals, best-run tracking, optional Cloud Code progress restore, longhaul routes with fuel stops, richer procedural space art, compact mobile menus, optional Ghost Coach hints, daily dispatch/share progression, cargo risk, hazard pressure, guardian and missile-boat enemies, five ship loadouts, ship HP, limited homing missiles, adaptive AI mission modifiers, keyboard/gamepad controls, and touch-friendly browser play.
+The game includes a compact campaign map, raid boss loops, stealth/chase/rescue/escort/raid missions, route mastery, medals, best-run tracking, optional Cloud Code progress restore, longhaul routes with fuel stops, richer procedural space art, compact mobile menus, optional Ghost Coach hints, daily and weekly challenge routes, cargo risk, hazard pressure, multiple enemy roles, five ship loadouts, ship HP, limited homing missiles, EMP bursts, adaptive AI combat scenes, keyboard/gamepad controls, and touch-friendly browser play.
 
 The project is organized as a pnpm monorepo with separate apps and packages for the web game, simulation, renderer, content, shared types, API, and the optional enemy director Worker.
 
@@ -29,10 +29,11 @@ Keyboard controls:
 - `E`: boost
 - `Space` / `J` / `Enter`: fire in flight
 - `X`: homing missile
+- `Q`: EMP burst
 - `P` / `Esc`: pause
 - `R`: restart from result screen
 
-The game also supports gamepad input and a large touch steering pad on mobile browsers. On phones, the action dock exposes brake, boost, fire, and remaining missile charges.
+The game also supports gamepad input and a large touch steering pad on mobile browsers. On phones, the action dock exposes brake, boost, fire, EMP, and remaining missile charges.
 
 ## How Codex helped
 
@@ -54,7 +55,7 @@ https://agent-axiom.github.io/astro-courier/
 
 ## Enemy Director Worker
 
-The optional OpenAI enemy director runs as a Cloudflare Worker from `apps/enemy-director-worker`. It keeps the OpenAI API key server-side and returns bounded combat policy plus formation, missile, tempo, and mission-modifier directives to the static GitHub Pages build.
+The optional OpenAI enemy director runs as a Cloudflare Worker from `apps/enemy-director-worker`. It keeps the OpenAI API key server-side and returns bounded combat policy plus formation, missile, tempo, mission-modifier, scene, and personality directives to the static GitHub Pages build.
 
 Deploy it with Wrangler:
 

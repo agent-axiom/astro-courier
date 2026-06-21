@@ -180,6 +180,26 @@ describe("keyboard input mapping", () => {
     expect(input.commands(0)).toEqual([{ type: "MISSILE" }]);
   });
 
+  it("queues EMP once per keyboard press", () => {
+    const target = new FakeKeyboardTarget();
+    const input = new KeyboardInput(target as unknown as Window);
+    input.attach();
+
+    target.dispatch("keydown", "KeyQ");
+
+    expect(input.commands(0)).toEqual([{ type: "EMP" }]);
+    expect(input.commands(0)).toEqual([]);
+
+    target.dispatch("keydown", "KeyQ");
+
+    expect(input.commands(0)).toEqual([]);
+
+    target.dispatch("keyup", "KeyQ");
+    target.dispatch("keydown", "KeyQ");
+
+    expect(input.commands(0)).toEqual([{ type: "EMP" }]);
+  });
+
   it("does not keep the old K missile hotkey active", () => {
     const target = new FakeKeyboardTarget();
     const input = new KeyboardInput(target as unknown as Window);

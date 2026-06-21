@@ -74,6 +74,8 @@ describe("enemy director client", () => {
         missileDoctrine: "salvo",
         tempo: "calm",
         modifier: "none",
+        scene: "none",
+        personality: "balanced",
         pressure: 0.8,
         hint: "pincer"
       }
@@ -100,6 +102,8 @@ describe("enemy director client", () => {
             missileDoctrine: "hold",
             tempo: "push",
             modifier: "meteorBurst",
+            scene: "pursuit",
+            personality: "aggressive",
             pressure: 0.4
           }
         })
@@ -147,6 +151,7 @@ function testSnapshot(): SimulationSnapshot {
       maxHp: 100,
       weaponCooldownSeconds: 0,
       missileAmmo: 3,
+      empAmmo: 1,
       boostCooldownSeconds: 0,
       cargoDamage: 0
     },

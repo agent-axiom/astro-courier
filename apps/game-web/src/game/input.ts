@@ -139,6 +139,7 @@ export class KeyboardInput {
   private boostQueued = false;
   private fireQueued = false;
   private missileQueued = false;
+  private empQueued = false;
   private gamepadBoostPressed = false;
   private gamepadFirePressed = false;
   private gamepadMissilePressed = false;
@@ -175,6 +176,7 @@ export class KeyboardInput {
     this.boostQueued = false;
     this.fireQueued = false;
     this.missileQueued = false;
+    this.empQueued = false;
     this.gamepadBoostPressed = false;
     this.gamepadFirePressed = false;
     this.gamepadMissilePressed = false;
@@ -197,6 +199,10 @@ export class KeyboardInput {
     if (this.missileQueued) {
       commands.push({ type: "MISSILE" });
       this.missileQueued = false;
+    }
+    if (this.empQueued) {
+      commands.push({ type: "EMP" });
+      this.empQueued = false;
     }
     if (this.takeGamepadBoost(gamepad)) {
       commands.push({ type: "BOOST" });
@@ -224,6 +230,9 @@ export class KeyboardInput {
       if (event.code === "KeyX" && !wasPressed) {
         this.missileQueued = true;
       }
+      if (event.code === "KeyQ" && !wasPressed) {
+        this.empQueued = true;
+      }
     }
   };
 
@@ -241,6 +250,7 @@ export class KeyboardInput {
     this.boostQueued = false;
     this.fireQueued = false;
     this.missileQueued = false;
+    this.empQueued = false;
     this.gamepadBoostPressed = false;
     this.gamepadFirePressed = false;
     this.gamepadMissilePressed = false;
@@ -329,6 +339,7 @@ function isGameKey(code: string): boolean {
     code === "KeyE" ||
     code === "KeyJ" ||
     code === "KeyX" ||
+    code === "KeyQ" ||
     code === "Enter" ||
     code === "ShiftLeft" ||
     code === "ShiftRight"

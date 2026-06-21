@@ -174,11 +174,11 @@ describe("Astro Courier API", () => {
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({
       label: "Daily dispatch",
-      value: "Convoy Escort",
+      value: "Forge Flagship Raid",
       systemId: "starter-route",
       date: "2026-06-13",
-      contractId: "convoy-escort",
-      seed: "daily-2026-06-13-convoy-escort",
+      contractId: "forge-flagship-raid",
+      seed: "daily-2026-06-13-forge-flagship-raid",
       resetsAt: "2026-06-14T00:00:00.000Z"
     });
   });

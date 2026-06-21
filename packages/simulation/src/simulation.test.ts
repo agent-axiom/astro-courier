@@ -23,8 +23,10 @@ import {
   RISK_GATE_SPEED_THRESHOLD,
   RISK_GATE_STYLE_BONUS,
   STYLE_CHAIN_WINDOW_SECONDS,
+  clampEnemyDirectorDirective,
   createWorldFromSystem,
   createWorldReplay,
+  defaultEnemyDirectorDirective,
   gravityAccelerationAt,
   predictTrajectory,
   retroBrakeImpulse,
@@ -605,6 +607,37 @@ describe("deterministic Astro Courier simulation", () => {
     });
   });
 
+  it("spawns combat 2.0 enemy roles with distinct size and durability bands", () => {
+    const roleSystem: SystemContent = {
+      ...starterSystem,
+      contracts: [
+        ...starterSystem.contracts,
+        {
+          id: "combat-2-role-test",
+          title: "Combat 2 Role Test",
+          briefing: "Verify expanded enemy roles.",
+          riskLabel: "Enemy Roles",
+          rewardLabel: "Role check",
+          pickupId: "north-pad",
+          destinationId: "dock-a",
+          cargoId: "bottled-starlight",
+          difficultyTier: "raid",
+          enemyWave: { drones: 0, fighters: 0, scouts: 1, gunships: 1, tankers: 1, jammers: 1, carriers: 1 },
+          medalTimes: { bronze: 120, silver: 80, gold: 50 }
+        }
+      ]
+    };
+
+    const snapshot = combatSnapshot(createWorldFromSystem(roleSystem, "combat-2-role-seed", { contractId: "combat-2-role-test" }));
+
+    expect(snapshot.enemies.map((enemy) => enemy.archetype)).toEqual(["jammer", "carrier", "gunship", "scout", "tanker"]);
+    expect(snapshot.enemies.find((enemy) => enemy.archetype === "scout")).toMatchObject({ radius: 9, maxHp: 23 });
+    expect(snapshot.enemies.find((enemy) => enemy.archetype === "gunship")).toMatchObject({ radius: 18, armor: 8 });
+    expect(snapshot.enemies.find((enemy) => enemy.archetype === "tanker")).toMatchObject({ radius: 24, maxHp: 117 });
+    expect(snapshot.enemies.find((enemy) => enemy.archetype === "jammer")).toMatchObject({ shield: 39, maxShield: 39 });
+    expect(snapshot.enemies.find((enemy) => enemy.archetype === "carrier")).toMatchObject({ radius: 26, missileAmmo: 1 });
+  });
+
   it("scales enemy armor and shields by contract difficulty tier", () => {
     const waveSystem: SystemContent = {
       ...starterSystem,
@@ -1105,6 +1138,32 @@ describe("deterministic Astro Courier simulation", () => {
     });
   });
 
+  it("fires one limited EMP pulse that cracks nearby shields and delays enemy weapons", () => {
+    const world = createWorldFromSystem(starterSystem, "emp-pulse-seed");
+    const combat = combatWorld(world);
+    combat.enemies = [
+      testEnemy("near-shielded-target", { x: 170, y: 0 }, { hp: 40, shield: 20 }),
+      testEnemy("far-shielded-target", { x: 620, y: 0 }, { hp: 40, shield: 20 })
+    ];
+    combat.ship.position = { x: 120, y: 0 };
+    combat.enemies[0].fireCooldownSeconds = 0;
+    combat.enemies[0].missileCooldownSeconds = 0;
+
+    expect(combat.ship.empAmmo).toBe(1);
+    stepWorld(world, 1 / 60, [{ type: "EMP" } as PlayerCommand]);
+    expect(world.lastMilestone).toBe("EMP Burst");
+    stepWorld(world, 1 / 60, [{ type: "EMP" } as PlayerCommand]);
+
+    expect(combat.ship.empAmmo).toBe(0);
+    expect(combat.enemies[0].shield).toBe(0);
+    expect(combat.enemies[0].fireCooldownSeconds).toBeCloseTo(2.4 - 1 / 60, 3);
+    expect(combat.enemies[0].missileCooldownSeconds).toBeCloseTo(2.4 - 1 / 60, 3);
+    expect(combat.enemies[1]).toMatchObject({
+      shield: 20
+    });
+    expect(snapshotWorld(world).ship.empAmmo).toBe(0);
+  });
+
   it("fires limited player homing missiles with a target lock", () => {
     const world = createWorldFromSystem(starterSystem, "player-missile-seed");
     const combat = combatWorld(world);
@@ -1122,6 +1181,40 @@ describe("deterministic Astro Courier simulation", () => {
       kind: "missile",
       targetId: "locked-interceptor-a",
       damage: 54
+    });
+  });
+
+  it("defaults and clamps AI director scene/personality for backward compatibility", () => {
+    expect(defaultEnemyDirectorDirective()).toMatchObject({
+      scene: "none",
+      personality: "balanced"
+    });
+
+    expect(
+      clampEnemyDirectorDirective({
+        formation: "pincer",
+        missileDoctrine: "salvo",
+        tempo: "spike",
+        modifier: "ambush",
+        pressure: 0.75,
+        scene: "siege",
+        personality: "sniper"
+      })
+    ).toMatchObject({
+      scene: "siege",
+      personality: "sniper"
+    });
+
+    expect(
+      clampEnemyDirectorDirective({
+        formation: "ambush",
+        missileDoctrine: "single",
+        tempo: "push",
+        pressure: 0.5
+      })
+    ).toMatchObject({
+      scene: "none",
+      personality: "balanced"
     });
   });
 
@@ -3187,6 +3280,7 @@ type CombatWorldForTest = SimulationWorld & {
     maxHp: number;
     weaponCooldownSeconds: number;
     missileAmmo: number;
+    empAmmo: number;
   };
   enemies: CombatEnemyForTest[];
   playerProjectiles: CombatProjectileForTest[];
@@ -3197,6 +3291,7 @@ type CombatSnapshotForTest = ReturnType<typeof snapshotWorld> & {
   ship: ReturnType<typeof snapshotWorld>["ship"] & {
     hp: number;
     maxHp: number;
+    empAmmo: number;
   };
   enemies: CombatEnemyForTest[];
   playerProjectiles: CombatProjectileForTest[];

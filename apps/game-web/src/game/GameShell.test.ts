@@ -101,6 +101,7 @@ describe("GameShell lifecycle", () => {
     expect(onHud.mock.calls.at(-1)?.[0].shipMaxHp).toBe(115);
     expect(onHud.mock.calls.at(-1)?.[0].shipHp).toBe(115);
     expect(onHud.mock.calls.at(-1)?.[0].missileAmmo).toBe(4);
+    expect(onHud.mock.calls.at(-1)?.[0].empAmmo).toBe(2);
   });
 
   it("reuses contract option references between HUD publishes", async () => {
@@ -253,6 +254,8 @@ describe("GameShell lifecycle", () => {
       "asteroid-sprint",
       "asteroid-labyrinth",
       "nebula-longhaul",
+      "silent-courier",
+      "comet-chase",
       "rescue-pod-run",
       "convoy-escort",
       "gravity-slingshot",
@@ -564,7 +567,8 @@ describe("GameShell lifecycle", () => {
     expect(onHud.mock.calls.at(-1)?.[0]).toMatchObject({
       status: "paused",
       activePerk: "missile-rack",
-      missileAmmo: 5
+      missileAmmo: 5,
+      empAmmo: 1
     });
   });
 

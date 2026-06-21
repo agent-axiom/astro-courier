@@ -122,7 +122,9 @@ function normalizeDirectorResult(value: unknown): EnemyDirectorResult | undefine
       directive: {
         ...candidate.directive,
         tempo: candidate.directive.tempo ?? "calm",
-        modifier: normalizeModifier(candidate.directive.modifier)
+        modifier: normalizeModifier(candidate.directive.modifier),
+        scene: normalizeScene(candidate.directive.scene),
+        personality: normalizePersonality(candidate.directive.personality)
       }
     };
   }
@@ -131,6 +133,16 @@ function normalizeDirectorResult(value: unknown): EnemyDirectorResult | undefine
 
 function normalizeModifier(value: unknown): EnemyDirectorDirective["modifier"] {
   return value === "ambush" || value === "lowFuel" || value === "heavyEscort" || value === "meteorBurst" || value === "quietLane" ? value : "none";
+}
+
+function normalizeScene(value: unknown): EnemyDirectorDirective["scene"] {
+  return value === "ambush" || value === "pursuit" || value === "siege" || value === "recovery" || value === "none" ? value : "none";
+}
+
+function normalizePersonality(value: unknown): EnemyDirectorDirective["personality"] {
+  return value === "aggressive" || value === "cautious" || value === "swarm" || value === "sniper" || value === "balanced"
+    ? value
+    : "balanced";
 }
 
 function distanceBetween(left: Vec2, right: Vec2): number {

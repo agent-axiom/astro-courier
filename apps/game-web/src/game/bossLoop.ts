@@ -1,6 +1,6 @@
 import type { ObjectivePhase, RunStatus } from "@astro-courier/shared";
 
-export type BossMissionType = "standard" | "longhaul" | "rescue" | "escort" | "raid";
+export type BossMissionType = "standard" | "longhaul" | "rescue" | "escort" | "raid" | "stealth" | "chase";
 
 export type BossLoopPhase = "breach" | "guard" | "beacon" | "extract";
 

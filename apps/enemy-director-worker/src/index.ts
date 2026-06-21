@@ -37,7 +37,18 @@ type EnemyDirectorRequest = {
   };
   enemies: Array<{
     id: string;
-    archetype?: "drone" | "fighter" | "brute" | "sentinel" | "guardian" | "missileBoat";
+    archetype?:
+      | "drone"
+      | "scout"
+      | "fighter"
+      | "gunship"
+      | "brute"
+      | "tanker"
+      | "sentinel"
+      | "guardian"
+      | "missileBoat"
+      | "jammer"
+      | "carrier";
     hp: number;
     position: Vec2;
     distance: number;
@@ -74,12 +85,16 @@ type EnemyDirectorPolicy = {
 };
 
 type EnemyDirectorModifier = "none" | "ambush" | "lowFuel" | "heavyEscort" | "meteorBurst" | "quietLane";
+type EnemyDirectorScene = "none" | "ambush" | "pursuit" | "siege" | "recovery";
+type EnemyDirectorPersonality = "balanced" | "aggressive" | "cautious" | "swarm" | "sniper";
 
 type EnemyDirectorDirective = {
   formation: "screen" | "pincer" | "ambush" | "retreat";
   missileDoctrine: "hold" | "single" | "salvo";
   tempo: "calm" | "push" | "spike";
   modifier: EnemyDirectorModifier;
+  scene: EnemyDirectorScene;
+  personality: EnemyDirectorPersonality;
   pressure: number;
   hint?: string;
 };
@@ -102,6 +117,8 @@ const fallbackDirective: EnemyDirectorDirective = {
   missileDoctrine: "hold",
   tempo: "calm",
   modifier: "none",
+  scene: "none",
+  personality: "balanced",
   pressure: 0.4,
   hint: "screen"
 };
@@ -407,11 +424,16 @@ function isEnemy(value: unknown): value is EnemyDirectorRequest["enemies"][numbe
     typeof candidate.id === "string" &&
     (candidate.archetype === undefined ||
       candidate.archetype === "drone" ||
+      candidate.archetype === "scout" ||
       candidate.archetype === "fighter" ||
+      candidate.archetype === "gunship" ||
       candidate.archetype === "brute" ||
+      candidate.archetype === "tanker" ||
       candidate.archetype === "sentinel" ||
       candidate.archetype === "guardian" ||
-      candidate.archetype === "missileBoat") &&
+      candidate.archetype === "missileBoat" ||
+      candidate.archetype === "jammer" ||
+      candidate.archetype === "carrier") &&
     Number.isFinite(candidate.hp) &&
     Number.isFinite(candidate.distance) &&
     isVec2(candidate.position)
@@ -482,8 +504,8 @@ function buildOpenAIRequest(model: string, directorRequest: EnemyDirectorRequest
         role: "system",
         content:
           quality === "cinematic"
-            ? "You are the Astro Courier enemy director. Return only compact JSON. Coordinate varied enemy archetypes, readable flanks, fair recoveries, tempo beats, and one bounded mission modifier."
-            : "You are the Astro Courier enemy director. Return only compact JSON. Tune enemies for fun pressure, not unfair hits. Use one bounded mission modifier."
+            ? "You are the Astro Courier enemy director. Return only compact JSON. Coordinate varied enemy archetypes, readable flanks, fair recoveries, tempo beats, one bounded mission modifier, one bounded combat scene, and one bounded enemy personality."
+            : "You are the Astro Courier enemy director. Return only compact JSON. Tune enemies for fun pressure, not unfair hits. Use one bounded modifier, scene, and personality."
       },
       {
         role: "user",
@@ -521,12 +543,14 @@ function buildOpenAIRequest(model: string, directorRequest: EnemyDirectorRequest
             directive: {
               type: "object",
               additionalProperties: false,
-              required: ["formation", "missileDoctrine", "tempo", "modifier", "pressure", "hint"],
+              required: ["formation", "missileDoctrine", "tempo", "modifier", "scene", "personality", "pressure", "hint"],
               properties: {
                 formation: { type: "string", enum: ["screen", "pincer", "ambush", "retreat"] },
                 missileDoctrine: { type: "string", enum: ["hold", "single", "salvo"] },
                 tempo: { type: "string", enum: ["calm", "push", "spike"] },
                 modifier: { type: "string", enum: ["none", "ambush", "lowFuel", "heavyEscort", "meteorBurst", "quietLane"] },
+                scene: { type: "string", enum: ["none", "ambush", "pursuit", "siege", "recovery"] },
+                personality: { type: "string", enum: ["balanced", "aggressive", "cautious", "swarm", "sniper"] },
                 pressure: { type: "number", minimum: 0, maximum: 1 },
                 hint: { type: "string", maxLength: 32 }
               }
@@ -588,6 +612,22 @@ function clampDirective(directive: Partial<EnemyDirectorDirective> | undefined):
       directive?.modifier === "none"
         ? directive.modifier
         : fallbackDirective.modifier,
+    scene:
+      directive?.scene === "ambush" ||
+      directive?.scene === "pursuit" ||
+      directive?.scene === "siege" ||
+      directive?.scene === "recovery" ||
+      directive?.scene === "none"
+        ? directive.scene
+        : fallbackDirective.scene,
+    personality:
+      directive?.personality === "aggressive" ||
+      directive?.personality === "cautious" ||
+      directive?.personality === "swarm" ||
+      directive?.personality === "sniper" ||
+      directive?.personality === "balanced"
+        ? directive.personality
+        : fallbackDirective.personality,
     pressure: clampNumber(directive?.pressure, 0, 1, fallbackDirective.pressure),
     hint: typeof directive?.hint === "string" && directive.hint.trim() ? directive.hint.trim().slice(0, 32) : fallbackDirective.hint
   };

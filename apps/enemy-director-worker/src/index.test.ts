@@ -60,12 +60,14 @@ describe("enemy director worker", () => {
       expect(body.text.format.type).toBe("json_schema");
       expect(body.text.format.schema.properties.directive.required).toContain("tempo");
       expect(body.text.format.schema.properties.directive.required).toContain("modifier");
+      expect(body.text.format.schema.properties.directive.required).toContain("scene");
+      expect(body.text.format.schema.properties.directive.required).toContain("personality");
       expect(body.max_output_tokens).toBe(160);
       expect(JSON.parse(body.input[1].content)).toMatchObject({
         quality: "standard",
         enemies: [
           {
-            archetype: "fighter"
+            archetype: "scout"
           }
         ]
       });
@@ -88,6 +90,8 @@ describe("enemy director worker", () => {
               missileDoctrine: "salvo",
               tempo: "spike",
               modifier: "ambush",
+              scene: "siege",
+              personality: "sniper",
               pressure: 3,
               hint: "wide pincer"
             }
@@ -122,6 +126,8 @@ describe("enemy director worker", () => {
         missileDoctrine: "salvo",
         tempo: "spike",
         modifier: "ambush",
+        scene: "siege",
+        personality: "sniper",
         pressure: 1,
         hint: "wide pincer"
       }
@@ -151,6 +157,8 @@ describe("enemy director worker", () => {
               missileDoctrine: "single",
               tempo: "push",
               modifier: "heavyEscort",
+              scene: "ambush",
+              personality: "swarm",
               pressure: 0.66,
               hint: "ambush lane"
             }
@@ -194,6 +202,8 @@ describe("enemy director worker", () => {
         missileDoctrine: "single",
         tempo: "push",
         modifier: "heavyEscort",
+        scene: "ambush",
+        personality: "swarm",
         pressure: 0.66,
         hint: "ambush lane"
       }
@@ -228,6 +238,8 @@ describe("enemy director worker", () => {
         missileDoctrine: "hold",
         tempo: "calm",
         modifier: "none",
+        scene: "none",
+        personality: "balanced",
         pressure: 0.4,
         hint: "screen"
       }
@@ -498,7 +510,7 @@ function validDirectorRequest() {
     enemies: [
       {
         id: "interceptor-a",
-        archetype: "fighter",
+        archetype: "scout",
         hp: 40,
         position: { x: 180, y: -10 },
         distance: 64

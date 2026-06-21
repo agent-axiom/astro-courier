@@ -324,6 +324,38 @@ describe("combat visuals", () => {
       armorBandColor: 0xffb13b,
       podCount: 4
     });
+    expect(enemyShipVisual({ archetype: "scout", policy: "chase", hp: 26, maxHp: 26 })).toMatchObject({
+      archetype: "scout",
+      silhouette: "drone",
+      radius: 10,
+      wingScale: 0.58,
+      beamColor: 0x8ee6b8
+    });
+    expect(enemyShipVisual({ archetype: "gunship", policy: "chase", hp: 64, maxHp: 64 })).toMatchObject({
+      archetype: "gunship",
+      silhouette: "fighter",
+      radius: 20,
+      wingScale: 1.05,
+      armorBandColor: 0xffd166
+    });
+    expect(enemyShipVisual({ archetype: "tanker", policy: "chase", hp: 90, maxHp: 90 })).toMatchObject({
+      archetype: "tanker",
+      silhouette: "brute",
+      radius: 25,
+      wingScale: 1.28
+    });
+    expect(enemyShipVisual({ archetype: "jammer", policy: "chase", hp: 50, maxHp: 50 })).toMatchObject({
+      archetype: "jammer",
+      silhouette: "guardian",
+      shieldAlpha: 0.44,
+      armorBandColor: 0xc7a6ff
+    });
+    expect(enemyShipVisual({ archetype: "carrier", policy: "chase", hp: 130, maxHp: 130 })).toMatchObject({
+      archetype: "carrier",
+      silhouette: "sentinel",
+      radius: 29,
+      podCount: 4
+    });
   });
 
   it("uses distinct projectile colors for player and enemy fire", () => {

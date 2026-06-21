@@ -350,6 +350,94 @@
       }
     },
     {
+      "id": "silent-courier",
+      "title": "Silent Courier",
+      "briefing": "Slip medicine through a quiet customs lane. Avoid noise, coast through the nebula pocket, and dock without drawing a patrol.",
+      "riskLabel": "Silent Run",
+      "rewardLabel": "Quiet route bonuses",
+      "missionType": "stealth",
+      "shipStart": {
+        "position": [404, -120],
+        "velocity": [12, -6],
+        "rotation": -0.18,
+        "fuel": 92
+      },
+      "pickupId": "dock-a",
+      "destinationId": "north-pad",
+      "cargoId": "midnight-medicine",
+      "hazardSeverityMultiplier": 1.08,
+      "enemyWave": {
+        "drones": 0,
+        "fighters": 0,
+        "brutes": 0
+      },
+      "hazards": [
+        {
+          "id": "silent-nebula-a",
+          "type": "nebula",
+          "position": [280, -112],
+          "radius": 62,
+          "severity": 0.34
+        },
+        {
+          "id": "silent-customs-a",
+          "type": "customs_drone",
+          "position": [172, -48],
+          "radius": 46,
+          "severity": 0.38
+        }
+      ],
+      "medalTimes": {
+        "bronze": 96,
+        "silver": 62,
+        "gold": 40
+      }
+    },
+    {
+      "id": "comet-chase",
+      "title": "Comet Chase",
+      "briefing": "Catch a moving comet-ice window through four gates, shake the scout screen, and land before the trail cools.",
+      "riskLabel": "Moving Target",
+      "rewardLabel": "Chase gate bonuses",
+      "missionType": "chase",
+      "shipStart": {
+        "position": [112, -218],
+        "velocity": [54, 8],
+        "rotation": 0.08,
+        "fuel": 92
+      },
+      "pickupId": "north-pad",
+      "destinationId": "dock-a",
+      "cargoId": "volatile-comet-ice",
+      "hazardSeverityMultiplier": 1.32,
+      "riskGateCount": 4,
+      "enemyWave": {
+        "scouts": 2,
+        "fighters": 1
+      },
+      "hazards": [
+        {
+          "id": "comet-tail-a",
+          "type": "solar_wind",
+          "position": [175, -142],
+          "radius": 40,
+          "severity": 0.44
+        },
+        {
+          "id": "comet-tail-b",
+          "type": "gravity_ripple",
+          "position": [302, -74],
+          "radius": 42,
+          "severity": 0.42
+        }
+      ],
+      "medalTimes": {
+        "bronze": 88,
+        "silver": 56,
+        "gold": 34
+      }
+    },
+    {
       "id": "rescue-pod-run",
       "title": "Rescue Pod Run",
       "briefing": "Recover an escape pod from Luma orbit and bring it back to Tea Station without rattling the crew.",
@@ -535,8 +623,10 @@
       "cargoId": "midnight-medicine",
       "difficultyTier": "hard",
       "enemyWave": {
+        "scouts": 2,
         "drones": 5,
         "fighters": 3,
+        "gunships": 1,
         "brutes": 1,
         "sentinels": 0
       },
@@ -613,8 +703,11 @@
       "enemyWave": {
         "drones": 4,
         "fighters": 4,
+        "gunships": 1,
         "brutes": 2,
-        "sentinels": 2
+        "tankers": 1,
+        "sentinels": 2,
+        "jammers": 1
       },
       "hazards": [
         {
@@ -659,11 +752,14 @@
       "riskGateCount": 3,
       "enemyWave": {
         "drones": 2,
+        "scouts": 2,
         "fighters": 2,
+        "gunships": 1,
         "brutes": 1,
         "sentinels": 1,
         "guardians": 1,
-        "missileBoats": 2
+        "missileBoats": 2,
+        "carriers": 1
       },
       "hazards": [
         {

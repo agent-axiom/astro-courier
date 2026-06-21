@@ -1,6 +1,6 @@
 import type { BestRun } from "./bestRun";
 
-export type CampaignMapMissionType = "standard" | "longhaul" | "rescue" | "escort" | "raid";
+export type CampaignMapMissionType = "standard" | "longhaul" | "rescue" | "escort" | "raid" | "stealth" | "chase";
 
 export type CampaignMapContract = {
   id: string;

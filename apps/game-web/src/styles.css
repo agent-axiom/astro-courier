@@ -2282,6 +2282,65 @@ button {
   color: #bff7d8;
 }
 
+.combat-feel-cue {
+  display: grid;
+  grid-template-columns: 16px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 7px;
+  font-size: 0.84rem;
+  font-weight: 890;
+}
+
+.combat-feel-cue span,
+.combat-feel-cue strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.combat-feel-cue span {
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.combat-feel-cue strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.combat-feel-danger {
+  border-color: rgba(255, 111, 145, 0.38);
+  background: rgba(255, 111, 145, 0.2);
+  color: #ffadc1;
+}
+
+.combat-feel-warning {
+  border-color: rgba(255, 209, 102, 0.36);
+  background: rgba(255, 209, 102, 0.18);
+  color: #ffe19a;
+}
+
+.combat-feel-emp {
+  border-color: rgba(142, 230, 184, 0.36);
+  background: rgba(142, 230, 184, 0.16);
+  color: #bff7d8;
+}
+
+.combat-feel-opportunity {
+  border-color: rgba(124, 225, 255, 0.34);
+  background: rgba(124, 225, 255, 0.15);
+  color: #c6f6ff;
+}
+
+.combat-feel-combat {
+  border-color: rgba(178, 196, 255, 0.26);
+  background: rgba(178, 196, 255, 0.12);
+  color: #d8e1ff;
+}
+
 .ghost-coach-chip,
 .ghost-coach-toggle {
   display: grid;
@@ -4428,6 +4487,127 @@ button {
   color: #bff7d8;
 }
 
+.mission-profile-chip {
+  display: grid;
+  grid-template-columns: 18px auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 9px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 870;
+}
+
+.mission-profile-chip span,
+.mission-profile-chip strong,
+.mission-profile-chip small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.mission-profile-chip span {
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+}
+
+.mission-profile-chip strong {
+  color: #ffffff;
+}
+
+.mission-profile-chip small {
+  color: rgba(255, 255, 255, 0.74);
+  text-align: right;
+}
+
+.mission-profile-standard {
+  background: rgba(124, 225, 255, 0.12);
+  color: #c6f6ff;
+}
+
+.mission-profile-relay,
+.mission-profile-chase {
+  border-color: rgba(255, 209, 102, 0.28);
+  background: rgba(255, 209, 102, 0.14);
+  color: #ffe19a;
+}
+
+.mission-profile-stealth,
+.mission-profile-rescue {
+  border-color: rgba(142, 230, 184, 0.28);
+  background: rgba(142, 230, 184, 0.14);
+  color: #c8ffe1;
+}
+
+.mission-profile-maze,
+.mission-profile-escort {
+  border-color: rgba(124, 225, 255, 0.28);
+  background: rgba(124, 225, 255, 0.14);
+  color: #c6f6ff;
+}
+
+.mission-profile-assault,
+.mission-profile-boss {
+  border-color: rgba(255, 111, 145, 0.32);
+  background: rgba(255, 111, 145, 0.15);
+  color: #ffadc1;
+}
+
+.upgrade-choice-chip {
+  display: grid;
+  grid-template-columns: 17px auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 880;
+}
+
+.upgrade-choice-chip span,
+.upgrade-choice-chip strong,
+.upgrade-choice-chip small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.upgrade-choice-chip span {
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+}
+
+.upgrade-choice-chip strong {
+  color: #ffffff;
+}
+
+.upgrade-choice-chip small {
+  color: rgba(255, 255, 255, 0.74);
+  text-align: right;
+}
+
+.upgrade-choice-next {
+  border-color: rgba(255, 209, 102, 0.32);
+  background: rgba(255, 209, 102, 0.14);
+  color: #ffe19a;
+}
+
+.upgrade-choice-online {
+  border-color: rgba(124, 225, 255, 0.3);
+  background: rgba(124, 225, 255, 0.13);
+  color: #c6f6ff;
+}
+
+.upgrade-choice-elite {
+  border-color: rgba(142, 230, 184, 0.34);
+  background: rgba(142, 230, 184, 0.15);
+  color: #c8ffe1;
+}
+
 .control-primer {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -5327,6 +5507,74 @@ button {
 .daily-dispatch-action:hover,
 .daily-dispatch-action:focus-visible {
   outline: 1px solid rgba(191, 247, 216, 0.34);
+  outline-offset: 2px;
+  filter: brightness(1.08);
+}
+
+.weekly-challenge-briefing {
+  display: grid;
+  grid-template-columns: 18px auto 1fr;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: rgba(124, 225, 255, 0.13);
+  color: #c6f6ff;
+  font-size: 0.82rem;
+  font-weight: 850;
+  text-align: left;
+}
+
+.weekly-challenge-briefing span,
+.weekly-challenge-briefing strong,
+.weekly-challenge-briefing small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.15;
+}
+
+.weekly-challenge-briefing span {
+  color: rgba(255, 255, 255, 0.76);
+  text-transform: uppercase;
+}
+
+.weekly-challenge-briefing strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.weekly-challenge-briefing small {
+  grid-column: 2 / 4;
+  color: rgba(198, 246, 255, 0.76);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.weekly-challenge-raid {
+  background: rgba(255, 209, 102, 0.15);
+  color: #ffe19a;
+}
+
+.weekly-challenge-combat {
+  background: rgba(255, 111, 145, 0.14);
+  color: #ffadc1;
+}
+
+.weekly-challenge-route {
+  background: rgba(124, 225, 255, 0.13);
+  color: #c6f6ff;
+}
+
+.weekly-challenge-action {
+  cursor: pointer;
+}
+
+.weekly-challenge-action:hover,
+.weekly-challenge-action:focus-visible {
+  outline: 1px solid rgba(255, 255, 255, 0.22);
   outline-offset: 2px;
   filter: brightness(1.08);
 }
@@ -7549,11 +7797,15 @@ button {
   .route-mastery-briefing,
   .route-campaign-briefing,
   .route-campaign-milestone-target,
+  .mission-profile-chip,
+  .upgrade-choice-chip,
   .boss-loop-chip,
+  .combat-feel-cue,
   .ghost-coach-chip,
   .ghost-coach-toggle,
   .route-target-briefing,
   .daily-dispatch-briefing,
+  .weekly-challenge-briefing,
   .contract-traits,
   .bonus-objectives,
   .contract-selector,

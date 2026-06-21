@@ -60,11 +60,16 @@ export type HazardContent = {
 
 export type EnemyWaveContent = {
   drones?: number;
+  scouts?: number;
   fighters?: number;
+  gunships?: number;
   brutes?: number;
+  tankers?: number;
   sentinels?: number;
   guardians?: number;
   missileBoats?: number;
+  jammers?: number;
+  carriers?: number;
 };
 
 export type ContractContent = {
@@ -81,7 +86,7 @@ export type ContractContent = {
   };
   pickupId: string;
   destinationId: string;
-  missionType?: "standard" | "longhaul" | "rescue" | "escort" | "raid";
+  missionType?: "standard" | "longhaul" | "rescue" | "escort" | "raid" | "stealth" | "chase";
   difficultyTier?: ContractDifficultyTier;
   refuelStationIds?: string[];
   cargoId: string;
@@ -216,6 +221,7 @@ export type ShipState = {
   maxHp: number;
   weaponCooldownSeconds: number;
   missileAmmo: number;
+  empAmmo: number;
   boostCooldownSeconds: number;
   thrustPower: number;
   rotationPower: number;
@@ -380,6 +386,8 @@ const PLAYER_PROJECTILE_DAMAGE = 20;
 const PLAYER_PROJECTILE_RADIUS = 4;
 const PLAYER_MISSILE_AMMO = 3;
 const MISSILE_RACK_BONUS_AMMO = 2;
+const PLAYER_EMP_AMMO = 1;
+const FORGE_CORE_EMP_BONUS = 1;
 const REINFORCED_HULL_BONUS_HP = 15;
 const FORGE_CORE_MISSILE_BONUS = 1;
 const BOOST_TUNE_IMPULSE_MULTIPLIER = 1.08;
@@ -390,6 +398,9 @@ const PLAYER_MISSILE_RADIUS = 6;
 const PLAYER_MISSILE_MAX_AGE_SECONDS = 4.4;
 const PLAYER_MISSILE_LOCK_DISTANCE = 420;
 const PLAYER_MISSILE_ARMOR_BREAK = 6;
+const PLAYER_EMP_RADIUS = 170;
+const PLAYER_EMP_SHIELD_DAMAGE = 24;
+const PLAYER_EMP_LOCKOUT_SECONDS = 2.4;
 const PULSE_SHOT_DAMAGE = 42;
 const PULSE_SHOT_RADIUS = 6;
 const PLAYER_PROJECTILE_MAX_AGE_SECONDS = 1.5;
@@ -444,6 +455,17 @@ const ENEMY_ARCHETYPE_STATS: Record<
     projectileDamage: 5,
     missileAmmo: 0
   },
+  scout: {
+    maxHp: 18,
+    armor: 1,
+    shield: 0,
+    radius: 9,
+    acceleration: 30,
+    maxSpeed: 42,
+    fireCooldownSeconds: 3.8,
+    projectileDamage: 4,
+    missileAmmo: 0
+  },
   fighter: {
     maxHp: 40,
     armor: 4,
@@ -453,6 +475,17 @@ const ENEMY_ARCHETYPE_STATS: Record<
     maxSpeed: 26,
     fireCooldownSeconds: 4.4,
     projectileDamage: 8,
+    missileAmmo: 1
+  },
+  gunship: {
+    maxHp: 58,
+    armor: 6,
+    shield: 12,
+    radius: 18,
+    acceleration: 13,
+    maxSpeed: 20,
+    fireCooldownSeconds: 3.6,
+    projectileDamage: 13,
     missileAmmo: 1
   },
   brute: {
@@ -465,6 +498,17 @@ const ENEMY_ARCHETYPE_STATS: Record<
     fireCooldownSeconds: 5.2,
     projectileDamage: 14,
     missileAmmo: 1
+  },
+  tanker: {
+    maxHp: 90,
+    armor: 11,
+    shield: 8,
+    radius: 24,
+    acceleration: 8,
+    maxSpeed: 13,
+    fireCooldownSeconds: 6.2,
+    projectileDamage: 10,
+    missileAmmo: 0
   },
   sentinel: {
     maxHp: 120,
@@ -488,6 +532,17 @@ const ENEMY_ARCHETYPE_STATS: Record<
     projectileDamage: 6,
     missileAmmo: 0
   },
+  jammer: {
+    maxHp: 46,
+    armor: 4,
+    shield: 26,
+    radius: 19,
+    acceleration: 12,
+    maxSpeed: 19,
+    fireCooldownSeconds: 5.9,
+    projectileDamage: 4,
+    missileAmmo: 0
+  },
   missileBoat: {
     maxHp: 52,
     armor: 3,
@@ -498,9 +553,20 @@ const ENEMY_ARCHETYPE_STATS: Record<
     fireCooldownSeconds: 5.8,
     projectileDamage: 5,
     missileAmmo: 2
+  },
+  carrier: {
+    maxHp: 102,
+    armor: 10,
+    shield: 22,
+    radius: 26,
+    acceleration: 7,
+    maxSpeed: 12,
+    fireCooldownSeconds: 6.5,
+    projectileDamage: 12,
+    missileAmmo: 1
   }
 };
-const ENEMY_MAX_HP = ENEMY_ARCHETYPE_STATS.sentinel.maxHp;
+const ENEMY_MAX_HP = Math.max(...Object.values(ENEMY_ARCHETYPE_STATS).map((stats) => stats.maxHp));
 const ENEMY_DIFFICULTY_SCALARS: Record<
   ContractDifficultyTier,
   {
@@ -539,6 +605,8 @@ export function defaultEnemyDirectorDirective(): EnemyDirectorDirective {
     missileDoctrine: "hold",
     tempo: "calm",
     modifier: "none",
+    scene: "none",
+    personality: "balanced",
     pressure: 0.4,
     hint: "screen"
   };
@@ -575,12 +643,30 @@ export function clampEnemyDirectorDirective(directive: Partial<EnemyDirectorDire
     directive?.modifier === "none"
       ? directive.modifier
       : fallback.modifier;
+  const scene =
+    directive?.scene === "ambush" ||
+    directive?.scene === "pursuit" ||
+    directive?.scene === "siege" ||
+    directive?.scene === "recovery" ||
+    directive?.scene === "none"
+      ? directive.scene
+      : fallback.scene;
+  const personality =
+    directive?.personality === "aggressive" ||
+    directive?.personality === "cautious" ||
+    directive?.personality === "swarm" ||
+    directive?.personality === "sniper" ||
+    directive?.personality === "balanced"
+      ? directive.personality
+      : fallback.personality;
   const hint = typeof directive?.hint === "string" && directive.hint.trim() ? directive.hint.trim().slice(0, 32) : fallback.hint;
   return {
     formation,
     missileDoctrine,
     tempo,
     modifier,
+    scene,
+    personality,
     pressure: round(clamp(directive?.pressure ?? fallback.pressure, 0, 1), 3),
     hint
   };
@@ -629,6 +715,7 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
     PLAYER_MISSILE_AMMO +
     (activePerk === "missile-rack" ? MISSILE_RACK_BONUS_AMMO : 0) +
     (hasShipUpgrade(shipUpgrades, "forge-core") ? FORGE_CORE_MISSILE_BONUS : 0);
+  const empAmmo = PLAYER_EMP_AMMO + (hasShipUpgrade(shipUpgrades, "forge-core") ? FORGE_CORE_EMP_BONUS : 0);
   const contractHazards = activeContract.hazards ?? [];
   const stationPadRoles = new Map<string, NonNullable<StationContent["role"]>>();
   for (const station of system.stations) {
@@ -728,6 +815,7 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
       maxHp: shipMaxHp,
       weaponCooldownSeconds: 0,
       missileAmmo,
+      empAmmo,
       boostCooldownSeconds: 0,
       thrustPower: system.ship.thrustPower,
       rotationPower: system.ship.rotationPower,
@@ -766,17 +854,27 @@ function createEnemyPatrol(system: SystemContent, activeContract: ContractConten
 
 function enemyWaveArchetypes(wave: EnemyWaveContent | undefined): EnemyShipArchetype[] {
   const fighters = wave?.fighters ?? 1;
+  const scouts = wave?.scouts ?? 0;
+  const gunships = wave?.gunships ?? 0;
   const drones = wave?.drones ?? 1;
   const brutes = wave?.brutes ?? 0;
+  const tankers = wave?.tankers ?? 0;
   const sentinels = wave?.sentinels ?? 0;
   const guardians = wave?.guardians ?? 0;
   const missileBoats = wave?.missileBoats ?? 0;
+  const jammers = wave?.jammers ?? 0;
+  const carriers = wave?.carriers ?? 0;
   return [
     ...Array<EnemyShipArchetype>(Math.max(0, guardians)).fill("guardian"),
     ...Array<EnemyShipArchetype>(Math.max(0, missileBoats)).fill("missileBoat"),
+    ...Array<EnemyShipArchetype>(Math.max(0, jammers)).fill("jammer"),
+    ...Array<EnemyShipArchetype>(Math.max(0, carriers)).fill("carrier"),
+    ...Array<EnemyShipArchetype>(Math.max(0, gunships)).fill("gunship"),
     ...Array<EnemyShipArchetype>(Math.max(0, fighters)).fill("fighter"),
+    ...Array<EnemyShipArchetype>(Math.max(0, scouts)).fill("scout"),
     ...Array<EnemyShipArchetype>(Math.max(0, drones)).fill("drone"),
     ...Array<EnemyShipArchetype>(Math.max(0, brutes)).fill("brute"),
+    ...Array<EnemyShipArchetype>(Math.max(0, tankers)).fill("tanker"),
     ...Array<EnemyShipArchetype>(Math.max(0, sentinels)).fill("sentinel")
   ];
 }
@@ -930,6 +1028,8 @@ export function stepWorld(
       firePlayerProjectile(world);
     } else if (command.type === "MISSILE") {
       firePlayerMissile(world);
+    } else if (command.type === "EMP") {
+      firePlayerEmp(world);
     } else if (command.type === "PAUSE") {
       world.status = "paused";
       return world;
@@ -1060,6 +1160,7 @@ export function snapshotWorld(world: SimulationWorld): SimulationSnapshot {
       maxHp: world.ship.maxHp,
       weaponCooldownSeconds: round(world.ship.weaponCooldownSeconds, 3),
       missileAmmo: world.ship.missileAmmo,
+      empAmmo: world.ship.empAmmo,
       boostCooldownSeconds: round(world.ship.boostCooldownSeconds, 3),
       cargoDamage: world.ship.cargoDamage
     },
@@ -1522,6 +1623,26 @@ function firePlayerMissile(world: SimulationWorld): void {
   world.lastMilestone = "Missile Lock";
 }
 
+function firePlayerEmp(world: SimulationWorld): void {
+  if (world.ship.empAmmo <= 0 || world.ship.hp <= 0) {
+    return;
+  }
+
+  let affected = 0;
+  for (const enemy of world.enemies) {
+    if (enemy.hp <= 0 || distanceBetween(world.ship.position, enemy.position) > PLAYER_EMP_RADIUS) {
+      continue;
+    }
+    enemy.shield = round(Math.max(0, enemy.shield - PLAYER_EMP_SHIELD_DAMAGE), 3);
+    enemy.fireCooldownSeconds = Math.max(enemy.fireCooldownSeconds, PLAYER_EMP_LOCKOUT_SECONDS);
+    enemy.missileCooldownSeconds = Math.max(enemy.missileCooldownSeconds, PLAYER_EMP_LOCKOUT_SECONDS);
+    affected += 1;
+  }
+
+  world.ship.empAmmo -= 1;
+  world.lastMilestone = affected > 0 ? "EMP Burst" : "EMP Miss";
+}
+
 function nearestEnemyInLock(world: SimulationWorld, lockDistance: number): EnemyShipState | undefined {
   return world.enemies
     .map((enemy) => ({
@@ -1547,8 +1668,17 @@ function updateEnemies(world: SimulationWorld, fixedDt: number): void {
   const policy = clampEnemyDirectorPolicy(world.enemyDirectorPolicy);
   const directive = clampEnemyDirectorDirective(world.enemyDirectorDirective);
   const tempoAggression = tempoAggressionMultiplier(directive.tempo);
-  const effectiveAggression = clamp(policy.aggression * tempoAggression + directive.pressure * 0.08, 0, 1.25);
-  const effectiveFireBias = clamp(policy.fireBias + tempoFireBiasOffset(directive.tempo) + directive.pressure * 0.08, 0, 1);
+  const personalityAggression = personalityAggressionMultiplier(directive.personality ?? "balanced");
+  const effectiveAggression = clamp(
+    policy.aggression * tempoAggression * personalityAggression + directive.pressure * 0.08 + sceneAggressionOffset(directive.scene ?? "none"),
+    0,
+    1.25
+  );
+  const effectiveFireBias = clamp(
+    policy.fireBias + tempoFireBiasOffset(directive.tempo) + directive.pressure * 0.08 + personalityFireBiasOffset(directive.personality ?? "balanced"),
+    0,
+    1
+  );
   for (const enemy of world.enemies) {
     const toShip = subtract(world.ship.position, enemy.position);
     const distance = magnitude(toShip);
@@ -1611,6 +1741,30 @@ function formationFlankMultiplier(formation: EnemyDirectorDirective["formation"]
   if (formation === "ambush") return 1.15;
   if (formation === "retreat") return 0.65;
   return 1;
+}
+
+function sceneAggressionOffset(scene: NonNullable<EnemyDirectorDirective["scene"]>): number {
+  if (scene === "pursuit") return 0.12;
+  if (scene === "siege") return 0.06;
+  if (scene === "recovery") return -0.16;
+  if (scene === "ambush") return 0.08;
+  return 0;
+}
+
+function personalityAggressionMultiplier(personality: NonNullable<EnemyDirectorDirective["personality"]>): number {
+  if (personality === "aggressive") return 1.14;
+  if (personality === "cautious") return 0.78;
+  if (personality === "swarm") return 1.06;
+  if (personality === "sniper") return 0.86;
+  return 1;
+}
+
+function personalityFireBiasOffset(personality: NonNullable<EnemyDirectorDirective["personality"]>): number {
+  if (personality === "aggressive") return 0.08;
+  if (personality === "cautious") return -0.12;
+  if (personality === "swarm") return -0.02;
+  if (personality === "sniper") return 0.12;
+  return 0;
 }
 
 function canEnemyFireMissile(

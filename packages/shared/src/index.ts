@@ -10,6 +10,7 @@ export type PlayerCommand =
   | { type: "BOOST" }
   | { type: "FIRE" }
   | { type: "MISSILE" }
+  | { type: "EMP" }
   | { type: "INTERACT" }
   | { type: "PAUSE" };
 
@@ -46,7 +47,18 @@ export type ScoreBreakdown = {
   total: number;
 };
 
-export type EnemyShipArchetype = "drone" | "fighter" | "brute" | "sentinel" | "guardian" | "missileBoat";
+export type EnemyShipArchetype =
+  | "drone"
+  | "scout"
+  | "fighter"
+  | "gunship"
+  | "brute"
+  | "tanker"
+  | "sentinel"
+  | "guardian"
+  | "missileBoat"
+  | "jammer"
+  | "carrier";
 export type ContractDifficultyTier = "standard" | "hard" | "raid" | "boss";
 
 export type EnemyDirectorPolicy = {
@@ -58,12 +70,16 @@ export type EnemyDirectorPolicy = {
 };
 
 export type EnemyDirectorModifier = "none" | "ambush" | "lowFuel" | "heavyEscort" | "meteorBurst" | "quietLane";
+export type EnemyDirectorScene = "none" | "ambush" | "pursuit" | "siege" | "recovery";
+export type EnemyDirectorPersonality = "balanced" | "aggressive" | "cautious" | "swarm" | "sniper";
 
 export type EnemyDirectorDirective = {
   formation: "screen" | "pincer" | "ambush" | "retreat";
   missileDoctrine: "hold" | "single" | "salvo";
   tempo: "calm" | "push" | "spike";
   modifier?: EnemyDirectorModifier;
+  scene?: EnemyDirectorScene;
+  personality?: EnemyDirectorPersonality;
   pressure: number;
   hint?: string;
 };
@@ -171,6 +187,7 @@ export type SimulationSnapshot = {
     maxHp: number;
     weaponCooldownSeconds: number;
     missileAmmo: number;
+    empAmmo: number;
     boostCooldownSeconds: number;
     cargoDamage: number;
   };

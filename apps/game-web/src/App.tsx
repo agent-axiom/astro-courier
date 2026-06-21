@@ -58,6 +58,8 @@ import {
 } from "./game/bestRun";
 import { buildBossLoop } from "./game/bossLoop";
 import { buildCampaignMap } from "./game/campaignMap";
+import { buildCombatFeelCue } from "./game/combatFeel";
+import { buildMissionProfile } from "./game/missionProfile";
 import { GameShell, type HudState } from "./game/GameShell";
 import { createEnemyDirectorClient } from "./game/enemyDirector";
 import { buildTargetCompassPresentation, formatBearingGuidance } from "./game/bearing";
@@ -208,6 +210,8 @@ import {
   type CloudSaveStatus
 } from "./game/cloudSave";
 import { buildHangarReadout } from "./game/hangar";
+import { buildUpgradeChoice } from "./game/upgradeChoice";
+import { buildWeeklyChallenge, buildWeeklyChallengeAction } from "./game/weeklyChallenge";
 
 type GameStore = {
   hud: HudState;
@@ -247,6 +251,7 @@ const initialHud: HudState = {
   shipMaxHp: 100,
   weaponCooldownSeconds: 0,
   missileAmmo: 3,
+  empAmmo: 1,
   interceptorCount: 2,
   incomingMissileCount: 0,
   enemyDirectorMode: "local",
@@ -940,6 +945,7 @@ export function App() {
   });
   const canBrake = canUseImpulseControl({ action: "brake", fuel: hud.fuel, paused, preflightOpen, status: hud.status });
   const canMissile = hud.status === "flying" && !preflightOpen && !paused && hud.missileAmmo > 0;
+  const canEmp = hud.status === "flying" && !preflightOpen && !paused && hud.empAmmo > 0;
   useEffect(() => {
     if (!mobileBrakeHeld) {
       return undefined;
@@ -1025,6 +1031,17 @@ export function App() {
     riskGateCount: hud.riskGateCount,
     clearedRiskGateCount: hud.clearedRiskGateCount,
     targetDistance: hud.targetDistance
+  });
+  const missionProfile = buildMissionProfile(activeContractOption ? { ...activeContractOption, riskGateCount: hud.riskGateCount } : undefined);
+  const combatFeelCue = buildCombatFeelCue({
+    status: hud.status,
+    preflightOpen,
+    incomingMissileCount: hud.incomingMissileCount,
+    empAmmo: hud.empAmmo,
+    shipHp: hud.shipHp,
+    shipMaxHp: hud.shipMaxHp,
+    interceptorCount: hud.interceptorCount,
+    missileAmmo: hud.missileAmmo
   });
   const firstRouteBestRun = bestRunsByContract["first-light-delivery"];
   const ghostCoachEligible = firstRouteBestRun === undefined && (hud.contractId === "first-light-delivery" || hud.contractId === "training-flight");
@@ -1301,6 +1318,7 @@ export function App() {
   const unlockedShipUpgradeKey = unlockedShipUpgradeIds.join("|");
   const shipUpgradeSummary = buildShipUpgradeSummary(shipUpgradeTrack);
   const hangarReadout = buildHangarReadout(shipUpgradeTrack);
+  const upgradeChoice = buildUpgradeChoice(shipUpgradeTrack);
   const routeTargetSelectionAction = buildRouteBoardSelectionAction(routeBoardTarget, hud.contractId);
   const currentDate = new Date();
   const dailyDispatch = buildDailyDispatch({ contracts: hud.contractOptions, now: currentDate });
@@ -1311,6 +1329,8 @@ export function App() {
   const dailyDispatchAction = buildDailyDispatchAction(dailyDispatch, hud.contractId, dailyDispatchStatus);
   const dailyDispatchReset = buildDailyDispatchReset(dailyDispatch, currentDate);
   const dailyDispatchPulse = buildDailyDispatchPulse(dailyDispatch);
+  const weeklyChallenge = buildWeeklyChallenge({ contracts: hud.contractOptions, now: currentDate });
+  const weeklyChallengeAction = buildWeeklyChallengeAction(weeklyChallenge, hud.contractId);
   const activeDailyDispatchPulse = buildActiveDailyDispatchPulse(dailyDispatch, hud.contractId);
   const activeDailyDispatchProgressStatus = buildActiveDailyDispatchProgressStatus(dailyDispatch, hud.contractId, dailyProgress);
   const dailyDispatchProgressStatus = buildDailyDispatchProgressStatus(dailyDispatch, dailyProgress);
@@ -1517,7 +1537,11 @@ export function App() {
   };
 
   const replaySeedForContract = (contractId: string): string | undefined =>
-    dailyDispatch?.contractId === contractId ? dailyDispatch.seed : undefined;
+    dailyDispatch?.contractId === contractId
+      ? dailyDispatch.seed
+      : weeklyChallenge?.contractId === contractId
+        ? weeklyChallenge.seed
+        : undefined;
 
   const applyDailyReplaySeed = (contractId: string) => {
     const replaySeed = replaySeedForContract(contractId);
@@ -1755,6 +1779,15 @@ export function App() {
     shellRef.current?.queueCommand({ type: "MISSILE" });
   };
 
+  const tapMobileEmp = (event: { preventDefault: () => void }) => {
+    event.preventDefault();
+    if (!canEmp) {
+      return;
+    }
+    audioRef.current?.unlock();
+    shellRef.current?.queueCommand({ type: "EMP" });
+  };
+
   const copyDeliveryReport = () => {
     if (!shareableDeliveryReport) {
       return;
@@ -1814,6 +1847,14 @@ export function App() {
       return;
     }
     shellRef.current?.selectContract(dailyDispatchAction.contractId, { replaySeed: dailyDispatch.seed });
+  };
+
+  const selectWeeklyChallenge = () => {
+    audioRef.current?.unlock();
+    if (!weeklyChallenge || !weeklyChallengeAction) {
+      return;
+    }
+    shellRef.current?.selectContract(weeklyChallengeAction.contractId, { replaySeed: weeklyChallenge.seed });
   };
 
   const selectPerk = (perkId: HudState["activePerk"]) => {
@@ -1993,6 +2034,17 @@ export function App() {
           >
             <Crosshair size={22} />
             <small>{mobileActionLabels.fire}</small>
+          </button>
+          <button
+            type="button"
+            className="mobile-action-button mobile-action-emp"
+            aria-label={`EMP ${hud.empAmmo}`}
+            title={`EMP ${hud.empAmmo}`}
+            disabled={!canEmp}
+            onPointerDown={tapMobileEmp}
+          >
+            <Activity size={22} />
+            <small>{mobileActionLabels.emp}</small>
           </button>
           <button
             type="button"
@@ -2291,6 +2343,13 @@ export function App() {
             <Flag size={16} />
             <span>{bossLoop.action}</span>
             <strong>{bossLoop.detail}</strong>
+          </div>
+        ) : null}
+        {liveHudDensity.showActionChips && combatFeelCue ? (
+          <div className={`combat-feel-cue combat-feel-${combatFeelCue.tone}`} aria-label={`${combatFeelCue.label}: ${combatFeelCue.value}`}>
+            {combatFeelCue.tone === "emp" ? <Activity size={16} /> : combatFeelCue.tone === "danger" || combatFeelCue.tone === "warning" ? <ShieldAlert size={16} /> : <Crosshair size={16} />}
+            <span>{combatFeelCue.label}</span>
+            <strong>{combatFeelCue.value}</strong>
           </div>
         ) : null}
         {liveHudDensity.showActionChips && ghostCoachCue ? (
@@ -2600,6 +2659,17 @@ export function App() {
               ))}
             </div>
           </div>
+          {upgradeChoice ? (
+            <div
+              className={`upgrade-choice-chip upgrade-choice-${upgradeChoice.tone}`}
+              aria-label={`${upgradeChoice.label}: ${upgradeChoice.value}. ${upgradeChoice.detail}`}
+            >
+              <Activity size={17} />
+              <span>{upgradeChoice.label}</span>
+              <strong>{upgradeChoice.value}</strong>
+              <small>{upgradeChoice.detail}</small>
+            </div>
+          ) : null}
           <div className="preflight-mini-goals" aria-label="Launch goals">
             {preflightPuzzleGoals.map((goal) => (
               <span
@@ -2643,6 +2713,25 @@ export function App() {
               <Route size={18} />
               <span>{routePlan.label}</span>
               <strong>{routePlan.value}</strong>
+            </div>
+          ) : null}
+          {missionProfile ? (
+            <div
+              className={`mission-profile-chip mission-profile-${missionProfile.tone}`}
+              aria-label={`${missionProfile.label}: ${missionProfile.value}. ${missionProfile.detail}`}
+            >
+              {missionProfile.tone === "stealth" ? (
+                <Satellite size={18} />
+              ) : missionProfile.tone === "chase" ? (
+                <Gauge size={18} />
+              ) : missionProfile.tone === "boss" || missionProfile.tone === "assault" ? (
+                <ShieldAlert size={18} />
+              ) : (
+                <Route size={18} />
+              )}
+              <span>{missionProfile.label}</span>
+              <strong>{missionProfile.value}</strong>
+              <small>{missionProfile.detail}</small>
             </div>
           ) : null}
           {preflightOverlayDensity.showRoutePressure ? (
@@ -2920,6 +3009,31 @@ export function App() {
                   <b className={`daily-progress daily-progress-${dailyDispatchProgressStatus.tone}`}>{dailyDispatchProgressStatus.value}</b>
                 ) : null}
                 {dailyDispatchPulse ? <b className={`daily-pulse daily-pulse-${dailyDispatchPulse.tone}`}>{dailyDispatchPulse.value}</b> : null}
+              </div>
+            )
+          ) : null}
+          {preflightOverlayDensity.showDailyDispatch && weeklyChallenge ? (
+            weeklyChallengeAction ? (
+              <button
+                type="button"
+                className={`weekly-challenge-briefing weekly-challenge-${weeklyChallenge.tone} weekly-challenge-action`}
+                aria-label={`${weeklyChallenge.label}: ${weeklyChallenge.value}. ${weeklyChallengeAction.label}`}
+                onClick={selectWeeklyChallenge}
+              >
+                <Trophy size={18} />
+                <span>{weeklyChallenge.label}</span>
+                <strong>{weeklyChallenge.value}</strong>
+                <small>{weeklyChallengeAction.label}</small>
+              </button>
+            ) : (
+              <div
+                className={`weekly-challenge-briefing weekly-challenge-${weeklyChallenge.tone}`}
+                aria-label={`${weeklyChallenge.label}: ${weeklyChallenge.value}`}
+              >
+                <Trophy size={18} />
+                <span>{weeklyChallenge.label}</span>
+                <strong>{weeklyChallenge.value}</strong>
+                <small>Ready</small>
               </div>
             )
           ) : null}

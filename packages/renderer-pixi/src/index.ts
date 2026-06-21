@@ -1476,6 +1476,44 @@ function enemyArchetypeVisual(archetype: EnemyShipArchetype): Omit<EnemyShipVisu
       podCount: 0
     };
   }
+  if (archetype === "scout") {
+    return {
+      archetype,
+      silhouette: "drone",
+      color: 0x4ddc9a,
+      chaseColor: 0x8ee6b8,
+      chaseBeamColor: 0x8ee6b8,
+      beamColor: 0x8ee6b8,
+      armorBandColor: 0x8ee6b8,
+      engineGlowColor: 0xbff7d8,
+      outlineColor: 0x0a2d20,
+      canopyColor: 0xd8fff0,
+      cockpitScale: 0.38,
+      radius: 10,
+      wingScale: 0.58,
+      shieldAlpha: 0.06,
+      podCount: 0
+    };
+  }
+  if (archetype === "gunship") {
+    return {
+      archetype,
+      silhouette: "fighter",
+      color: 0x9a4f8d,
+      chaseColor: 0xff6f91,
+      chaseBeamColor: 0xffd166,
+      beamColor: 0xff9ac0,
+      armorBandColor: 0xffd166,
+      engineGlowColor: 0xff8a3d,
+      outlineColor: 0x35162d,
+      canopyColor: 0xffe6b5,
+      cockpitScale: 0.5,
+      radius: 20,
+      wingScale: 1.05,
+      shieldAlpha: 0.14,
+      podCount: 2
+    };
+  }
   if (archetype === "brute") {
     return {
       archetype,
@@ -1492,6 +1530,25 @@ function enemyArchetypeVisual(archetype: EnemyShipArchetype): Omit<EnemyShipVisu
       radius: 22,
       wingScale: 1.18,
       shieldAlpha: 0.12,
+      podCount: 2
+    };
+  }
+  if (archetype === "tanker") {
+    return {
+      archetype,
+      silhouette: "brute",
+      color: 0x6f6351,
+      chaseColor: 0xa67852,
+      chaseBeamColor: 0xffd166,
+      beamColor: 0xe8bd72,
+      armorBandColor: 0xffd166,
+      engineGlowColor: 0xffb13b,
+      outlineColor: 0x2a2117,
+      canopyColor: 0xfff0ad,
+      cockpitScale: 0.48,
+      radius: 25,
+      wingScale: 1.28,
+      shieldAlpha: 0.1,
       podCount: 2
     };
   }
@@ -1514,6 +1571,25 @@ function enemyArchetypeVisual(archetype: EnemyShipArchetype): Omit<EnemyShipVisu
       podCount: 0
     };
   }
+  if (archetype === "carrier") {
+    return {
+      archetype,
+      silhouette: "sentinel",
+      color: 0x12131f,
+      chaseColor: 0x1c1b2e,
+      chaseBeamColor: 0xc7a6ff,
+      beamColor: 0xa6c8ff,
+      armorBandColor: 0xc7a6ff,
+      engineGlowColor: 0xffd166,
+      outlineColor: 0x51506a,
+      canopyColor: 0xd8e5ff,
+      cockpitScale: 0.58,
+      radius: 29,
+      wingScale: 1.38,
+      shieldAlpha: 0.32,
+      podCount: 4
+    };
+  }
   if (archetype === "guardian") {
     return {
       archetype,
@@ -1530,6 +1606,25 @@ function enemyArchetypeVisual(archetype: EnemyShipArchetype): Omit<EnemyShipVisu
       radius: 20,
       wingScale: 1.08,
       shieldAlpha: 0.38,
+      podCount: 2
+    };
+  }
+  if (archetype === "jammer") {
+    return {
+      archetype,
+      silhouette: "guardian",
+      color: 0x231d38,
+      chaseColor: 0x34295a,
+      chaseBeamColor: 0xc7a6ff,
+      beamColor: 0xc7a6ff,
+      armorBandColor: 0xc7a6ff,
+      engineGlowColor: 0x8ee6ff,
+      outlineColor: 0xc7a6ff,
+      canopyColor: 0xf1e6ff,
+      cockpitScale: 0.48,
+      radius: 21,
+      wingScale: 1,
+      shieldAlpha: 0.44,
       podCount: 2
     };
   }
