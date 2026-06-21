@@ -221,7 +221,7 @@ export class KeyboardInput {
       if ((event.code === "KeyJ" || event.code === "Enter" || event.code === "Space") && !wasPressed) {
         this.fireQueued = true;
       }
-      if (event.code === "KeyK" && !wasPressed) {
+      if (event.code === "KeyX" && !wasPressed) {
         this.missileQueued = true;
       }
     }
@@ -328,7 +328,7 @@ function isGameKey(code: string): boolean {
     code === "Space" ||
     code === "KeyE" ||
     code === "KeyJ" ||
-    code === "KeyK" ||
+    code === "KeyX" ||
     code === "Enter" ||
     code === "ShiftLeft" ||
     code === "ShiftRight"

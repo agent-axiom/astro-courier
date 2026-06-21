@@ -28,7 +28,7 @@ Keyboard controls:
 - `S` / `ArrowDown` / `Shift`: brake
 - `E`: boost
 - `Space` / `J` / `Enter`: fire in flight
-- `K`: homing missile
+- `X`: homing missile
 - `P` / `Esc`: pause
 - `R`: restart from result screen
 

@@ -165,19 +165,29 @@ describe("keyboard input mapping", () => {
     const input = new KeyboardInput(target as unknown as Window);
     input.attach();
 
-    target.dispatch("keydown", "KeyK");
+    target.dispatch("keydown", "KeyX");
 
     expect(input.commands(0)).toEqual([{ type: "MISSILE" }]);
     expect(input.commands(0)).toEqual([]);
 
-    target.dispatch("keydown", "KeyK");
+    target.dispatch("keydown", "KeyX");
 
     expect(input.commands(0)).toEqual([]);
 
-    target.dispatch("keyup", "KeyK");
-    target.dispatch("keydown", "KeyK");
+    target.dispatch("keyup", "KeyX");
+    target.dispatch("keydown", "KeyX");
 
     expect(input.commands(0)).toEqual([{ type: "MISSILE" }]);
+  });
+
+  it("does not keep the old K missile hotkey active", () => {
+    const target = new FakeKeyboardTarget();
+    const input = new KeyboardInput(target as unknown as Window);
+    input.attach();
+
+    target.dispatch("keydown", "KeyK");
+
+    expect(input.commands(0)).toEqual([]);
   });
 });
 
