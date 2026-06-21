@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 import {
   boostBurstVisual,
   boostSparkVisual,
@@ -9,13 +10,16 @@ import {
   cargoAuraVisual,
   cargoFractureVisual,
   enemyShipVisual,
+  fuelStationVisual,
   ghostTrailSegmentVisual,
   ghostTrailPointVisual,
   gravitySourceVisual,
+  layeredSpaceVisual,
   gravitySurfaceRimVisual,
   gravitySurfaceWarningVisual,
   gravitySlingCueVisual,
   hazardFieldVisual,
+  cosmicPhenomenonVisual,
   hazardVignetteEffect,
   landingCorridorVisual,
   landingPadVisual,
@@ -30,9 +34,11 @@ import {
   projectileVisual,
   shipBoostReadinessVisual,
   shipBankVisual,
+  shipHullDetailVisual,
   shipShieldReserveVisual,
   shipStyleOrbitVisual,
   shipTrailVisual,
+  planetSurfaceVisual,
   speedLineVisual,
   trajectoryHazardDanger,
   trajectoryHazardMarkerVisual,
@@ -41,6 +47,85 @@ import {
   trajectorySegmentVisual,
   velocityVectorVisual
 } from "./index";
+
+const rendererSource = readFileSync(new URL("./index.ts", import.meta.url), "utf8");
+
+describe("procedural art direction helpers", () => {
+  it("builds layered space palettes for calm and dangerous routes", () => {
+    expect(layeredSpaceVisual({ background: "soft-blue-nebula", status: "paused", tick: 10 })).toMatchObject({
+      baseColor: 0x070b1e,
+      nebulaColor: 0x245f9f,
+      dustColor: 0x8ee6ff,
+      starDensity: 1,
+      parallaxLayers: 3
+    });
+    expect(layeredSpaceVisual({ background: "black-hole-frontier", status: "flying", tick: 40 })).toMatchObject({
+      baseColor: 0x04030b,
+      nebulaColor: 0x6d4cff,
+      dustColor: 0xffd166,
+      starDensity: 0.72,
+      parallaxLayers: 4
+    });
+  });
+
+  it("maps planet themes to readable surface, atmosphere, and rim colors", () => {
+    expect(planetSurfaceVisual({ visualTheme: "blue_garden", radius: 72, status: "flying", tick: 8 })).toMatchObject({
+      surfaceColor: 0x3aa7d8,
+      secondaryColor: 0x6edb9a,
+      atmosphereColor: 0x8ee6ff,
+      detailCount: 8,
+      ringAlpha: 0
+    });
+    expect(planetSurfaceVisual({ visualTheme: "black_metal", radius: 58, status: "flying", tick: 8 })).toMatchObject({
+      surfaceColor: 0x11131a,
+      secondaryColor: 0x3c4254,
+      atmosphereColor: 0xff6f91,
+      detailCount: 6,
+      ringAlpha: 0.22
+    });
+  });
+
+  it("gives stations and courier hulls readable silhouettes without text", () => {
+    expect(fuelStationVisual({ role: "fuel", active: true, tick: 12 })).toMatchObject({
+      bodyColor: 0x26364c,
+      fuelColor: 0xffd166,
+      beaconColor: 0x8ee6b8,
+      ringCount: 3,
+      pulseAlpha: 0.78
+    });
+    expect(shipHullDetailVisual({ status: "flying", fuelRatio: 0.42, hpRatio: 0.9 })).toMatchObject({
+      cockpitColor: 0x92f4ff,
+      cargoColor: 0xffb13b,
+      engineColor: 0x7ce1ff,
+      panelAlpha: 0.62
+    });
+  });
+
+  it("assigns distinct visuals to cosmic phenomena", () => {
+    expect(cosmicPhenomenonVisual({ type: "nebula", severity: 0.6, tick: 5 })).toMatchObject({
+      color: 0x7c5cff,
+      accentColor: 0x7ce1ff,
+      particleCount: 20,
+      swirl: 0.45
+    });
+    expect(cosmicPhenomenonVisual({ type: "gravity_ripple", severity: 0.8, tick: 5 })).toMatchObject({
+      color: 0x8ee6ff,
+      accentColor: 0xffd166,
+      particleCount: 12,
+      swirl: 0.8
+    });
+  });
+});
+
+describe("procedural art direction renderer wiring", () => {
+  it("uses art direction helpers from the main Pixi draw passes", () => {
+    expect(rendererSource).toContain("const space = layeredSpaceVisual({");
+    expect(rendererSource).toContain("const surface = planetSurfaceVisual({");
+    expect(rendererSource).toContain("const stationVisual = fuelStationVisual({");
+    expect(rendererSource).toContain("const phenomenon = cosmicPhenomenonVisual({");
+    expect(rendererSource).toContain("const hullDetail = shipHullDetailVisual({");
+  });
+});
 
 describe("camera focus", () => {
   it("stays centered on the ship outside active flight", () => {

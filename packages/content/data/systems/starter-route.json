@@ -57,6 +57,7 @@
       "id": "tea-station",
       "name": "Tea Station",
       "position": [420, -140],
+      "role": "fuel",
       "landingPads": [
         {
           "id": "dock-a",
@@ -65,6 +66,38 @@
           "radius": 26,
           "allowedApproachSpeed": 36,
           "requiredAngleTolerance": 0.85
+        }
+      ]
+    },
+    {
+      "id": "relay-fuel-depot",
+      "name": "Relay Fuel Depot",
+      "position": [850, -420],
+      "role": "fuel",
+      "landingPads": [
+        {
+          "id": "relay-fuel-pad",
+          "position": [850, -420],
+          "normalAngle": 0.2,
+          "radius": 28,
+          "allowedApproachSpeed": 34,
+          "requiredAngleTolerance": 0.9
+        }
+      ]
+    },
+    {
+      "id": "far-harbor",
+      "name": "Far Harbor",
+      "position": [1260, -640],
+      "role": "fuel",
+      "landingPads": [
+        {
+          "id": "far-dock",
+          "position": [1260, -640],
+          "normalAngle": 2.95,
+          "radius": 30,
+          "allowedApproachSpeed": 32,
+          "requiredAngleTolerance": 0.88
         }
       ]
     }
@@ -152,6 +185,46 @@
       }
     },
     {
+      "id": "luma-longhaul",
+      "title": "Luma Longhaul",
+      "briefing": "Carry bottled starlight past the local route, dock at the relay fuel depot, then finish the far harbor burn.",
+      "riskLabel": "Longhaul",
+      "rewardLabel": "Fuel stop bonuses",
+      "missionType": "longhaul",
+      "shipStart": {
+        "position": [180, 20],
+        "velocity": [18, -4],
+        "rotation": -0.1,
+        "fuel": 118
+      },
+      "pickupId": "north-pad",
+      "destinationId": "far-dock",
+      "cargoId": "bottled-starlight",
+      "refuelStationIds": ["relay-fuel-pad"],
+      "hazardSeverityMultiplier": 1.1,
+      "hazards": [
+        {
+          "id": "longhaul-ripple-a",
+          "type": "gravity_ripple",
+          "position": [710, -360],
+          "radius": 58,
+          "severity": 0.36
+        },
+        {
+          "id": "longhaul-nebula-a",
+          "type": "nebula",
+          "position": [1040, -540],
+          "radius": 88,
+          "severity": 0.42
+        }
+      ],
+      "medalTimes": {
+        "bronze": 180,
+        "silver": 124,
+        "gold": 86
+      }
+    },
+    {
       "id": "asteroid-sprint",
       "title": "Asteroid Sprint",
       "briefing": "Thread the asteroid field with volatile comet ice, load fast, and bring the cargo home before the sprint window closes.",
@@ -226,6 +299,54 @@
         "bronze": 86,
         "silver": 54,
         "gold": 32
+      }
+    },
+    {
+      "id": "nebula-longhaul",
+      "title": "Nebula Longhaul",
+      "briefing": "Take medicine from Tea Station through a wide nebula leg. Refuel at the relay depot before the final harbor approach.",
+      "riskLabel": "Longhaul Nebula",
+      "rewardLabel": "Refuel route bonuses",
+      "missionType": "longhaul",
+      "shipStart": {
+        "position": [420, -140],
+        "velocity": [20, -10],
+        "rotation": -0.25,
+        "fuel": 96
+      },
+      "pickupId": "dock-a",
+      "destinationId": "far-dock",
+      "cargoId": "midnight-medicine",
+      "refuelStationIds": ["relay-fuel-pad"],
+      "hazardSeverityMultiplier": 1.25,
+      "riskGateCount": 3,
+      "hazards": [
+        {
+          "id": "nebula-lane-a",
+          "type": "nebula",
+          "position": [680, -280],
+          "radius": 76,
+          "severity": 0.46
+        },
+        {
+          "id": "nebula-lane-b",
+          "type": "solar_wind",
+          "position": [910, -460],
+          "radius": 64,
+          "severity": 0.48
+        },
+        {
+          "id": "nebula-lane-c",
+          "type": "gravity_ripple",
+          "position": [1120, -560],
+          "radius": 60,
+          "severity": 0.5
+        }
+      ],
+      "medalTimes": {
+        "bronze": 210,
+        "silver": 148,
+        "gold": 104
       }
     },
     {

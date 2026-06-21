@@ -214,7 +214,26 @@ describe("GameShell lifecycle", () => {
       targetDistance: 60,
       paceSecondsRemaining: 30
     });
-    expect(onHud.mock.calls.at(-1)?.[0].contractOptions).toEqual([
+    const latestHud = onHud.mock.calls.at(-1)?.[0] as HudState;
+    const contractOptions = latestHud.contractOptions;
+    expect(contractOptions.map((contract) => contract.id)).toEqual([
+      "first-light-delivery",
+      "return-leg",
+      "luma-longhaul",
+      "asteroid-sprint",
+      "asteroid-labyrinth",
+      "nebula-longhaul",
+      "gravity-slingshot",
+      "gravity-lockpick",
+      "solar-thread",
+      "chain-relay",
+      "interceptor-swarm",
+      "black-forge-capture",
+      "sentinel-siege",
+      "antimatter-drift",
+      "last-drop-run"
+    ]);
+    expect(contractOptions).toEqual(expect.arrayContaining([
       {
         id: "first-light-delivery",
         title: "First Light Delivery",
@@ -392,7 +411,15 @@ describe("GameShell lifecycle", () => {
         cargoFragility: 0.9,
         medalTimes: { bronze: 72, silver: 44, gold: 27 }
       }
-    ]);
+    ]));
+    expect(contractOptions).toContainEqual(
+      expect.objectContaining({
+        id: "luma-longhaul",
+        missionType: "longhaul",
+        refuelStationIds: ["relay-fuel-pad"],
+        destinationLabel: "Far Harbor Far Dock"
+      })
+    );
   });
 
   it("keeps the optional training flight out of the career route list while allowing opt-in selection", async () => {

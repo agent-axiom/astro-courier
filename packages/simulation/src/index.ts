@@ -42,6 +42,7 @@ export type PlanetContent = {
 export type StationContent = {
   id: string;
   name: string;
+  role?: "neutral" | "fuel";
   position: [number, number];
   landingPads: LandingPadContent[];
 };
@@ -75,6 +76,8 @@ export type ContractContent = {
   };
   pickupId: string;
   destinationId: string;
+  missionType?: "standard" | "longhaul";
+  refuelStationIds?: string[];
   cargoId: string;
   hazardSeverityMultiplier?: number;
   hazards?: HazardContent[];
@@ -133,6 +136,9 @@ export type LandingPadState = {
   allowedApproachSpeed: number;
   requiredAngleTolerance: number;
   role: "pickup" | "destination" | "neutral";
+  stationRole?: "neutral" | "fuel";
+  refuel: boolean;
+  refueled: boolean;
   active: boolean;
   destination: boolean;
 };
@@ -228,6 +234,7 @@ export type SimulationWorld = {
   mazeGateChainAwarded: boolean;
   skimmedHazardIds: string[];
   slungGravitySourceIds: string[];
+  refueledPadIds: string[];
   riskGates: RiskGateState[];
   clearedRiskGateIds: string[];
   manualBrakeUsed: boolean;
@@ -282,6 +289,7 @@ const GRAVITY_SCALE = 70;
 const GRAVITY_SOFTENING = 16;
 const FUEL_BURN_PER_SECOND = 8;
 const BRAKE_BURN_PER_SECOND = 3;
+const RETRO_BRAKE_THRUST_RATIO = 0.72;
 export const BOOST_COOLDOWN_SECONDS = 1.15;
 const BOOST_IMPULSE_SPEED = 24;
 const BOOST_FUEL_COST = 2;
@@ -321,6 +329,7 @@ export const MAZE_GATE_CHAIN_STYLE_BONUS = 420;
 export const CONTROLLED_DOCK_SPEED_RATIO = 0.7;
 export const EMERGENCY_SHIELD_REBOUND_DAMAGE = 0.22;
 export const DRY_FUEL_BLACK_HOLE_SECONDS = 18;
+const REFUEL_STOP_VELOCITY_DAMPING = 0.25;
 const SHIELD_CRATE_MAX_HP = 125;
 const SHIELD_CRATE_REBOUND_DAMAGE = 0.08;
 const CATASTROPHIC_DOCK_SPEED_RATIO = 1.85;
@@ -470,6 +479,13 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
   const activePerk = options.perkId ?? "afterburner";
   const shipMaxHp = activePerk === "shield-crate" ? SHIELD_CRATE_MAX_HP : SHIP_MAX_HP;
   const contractHazards = activeContract.hazards ?? [];
+  const stationPadRoles = new Map<string, NonNullable<StationContent["role"]>>();
+  for (const station of system.stations) {
+    for (const pad of station.landingPads) {
+      stationPadRoles.set(pad.id, station.role ?? "neutral");
+    }
+  }
+  const refuelStationIds = new Set(activeContract.refuelStationIds ?? []);
   const hazards = [...system.hazards, ...contractHazards].map((hazard) => ({
     id: hazard.id,
     type: hazard.type,
@@ -491,6 +507,9 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
       allowedApproachSpeed: pad.allowedApproachSpeed,
       requiredAngleTolerance: pad.requiredAngleTolerance,
       role,
+      stationRole: stationPadRoles.get(pad.id),
+      refuel: refuelStationIds.has(pad.id),
+      refueled: false,
       active: pad.id === activeContract.pickupId,
       destination: pad.id === activeContract.destinationId
     };
@@ -519,6 +538,7 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
     mazeGateChainAwarded: false,
     skimmedHazardIds: [],
     slungGravitySourceIds: [],
+    refueledPadIds: [],
     riskGates: createRiskGates(system, activeContract, hazards),
     clearedRiskGateIds: [],
     manualBrakeUsed: false,
@@ -754,6 +774,7 @@ export function stepWorld(
   updateApproachStreak(world, fixedDt);
   updateHazards(world, fixedDt);
   updateRiskGates(world);
+  resolveRefuelStop(world);
   resolveLandingOrCrash(world);
   updateDryFuelBlackHole(world, fixedDt);
   updateScore(world);
@@ -844,6 +865,7 @@ export function snapshotWorld(world: SimulationWorld): SimulationSnapshot {
     activePerk: world.activePerk,
     objectiveTarget: getObjectiveTarget(world),
     gravitySlingOpportunity: getGravitySlingOpportunity(world),
+    refuelStop: getRefuelStop(world),
     riskGates: world.riskGates.map((gate) => ({
       id: gate.id,
       position: { ...gate.position },
@@ -905,6 +927,9 @@ export function snapshotWorld(world: SimulationWorld): SimulationSnapshot {
       normalAngle: pad.normalAngle,
       radius: pad.radius,
       role: pad.role,
+      stationRole: pad.stationRole,
+      refuel: pad.refuel,
+      refueled: pad.refueled,
       active: pad.active,
       destination: pad.destination
     })),
@@ -943,6 +968,38 @@ function getObjectiveTarget(world: SimulationWorld): SimulationSnapshot["objecti
     requiredAngleTolerance: pad.requiredAngleTolerance,
     assistAvailable,
     landingStatus: classifyLandingGuidance(distance, speed, angleError, pad)
+  };
+}
+
+function getRefuelStop(world: SimulationWorld): SimulationSnapshot["refuelStop"] {
+  if (world.status !== "flying") {
+    return undefined;
+  }
+
+  const nearest = world.landingPads
+    .filter((pad) => pad.refuel && !pad.refueled)
+    .map((pad) => {
+      const offset = subtract(pad.position, world.ship.position);
+      return {
+        pad,
+        offset,
+        distance: magnitude(offset)
+      };
+    })
+    .sort((left, right) => left.distance - right.distance)[0];
+
+  if (!nearest) {
+    return undefined;
+  }
+
+  return {
+    id: nearest.pad.id,
+    position: { ...nearest.pad.position },
+    distance: round(nearest.distance, 3),
+    bearing: normalizeAngle(Math.atan2(nearest.offset.y, nearest.offset.x)),
+    ready: canRefuelAtPad(world, nearest.pad, nearest.distance),
+    fuelGain: round(Math.max(0, world.ship.maxFuel - world.ship.fuel), 1),
+    allowedApproachSpeed: nearest.pad.allowedApproachSpeed
   };
 }
 
@@ -1000,18 +1057,30 @@ function getNearestHazard(world: SimulationWorld): SimulationSnapshot["nearestHa
   };
 }
 
+export function gravityAccelerationAt(
+  position: Vec2,
+  source: Pick<GravitySourceState, "position" | "radius" | "gravityMass" | "influenceRadius">
+): Vec2 {
+  const offset = subtract(source.position, position);
+  const distance = magnitude(offset);
+  if (distance <= 0 || distance > source.influenceRadius) {
+    return { x: 0, y: 0 };
+  }
+
+  const direction = scale(offset, 1 / distance);
+  const strength =
+    (source.gravityMass / (distance * distance + source.radius * source.radius + GRAVITY_SOFTENING)) * GRAVITY_SCALE;
+  return scale(direction, strength);
+}
+
 function applyGravity(world: SimulationWorld, fixedDt: number): void {
   for (const source of world.gravitySources) {
-    const offset = subtract(source.position, world.ship.position);
-    const distance = magnitude(offset);
-    if (distance <= 0 || distance > source.influenceRadius) {
+    const acceleration = gravityAccelerationAt(world.ship.position, source);
+    if (acceleration.x === 0 && acceleration.y === 0) {
       continue;
     }
 
-    const direction = scale(offset, 1 / distance);
-    const strength =
-      (source.gravityMass / (distance * distance + source.radius * source.radius + GRAVITY_SOFTENING)) * GRAVITY_SCALE;
-    world.ship.velocity = add(world.ship.velocity, scale(direction, strength * fixedDt));
+    world.ship.velocity = add(world.ship.velocity, scale(acceleration, fixedDt));
   }
 }
 
@@ -1101,15 +1170,33 @@ function applyThrust(world: SimulationWorld, fixedDt: number, amount: number): v
   world.fuelUsed = round(world.fuelUsed + spend, 6);
 }
 
+export function retroBrakeImpulse(velocity: Vec2, maxDeltaSpeed: number): Vec2 {
+  const speed = magnitude(velocity);
+  const deltaSpeed = Math.min(speed, Math.max(0, maxDeltaSpeed));
+  if (speed <= 0 || deltaSpeed <= 0) {
+    return { x: 0, y: 0 };
+  }
+
+  return cleanZeroVector(scale(velocity, -deltaSpeed / speed));
+}
+
+function cleanZeroVector(value: Vec2): Vec2 {
+  return {
+    x: Object.is(value.x, -0) ? 0 : value.x,
+    y: Object.is(value.y, -0) ? 0 : value.y
+  };
+}
+
 function applyBrake(world: SimulationWorld, fixedDt: number, amount: number): void {
-  if (amount <= 0 || world.ship.fuel <= 0) {
+  if (amount <= 0 || world.ship.fuel <= 0 || fixedDt <= 0) {
     return;
   }
 
   const spend = Math.min(world.ship.fuel, amount * BRAKE_BURN_PER_SECOND * fixedDt);
-  const damping = Math.max(0, 1 - amount * fixedDt * 1.8);
+  const effectiveAmount = spend / (BRAKE_BURN_PER_SECOND * fixedDt);
+  const maxDeltaSpeed = world.ship.thrustPower * RETRO_BRAKE_THRUST_RATIO * effectiveAmount * fixedDt;
 
-  world.ship.velocity = scale(world.ship.velocity, damping);
+  world.ship.velocity = add(world.ship.velocity, retroBrakeImpulse(world.ship.velocity, maxDeltaSpeed));
   world.ship.fuel = round(world.ship.fuel - spend, 6);
   world.fuelUsed = round(world.fuelUsed + spend, 6);
 }
@@ -1592,6 +1679,44 @@ function canAwardNoBrakeFinesse(world: SimulationWorld): boolean {
 
 function canAwardAntimatterDrift(world: SimulationWorld): boolean {
   return world.activeContract.id === "antimatter-drift" && world.activeCargo.kind === "unstable" && canAwardNoBrakeFinesse(world);
+}
+
+function resolveRefuelStop(world: SimulationWorld): void {
+  const pad = world.landingPads.find((candidate) => {
+    if (!candidate.refuel || candidate.refueled) {
+      return false;
+    }
+    return canRefuelAtPad(world, candidate);
+  });
+
+  if (!pad) {
+    return;
+  }
+
+  const fuelGain = Math.max(0, world.ship.maxFuel - world.ship.fuel);
+  if (fuelGain <= 0) {
+    world.lastMilestone = "Fuel Full";
+    world.ship.velocity = scale(world.ship.velocity, REFUEL_STOP_VELOCITY_DAMPING);
+    return;
+  }
+
+  pad.refueled = true;
+  world.refueledPadIds.push(pad.id);
+  world.ship.fuel = world.ship.maxFuel;
+  world.dryFuelSeconds = 0;
+  world.ship.velocity = scale(world.ship.velocity, REFUEL_STOP_VELOCITY_DAMPING);
+  world.lastMilestone = "Refueled";
+}
+
+function canRefuelAtPad(world: SimulationWorld, pad: LandingPadState, knownDistance?: number): boolean {
+  const distance = knownDistance ?? distanceBetween(world.ship.position, pad.position);
+  if (distance > pad.radius * DOCK_CAPTURE_RADIUS_MULTIPLIER) {
+    return false;
+  }
+
+  const speed = magnitude(world.ship.velocity);
+  const angleDiff = Math.abs(shortestAngleDelta(world.ship.rotation, pad.normalAngle));
+  return speed <= pad.allowedApproachSpeed && (angleDiff <= pad.requiredAngleTolerance || isControlledDockSpeed(speed, pad));
 }
 
 function resolveLandingOrCrash(world: SimulationWorld): void {

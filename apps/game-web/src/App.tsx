@@ -841,6 +841,7 @@ export function App() {
   const pickupRushActive = hud.objectivePhase === "pickup" && hud.quickPickupSecondsRemaining > 0 && !runFinished;
   const radioMessage = buildRadioMessage(hud, { preflightOpen });
   const targetDistanceLabel = hud.targetDistance === undefined ? "-" : `${Math.round(hud.targetDistance)}m`;
+  const refuelDistanceLabel = hud.refuelDistance === undefined ? undefined : `${Math.round(hud.refuelDistance)}m`;
   const bearingGuidance = hud.targetRelativeBearing === undefined ? undefined : formatBearingGuidance(hud.targetRelativeBearing);
   const targetCompass = buildTargetCompassPresentation({
     status: hud.status,
@@ -2219,6 +2220,17 @@ export function App() {
             <Route size={16} />
             <span>{routeFocusReadout.label}</span>
             <strong>{routeFocusReadout.value}</strong>
+          </div>
+        ) : null}
+        {liveHudDensity.showActionChips && refuelDistanceLabel ? (
+          <div
+            className={`refuel-chip ${hud.refuelReady ? "refuel-chip-ready" : "refuel-chip-route"}`}
+            aria-label={`Fuel stop: ${hud.refuelReady ? "dock" : refuelDistanceLabel}`}
+          >
+            <Zap size={16} />
+            <span>Fuel</span>
+            <strong>{hud.refuelReady ? "Dock" : refuelDistanceLabel}</strong>
+            {hud.refuelGain && hud.refuelGain > 0 ? <small>+{Math.round(hud.refuelGain)}</small> : null}
           </div>
         ) : null}
         {liveHudDensity.showTelemetryChips && liveRouteMarkCue ? (

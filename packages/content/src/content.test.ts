@@ -12,8 +12,10 @@ describe("content schemas", () => {
       "first-light-delivery",
       "training-flight",
       "return-leg",
+      "luma-longhaul",
       "asteroid-sprint",
       "asteroid-labyrinth",
+      "nebula-longhaul",
       "gravity-slingshot",
       "gravity-lockpick",
       "solar-thread",
@@ -52,6 +54,58 @@ describe("content schemas", () => {
       name: "Forge Prime",
       visualTheme: "black_metal",
       radius: 58
+    });
+    expect(parsed.stations.find((station) => station.id === "tea-station")).toMatchObject({
+      role: "fuel"
+    });
+    expect(parsed.stations.find((station) => station.id === "relay-fuel-depot")).toMatchObject({
+      role: "fuel",
+      landingPads: [
+        expect.objectContaining({
+          id: "relay-fuel-pad"
+        })
+      ]
+    });
+    expect(parsed.contracts.map((contract) => contract.missionType ?? "standard")).toEqual([
+      "standard",
+      "standard",
+      "standard",
+      "longhaul",
+      "standard",
+      "standard",
+      "longhaul",
+      "standard",
+      "standard",
+      "standard",
+      "standard",
+      "standard",
+      "standard",
+      "standard",
+      "standard",
+      "standard"
+    ]);
+    expect(parsed.contracts.find((contract) => contract.id === "luma-longhaul")).toMatchObject({
+      title: "Luma Longhaul",
+      missionType: "longhaul",
+      pickupId: "north-pad",
+      destinationId: "far-dock",
+      refuelStationIds: ["relay-fuel-pad"],
+      shipStart: {
+        position: [180, 20],
+        velocity: [18, -4],
+        rotation: -0.1,
+        fuel: 118
+      },
+      medalTimes: { bronze: 180, silver: 124, gold: 86 }
+    });
+    expect(parsed.contracts.find((contract) => contract.id === "nebula-longhaul")).toMatchObject({
+      title: "Nebula Longhaul",
+      missionType: "longhaul",
+      pickupId: "dock-a",
+      destinationId: "far-dock",
+      refuelStationIds: ["relay-fuel-pad"],
+      hazardSeverityMultiplier: 1.25,
+      medalTimes: { bronze: 210, silver: 148, gold: 104 }
     });
     expect(parsed.contracts.find((contract) => contract.id === "asteroid-sprint")?.briefing ?? "").toContain("asteroid");
     expect(parsed.contracts.find((contract) => contract.id === "asteroid-sprint")?.riskLabel).toBe("Asteroid Field");

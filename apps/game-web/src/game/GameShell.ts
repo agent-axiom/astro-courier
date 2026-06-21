@@ -74,6 +74,9 @@ export type HudState = {
   targetAngleError?: number;
   targetRequiredAngleTolerance?: number;
   targetRelativeBearing?: number;
+  refuelDistance?: number;
+  refuelReady?: boolean;
+  refuelGain?: number;
   landingStatus?: LandingGuidanceStatus;
   perfectDockReady?: boolean;
   assistAvailable?: boolean;
@@ -125,7 +128,10 @@ export type PerkOption = {
   tone: "boost" | "guard" | "shot" | "dock";
 };
 
-export type ContractOption = Pick<ContractContent, "id" | "title" | "briefing" | "riskLabel" | "rewardLabel" | "medalTimes"> & {
+export type ContractOption = Pick<
+  ContractContent,
+  "id" | "title" | "briefing" | "riskLabel" | "rewardLabel" | "medalTimes" | "missionType" | "refuelStationIds"
+> & {
   pickupLabel: string;
   destinationLabel: string;
   cargoName: string;
@@ -578,6 +584,9 @@ export class GameShell {
       targetRequiredAngleTolerance: snapshot.objectiveTarget?.requiredAngleTolerance,
       targetRelativeBearing:
         snapshot.objectiveTarget === undefined ? undefined : normalizeAngle(snapshot.objectiveTarget.bearing - this.world.ship.rotation),
+      refuelDistance: snapshot.refuelStop?.distance,
+      refuelReady: snapshot.refuelStop?.ready,
+      refuelGain: snapshot.refuelStop?.fuelGain,
       landingStatus: snapshot.objectiveTarget?.landingStatus,
       perfectDockReady,
       assistAvailable: snapshot.objectiveTarget?.assistAvailable,
@@ -652,6 +661,8 @@ export class GameShell {
       briefing: contract.briefing,
       riskLabel: contract.riskLabel,
       rewardLabel: contract.rewardLabel,
+      ...(contract.missionType === undefined ? {} : { missionType: contract.missionType }),
+      ...(contract.refuelStationIds === undefined ? {} : { refuelStationIds: contract.refuelStationIds }),
       pickupLabel: this.padLabel(contract.pickupId),
       destinationLabel: this.padLabel(contract.destinationId),
       cargoName: cargo?.name ?? titleFromId(contract.cargoId),

@@ -1115,6 +1115,211 @@ export type BoostSparkVisual = {
   width: number;
 };
 
+export type LayeredSpaceVisualInput = Pick<SimulationSnapshot, "status"> & {
+  background?: string;
+  tick: number;
+};
+
+export type LayeredSpaceVisual = {
+  baseColor: number;
+  nebulaColor: number;
+  dustColor: number;
+  starDensity: number;
+  parallaxLayers: number;
+  drift: number;
+  nebulaAlpha: number;
+};
+
+export type PlanetSurfaceVisualInput = Pick<SimulationSnapshot, "status"> & {
+  visualTheme?: string;
+  radius: number;
+  tick: number;
+};
+
+export type PlanetSurfaceVisual = {
+  surfaceColor: number;
+  secondaryColor: number;
+  atmosphereColor: number;
+  craterColor: number;
+  detailCount: number;
+  ringAlpha: number;
+  cloudAlpha: number;
+  rotation: number;
+};
+
+export type FuelStationVisualInput = {
+  role?: "fuel" | "neutral";
+  active: boolean;
+  tick: number;
+};
+
+export type FuelStationVisual = {
+  bodyColor: number;
+  fuelColor: number;
+  beaconColor: number;
+  ringCount: number;
+  pulseAlpha: number;
+  panelAlpha: number;
+};
+
+export type ShipHullDetailVisualInput = Pick<SimulationSnapshot, "status"> & {
+  fuelRatio: number;
+  hpRatio: number;
+};
+
+export type ShipHullDetailVisual = {
+  cockpitColor: number;
+  cargoColor: number;
+  engineColor: number;
+  panelAlpha: number;
+  damageAlpha: number;
+};
+
+export type CosmicPhenomenonVisualInput = {
+  type: SimulationSnapshot["hazards"][number]["type"];
+  severity: number;
+  tick: number;
+};
+
+export type CosmicPhenomenonVisual = {
+  color: number;
+  accentColor: number;
+  particleCount: number;
+  swirl: number;
+  alpha: number;
+  ringWidth: number;
+};
+
+export function layeredSpaceVisual(input: LayeredSpaceVisualInput): LayeredSpaceVisual {
+  const background = input.background ?? "";
+  const active = input.status === "flying" ? 1 : 0;
+  if (background.includes("black-hole") || background.includes("frontier")) {
+    return {
+      baseColor: 0x04030b,
+      nebulaColor: 0x6d4cff,
+      dustColor: 0xffd166,
+      starDensity: 0.72,
+      parallaxLayers: 4,
+      drift: round(positiveModulo(input.tick * (0.012 + active * 0.006), 1), 3),
+      nebulaAlpha: 0.3
+    };
+  }
+  if (background.includes("nebula")) {
+    return {
+      baseColor: 0x070b1e,
+      nebulaColor: 0x245f9f,
+      dustColor: 0x8ee6ff,
+      starDensity: 1,
+      parallaxLayers: 3,
+      drift: round(positiveModulo(input.tick * (0.01 + active * 0.006), 1), 3),
+      nebulaAlpha: 0.24
+    };
+  }
+  return {
+    baseColor: 0x080a18,
+    nebulaColor: 0x2a244f,
+    dustColor: 0xa0c4ff,
+    starDensity: 0.86,
+    parallaxLayers: 3,
+    drift: round(positiveModulo(input.tick * (0.008 + active * 0.004), 1), 3),
+    nebulaAlpha: 0.18
+  };
+}
+
+export function planetSurfaceVisual(input: PlanetSurfaceVisualInput): PlanetSurfaceVisual {
+  const theme = input.visualTheme ?? "";
+  const pressure = clamp(input.radius / 80, 0.5, 1.35);
+  if (theme === "black_metal") {
+    return {
+      surfaceColor: 0x11131a,
+      secondaryColor: 0x3c4254,
+      atmosphereColor: 0xff6f91,
+      craterColor: 0x05070c,
+      detailCount: 6,
+      ringAlpha: 0.22,
+      cloudAlpha: 0.08,
+      rotation: round(positiveModulo(input.tick * 0.004, 1), 3)
+    };
+  }
+  return {
+    surfaceColor: 0x3aa7d8,
+    secondaryColor: 0x6edb9a,
+    atmosphereColor: 0x8ee6ff,
+    craterColor: 0x2476a6,
+    detailCount: Math.round(7 + pressure),
+    ringAlpha: 0,
+    cloudAlpha: input.status === "flying" ? 0.18 : 0.12,
+    rotation: round(positiveModulo(input.tick * 0.006, 1), 3)
+  };
+}
+
+export function fuelStationVisual(input: FuelStationVisualInput): FuelStationVisual {
+  const pulse = (Math.sin(input.tick * 0.15) + 1) / 2;
+  const fuel = input.role === "fuel";
+  return {
+    bodyColor: 0x26364c,
+    fuelColor: fuel ? 0xffd166 : 0xa0c4ff,
+    beaconColor: input.active ? 0x8ee6b8 : 0x7ce1ff,
+    ringCount: fuel ? 3 : 2,
+    pulseAlpha: round((input.active ? 0.58 : 0.28) + pulse * (input.active ? 0.2 : 0.12), 2),
+    panelAlpha: fuel ? 0.7 : 0.46
+  };
+}
+
+export function shipHullDetailVisual(input: ShipHullDetailVisualInput): ShipHullDetailVisual {
+  const fuelPressure = 1 - clamp(input.fuelRatio, 0, 1);
+  const damagePressure = 1 - clamp(input.hpRatio, 0, 1);
+  return {
+    cockpitColor: 0x92f4ff,
+    cargoColor: damagePressure > 0.45 ? 0xff6f91 : 0xffb13b,
+    engineColor: fuelPressure > 0.72 ? 0xffd166 : 0x7ce1ff,
+    panelAlpha: input.status === "flying" ? 0.62 : 0.42,
+    damageAlpha: round(clamp(damagePressure * 0.74, 0, 0.74), 2)
+  };
+}
+
+export function cosmicPhenomenonVisual(input: CosmicPhenomenonVisualInput): CosmicPhenomenonVisual {
+  const severity = clamp(input.severity, 0, 1);
+  if (input.type === "gravity_ripple") {
+    return {
+      color: 0x8ee6ff,
+      accentColor: 0xffd166,
+      particleCount: Math.round(8 + severity * 5),
+      swirl: round(severity, 2),
+      alpha: round(0.18 + severity * 0.32, 2),
+      ringWidth: round(1.2 + severity * 1.6, 2)
+    };
+  }
+  if (input.type === "nebula") {
+    return {
+      color: 0x7c5cff,
+      accentColor: 0x7ce1ff,
+      particleCount: Math.round(12 + severity * 14),
+      swirl: round(0.25 + severity * 0.34, 2),
+      alpha: round(0.16 + severity * 0.24, 2),
+      ringWidth: round(1 + severity * 0.9, 2)
+    };
+  }
+  if (input.type === "solar_wind" || input.type === "radiation") {
+    return {
+      color: 0xffd166,
+      accentColor: 0xff6f91,
+      particleCount: Math.round(10 + severity * 10),
+      swirl: round(0.18 + severity * 0.22, 2),
+      alpha: round(0.14 + severity * 0.28, 2),
+      ringWidth: round(1 + severity * 1.2, 2)
+    };
+  }
+  return {
+    color: 0xb56576,
+    accentColor: 0xffd166,
+    particleCount: Math.round(7 + severity * 7),
+    swirl: round(0.12 + severity * 0.18, 2),
+    alpha: round(0.14 + severity * 0.22, 2),
+    ringWidth: round(1 + severity, 2)
+  };
+}
+
 export function shipTrailVisual(input: ShipTrailVisualInput): ShipTrailVisual | undefined {
   if (input.status !== "flying" || input.speed <= 8) {
     return undefined;
@@ -1803,8 +2008,33 @@ class PixiRenderer implements AstroPixiRenderer {
 
   private drawBackground(viewport: { width: number; height: number }, snapshot: SimulationSnapshot): void {
     this.background.clear();
-    this.background.rect(0, 0, viewport.width, viewport.height).fill(0x080a18);
     const tick = snapshot.tick;
+    const space = layeredSpaceVisual({
+      background: snapshot.status === "crashed" && snapshot.blackHole ? "black-hole-frontier" : "soft-blue-nebula",
+      status: snapshot.status,
+      tick
+    });
+    this.background.rect(0, 0, viewport.width, viewport.height).fill(space.baseColor);
+    for (let layer = 0; layer < space.parallaxLayers; layer += 1) {
+      const layerProgress = (layer + 1) / space.parallaxLayers;
+      const offset = (space.drift + layer * 0.17) * viewport.width * (0.12 + layerProgress * 0.18);
+      this.background
+        .ellipse(
+          viewport.width * (0.18 + layerProgress * 0.26) - offset * 0.12,
+          viewport.height * (0.18 + layerProgress * 0.18),
+          viewport.width * (0.34 + layerProgress * 0.24),
+          viewport.height * (0.06 + layerProgress * 0.035)
+        )
+        .fill({ color: space.nebulaColor, alpha: space.nebulaAlpha * (1 - layer * 0.12) });
+      this.background
+        .ellipse(
+          viewport.width * (0.78 - layerProgress * 0.18) + offset * 0.08,
+          viewport.height * (0.72 - layerProgress * 0.13),
+          viewport.width * (0.22 + layerProgress * 0.18),
+          viewport.height * (0.035 + layerProgress * 0.03)
+        )
+        .fill({ color: space.dustColor, alpha: space.nebulaAlpha * 0.36 });
+    }
     const speedLines = speedLineVisual({
       status: snapshot.status,
       velocity: snapshot.ship.velocity,
@@ -1812,10 +2042,14 @@ class PixiRenderer implements AstroPixiRenderer {
     });
 
     for (const star of this.stars) {
-      const drift = tick * 0.018 * star.radius;
+      const layer = 0.55 + (star.radius / 2.4) * 0.65;
+      const drift = tick * 0.018 * star.radius + space.drift * 32 * layer;
       const x = positiveModulo(star.x * viewport.width - drift, viewport.width);
       const y = positiveModulo(star.y * viewport.height + drift * 0.18, viewport.height);
-      this.background.circle(x, y, star.radius).fill({ color: 0xffffff, alpha: star.alpha });
+      this.background.circle(x, y, star.radius * space.starDensity).fill({
+        color: star.radius > 1.8 ? space.dustColor : 0xffffff,
+        alpha: star.alpha * space.starDensity
+      });
     }
 
     if (speedLines) {
@@ -2142,6 +2376,12 @@ class PixiRenderer implements AstroPixiRenderer {
     for (const source of snapshot.gravitySources) {
       const center = project(source.position);
       const sourceVisual = gravitySourceVisual(source.visualTheme);
+      const surface = planetSurfaceVisual({
+        visualTheme: source.visualTheme,
+        radius: source.radius,
+        status: snapshot.status,
+        tick: snapshot.tick
+      });
       const distanceToShip = Math.hypot(snapshot.ship.position.x - source.position.x, snapshot.ship.position.y - source.position.y);
       const surfaceWarning = gravitySurfaceWarningVisual({
         status: snapshot.status,
@@ -2149,16 +2389,47 @@ class PixiRenderer implements AstroPixiRenderer {
         radius: source.radius,
         tick: snapshot.tick
       });
-      this.world.circle(center.x, center.y, source.radius + 8).fill({ color: sourceVisual.haloColor, alpha: sourceVisual.haloAlpha });
-      this.world.circle(center.x, center.y, source.radius).fill(sourceVisual.bodyColor);
+      this.world.circle(center.x, center.y, source.radius + 10).fill({ color: surface.atmosphereColor, alpha: sourceVisual.haloAlpha * 0.38 });
+      this.world.circle(center.x, center.y, source.radius + 8).fill({ color: sourceVisual.haloColor, alpha: sourceVisual.haloAlpha * 0.72 });
+      this.world.circle(center.x, center.y, source.radius).fill(surface.surfaceColor);
+      this.world.circle(center.x - source.radius * 0.22, center.y + source.radius * 0.14, source.radius * 0.72).fill({
+        color: surface.secondaryColor,
+        alpha: source.visualTheme === "black_metal" ? 0.28 : 0.34
+      });
       this.world.circle(center.x + source.radius * 0.22, center.y + source.radius * 0.18, source.radius * 0.16).fill({
-        color: sourceVisual.craterColor,
-        alpha: source.visualTheme === "black_metal" ? 0.62 : 0.24
+        color: surface.craterColor,
+        alpha: source.visualTheme === "black_metal" ? 0.72 : 0.28
       });
       this.world.circle(center.x - source.radius * 0.25, center.y - source.radius * 0.3, source.radius * 0.28).fill({
         color: sourceVisual.highlightColor,
         alpha: sourceVisual.highlightAlpha
       });
+      for (let index = 0; index < surface.detailCount; index += 1) {
+        const angle = surface.rotation * Math.PI * 2 + (index / surface.detailCount) * Math.PI * 2;
+        const band = 0.28 + (index % 4) * 0.13;
+        const detail = {
+          x: center.x + Math.cos(angle) * source.radius * band,
+          y: center.y + Math.sin(angle) * source.radius * band * 0.72
+        };
+        this.world.circle(detail.x, detail.y, source.radius * (0.025 + (index % 3) * 0.012)).fill({
+          color: index % 2 === 0 ? surface.secondaryColor : surface.craterColor,
+          alpha: source.visualTheme === "black_metal" ? 0.42 : 0.32
+        });
+      }
+      if (surface.cloudAlpha > 0) {
+        this.world.ellipse(center.x - source.radius * 0.06, center.y - source.radius * 0.08, source.radius * 0.74, source.radius * 0.18).stroke({
+          color: surface.atmosphereColor,
+          width: 2,
+          alpha: surface.cloudAlpha
+        });
+      }
+      if (surface.ringAlpha > 0) {
+        this.world.ellipse(center.x, center.y, source.radius * 1.62, source.radius * 0.46).stroke({
+          color: surface.atmosphereColor,
+          width: 2,
+          alpha: surface.ringAlpha
+        });
+      }
       this.world.circle(center.x, center.y, source.radius).stroke({
         color: source.visualTheme === "black_metal" ? sourceVisual.rimColor : gravitySurfaceRim.color,
         width: gravitySurfaceRim.width,
@@ -2176,6 +2447,11 @@ class PixiRenderer implements AstroPixiRenderer {
     for (const pad of snapshot.landingPads) {
       const center = project(pad.position);
       const visual = landingPadVisual(pad);
+      const stationVisual = fuelStationVisual({
+        role: pad.refuel || pad.stationRole === "fuel" ? "fuel" : "neutral",
+        active: pad.active,
+        tick: snapshot.tick
+      });
       const corridor =
         objectiveTarget?.id === pad.id
           ? landingCorridorVisual({
@@ -2187,6 +2463,25 @@ class PixiRenderer implements AstroPixiRenderer {
             })
           : undefined;
       const corridorTarget = objectiveTarget?.id === pad.id ? objectiveTarget : undefined;
+      if (pad.refuel || pad.stationRole === "fuel") {
+        this.world.circle(center.x, center.y, pad.radius + 16).stroke({
+          color: stationVisual.beaconColor,
+          width: 1,
+          alpha: stationVisual.pulseAlpha * 0.38
+        });
+        for (let ring = 0; ring < stationVisual.ringCount; ring += 1) {
+          const radius = pad.radius + 7 + ring * 5;
+          this.world.ellipse(center.x, center.y, radius * 1.34, radius * 0.58).stroke({
+            color: ring === 0 ? stationVisual.bodyColor : stationVisual.fuelColor,
+            width: ring === 0 ? 4 : 1.4,
+            alpha: ring === 0 ? stationVisual.panelAlpha : stationVisual.pulseAlpha * 0.62
+          });
+        }
+        this.world.rect(center.x - pad.radius * 0.5, center.y - 4, pad.radius, 8).fill({
+          color: stationVisual.fuelColor,
+          alpha: stationVisual.panelAlpha
+        });
+      }
       if (corridor && corridorTarget) {
         const corridorInner = pad.radius + 8;
         const corridorOuter = pad.radius + corridor.length;
@@ -2250,19 +2545,31 @@ class PixiRenderer implements AstroPixiRenderer {
     for (const hazard of snapshot.hazards) {
       const center = project(hazard.position);
       const visual = hazardFieldVisual(hazard);
-      this.hazards.circle(center.x, center.y, hazard.radius).fill({ color: 0xff5c7a, alpha: visual.fillAlpha });
+      const phenomenon = cosmicPhenomenonVisual({
+        type: hazard.type as SimulationSnapshot["hazards"][number]["type"],
+        severity: hazard.severity,
+        tick: snapshot.tick
+      });
+      this.hazards.circle(center.x, center.y, hazard.radius).fill({
+        color: phenomenon.color,
+        alpha: visual.fillAlpha + phenomenon.alpha * 0.18
+      });
       this.hazards.circle(center.x, center.y, hazard.radius).stroke({
-        color: 0xff7a90,
-        width: visual.strokeWidth,
+        color: phenomenon.accentColor,
+        width: Math.max(visual.strokeWidth, phenomenon.ringWidth),
         alpha: visual.strokeAlpha
       });
-      for (let index = 0; index < visual.rockCount; index += 1) {
-        const angle = (index / visual.rockCount) * Math.PI * 2;
+      for (let index = 0; index < Math.max(visual.rockCount, phenomenon.particleCount); index += 1) {
+        const angle = phenomenon.swirl + (index / Math.max(1, phenomenon.particleCount)) * Math.PI * 2;
+        const wobble = 0.7 + ((index * 37) % 11) / 30;
         const rock = {
-          x: center.x + Math.cos(angle) * hazard.radius * 0.62,
-          y: center.y + Math.sin(angle) * hazard.radius * 0.36
+          x: center.x + Math.cos(angle) * hazard.radius * 0.62 * wobble,
+          y: center.y + Math.sin(angle) * hazard.radius * 0.36 * wobble
         };
-        this.hazards.circle(rock.x, rock.y, 3 + (index % 3)).fill({ color: 0xb56576, alpha: 0.8 });
+        this.hazards.circle(rock.x, rock.y, 2.2 + (index % 3)).fill({
+          color: index % 2 === 0 ? phenomenon.accentColor : phenomenon.color,
+          alpha: hazard.type === "asteroid_field" ? 0.8 : phenomenon.alpha
+        });
       }
     }
   }
@@ -2377,6 +2684,12 @@ class PixiRenderer implements AstroPixiRenderer {
     };
     const speed = Math.hypot(snapshot.ship.velocity.x, snapshot.ship.velocity.y);
     const fuelRatio = snapshot.ship.maxFuel > 0 ? snapshot.ship.fuel / snapshot.ship.maxFuel : 0;
+    const hpRatio = snapshot.ship.maxHp > 0 ? snapshot.ship.hp / snapshot.ship.maxHp : 0;
+    const hullDetail = shipHullDetailVisual({
+      status: snapshot.status,
+      fuelRatio,
+      hpRatio
+    });
     const trail = shipTrailVisual({
       status: snapshot.status,
       speed,
@@ -2593,8 +2906,28 @@ class PixiRenderer implements AstroPixiRenderer {
       width: 2,
       alpha: 1
     });
+    this.ship
+      .moveTo(center.x + Math.cos(angle + Math.PI / 2) * 3 * shipScale, center.y + Math.sin(angle + Math.PI / 2) * 3 * shipScale)
+      .lineTo(center.x + Math.cos(angle) * 13 * shipScale, center.y + Math.sin(angle) * 13 * shipScale)
+      .lineTo(center.x + Math.cos(angle - Math.PI / 2) * 3 * shipScale, center.y + Math.sin(angle - Math.PI / 2) * 3 * shipScale)
+      .stroke({ color: 0xffffff, width: 1, alpha: hullDetail.panelAlpha * 0.42 });
+    this.ship.circle(center.x - Math.cos(angle) * 9 * shipScale, center.y - Math.sin(angle) * 9 * shipScale, 5.2 * shipScale).fill({
+      color: hullDetail.cargoColor,
+      alpha: 0.84
+    });
+    this.ship.circle(center.x - Math.cos(angle) * 15 * shipScale, center.y - Math.sin(angle) * 15 * shipScale, 3.4 * shipScale).fill({
+      color: hullDetail.engineColor,
+      alpha: 0.92
+    });
+    if (hullDetail.damageAlpha > 0) {
+      this.ship.circle(center.x, center.y, 20 * shipScale).stroke({
+        color: 0xff6f91,
+        width: 1.5,
+        alpha: hullDetail.damageAlpha
+      });
+    }
     this.ship.circle(center.x + Math.cos(angle) * 4 * shipScale, center.y + Math.sin(angle) * 4 * shipScale, 5.6 * shipScale).fill({
-      color: hullVisual.canopyColor,
+      color: hullDetail.cockpitColor,
       alpha: 0.94
     });
     this.ship.circle(center.x + Math.cos(angle) * 6 * shipScale, center.y + Math.sin(angle) * 6 * shipScale, 2.2 * shipScale).fill({

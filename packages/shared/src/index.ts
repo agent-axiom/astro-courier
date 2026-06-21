@@ -137,6 +137,15 @@ export type SimulationSnapshot = {
     speedThreshold: number;
     styleBonus: number;
   };
+  refuelStop?: {
+    id: string;
+    position: Vec2;
+    distance: number;
+    bearing: number;
+    ready: boolean;
+    fuelGain: number;
+    allowedApproachSpeed: number;
+  };
   riskGates: RiskGateSnapshot[];
   ship: {
     position: Vec2;
@@ -191,6 +200,9 @@ export type SimulationSnapshot = {
     normalAngle: number;
     radius: number;
     role: "pickup" | "destination" | "neutral";
+    stationRole?: "neutral" | "fuel";
+    refuel: boolean;
+    refueled: boolean;
     active: boolean;
     destination: boolean;
   }>;

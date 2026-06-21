@@ -26,6 +26,7 @@ export const stationSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
   position: vec2Schema,
+  role: z.enum(["neutral", "fuel"]).optional(),
   landingPads: z.array(landingPadSchema)
 });
 
@@ -65,10 +66,12 @@ export const contractSchema = z.object({
   briefing: z.string().min(1),
   riskLabel: z.string().min(1),
   rewardLabel: z.string().min(1),
+  missionType: z.enum(["standard", "longhaul"]).optional(),
   shipStart: contractShipStartSchema.optional(),
   pickupId: z.string().min(1),
   destinationId: z.string().min(1),
   cargoId: z.string().min(1),
+  refuelStationIds: z.array(z.string().min(1)).optional(),
   hazardSeverityMultiplier: z.number().positive().max(3).optional(),
   hazards: z.array(hazardSchema).optional(),
   riskGateCount: z.number().int().min(0).max(12).optional(),
@@ -136,6 +139,15 @@ export const systemSchema = z
           message: `Unknown cargo "${contract.cargoId}"`
         });
       }
+      contract.refuelStationIds?.forEach((padId, refuelIndex) => {
+        if (!padIds.has(padId)) {
+          context.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["contracts", index, "refuelStationIds", refuelIndex],
+            message: `Unknown refuel pad "${padId}"`
+          });
+        }
+      });
     });
   });
 

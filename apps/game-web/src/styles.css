@@ -2282,6 +2282,49 @@ button {
   color: #ffe19a;
 }
 
+.refuel-chip {
+  display: grid;
+  grid-template-columns: 16px auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 1px solid rgba(142, 230, 184, 0.26);
+  border-radius: 7px;
+  background: rgba(142, 230, 184, 0.13);
+  color: #bff7d8;
+  font-size: 0.8rem;
+  font-weight: 880;
+}
+
+.refuel-chip span,
+.refuel-chip strong,
+.refuel-chip small {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.12;
+}
+
+.refuel-chip span {
+  color: rgba(232, 255, 243, 0.76);
+}
+
+.refuel-chip strong {
+  color: #ffffff;
+  text-align: right;
+}
+
+.refuel-chip small {
+  color: #ffe19a;
+  text-align: right;
+}
+
+.refuel-chip-ready {
+  border-color: rgba(255, 209, 102, 0.4);
+  background: rgba(255, 209, 102, 0.18);
+  color: #ffe19a;
+}
+
 .route-mark-cue-chip {
   display: grid;
   grid-template-columns: 16px auto 1fr;

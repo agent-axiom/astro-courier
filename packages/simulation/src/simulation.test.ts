@@ -24,7 +24,9 @@ import {
   STYLE_CHAIN_WINDOW_SECONDS,
   createWorldFromSystem,
   createWorldReplay,
+  gravityAccelerationAt,
   predictTrajectory,
+  retroBrakeImpulse,
   snapshotWorld,
   stepWorld,
   summarizeRun,
@@ -151,6 +153,82 @@ describe("deterministic Astro Courier simulation", () => {
     expect(snapshotWorld(world).ship.fuel).toBe(22);
   });
 
+  it("exposes and resolves longhaul refuel stops without completing the delivery", () => {
+    const systemWithFuelStop: SystemContent = {
+      ...starterSystem,
+      stations: [
+        ...starterSystem.stations,
+        {
+          id: "relay-fuel",
+          name: "Relay Fuel",
+          role: "fuel",
+          position: [440, -160],
+          landingPads: [
+            {
+              id: "relay-fuel-pad",
+              position: [440, -160],
+              normalAngle: 0,
+              radius: 24,
+              allowedApproachSpeed: 35,
+              requiredAngleTolerance: 0.8
+            }
+          ]
+        }
+      ],
+      contracts: [
+        ...starterSystem.contracts,
+        {
+          id: "longhaul-test",
+          title: "Longhaul Test",
+          briefing: "Cross the wide lane and refuel once.",
+          riskLabel: "Longhaul",
+          rewardLabel: "Fuel-stop routing",
+          missionType: "longhaul",
+          shipStart: {
+            position: [120, 0],
+            velocity: [8, 0],
+            rotation: 0,
+            fuel: 60
+          },
+          pickupId: "north-pad",
+          destinationId: "dock-a",
+          refuelStationIds: ["relay-fuel-pad"],
+          cargoId: "bottled-starlight",
+          medalTimes: { bronze: 140, silver: 96, gold: 62 }
+        }
+      ]
+    };
+    const world = createWorldFromSystem(systemWithFuelStop, "refuel-seed", { contractId: "longhaul-test" });
+
+    expect(snapshotWorld(world).refuelStop).toMatchObject({
+      id: "relay-fuel-pad",
+      distance: expect.any(Number),
+      ready: false,
+      fuelGain: 0
+    });
+
+    world.ship.position = { x: 440, y: -160 };
+    world.ship.velocity = { x: 3, y: 0 };
+    world.ship.rotation = 0;
+    world.ship.fuel = 9;
+
+    stepWorld(world, 1 / 60, [], { combat: false });
+
+    expect(world.status).toBe("flying");
+    expect(world.objectivePhase).toBe("pickup");
+    expect(world.ship.fuel).toBeGreaterThan(54);
+    expect(world.refueledPadIds).toContain("relay-fuel-pad");
+    expect(world.lastMilestone).toBe("Refueled");
+    expect(snapshotWorld(world).refuelStop).toBeUndefined();
+
+    world.ship.fuel = 12;
+    world.ship.position = { x: 440, y: -160 };
+    world.ship.velocity = { x: 2, y: 0 };
+    stepWorld(world, 1 / 60, [], { combat: false });
+
+    expect(world.ship.fuel).toBeLessThan(13);
+  });
+
   it("produces the same summary and checksum for the same seed and command frames", () => {
     const commands = createCommandBuffer([
       { tick: 0, command: { type: "THRUST", amount: 1 } },
@@ -191,6 +269,32 @@ describe("deterministic Astro Courier simulation", () => {
     expect(Number.isFinite(world.ship.position.y)).toBe(true);
     expect(Number.isFinite(world.ship.velocity.x)).toBe(true);
     expect(Number.isFinite(world.ship.velocity.y)).toBe(true);
+  });
+
+  it("calculates gravity as a bounded inverse-square acceleration toward the source", () => {
+    const source = {
+      id: "luma",
+      name: "Luma",
+      visualTheme: "blue_garden",
+      position: { x: 0, y: 0 },
+      radius: 64,
+      gravityMass: 1400,
+      influenceRadius: 360
+    };
+    const near = gravityAccelerationAt({ x: 120, y: 0 }, source);
+    const far = gravityAccelerationAt({ x: 240, y: 0 }, source);
+    const outside = gravityAccelerationAt({ x: 420, y: 0 }, source);
+
+    expect(near.x).toBeLessThan(0);
+    expect(Math.abs(near.x)).toBeGreaterThan(Math.abs(far.x));
+    expect(far.y).toBeCloseTo(0, 6);
+    expect(outside).toEqual({ x: 0, y: 0 });
+  });
+
+  it("turns manual braking into a capped retro impulse against current velocity", () => {
+    expect(retroBrakeImpulse({ x: 12, y: 0 }, 5)).toEqual({ x: -5, y: 0 });
+    expect(retroBrakeImpulse({ x: 3, y: 4 }, 12)).toEqual({ x: -3, y: -4 });
+    expect(retroBrakeImpulse({ x: 0, y: 0 }, 12)).toEqual({ x: 0, y: 0 });
   });
 
   it("awards one gravity sling style hit for a clean high-speed gravity pocket pass", () => {
