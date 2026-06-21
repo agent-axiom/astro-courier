@@ -53,6 +53,7 @@ type ProfileSessionPayload = {
   sub: string;
   provider: "guest";
   displayName: string;
+  cloudCode?: string;
   issuedAt: number;
 };
 
@@ -102,6 +103,10 @@ export function createEnemyDirectorWorker(deps: EnemyDirectorWorkerDeps = {}): E
         return handleProfileSession(request, env, cors);
       }
 
+      if (url.pathname === "/profile/restore") {
+        return handleProfileRestore(request, env, cors);
+      }
+
       if (url.pathname === "/profile/progress") {
         return handleProfileProgress(request, env, cors);
       }
@@ -136,13 +141,18 @@ async function handleProfileSession(request: Request, env: EnemyDirectorEnv, cor
   if (!env.PROFILE_TOKEN_SECRET) {
     return json({ error: "profile_auth_unavailable" }, { status: 503, headers: cors });
   }
+  if (!env.PROFILE_DB) {
+    return json({ error: "cloud_save_unavailable" }, { status: 503, headers: cors });
+  }
 
   const body = await readJsonObject(request);
   const displayName = sanitizeDisplayName(typeof body?.displayName === "string" ? body.displayName : "Courier");
+  const cloudCode = await createCloudProfile(env.PROFILE_DB, displayName);
   const payload: ProfileSessionPayload = {
-    sub: `guest_${crypto.randomUUID().replaceAll("-", "").slice(0, 18)}`,
+    sub: cloudCode.playerId,
     provider: "guest",
     displayName,
+    cloudCode: cloudCode.code,
     issuedAt: Date.now()
   };
   const token = await signProfileToken(payload, env.PROFILE_TOKEN_SECRET);
@@ -150,11 +160,69 @@ async function handleProfileSession(request: Request, env: EnemyDirectorEnv, cor
   return json(
     {
       token,
+      cloudCode: payload.cloudCode,
       player: {
         id: payload.sub,
         displayName: payload.displayName,
         provider: payload.provider
       }
+    },
+    { status: 200, headers: cors }
+  );
+}
+
+async function handleProfileRestore(request: Request, env: EnemyDirectorEnv, cors: Headers): Promise<Response> {
+  if (request.method !== "POST") {
+    return json({ error: "method_not_allowed" }, { status: 405, headers: cors });
+  }
+  if (!env.PROFILE_TOKEN_SECRET) {
+    return json({ error: "profile_auth_unavailable" }, { status: 503, headers: cors });
+  }
+  if (!env.PROFILE_DB) {
+    return json({ error: "cloud_save_unavailable" }, { status: 503, headers: cors });
+  }
+
+  const body = await readJsonObject(request);
+  const cloudCode = normalizeCloudCode(typeof body?.cloudCode === "string" ? body.cloudCode : "");
+  if (!cloudCode) {
+    return json({ error: "invalid_cloud_code" }, { status: 400, headers: cors });
+  }
+
+  const row = await env.PROFILE_DB.prepare(
+    "SELECT player_id, cloud_code, display_name, progress_json FROM player_progress WHERE cloud_code = ?"
+  )
+    .bind(cloudCode)
+    .first<{
+      player_id: string;
+      cloud_code: string;
+      display_name: string | null;
+      progress_json: string;
+    }>();
+
+  if (!row) {
+    return json({ error: "cloud_code_not_found" }, { status: 404, headers: cors });
+  }
+
+  const displayName = sanitizeDisplayName(row.display_name ?? "Courier");
+  const payload: ProfileSessionPayload = {
+    sub: row.player_id,
+    provider: "guest",
+    displayName,
+    cloudCode: row.cloud_code,
+    issuedAt: Date.now()
+  };
+  const token = await signProfileToken(payload, env.PROFILE_TOKEN_SECRET);
+
+  return json(
+    {
+      token,
+      cloudCode: row.cloud_code,
+      player: {
+        id: row.player_id,
+        displayName,
+        provider: "guest"
+      },
+      progress: JSON.parse(row.progress_json)
     },
     { status: 200, headers: cors }
   );
@@ -174,12 +242,14 @@ async function handleProfileProgress(request: Request, env: EnemyDirectorEnv, co
   }
 
   if (request.method === "GET") {
-    const row = await env.PROFILE_DB.prepare("SELECT progress_json FROM player_progress WHERE player_id = ?").bind(session.sub).first<{
+    const row = await env.PROFILE_DB.prepare("SELECT progress_json, cloud_code FROM player_progress WHERE player_id = ?").bind(session.sub).first<{
       progress_json: string;
+      cloud_code: string | null;
     }>();
     return json(
       {
         playerId: session.sub,
+        cloudCode: row?.cloud_code ?? session.cloudCode,
         progress: row ? JSON.parse(row.progress_json) : undefined
       },
       { status: 200, headers: cors }
@@ -191,12 +261,42 @@ async function handleProfileProgress(request: Request, env: EnemyDirectorEnv, co
     return json({ error: "invalid_progress" }, { status: 400, headers: cors });
   }
   await env.PROFILE_DB.prepare(
-    "INSERT INTO player_progress (player_id, progress_json, updated_at) VALUES (?, ?, ?) ON CONFLICT(player_id) DO UPDATE SET progress_json = excluded.progress_json, updated_at = excluded.updated_at"
+    "INSERT INTO player_progress (player_id, cloud_code, display_name, progress_json, updated_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT(player_id) DO UPDATE SET cloud_code = COALESCE(player_progress.cloud_code, excluded.cloud_code), display_name = excluded.display_name, progress_json = excluded.progress_json, updated_at = excluded.updated_at"
   )
-    .bind(session.sub, JSON.stringify(progress), progress.updatedAt)
+    .bind(session.sub, session.cloudCode ?? null, session.displayName, JSON.stringify(progress), progress.updatedAt)
     .run();
 
   return json({ ok: true, saved: true }, { status: 200, headers: cors });
+}
+
+async function createCloudProfile(db: D1DatabaseBinding, displayName: string): Promise<{ playerId: string; code: string }> {
+  const progress = emptyProgressSnapshot();
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const playerId = `guest_${crypto.randomUUID().replaceAll("-", "").slice(0, 18)}`;
+    const code = generateCloudCode();
+    try {
+      await db
+        .prepare("INSERT INTO player_progress (player_id, cloud_code, display_name, progress_json, updated_at) VALUES (?, ?, ?, ?, ?)")
+        .bind(playerId, code, displayName, JSON.stringify(progress), progress.updatedAt)
+        .run();
+      return { playerId, code };
+    } catch (error) {
+      if (attempt === 4) {
+        throw error;
+      }
+    }
+  }
+  throw new Error("cloud_code_generation_failed");
+}
+
+function emptyProgressSnapshot(): ProfileProgressSnapshot {
+  return {
+    schemaVersion: 1,
+    bestRunsByContract: {},
+    unlockedContracts: [],
+    shipUpgrades: [],
+    updatedAt: new Date().toISOString()
+  };
 }
 
 async function readJsonObject(request: Request): Promise<Record<string, unknown> | undefined> {
@@ -447,6 +547,24 @@ async function hmacSha256(value: string, secret: string): Promise<string> {
 function sanitizeDisplayName(value: string): string {
   const trimmed = value.trim().replace(/\s+/g, " ");
   return trimmed.slice(0, 24) || "Courier";
+}
+
+const cloudCodeAlphabet = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+
+function generateCloudCode(): string {
+  const bytes = new Uint8Array(8);
+  crypto.getRandomValues(bytes);
+  const characters = Array.from(bytes, (byte) => cloudCodeAlphabet[byte % cloudCodeAlphabet.length]).join("");
+  return `AC-${characters.slice(0, 4)}-${characters.slice(4)}`;
+}
+
+function normalizeCloudCode(value: string): string | undefined {
+  const compact = value.toUpperCase().replace(/[^A-Z0-9]/gu, "");
+  const withoutPrefix = compact.startsWith("AC") ? compact.slice(2) : compact;
+  if (!/^[2-9A-HJ-NP-Z]{8}$/u.test(withoutPrefix)) {
+    return undefined;
+  }
+  return `AC-${withoutPrefix.slice(0, 4)}-${withoutPrefix.slice(4)}`;
 }
 
 function base64UrlEncode(value: string): string {

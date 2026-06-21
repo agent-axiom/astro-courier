@@ -3612,6 +3612,78 @@ button {
   transform: none;
 }
 
+.preflight-cloud-stack {
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  justify-self: center;
+  width: min(100%, 320px);
+}
+
+.preflight-cloud-code {
+  display: inline-grid;
+  grid-template-columns: auto minmax(0, auto);
+  align-items: center;
+  gap: 7px;
+  min-height: 30px;
+  padding: 6px 9px;
+  border: 1px solid rgba(135, 239, 189, 0.24);
+  border-radius: 8px;
+  background: rgba(13, 44, 37, 0.36);
+  color: #d9ffe9;
+  font-size: 0.68rem;
+  font-weight: 850;
+  letter-spacing: 0;
+}
+
+.preflight-cloud-code span {
+  color: rgba(217, 255, 233, 0.72);
+  text-transform: uppercase;
+}
+
+.preflight-cloud-code strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.preflight-cloud-restore {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
+  width: 100%;
+}
+
+.preflight-cloud-restore input,
+.preflight-cloud-restore button {
+  min-height: 34px;
+  border-radius: 8px;
+  font-size: 0.7rem;
+  font-weight: 850;
+  letter-spacing: 0;
+}
+
+.preflight-cloud-restore input {
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(8, 13, 28, 0.62);
+  color: #ffffff;
+  padding: 6px 9px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.preflight-cloud-restore button {
+  border: 1px solid rgba(124, 225, 255, 0.32);
+  background: rgba(124, 225, 255, 0.12);
+  color: #d8f8ff;
+  cursor: pointer;
+}
+
+.preflight-cloud-restore button:disabled {
+  cursor: default;
+  opacity: 0.58;
+}
+
 .preflight-cloud-syncing {
   border-color: rgba(255, 209, 102, 0.42);
   color: #ffe7a1;
@@ -7096,6 +7168,7 @@ button {
 
   .preflight-kicker,
   .preflight-cover-art,
+  .preflight-cloud-stack,
   .perk-selector,
   .hangar-strip,
   .ship-upgrade-track,
@@ -7372,6 +7445,23 @@ button {
   .hangar-strip {
     gap: 6px;
     padding: 6px;
+  }
+
+  .preflight-cloud-stack {
+    gap: 5px;
+    width: min(100%, 286px);
+  }
+
+  .preflight-cloud-code {
+    min-height: 26px;
+    padding: 5px 8px;
+    font-size: 0.62rem;
+  }
+
+  .preflight-cloud-restore input,
+  .preflight-cloud-restore button {
+    min-height: 30px;
+    font-size: 0.62rem;
   }
 
   .hangar-system {

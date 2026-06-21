@@ -22,7 +22,7 @@ import {
   VolumeX,
   Zap
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import { create } from "zustand";
 import {
   buildBestRunChase,
@@ -195,6 +195,10 @@ import {
   buildCloudProgressSnapshot,
   buildCloudSaveStatusLabel,
   createCloudSaveClient,
+  readStoredCloudSaveSession,
+  storeCloudSaveSession,
+  writeCloudProgressToStorage,
+  type CloudProgressSnapshot,
   type CloudSaveSession,
   type CloudSaveStatus
 } from "./game/cloudSave";
@@ -310,6 +314,7 @@ export function App() {
   const previousAudioSnapshotRef = useRef<HudAudioSnapshot | undefined>(undefined);
   const previousRunFeedSnapshotRef = useRef<RunFeedSnapshot | undefined>(undefined);
   const nextRunFeedIdRef = useRef(1);
+  const cloudHydratedSessionRef = useRef<string | null>(null);
   const screenFeedbackTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const touchPointerActiveRef = useRef(false);
   const touchPointerOriginRef = useRef<{ x: number; y: number } | undefined>(undefined);
@@ -341,8 +346,14 @@ export function App() {
   const [dailyProgressReceipt, setDailyProgressReceipt] = useState<DailyDispatchProgressReceipt | undefined>(undefined);
   const profileApiUrl = import.meta.env.VITE_PROFILE_API_URL as string | undefined;
   const cloudSaveClient = useMemo(() => createCloudSaveClient(profileApiUrl), [profileApiUrl]);
-  const [cloudSession, setCloudSession] = useState<CloudSaveSession | undefined>(undefined);
-  const [cloudSaveStatus, setCloudSaveStatus] = useState<CloudSaveStatus>(() => (profileApiUrl ? { mode: "idle" } : { mode: "disabled" }));
+  const [cloudSession, setCloudSession] = useState<CloudSaveSession | undefined>(() => {
+    const storage = getBestRunStorage();
+    return storage ? readStoredCloudSaveSession(storage) : undefined;
+  });
+  const [cloudRestoreCode, setCloudRestoreCode] = useState("");
+  const [cloudSaveStatus, setCloudSaveStatus] = useState<CloudSaveStatus>(() =>
+    profileApiUrl ? (cloudSession ? { mode: "synced", displayName: cloudSession.player.displayName } : { mode: "idle" }) : { mode: "disabled" }
+  );
   const cloudSaveStatusLabel = buildCloudSaveStatusLabel(cloudSaveStatus);
   const pushScreenFeedback = (feedback: ScreenFeedback | undefined) => {
     if (!feedback) {
@@ -549,6 +560,35 @@ export function App() {
 
     setBestRunsByContract(readBestRunsByContract(storage, hud.contractOptions));
   }, [hud.contractOptions]);
+
+  useEffect(() => {
+    if (!cloudSaveClient || !cloudSession || cloudHydratedSessionRef.current === cloudSession.token) {
+      return;
+    }
+
+    cloudHydratedSessionRef.current = cloudSession.token;
+    setCloudSaveStatus({ mode: "syncing" });
+    let cancelled = false;
+    void cloudSaveClient
+      .loadProgress(cloudSession)
+      .then((progress) => {
+        if (cancelled) {
+          return;
+        }
+        applyCloudProgressSnapshot(progress);
+        setCloudSaveStatus({ mode: "synced", displayName: cloudSession.player.displayName });
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setCloudSaveStatus({ mode: "error" });
+          cloudHydratedSessionRef.current = null;
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [cloudSaveClient, cloudSession]);
 
   useEffect(() => {
     const currentSnapshot = toHudAudioSnapshot(hud, bestRun);
@@ -1517,6 +1557,20 @@ export function App() {
     }
   };
 
+  function applyCloudProgressSnapshot(progress: CloudProgressSnapshot | undefined): number {
+    if (!progress) {
+      return 0;
+    }
+    const storage = getBestRunStorage();
+    if (!storage) {
+      return 0;
+    }
+    const written = writeCloudProgressToStorage(storage, progress);
+    setBestRunsByContract(readBestRunsByContract(storage, hud.contractOptions));
+    setBestRun(getBestRun(storage, hud.contractId));
+    return written;
+  }
+
   const enableCloudSave = async () => {
     if (!cloudSaveClient) {
       setCloudSaveStatus({ mode: "disabled" });
@@ -1530,6 +1584,10 @@ export function App() {
       return;
     }
 
+    const storage = getBestRunStorage();
+    if (storage) {
+      storeCloudSaveSession(storage, nextSession);
+    }
     setCloudSession(nextSession);
     const saved = await cloudSaveClient.saveProgress(
       nextSession,
@@ -1540,6 +1598,29 @@ export function App() {
       })
     );
     setCloudSaveStatus(saved ? { mode: "synced", displayName: nextSession.player.displayName } : { mode: "error" });
+  };
+
+  const restoreCloudSave = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!cloudSaveClient || !cloudRestoreCode.trim()) {
+      return;
+    }
+
+    setCloudSaveStatus({ mode: "syncing" });
+    const restored = await cloudSaveClient.restoreSession(cloudRestoreCode.trim());
+    if (!restored) {
+      setCloudSaveStatus({ mode: "error" });
+      return;
+    }
+
+    const storage = getBestRunStorage();
+    if (storage) {
+      storeCloudSaveSession(storage, restored);
+    }
+    setCloudSession(restored);
+    setCloudRestoreCode("");
+    applyCloudProgressSnapshot(restored.progress);
+    setCloudSaveStatus({ mode: "synced", displayName: restored.player.displayName });
   };
 
   const restartActiveRun = () => {
@@ -2280,16 +2361,41 @@ export function App() {
                   <span>{trainingFlightAction.label}</span>
                 </button>
               ) : null}
-              <button
-                type="button"
-                className={`preflight-cloud-button preflight-cloud-${cloudSaveStatusLabel.tone}`}
-                aria-label={`${cloudSaveStatusLabel.label}: ${cloudSaveStatusLabel.value}`}
-                disabled={!cloudSaveClient || cloudSaveStatus.mode === "syncing"}
-                onClick={enableCloudSave}
-              >
-                <Satellite size={16} />
-                <span>{cloudSaveStatusLabel.value}</span>
-              </button>
+              <div className="preflight-cloud-stack">
+                <button
+                  type="button"
+                  className={`preflight-cloud-button preflight-cloud-${cloudSaveStatusLabel.tone}`}
+                  aria-label={`${cloudSaveStatusLabel.label}: ${cloudSaveStatusLabel.value}`}
+                  disabled={!cloudSaveClient || cloudSaveStatus.mode === "syncing"}
+                  onClick={enableCloudSave}
+                >
+                  <Satellite size={16} />
+                  <span>{cloudSaveStatusLabel.value}</span>
+                </button>
+                {cloudSession?.cloudCode ? (
+                  <div className="preflight-cloud-code" aria-label={`Cloud code: ${cloudSession.cloudCode}`}>
+                    <span>Code</span>
+                    <strong>{cloudSession.cloudCode}</strong>
+                  </div>
+                ) : null}
+                {cloudSaveClient && !cloudSession ? (
+                  <form className="preflight-cloud-restore" aria-label="Restore cloud progress" onSubmit={restoreCloudSave}>
+                    <input
+                      aria-label="Cloud code"
+                      autoCapitalize="characters"
+                      autoComplete="off"
+                      inputMode="text"
+                      maxLength={12}
+                      placeholder="AC-CODE-2026"
+                      value={cloudRestoreCode}
+                      onChange={(event) => setCloudRestoreCode(event.target.value.toUpperCase())}
+                    />
+                    <button type="submit" disabled={cloudSaveStatus.mode === "syncing" || !cloudRestoreCode.trim()}>
+                      Restore
+                    </button>
+                  </form>
+                ) : null}
+              </div>
             </>
           ) : (
             <div className="preflight-cover-art">

@@ -849,6 +849,10 @@ function medalRank(medal: RunMedal | undefined): number {
 }
 
 function storageKey(contractKey: string): string {
+  return bestRunStorageKey(contractKey);
+}
+
+export function bestRunStorageKey(contractKey: string): string {
   return `astro-courier:best-run:${contractKey}`;
 }
 

@@ -97,6 +97,13 @@ describe("responsive game layout CSS", () => {
     expect(styles).toContain(".hangar-system-online");
   });
 
+  it("styles cloud code save and restore controls as a compact menu stack", () => {
+    expect(styles).toContain(".preflight-cloud-stack");
+    expect(styles).toContain(".preflight-cloud-code");
+    expect(styles).toContain(".preflight-cloud-restore");
+    expect(styles).toMatch(/\.preflight-cloud-restore input[\s\S]*text-transform: uppercase;/);
+  });
+
   it("turns phone preflight into a compact launch sheet with icon-first choices", () => {
     expect(styles).toMatch(/@media \(max-width: 480px\)[\s\S]*\.preflight-overlay[\s\S]*top: auto;/);
     expect(styles).toMatch(

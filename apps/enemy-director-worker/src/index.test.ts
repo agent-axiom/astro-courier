@@ -189,6 +189,7 @@ describe("enemy director worker", () => {
   });
 
   it("issues a signed guest profile session", async () => {
+    const db = new MemoryProfileDb();
     const worker = createEnemyDirectorWorker();
 
     const response = await worker.fetch(
@@ -197,18 +198,90 @@ describe("enemy director worker", () => {
         headers: { Origin: "https://agent-axiom.github.io", "Content-Type": "application/json" },
         body: JSON.stringify({ displayName: "Pilot" })
       }),
-      testEnv({ PROFILE_TOKEN_SECRET: "profile-secret" })
+      testEnv({ PROFILE_DB: db, PROFILE_TOKEN_SECRET: "profile-secret" })
     );
 
-    const payload = (await response.json()) as { token?: string; player?: { id: string; displayName: string; provider: string } };
+    const payload = (await response.json()) as {
+      token?: string;
+      cloudCode?: string;
+      player?: { id: string; displayName: string; provider: string };
+    };
 
     expect(response.status).toBe(200);
     expect(payload.token).toMatch(/^guest\./);
+    expect(payload.cloudCode).toMatch(/^AC-[2-9A-HJ-NP-Z]{4}-[2-9A-HJ-NP-Z]{4}$/);
     expect(payload.player).toMatchObject({
       displayName: "Pilot",
       provider: "guest"
     });
     expect(payload.player?.id).toMatch(/^guest_/);
+  });
+
+  it("restores a guest profile session and progress by cloud code", async () => {
+    const db = new MemoryProfileDb();
+    const worker = createEnemyDirectorWorker();
+    const env = testEnv({ PROFILE_DB: db, PROFILE_TOKEN_SECRET: "profile-secret" });
+    const session = (await (
+      await worker.fetch(
+        new Request("https://director.example/profile/session", {
+          method: "POST",
+          body: JSON.stringify({ displayName: "Courier" })
+        }),
+        env
+      )
+    ).json()) as { token: string; cloudCode: string; player: { id: string } };
+    await worker.fetch(
+      new Request("https://director.example/profile/progress", {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${session.token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          schemaVersion: 1,
+          bestRunsByContract: {
+            "first-light-delivery": { score: 1200, elapsedSeconds: 31, medal: "gold" }
+          },
+          unlockedContracts: ["first-light-delivery"],
+          shipUpgrades: ["Boost Tune"],
+          updatedAt: "2026-06-21T00:00:00.000Z"
+        })
+      }),
+      env
+    );
+
+    const restoreResponse = await worker.fetch(
+      new Request("https://director.example/profile/restore", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cloudCode: session.cloudCode.toLowerCase().replaceAll("-", " ") })
+      }),
+      env
+    );
+    const restored = (await restoreResponse.json()) as {
+      token?: string;
+      cloudCode?: string;
+      player?: { id: string; displayName: string; provider: string };
+      progress?: unknown;
+    };
+
+    expect(restoreResponse.status).toBe(200);
+    expect(restored.token).toMatch(/^guest\./);
+    expect(restored.cloudCode).toBe(session.cloudCode);
+    expect(restored.player).toEqual({
+      id: session.player.id,
+      displayName: "Courier",
+      provider: "guest"
+    });
+    expect(restored.progress).toEqual({
+      schemaVersion: 1,
+      bestRunsByContract: {
+        "first-light-delivery": { score: 1200, elapsedSeconds: 31, medal: "gold" }
+      },
+      unlockedContracts: ["first-light-delivery"],
+      shipUpgrades: ["Boost Tune"],
+      updatedAt: "2026-06-21T00:00:00.000Z"
+    });
   });
 
   it("saves and reads a cloud progress snapshot from D1", async () => {
@@ -223,7 +296,7 @@ describe("enemy director worker", () => {
         }),
         env
       )
-    ).json()) as { token: string; player: { id: string } };
+    ).json()) as { token: string; cloudCode: string; player: { id: string } };
 
     const saveResponse = await worker.fetch(
       new Request("https://director.example/profile/progress", {
@@ -257,6 +330,7 @@ describe("enemy director worker", () => {
     expect(readResponse.status).toBe(200);
     expect(await readResponse.json()).toEqual({
       playerId: session.player.id,
+      cloudCode: session.cloudCode,
       progress: {
         schemaVersion: 1,
         bestRunsByContract: {
@@ -271,22 +345,11 @@ describe("enemy director worker", () => {
 
   it("returns a clear cloud-save unavailable response when D1 is not bound", async () => {
     const worker = createEnemyDirectorWorker();
-    const env = testEnv({ PROFILE_TOKEN_SECRET: "profile-secret" });
-    const session = (await (
-      await worker.fetch(
-        new Request("https://director.example/profile/session", {
-          method: "POST",
-          body: JSON.stringify({ displayName: "Courier" })
-        }),
-        env
-      )
-    ).json()) as { token: string };
-
     const response = await worker.fetch(
       new Request("https://director.example/profile/progress", {
-        headers: { Authorization: `Bearer ${session.token}` }
+        headers: { Authorization: "Bearer guest.invalid.signature" }
       }),
-      env
+      testEnv({ PROFILE_TOKEN_SECRET: "profile-secret" })
     );
 
     expect(response.status).toBe(503);
@@ -304,13 +367,22 @@ function testEnv(overrides: Partial<EnemyDirectorEnv> = {}): EnemyDirectorEnv {
 }
 
 class MemoryProfileDb {
-  private progress = new Map<string, string>();
+  private rows = new Map<
+    string,
+    {
+      player_id: string;
+      cloud_code: string | null;
+      display_name: string | null;
+      progress_json: string;
+      updated_at: string;
+    }
+  >();
   private query = "";
   private args: unknown[] = [];
 
   prepare(query: string): this {
     const statement = new MemoryProfileDb();
-    statement.progress = this.progress;
+    statement.rows = this.rows;
     statement.query = query;
     return statement as this;
   }
@@ -321,10 +393,14 @@ class MemoryProfileDb {
   }
 
   async first<T>(): Promise<T | null> {
-    if (this.query.includes("SELECT progress_json")) {
+    if (this.query.includes("WHERE cloud_code")) {
+      const cloudCode = String(this.args[0]);
+      const row = Array.from(this.rows.values()).find((candidate) => candidate.cloud_code === cloudCode);
+      return row ? (row as T) : null;
+    }
+    if (this.query.includes("WHERE player_id")) {
       const playerId = String(this.args[0]);
-      const progress_json = this.progress.get(playerId);
-      return progress_json ? ({ progress_json } as T) : null;
+      return (this.rows.get(playerId) as T | undefined) ?? null;
     }
     return null;
   }
@@ -332,8 +408,33 @@ class MemoryProfileDb {
   async run(): Promise<{ success: boolean }> {
     if (this.query.includes("INSERT INTO player_progress")) {
       const playerId = String(this.args[0]);
-      const progressJson = String(this.args[1]);
-      this.progress.set(playerId, progressJson);
+      const hasCloudCode = this.args.length >= 5;
+      if (hasCloudCode) {
+        const cloudCode = this.args[1] === null ? null : String(this.args[1]);
+        const displayName = this.args[2] === null ? null : String(this.args[2]);
+        const progressJson = String(this.args[3]);
+        const updatedAt = String(this.args[4]);
+        if (cloudCode && Array.from(this.rows.values()).some((row) => row.cloud_code === cloudCode && row.player_id !== playerId)) {
+          throw new Error("UNIQUE constraint failed: player_progress.cloud_code");
+        }
+        this.rows.set(playerId, {
+          player_id: playerId,
+          cloud_code: cloudCode ?? this.rows.get(playerId)?.cloud_code ?? null,
+          display_name: displayName,
+          progress_json: progressJson,
+          updated_at: updatedAt
+        });
+      } else {
+        const progressJson = String(this.args[1]);
+        const updatedAt = String(this.args[2]);
+        this.rows.set(playerId, {
+          player_id: playerId,
+          cloud_code: this.rows.get(playerId)?.cloud_code ?? null,
+          display_name: this.rows.get(playerId)?.display_name ?? null,
+          progress_json: progressJson,
+          updated_at: updatedAt
+        });
+      }
     }
     return { success: true };
   }

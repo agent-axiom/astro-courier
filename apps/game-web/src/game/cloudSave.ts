@@ -1,3 +1,5 @@
+import { bestRunStorageKey, type BestRun } from "./bestRun";
+
 export type CloudProgressSnapshot = {
   schemaVersion: 1;
   bestRunsByContract: Record<string, unknown>;
@@ -8,11 +10,16 @@ export type CloudProgressSnapshot = {
 
 export type CloudSaveSession = {
   token: string;
+  cloudCode: string;
   player: {
     id: string;
     displayName: string;
     provider: "guest";
   };
+};
+
+export type CloudSaveRestore = CloudSaveSession & {
+  progress?: CloudProgressSnapshot;
 };
 
 export type CloudSaveStatus =
@@ -32,9 +39,13 @@ export type CloudSaveClient = {
   createGuestSession(displayName: string): Promise<CloudSaveSession | undefined>;
   saveProgress(session: CloudSaveSession, progress: CloudProgressSnapshot): Promise<boolean>;
   loadProgress(session: CloudSaveSession): Promise<CloudProgressSnapshot | undefined>;
+  restoreSession(cloudCode: string): Promise<CloudSaveRestore | undefined>;
 };
 
 type FetchCloudSave = (url: string, init?: RequestInit) => Promise<Response>;
+type CloudSaveStorage = Pick<Storage, "getItem" | "setItem">;
+
+export const CLOUD_SAVE_SESSION_STORAGE_KEY = "astro-courier:cloud-session";
 
 export function createCloudSaveClient(profileApiUrl: string | undefined, fetchImpl?: FetchCloudSave): CloudSaveClient | undefined {
   const endpoint = normalizeProfileApiUrl(profileApiUrl);
@@ -76,6 +87,27 @@ export function createCloudSaveClient(profileApiUrl: string | undefined, fetchIm
       }
       const payload = (await response.json()) as { progress?: unknown };
       return isCloudProgressSnapshot(payload.progress) ? payload.progress : undefined;
+    },
+    async restoreSession(cloudCode) {
+      const response = await cloudFetch(`${endpoint}/profile/restore`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cloudCode })
+      });
+      if (!response.ok) {
+        return undefined;
+      }
+      const payload = (await response.json()) as Partial<CloudSaveRestore>;
+      const progress = payload.progress;
+      if (!isCloudSaveSession(payload)) {
+        return undefined;
+      }
+      return {
+        token: payload.token,
+        cloudCode: payload.cloudCode,
+        player: payload.player,
+        ...(isCloudProgressSnapshot(progress) ? { progress } : {})
+      };
     }
   };
 }
@@ -111,6 +143,34 @@ export function buildCloudSaveStatusLabel(status: CloudSaveStatus): CloudSaveSta
   return { label: "Cloud", value: "Cloud save", tone: "idle" };
 }
 
+export function storeCloudSaveSession(storage: CloudSaveStorage, session: CloudSaveSession): void {
+  storage.setItem(CLOUD_SAVE_SESSION_STORAGE_KEY, JSON.stringify(session));
+}
+
+export function readStoredCloudSaveSession(storage: CloudSaveStorage): CloudSaveSession | undefined {
+  const raw = storage.getItem(CLOUD_SAVE_SESSION_STORAGE_KEY);
+  if (!raw) {
+    return undefined;
+  }
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    return isCloudSaveSession(parsed) ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export function writeCloudProgressToStorage(storage: CloudSaveStorage, progress: CloudProgressSnapshot): number {
+  let written = 0;
+  for (const [contractId, value] of Object.entries(progress.bestRunsByContract)) {
+    if (isBestRun(value)) {
+      storage.setItem(bestRunStorageKey(contractId), JSON.stringify(value));
+      written += 1;
+    }
+  }
+  return written;
+}
+
 function normalizeProfileApiUrl(value: string | undefined): string | undefined {
   const trimmed = value?.trim();
   if (!trimmed) {
@@ -126,10 +186,27 @@ function isCloudSaveSession(value: unknown): value is CloudSaveSession {
   const candidate = value as CloudSaveSession;
   return (
     typeof candidate.token === "string" &&
+    typeof candidate.cloudCode === "string" &&
     candidate.player !== undefined &&
     typeof candidate.player.id === "string" &&
     typeof candidate.player.displayName === "string" &&
     candidate.player.provider === "guest"
+  );
+}
+
+function isBestRun(value: unknown): value is BestRun {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const candidate = value as Partial<BestRun>;
+  return (
+    typeof candidate.score === "number" &&
+    typeof candidate.elapsedSeconds === "number" &&
+    (candidate.medal === "none" ||
+      candidate.medal === "bronze" ||
+      candidate.medal === "silver" ||
+      candidate.medal === "gold" ||
+      candidate.medal === "comet")
   );
 }
 
