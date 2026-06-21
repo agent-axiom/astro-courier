@@ -58,10 +58,11 @@ export function createEnemyDirectorClient(
           return undefined;
         }
         const payload = (await response.json()) as Partial<EnemyDirectorResult>;
-        if (!isDirectorResult(payload)) {
+        const result = normalizeDirectorResult(payload);
+        if (!result) {
           return undefined;
         }
-        return payload;
+        return result;
       } catch {
         return undefined;
       }
@@ -89,12 +90,12 @@ export function buildEnemyDirectorRequest(snapshot: SimulationSnapshot, quality:
   };
 }
 
-function isDirectorResult(value: unknown): value is EnemyDirectorResult {
+function normalizeDirectorResult(value: unknown): EnemyDirectorResult | undefined {
   if (!value || typeof value !== "object") {
-    return false;
+    return undefined;
   }
   const candidate = value as EnemyDirectorResult;
-  return (
+  if (
     (candidate.mode === "openai" || candidate.mode === "fallback") &&
     candidate.policy !== undefined &&
     candidate.directive !== undefined &&
@@ -110,8 +111,21 @@ function isDirectorResult(value: unknown): value is EnemyDirectorResult {
     (candidate.directive.missileDoctrine === "hold" ||
       candidate.directive.missileDoctrine === "single" ||
       candidate.directive.missileDoctrine === "salvo") &&
+    (candidate.directive.tempo === undefined ||
+      candidate.directive.tempo === "calm" ||
+      candidate.directive.tempo === "push" ||
+      candidate.directive.tempo === "spike") &&
     Number.isFinite(candidate.directive.pressure)
-  );
+  ) {
+    return {
+      ...candidate,
+      directive: {
+        ...candidate.directive,
+        tempo: candidate.directive.tempo ?? "calm"
+      }
+    };
+  }
+  return undefined;
 }
 
 function distanceBetween(left: Vec2, right: Vec2): number {

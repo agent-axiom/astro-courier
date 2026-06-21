@@ -12,9 +12,29 @@ describe("flight director", () => {
     ).toEqual({
       label: "Flight director",
       action: "Commit route",
-      detail: "Launch when ready",
+      detail: "Enter / Space",
       tone: "idle",
       progress: 0
+    });
+  });
+
+  it("keeps combat controls obvious when enemies are active", () => {
+    expect(
+      buildFlightDirector({
+        status: "flying",
+        objectivePhase: "delivery",
+        cargoOnboard: true,
+        targetDistance: 260,
+        interceptorCount: 2,
+        weaponCooldownSeconds: 0,
+        missileAmmo: 1
+      })
+    ).toEqual({
+      label: "Flight director",
+      action: "Fire now",
+      detail: "Space / X missile",
+      tone: "urgent",
+      progress: 1
     });
   });
 

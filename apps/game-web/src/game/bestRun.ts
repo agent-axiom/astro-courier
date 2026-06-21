@@ -1,4 +1,6 @@
-import type { RunMedal, RunStatus, Vec2 } from "@astro-courier/shared";
+import type { RunMedal, RunStatus, ShipUpgradeId, Vec2 } from "@astro-courier/shared";
+
+export type { ShipUpgradeId } from "@astro-courier/shared";
 
 export type BestRun = {
   score: number;
@@ -145,8 +147,6 @@ export type RouteMarkReceipt = {
   value: "Clear mark banked" | "Comet mark banked" | "Ghost mark banked";
   tone: "clear" | "comet" | "ghost";
 };
-
-export type ShipUpgradeId = "boost-tune" | "reinforced-hull" | "pulse-rail" | "mag-clamp" | "forge-core";
 
 export type ShipUpgradeTrackItem = {
   id: ShipUpgradeId;

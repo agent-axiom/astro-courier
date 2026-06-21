@@ -57,7 +57,9 @@ export const enemyWaveSchema = z
     drones: z.number().int().min(0).max(8).optional(),
     fighters: z.number().int().min(0).max(8).optional(),
     brutes: z.number().int().min(0).max(4).optional(),
-    sentinels: z.number().int().min(0).max(3).optional()
+    sentinels: z.number().int().min(0).max(3).optional(),
+    guardians: z.number().int().min(0).max(4).optional(),
+    missileBoats: z.number().int().min(0).max(3).optional()
   });
 
 export const contractSchema = z.object({
@@ -67,7 +69,7 @@ export const contractSchema = z.object({
   riskLabel: z.string().min(1),
   rewardLabel: z.string().min(1),
   difficultyTier: z.enum(["standard", "hard", "raid", "boss"]).optional(),
-  missionType: z.enum(["standard", "longhaul"]).optional(),
+  missionType: z.enum(["standard", "longhaul", "rescue", "escort", "raid"]).optional(),
   shipStart: contractShipStartSchema.optional(),
   pickupId: z.string().min(1),
   destinationId: z.string().min(1),

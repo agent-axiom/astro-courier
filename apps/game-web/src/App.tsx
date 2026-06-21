@@ -1028,7 +1028,10 @@ export function App() {
     approachStreakSeconds: hud.approachStreakSeconds,
     styleMultiplier: hud.styleMultiplier,
     styleChainSecondsRemaining: hud.styleChainSecondsRemaining,
-    manualBrakeUsed: hud.manualBrakeUsed
+    manualBrakeUsed: hud.manualBrakeUsed,
+    interceptorCount: hud.interceptorCount,
+    weaponCooldownSeconds: hud.weaponCooldownSeconds,
+    missileAmmo: hud.missileAmmo
   });
   const flightDirectorStyle = { "--flight-director-progress": flightDirector?.progress ?? 0 } as CSSProperties;
   const liveHudDensity = buildLiveHudDensity({
@@ -1258,6 +1261,8 @@ export function App() {
   const routeBoardMastery = buildRouteBoardMastery(hud.contractOptions, bestRunsByContract);
   const routeBoardTarget = buildRouteBoardTarget(hud.contractOptions, bestRunsByContract);
   const shipUpgradeTrack = buildShipUpgradeTrack(hud.contractOptions, bestRunsByContract);
+  const unlockedShipUpgradeIds = shipUpgradeTrack.filter((upgrade) => upgrade.unlocked).map((upgrade) => upgrade.id);
+  const unlockedShipUpgradeKey = unlockedShipUpgradeIds.join("|");
   const shipUpgradeSummary = buildShipUpgradeSummary(shipUpgradeTrack);
   const hangarReadout = buildHangarReadout(shipUpgradeTrack);
   const routeTargetSelectionAction = buildRouteBoardSelectionAction(routeBoardTarget, hud.contractId);
@@ -1764,6 +1769,10 @@ export function App() {
     audioRef.current?.unlock();
     shellRef.current?.selectPerk(perkId);
   };
+
+  useEffect(() => {
+    shellRef.current?.setShipUpgrades(unlockedShipUpgradeIds);
+  }, [unlockedShipUpgradeKey]);
 
   const toggleAudioMuted = () => {
     const nextMuted = !audioMuted;

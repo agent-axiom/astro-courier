@@ -350,6 +350,76 @@
       }
     },
     {
+      "id": "rescue-pod-run",
+      "title": "Rescue Pod Run",
+      "briefing": "Recover an escape pod from Luma orbit and bring it back to Tea Station without rattling the crew.",
+      "riskLabel": "Rescue",
+      "rewardLabel": "Crew rescue bonuses",
+      "missionType": "rescue",
+      "shipStart": {
+        "position": [142, -170],
+        "velocity": [32, 4],
+        "rotation": 0.12,
+        "fuel": 108
+      },
+      "pickupId": "north-pad",
+      "destinationId": "dock-a",
+      "cargoId": "escape-pod",
+      "hazardSeverityMultiplier": 1.18,
+      "hazards": [
+        {
+          "id": "rescue-radiation-a",
+          "type": "radiation",
+          "position": [168, -112],
+          "radius": 42,
+          "severity": 0.38
+        },
+        {
+          "id": "rescue-nebula-b",
+          "type": "nebula",
+          "position": [305, -92],
+          "radius": 58,
+          "severity": 0.34
+        }
+      ],
+      "medalTimes": {
+        "bronze": 92,
+        "silver": 58,
+        "gold": 36
+      }
+    },
+    {
+      "id": "convoy-escort",
+      "title": "Convoy Escort",
+      "briefing": "Carry the convoy transponder through a guarded lane. Guardians block the route; tag them and keep the line moving.",
+      "riskLabel": "Escort",
+      "rewardLabel": "Guardian lane bonuses",
+      "missionType": "escort",
+      "shipStart": {
+        "position": [182, 18],
+        "velocity": [10, 20],
+        "rotation": 1.5707963267948966,
+        "fuel": 104
+      },
+      "pickupId": "north-pad",
+      "destinationId": "dock-a",
+      "cargoId": "convoy-transponder",
+      "difficultyTier": "hard",
+      "enemyWave": {
+        "drones": 3,
+        "fighters": 1,
+        "brutes": 0,
+        "sentinels": 0,
+        "guardians": 1,
+        "missileBoats": 0
+      },
+      "medalTimes": {
+        "bronze": 98,
+        "silver": 62,
+        "gold": 39
+      }
+    },
+    {
       "id": "gravity-slingshot",
       "title": "Gravity Slingshot",
       "briefing": "Enter above Luma with lateral speed, catch the north pad, then ride the gravity arc out to Tea Station.",
@@ -569,6 +639,62 @@
       }
     },
     {
+      "id": "forge-flagship-raid",
+      "title": "Forge Flagship Raid",
+      "briefing": "Punch through the Forge flagship screen, break missile boats, and plant the capture beacon on the black-metal dock.",
+      "riskLabel": "Boss Raid",
+      "rewardLabel": "Flagship takedown",
+      "missionType": "raid",
+      "shipStart": {
+        "position": [374, -128],
+        "velocity": [18, -8],
+        "rotation": -0.26,
+        "fuel": 124
+      },
+      "pickupId": "dock-a",
+      "destinationId": "forge-dock",
+      "cargoId": "capture-beacon",
+      "difficultyTier": "boss",
+      "hazardSeverityMultiplier": 1.42,
+      "riskGateCount": 3,
+      "enemyWave": {
+        "drones": 2,
+        "fighters": 2,
+        "brutes": 1,
+        "sentinels": 1,
+        "guardians": 1,
+        "missileBoats": 2
+      },
+      "hazards": [
+        {
+          "id": "flagship-radiation-a",
+          "type": "radiation",
+          "position": [496, -168],
+          "radius": 44,
+          "severity": 0.52
+        },
+        {
+          "id": "flagship-ripple-b",
+          "type": "gravity_ripple",
+          "position": [582, -294],
+          "radius": 52,
+          "severity": 0.56
+        },
+        {
+          "id": "flagship-nebula-c",
+          "type": "nebula",
+          "position": [688, -252],
+          "radius": 58,
+          "severity": 0.48
+        }
+      ],
+      "medalTimes": {
+        "bronze": 128,
+        "silver": 82,
+        "gold": 54
+      }
+    },
+    {
       "id": "antimatter-drift",
       "title": "Antimatter Drift",
       "briefing": "Carry an unstable antimatter vial on a lean tank. Brake taps rattle the containment, so coast the arc and dock clean.",
@@ -647,6 +773,18 @@
       "name": "Capture Beacon",
       "kind": "magnetic",
       "fragility": 0.82
+    },
+    {
+      "id": "escape-pod",
+      "name": "Escape Pod",
+      "kind": "live",
+      "fragility": 0.72
+    },
+    {
+      "id": "convoy-transponder",
+      "name": "Convoy Transponder",
+      "kind": "time-sensitive",
+      "fragility": 0.7
     }
   ]
 }

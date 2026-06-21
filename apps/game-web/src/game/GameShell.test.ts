@@ -80,6 +80,29 @@ describe("GameShell lifecycle", () => {
     expect(renderer.render).toHaveBeenCalled();
   });
 
+  it("applies unlocked ship upgrades to the paused launch setup", async () => {
+    const { renderer, input } = createShellDoubles();
+    const onHud = vi.fn();
+    vi.stubGlobal("requestAnimationFrame", vi.fn(() => 7));
+    vi.stubGlobal("cancelAnimationFrame", vi.fn());
+    vi.spyOn(performance, "now").mockReturnValue(1000);
+
+    const shell = new GameShell({
+      mount: {} as HTMLElement,
+      onHud,
+      renderer,
+      input,
+      initialPaused: true
+    });
+
+    await shell.start();
+    shell.setShipUpgrades(["reinforced-hull", "forge-core"]);
+
+    expect(onHud.mock.calls.at(-1)?.[0].shipMaxHp).toBe(115);
+    expect(onHud.mock.calls.at(-1)?.[0].shipHp).toBe(115);
+    expect(onHud.mock.calls.at(-1)?.[0].missileAmmo).toBe(4);
+  });
+
   it("reuses contract option references between HUD publishes", async () => {
     const { renderer, input } = createShellDoubles();
     const onHud = vi.fn();
@@ -158,6 +181,7 @@ describe("GameShell lifecycle", () => {
         directive: {
           formation: "pincer" as const,
           missileDoctrine: "single" as const,
+          tempo: "push" as const,
           pressure: 0.7,
           hint: "pincer"
         }
@@ -229,6 +253,8 @@ describe("GameShell lifecycle", () => {
       "asteroid-sprint",
       "asteroid-labyrinth",
       "nebula-longhaul",
+      "rescue-pod-run",
+      "convoy-escort",
       "gravity-slingshot",
       "gravity-lockpick",
       "solar-thread",
@@ -236,6 +262,7 @@ describe("GameShell lifecycle", () => {
       "interceptor-swarm",
       "black-forge-capture",
       "sentinel-siege",
+      "forge-flagship-raid",
       "antimatter-drift",
       "last-drop-run"
     ]);

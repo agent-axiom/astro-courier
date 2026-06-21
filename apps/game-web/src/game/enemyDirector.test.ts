@@ -72,6 +72,7 @@ describe("enemy director client", () => {
       directive: {
         formation: "pincer",
         missileDoctrine: "salvo",
+        tempo: "calm",
         pressure: 0.8,
         hint: "pincer"
       }
@@ -96,6 +97,7 @@ describe("enemy director client", () => {
           directive: {
             formation: "screen",
             missileDoctrine: "hold",
+            tempo: "push",
             pressure: 0.4
           }
         })
@@ -158,6 +160,7 @@ function testSnapshot(): SimulationSnapshot {
         armor: 4,
         shield: 8,
         maxShield: 8,
+        missileAmmo: 0,
         difficultyTier: "standard",
         radius: 14,
         policy: "chase"
@@ -177,6 +180,7 @@ function testSnapshot(): SimulationSnapshot {
       directive: {
         formation: "screen",
         missileDoctrine: "hold",
+        tempo: "calm",
         pressure: 0.4
       }
     },

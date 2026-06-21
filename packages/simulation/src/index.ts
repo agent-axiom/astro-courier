@@ -15,6 +15,7 @@ import type {
   RunMedal,
   RunResultSummary,
   ScoreBreakdown,
+  ShipUpgradeId,
   RunStatus,
   SimulationSnapshot,
   Vec2
@@ -62,6 +63,8 @@ export type EnemyWaveContent = {
   fighters?: number;
   brutes?: number;
   sentinels?: number;
+  guardians?: number;
+  missileBoats?: number;
 };
 
 export type ContractContent = {
@@ -78,7 +81,7 @@ export type ContractContent = {
   };
   pickupId: string;
   destinationId: string;
-  missionType?: "standard" | "longhaul";
+  missionType?: "standard" | "longhaul" | "rescue" | "escort" | "raid";
   difficultyTier?: ContractDifficultyTier;
   refuelStationIds?: string[];
   cargoId: string;
@@ -229,6 +232,7 @@ export type SimulationWorld = {
   status: RunStatus;
   objectivePhase: ObjectivePhase;
   activePerk: PlayerPerkId;
+  shipUpgrades: ShipUpgradeId[];
   cargoOnboard: boolean;
   lastMilestone?: string;
   lastStyleAward?: number;
@@ -277,6 +281,7 @@ export type TrajectoryOptions = {
 export type WorldCreationOptions = {
   contractId?: string;
   perkId?: PlayerPerkId;
+  shipUpgrades?: readonly ShipUpgradeId[];
 };
 
 export type WorldReplayInput = {
@@ -373,6 +378,10 @@ const PLAYER_PROJECTILE_SPEED = 112;
 const PLAYER_PROJECTILE_DAMAGE = 20;
 const PLAYER_PROJECTILE_RADIUS = 4;
 const PLAYER_MISSILE_AMMO = 3;
+const REINFORCED_HULL_BONUS_HP = 15;
+const FORGE_CORE_MISSILE_BONUS = 1;
+const BOOST_TUNE_IMPULSE_MULTIPLIER = 1.08;
+const BOOST_TUNE_FUEL_MULTIPLIER = 0.75;
 const PLAYER_MISSILE_SPEED = 82;
 const PLAYER_MISSILE_DAMAGE = 54;
 const PLAYER_MISSILE_RADIUS = 6;
@@ -464,6 +473,28 @@ const ENEMY_ARCHETYPE_STATS: Record<
     fireCooldownSeconds: 4.8,
     projectileDamage: 18,
     missileAmmo: 2
+  },
+  guardian: {
+    maxHp: 62,
+    armor: 5,
+    shield: 28,
+    radius: 18,
+    acceleration: 10,
+    maxSpeed: 16,
+    fireCooldownSeconds: 5.6,
+    projectileDamage: 6,
+    missileAmmo: 0
+  },
+  missileBoat: {
+    maxHp: 52,
+    armor: 3,
+    shield: 10,
+    radius: 17,
+    acceleration: 11,
+    maxSpeed: 17,
+    fireCooldownSeconds: 5.8,
+    projectileDamage: 5,
+    missileAmmo: 2
   }
 };
 const ENEMY_MAX_HP = ENEMY_ARCHETYPE_STATS.sentinel.maxHp;
@@ -475,8 +506,8 @@ const ENEMY_DIFFICULTY_SCALARS: Record<
     shield: number;
   }
 > = {
-  standard: { hp: 1, armor: 1, shield: 1 },
-  hard: { hp: 1.15, armor: 1.1, shield: 1.15 },
+  standard: { hp: 0.9, armor: 0.55, shield: 0.65 },
+  hard: { hp: 1.05, armor: 0.85, shield: 0.9 },
   raid: { hp: 1.3, armor: 1.25, shield: 1.5 },
   boss: { hp: 1.6, armor: 1.45, shield: 1.9 }
 };
@@ -503,6 +534,7 @@ export function defaultEnemyDirectorDirective(): EnemyDirectorDirective {
   return {
     formation: "screen",
     missileDoctrine: "hold",
+    tempo: "calm",
     pressure: 0.4,
     hint: "screen"
   };
@@ -528,13 +560,28 @@ export function clampEnemyDirectorDirective(directive: Partial<EnemyDirectorDire
     directive?.missileDoctrine === "single" || directive?.missileDoctrine === "salvo" || directive?.missileDoctrine === "hold"
       ? directive.missileDoctrine
       : fallback.missileDoctrine;
+  const tempo =
+    directive?.tempo === "push" || directive?.tempo === "spike" || directive?.tempo === "calm" ? directive.tempo : fallback.tempo;
   const hint = typeof directive?.hint === "string" && directive.hint.trim() ? directive.hint.trim().slice(0, 32) : fallback.hint;
   return {
     formation,
     missileDoctrine,
+    tempo,
     pressure: round(clamp(directive?.pressure ?? fallback.pressure, 0, 1), 3),
     hint
   };
+}
+
+function normalizeShipUpgrades(upgrades: readonly ShipUpgradeId[] | undefined): ShipUpgradeId[] {
+  return [...new Set(upgrades ?? [])];
+}
+
+function hasShipUpgrade(upgrades: readonly ShipUpgradeId[], upgradeId: ShipUpgradeId): boolean {
+  return upgrades.includes(upgradeId);
+}
+
+function hasWorldShipUpgrade(world: Pick<SimulationWorld, "shipUpgrades">, upgradeId: ShipUpgradeId): boolean {
+  return hasShipUpgrade(world.shipUpgrades, upgradeId);
 }
 
 export function createWorldFromSystem(system: SystemContent, seed: string, options: WorldCreationOptions = {}): SimulationWorld {
@@ -560,7 +607,12 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
   const hazardSeedPulse = dailyHazardSeverityPulse(seed);
   const shipStartPosition = toVec2(shipPosition);
   const activePerk = options.perkId ?? "afterburner";
-  const shipMaxHp = activePerk === "shield-crate" ? SHIELD_CRATE_MAX_HP : SHIP_MAX_HP;
+  const shipUpgrades = normalizeShipUpgrades(options.shipUpgrades);
+  const shipMaxHp =
+    (activePerk === "shield-crate" ? SHIELD_CRATE_MAX_HP : SHIP_MAX_HP) +
+    (hasShipUpgrade(shipUpgrades, "reinforced-hull") ? REINFORCED_HULL_BONUS_HP : 0);
+  const missileAmmo =
+    PLAYER_MISSILE_AMMO + (hasShipUpgrade(shipUpgrades, "forge-core") ? FORGE_CORE_MISSILE_BONUS : 0);
   const contractHazards = activeContract.hazards ?? [];
   const stationPadRoles = new Map<string, NonNullable<StationContent["role"]>>();
   for (const station of system.stations) {
@@ -608,6 +660,7 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
     status: "flying",
     objectivePhase: "pickup",
     activePerk,
+    shipUpgrades,
     cargoOnboard: false,
     approachStreakSeconds: 0,
     bestApproachStreakSeconds: 0,
@@ -628,7 +681,7 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
     dryFuelSeconds: 0,
     fuelUsed: 0,
     emergencyShieldUsed: false,
-    pulseShotAvailable: activePerk === "pulse-shot",
+    pulseShotAvailable: activePerk === "pulse-shot" || hasShipUpgrade(shipUpgrades, "pulse-rail"),
     activeContract,
     activeCargo,
     gravitySources: system.planets.map((planet) => ({
@@ -658,7 +711,7 @@ export function createWorldFromSystem(system: SystemContent, seed: string, optio
       hp: shipMaxHp,
       maxHp: shipMaxHp,
       weaponCooldownSeconds: 0,
-      missileAmmo: PLAYER_MISSILE_AMMO,
+      missileAmmo,
       boostCooldownSeconds: 0,
       thrustPower: system.ship.thrustPower,
       rotationPower: system.ship.rotationPower,
@@ -674,28 +727,11 @@ function createEnemyPatrol(system: SystemContent, activeContract: ContractConten
   const routeDistance = Math.max(1, magnitude(route));
   const routeDirection = scale(route, 1 / routeDistance);
   const flank = { x: -routeDirection.y, y: routeDirection.x };
-  const midpoint = scale(add(pickup, destination), 0.5);
-  const seedShift = deterministicUnit(`${system.id}:${activeContract.id}:interceptors`) - 0.5;
   const wave = enemyWaveArchetypes(activeContract.enemyWave);
   const difficultyTier = activeContract.difficultyTier ?? "standard";
 
   if (!activeContract.enemyWave) {
-    return [
-      createEnemyShip(
-        "interceptor-a",
-        add(add(midpoint, scale(flank, 220)), scale(routeDirection, seedShift * 80)),
-        0.35,
-        "fighter",
-        difficultyTier
-      ),
-      createEnemyShip(
-        "interceptor-b",
-        add(add(midpoint, scale(flank, -190)), scale(routeDirection, 90 + seedShift * 60)),
-        -0.2,
-        "drone",
-        difficultyTier
-      )
-    ];
+    return [];
   }
 
   return wave.map((archetype, index) => {
@@ -717,7 +753,11 @@ function enemyWaveArchetypes(wave: EnemyWaveContent | undefined): EnemyShipArche
   const drones = wave?.drones ?? 1;
   const brutes = wave?.brutes ?? 0;
   const sentinels = wave?.sentinels ?? 0;
+  const guardians = wave?.guardians ?? 0;
+  const missileBoats = wave?.missileBoats ?? 0;
   return [
+    ...Array<EnemyShipArchetype>(Math.max(0, guardians)).fill("guardian"),
+    ...Array<EnemyShipArchetype>(Math.max(0, missileBoats)).fill("missileBoat"),
     ...Array<EnemyShipArchetype>(Math.max(0, fighters)).fill("fighter"),
     ...Array<EnemyShipArchetype>(Math.max(0, drones)).fill("drone"),
     ...Array<EnemyShipArchetype>(Math.max(0, brutes)).fill("brute"),
@@ -777,7 +817,7 @@ function createEnemyShip(
   const scalars = ENEMY_DIFFICULTY_SCALARS[difficultyTier] ?? ENEMY_DIFFICULTY_SCALARS.standard;
   const maxHp = Math.round(stats.maxHp * scalars.hp);
   const maxShield = Math.round(stats.shield * scalars.shield);
-  const missileLoadoutScale = difficultyTier === "standard" ? 0 : difficultyTier === "hard" ? 1 : 1.5;
+  const missileLoadoutScale = difficultyTier === "standard" || difficultyTier === "hard" ? 0 : difficultyTier === "raid" ? 1 : 1.5;
   return {
     id,
     archetype,
@@ -1018,6 +1058,7 @@ export function snapshotWorld(world: SimulationWorld): SimulationSnapshot {
       armor: enemy.armor,
       shield: round(enemy.shield, 3),
       maxShield: enemy.maxShield,
+      missileAmmo: enemy.missileAmmo,
       difficultyTier: enemy.difficultyTier,
       radius: enemy.radius,
       policy: enemy.policy
@@ -1214,12 +1255,14 @@ function applyGravity(world: SimulationWorld, fixedDt: number): void {
   }
 }
 
-function boostFuelCost(world: Pick<SimulationWorld, "activePerk">): number {
-  return world.activePerk === "afterburner" ? AFTERBURNER_BOOST_FUEL_COST : BOOST_FUEL_COST;
+function boostFuelCost(world: Pick<SimulationWorld, "activePerk" | "shipUpgrades">): number {
+  const baseCost = world.activePerk === "afterburner" ? AFTERBURNER_BOOST_FUEL_COST : BOOST_FUEL_COST;
+  return hasWorldShipUpgrade(world, "boost-tune") ? round(baseCost * BOOST_TUNE_FUEL_MULTIPLIER, 3) : baseCost;
 }
 
-function boostImpulseSpeed(world: Pick<SimulationWorld, "activePerk">): number {
-  return world.activePerk === "afterburner" ? AFTERBURNER_BOOST_IMPULSE_SPEED : BOOST_IMPULSE_SPEED;
+function boostImpulseSpeed(world: Pick<SimulationWorld, "activePerk" | "shipUpgrades">): number {
+  const baseImpulse = world.activePerk === "afterburner" ? AFTERBURNER_BOOST_IMPULSE_SPEED : BOOST_IMPULSE_SPEED;
+  return hasWorldShipUpgrade(world, "boost-tune") ? round(baseImpulse * BOOST_TUNE_IMPULSE_MULTIPLIER, 3) : baseImpulse;
 }
 
 function tickBoostCooldown(world: SimulationWorld, fixedDt: number): void {
@@ -1414,7 +1457,7 @@ function firePlayerProjectile(world: SimulationWorld): void {
 
   const forward = { x: Math.cos(world.ship.rotation), y: Math.sin(world.ship.rotation) };
   const muzzle = add(world.ship.position, scale(forward, 18));
-  const chargedPulse = world.activePerk === "pulse-shot" && world.pulseShotAvailable;
+  const chargedPulse = (world.activePerk === "pulse-shot" || hasWorldShipUpgrade(world, "pulse-rail")) && world.pulseShotAvailable;
   world.playerProjectiles.push({
     id: `player-shot-${world.tick}-${world.playerProjectiles.length}`,
     owner: "player",
@@ -1483,6 +1526,9 @@ function updateCombat(world: SimulationWorld, fixedDt: number): void {
 function updateEnemies(world: SimulationWorld, fixedDt: number): void {
   const policy = clampEnemyDirectorPolicy(world.enemyDirectorPolicy);
   const directive = clampEnemyDirectorDirective(world.enemyDirectorDirective);
+  const tempoAggression = tempoAggressionMultiplier(directive.tempo);
+  const effectiveAggression = clamp(policy.aggression * tempoAggression + directive.pressure * 0.08, 0, 1.25);
+  const effectiveFireBias = clamp(policy.fireBias + tempoFireBiasOffset(directive.tempo) + directive.pressure * 0.08, 0, 1);
   for (const enemy of world.enemies) {
     const toShip = subtract(world.ship.position, enemy.position);
     const distance = magnitude(toShip);
@@ -1499,8 +1545,8 @@ function updateEnemies(world: SimulationWorld, fixedDt: number): void {
     }
 
     const flankAxis = {
-      x: -direction.y * policy.flank * formationFlankMultiplier(directive.formation),
-      y: direction.x * policy.flank * formationFlankMultiplier(directive.formation)
+      x: -direction.y * policy.flank * formationFlankMultiplier(directive.formation) * tempoAggression,
+      y: direction.x * policy.flank * formationFlankMultiplier(directive.formation) * tempoAggression
     };
     const desired =
       enemy.policy === "evade"
@@ -1508,7 +1554,7 @@ function updateEnemies(world: SimulationWorld, fixedDt: number): void {
         : enemy.policy === "chase"
           ? normalizeVector(
               add(
-                scale(direction, distance < standoffDistance ? -1.85 : 1 + policy.aggression),
+                scale(direction, distance < standoffDistance ? -1.85 : 1 + effectiveAggression),
                 scale(flankAxis, distance < standoffSlowDistance ? 1.15 : 0.45)
               )
             )
@@ -1519,13 +1565,25 @@ function updateEnemies(world: SimulationWorld, fixedDt: number): void {
     enemy.rotation = normalizeAngle(Math.atan2(enemy.velocity.y || direction.y, enemy.velocity.x || direction.x));
 
     if (distance <= ENEMY_FIRE_DISTANCE) {
-      if (canEnemyFireMissile(enemy, distance, policy, directive)) {
+      if (canEnemyFireMissile(enemy, distance, effectiveFireBias, directive)) {
         fireEnemyMissile(world, enemy, direction);
       } else if (enemy.fireCooldownSeconds <= 0) {
-        fireEnemyProjectile(world, enemy, direction, policy);
+        fireEnemyProjectile(world, enemy, direction, effectiveFireBias);
       }
     }
   }
+}
+
+function tempoAggressionMultiplier(tempo: EnemyDirectorDirective["tempo"]): number {
+  if (tempo === "spike") return 1.18;
+  if (tempo === "push") return 1;
+  return 0.72;
+}
+
+function tempoFireBiasOffset(tempo: EnemyDirectorDirective["tempo"]): number {
+  if (tempo === "spike") return 0.16;
+  if (tempo === "push") return 0.04;
+  return -0.18;
 }
 
 function formationFlankMultiplier(formation: EnemyDirectorDirective["formation"]): number {
@@ -1538,10 +1596,13 @@ function formationFlankMultiplier(formation: EnemyDirectorDirective["formation"]
 function canEnemyFireMissile(
   enemy: EnemyShipState,
   distance: number,
-  policy: EnemyDirectorPolicy,
+  fireBias: number,
   directive: EnemyDirectorDirective
 ): boolean {
   if (directive.missileDoctrine === "hold") {
+    return false;
+  }
+  if (directive.tempo === "calm" && directive.missileDoctrine !== "salvo") {
     return false;
   }
   const pressureBias = directive.missileDoctrine === "salvo" ? directive.pressure * 0.22 : 0;
@@ -1549,7 +1610,7 @@ function canEnemyFireMissile(
     enemy.missileAmmo > 0 &&
     enemy.missileCooldownSeconds <= 0 &&
     distance > 70 &&
-    policy.fireBias + pressureBias >= 0.35 &&
+    fireBias + pressureBias >= 0.35 &&
     enemy.policy !== "evade"
   );
 }
@@ -1558,9 +1619,9 @@ function fireEnemyProjectile(
   world: SimulationWorld,
   enemy: EnemyShipState,
   directionToShip: Vec2,
-  policy: EnemyDirectorPolicy
+  fireBias: number
 ): void {
-  const fireBiasCooldown = enemy.fireCooldownBaseSeconds * (1.15 - policy.fireBias * 0.35);
+  const fireBiasCooldown = enemy.fireCooldownBaseSeconds * (1.15 - fireBias * 0.35);
   enemy.fireCooldownSeconds = round(clamp(fireBiasCooldown, 0.9, 2.4), 6);
   world.enemyProjectiles.push({
     id: `${enemy.id}-shot-${world.tick}-${world.enemyProjectiles.length}`,
@@ -1932,7 +1993,7 @@ function canLandingAssist(
   speed: number,
   angleError: number,
   pad: LandingPadState,
-  world?: Pick<SimulationWorld, "activePerk">
+  world?: Pick<SimulationWorld, "activePerk" | "shipUpgrades">
 ): boolean {
   const closeEnough = isWithinDockCaptureRadius(distance, pad, world);
   const moderatelyFast = speed > pad.allowedApproachSpeed && speed <= pad.allowedApproachSpeed * 1.3;
@@ -2183,9 +2244,10 @@ function isPadOnGravitySource(pad: LandingPadState, source: GravitySourceState):
 function isWithinDockCaptureRadius(
   distance: number,
   pad: LandingPadState,
-  world?: Pick<SimulationWorld, "activePerk">
+  world?: Pick<SimulationWorld, "activePerk" | "shipUpgrades">
 ): boolean {
-  const pickupBoost = world?.activePerk === "magnet-clamp" && pad.role === "pickup" ? 2.45 : 0;
+  const pickupBoost =
+    world && (world.activePerk === "magnet-clamp" || hasWorldShipUpgrade(world, "mag-clamp")) && pad.role === "pickup" ? 2.45 : 0;
   return distance <= pad.radius * (DOCK_CAPTURE_RADIUS_MULTIPLIER + pickupBoost);
 }
 

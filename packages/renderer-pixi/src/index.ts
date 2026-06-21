@@ -938,15 +938,19 @@ export type EnemyShipVisualInput = {
 
 export type EnemyShipVisual = {
   archetype: EnemyShipArchetype;
-  silhouette: "drone" | "fighter" | "brute" | "sentinel";
+  silhouette: "drone" | "fighter" | "brute" | "sentinel" | "guardian" | "missileBoat";
   color: number;
   beamColor: number;
   armorBandColor: number;
   engineGlowColor: number;
+  outlineColor: number;
+  canopyColor: number;
   cockpitScale: number;
   alpha: number;
   radius: number;
   wingScale: number;
+  shieldAlpha: number;
+  podCount: number;
   warningAlpha: number;
 };
 
@@ -1128,10 +1132,13 @@ export type LayeredSpaceVisual = {
   baseColor: number;
   nebulaColor: number;
   dustColor: number;
+  deepStarColor: number;
+  horizonGlowColor: number;
   starDensity: number;
   parallaxLayers: number;
   drift: number;
   nebulaAlpha: number;
+  constellationAlpha: number;
 };
 
 export type PlanetSurfaceVisualInput = Pick<SimulationSnapshot, "status"> & {
@@ -1144,6 +1151,11 @@ export type PlanetSurfaceVisual = {
   surfaceColor: number;
   secondaryColor: number;
   atmosphereColor: number;
+  cloudColor: number;
+  cityLightColor: number;
+  cityLightAlpha: number;
+  terminatorColor: number;
+  specularColor: number;
   craterColor: number;
   detailCount: number;
   ringAlpha: number;
@@ -1151,6 +1163,7 @@ export type PlanetSurfaceVisual = {
   lightAngle: number;
   shadowAlpha: number;
   continentScale: number;
+  bandAlpha: number;
   rotation: number;
 };
 
@@ -1194,10 +1207,13 @@ export type CosmicPhenomenonVisualInput = {
 export type CosmicPhenomenonVisual = {
   color: number;
   accentColor: number;
+  coreColor: number;
+  particleColor: number;
   particleCount: number;
   swirl: number;
   alpha: number;
   ringWidth: number;
+  lensAlpha: number;
 };
 
 export function layeredSpaceVisual(input: LayeredSpaceVisualInput): LayeredSpaceVisual {
@@ -1208,10 +1224,13 @@ export function layeredSpaceVisual(input: LayeredSpaceVisualInput): LayeredSpace
       baseColor: 0x04030b,
       nebulaColor: 0x6d4cff,
       dustColor: 0xffd166,
+      deepStarColor: 0xfff2c7,
+      horizonGlowColor: 0x7c5cff,
       starDensity: 0.72,
       parallaxLayers: 4,
       drift: round(positiveModulo(input.tick * (0.012 + active * 0.006), 1), 3),
-      nebulaAlpha: 0.3
+      nebulaAlpha: 0.3,
+      constellationAlpha: 0.22
     };
   }
   if (background.includes("nebula")) {
@@ -1219,20 +1238,26 @@ export function layeredSpaceVisual(input: LayeredSpaceVisualInput): LayeredSpace
       baseColor: 0x070b1e,
       nebulaColor: 0x245f9f,
       dustColor: 0x8ee6ff,
+      deepStarColor: 0xbff7ff,
+      horizonGlowColor: 0x1c4c8d,
       starDensity: 1,
       parallaxLayers: 3,
       drift: round(positiveModulo(input.tick * (0.01 + active * 0.006), 1), 3),
-      nebulaAlpha: 0.24
+      nebulaAlpha: 0.24,
+      constellationAlpha: 0.18
     };
   }
   return {
     baseColor: 0x080a18,
     nebulaColor: 0x2a244f,
     dustColor: 0xa0c4ff,
+    deepStarColor: 0xd7fbff,
+    horizonGlowColor: 0x2a244f,
     starDensity: 0.86,
     parallaxLayers: 3,
     drift: round(positiveModulo(input.tick * (0.008 + active * 0.004), 1), 3),
-    nebulaAlpha: 0.18
+    nebulaAlpha: 0.18,
+    constellationAlpha: 0.14
   };
 }
 
@@ -1244,6 +1269,11 @@ export function planetSurfaceVisual(input: PlanetSurfaceVisualInput): PlanetSurf
       surfaceColor: 0x11131a,
       secondaryColor: 0x3c4254,
       atmosphereColor: 0xff6f91,
+      cloudColor: 0x7d87a7,
+      cityLightColor: 0xff6f91,
+      cityLightAlpha: 0.62,
+      terminatorColor: 0x04050a,
+      specularColor: 0x8c96ad,
       craterColor: 0x05070c,
       detailCount: 6,
       ringAlpha: 0.22,
@@ -1251,6 +1281,7 @@ export function planetSurfaceVisual(input: PlanetSurfaceVisualInput): PlanetSurf
       lightAngle: -0.82,
       shadowAlpha: 0.42,
       continentScale: 0.36,
+      bandAlpha: 0.24,
       rotation: round(positiveModulo(input.tick * 0.004, 1), 3)
     };
   }
@@ -1258,6 +1289,11 @@ export function planetSurfaceVisual(input: PlanetSurfaceVisualInput): PlanetSurf
     surfaceColor: 0x3aa7d8,
     secondaryColor: 0x6edb9a,
     atmosphereColor: 0x8ee6ff,
+    cloudColor: 0xd7fbff,
+    cityLightColor: 0xffd166,
+    cityLightAlpha: 0.18,
+    terminatorColor: 0x06264b,
+    specularColor: 0xffffff,
     craterColor: 0x2476a6,
     detailCount: Math.round(7 + pressure),
     ringAlpha: 0,
@@ -1265,6 +1301,7 @@ export function planetSurfaceVisual(input: PlanetSurfaceVisualInput): PlanetSurf
     lightAngle: -0.72,
     shadowAlpha: 0.28,
     continentScale: 0.64,
+    bandAlpha: 0.12,
     rotation: round(positiveModulo(input.tick * 0.006, 1), 3)
   };
 }
@@ -1303,39 +1340,51 @@ export function cosmicPhenomenonVisual(input: CosmicPhenomenonVisualInput): Cosm
     return {
       color: 0x8ee6ff,
       accentColor: 0xffd166,
+      coreColor: 0x061e36,
+      particleColor: 0xfff2c7,
       particleCount: Math.round(8 + severity * 5),
       swirl: round(severity, 2),
       alpha: round(0.18 + severity * 0.32, 2),
-      ringWidth: round(1.2 + severity * 1.6, 2)
+      ringWidth: round(1.2 + severity * 1.6, 2),
+      lensAlpha: round(0.14 + severity * 0.25, 2)
     };
   }
   if (input.type === "nebula") {
     return {
       color: 0x7c5cff,
       accentColor: 0x7ce1ff,
+      coreColor: 0x2a174e,
+      particleColor: 0xbff7ff,
       particleCount: Math.round(12 + severity * 14),
       swirl: round(0.25 + severity * 0.34, 2),
       alpha: round(0.16 + severity * 0.24, 2),
-      ringWidth: round(1 + severity * 0.9, 2)
+      ringWidth: round(1 + severity * 0.9, 2),
+      lensAlpha: round(0.12 + severity * 0.16, 2)
     };
   }
   if (input.type === "solar_wind" || input.type === "radiation") {
     return {
       color: 0xffd166,
       accentColor: 0xff6f91,
+      coreColor: 0x4a2806,
+      particleColor: 0xfff2c7,
       particleCount: Math.round(10 + severity * 10),
       swirl: round(0.18 + severity * 0.22, 2),
       alpha: round(0.14 + severity * 0.28, 2),
-      ringWidth: round(1 + severity * 1.2, 2)
+      ringWidth: round(1 + severity * 1.2, 2),
+      lensAlpha: round(0.1 + severity * 0.18, 2)
     };
   }
   return {
     color: 0xb56576,
     accentColor: 0xffd166,
+    coreColor: 0x2b1018,
+    particleColor: 0xfff0ad,
     particleCount: Math.round(7 + severity * 7),
     swirl: round(0.12 + severity * 0.18, 2),
     alpha: round(0.14 + severity * 0.22, 2),
-    ringWidth: round(1 + severity, 2)
+    ringWidth: round(1 + severity, 2),
+    lensAlpha: round(0.08 + severity * 0.14, 2)
   };
 }
 
@@ -1418,9 +1467,13 @@ function enemyArchetypeVisual(archetype: EnemyShipArchetype): Omit<EnemyShipVisu
       beamColor: 0x7ce1ff,
       armorBandColor: 0x7ce1ff,
       engineGlowColor: 0x8ee6b8,
+      outlineColor: 0x07223a,
+      canopyColor: 0xbff7ff,
       cockpitScale: 0.45,
       radius: 11,
-      wingScale: 0.72
+      wingScale: 0.72,
+      shieldAlpha: 0.08,
+      podCount: 0
     };
   }
   if (archetype === "brute") {
@@ -1433,9 +1486,13 @@ function enemyArchetypeVisual(archetype: EnemyShipArchetype): Omit<EnemyShipVisu
       beamColor: 0xffd166,
       armorBandColor: 0xffd166,
       engineGlowColor: 0xff8a3d,
+      outlineColor: 0x3d190e,
+      canopyColor: 0xfff0ad,
       cockpitScale: 0.54,
       radius: 22,
-      wingScale: 1.18
+      wingScale: 1.18,
+      shieldAlpha: 0.12,
+      podCount: 2
     };
   }
   if (archetype === "sentinel") {
@@ -1448,9 +1505,51 @@ function enemyArchetypeVisual(archetype: EnemyShipArchetype): Omit<EnemyShipVisu
       beamColor: 0x5cc8ff,
       armorBandColor: 0xff6f91,
       engineGlowColor: 0xffd166,
+      outlineColor: 0x39435c,
+      canopyColor: 0x8ee6ff,
       cockpitScale: 0.62,
       radius: 27,
-      wingScale: 1.32
+      wingScale: 1.32,
+      shieldAlpha: 0.28,
+      podCount: 0
+    };
+  }
+  if (archetype === "guardian") {
+    return {
+      archetype,
+      silhouette: "guardian",
+      color: 0x18312f,
+      chaseColor: 0x244e49,
+      chaseBeamColor: 0x8ee6b8,
+      beamColor: 0x7ce1ff,
+      armorBandColor: 0x8ee6b8,
+      engineGlowColor: 0x9ce8ff,
+      outlineColor: 0x8ee6b8,
+      canopyColor: 0xd7fff0,
+      cockpitScale: 0.5,
+      radius: 20,
+      wingScale: 1.08,
+      shieldAlpha: 0.38,
+      podCount: 2
+    };
+  }
+  if (archetype === "missileBoat") {
+    return {
+      archetype,
+      silhouette: "missileBoat",
+      color: 0x4f2f22,
+      chaseColor: 0x7b3d25,
+      chaseBeamColor: 0xffd166,
+      beamColor: 0xffb13b,
+      armorBandColor: 0xffb13b,
+      engineGlowColor: 0xff8a3d,
+      outlineColor: 0xffd166,
+      canopyColor: 0xfff0ad,
+      cockpitScale: 0.48,
+      radius: 19,
+      wingScale: 1,
+      shieldAlpha: 0.14,
+      podCount: 4
     };
   }
   return {
@@ -1462,9 +1561,13 @@ function enemyArchetypeVisual(archetype: EnemyShipArchetype): Omit<EnemyShipVisu
     beamColor: 0xff7ab6,
     armorBandColor: 0xff7ab6,
     engineGlowColor: 0x7ce1ff,
+    outlineColor: 0x3a1644,
+    canopyColor: 0xffd1e3,
     cockpitScale: 0.5,
     radius: 16,
-    wingScale: 0.9
+    wingScale: 0.9,
+    shieldAlpha: 0.1,
+    podCount: 0
   };
 }
 
@@ -2054,6 +2157,10 @@ class PixiRenderer implements AstroPixiRenderer {
       tick
     });
     this.background.rect(0, 0, viewport.width, viewport.height).fill(space.baseColor);
+    this.background.ellipse(viewport.width * 0.5, viewport.height * 1.04, viewport.width * 0.72, viewport.height * 0.12).fill({
+      color: space.horizonGlowColor,
+      alpha: space.nebulaAlpha * 0.2
+    });
     for (let layer = 0; layer < space.parallaxLayers; layer += 1) {
       const layerProgress = (layer + 1) / space.parallaxLayers;
       const offset = (space.drift + layer * 0.17) * viewport.width * (0.12 + layerProgress * 0.18);
@@ -2086,9 +2193,25 @@ class PixiRenderer implements AstroPixiRenderer {
       const x = positiveModulo(star.x * viewport.width - drift, viewport.width);
       const y = positiveModulo(star.y * viewport.height + drift * 0.18, viewport.height);
       this.background.circle(x, y, star.radius * space.starDensity).fill({
-        color: star.radius > 1.8 ? space.dustColor : 0xffffff,
+        color: star.radius > 1.8 ? space.dustColor : star.radius > 1.25 ? space.deepStarColor : 0xffffff,
         alpha: star.alpha * space.starDensity
       });
+    }
+
+    if (space.constellationAlpha > 0) {
+      for (let index = 0; index < 8; index += 1) {
+        const start = this.stars[(index * 11) % this.stars.length];
+        const end = this.stars[(index * 11 + 5) % this.stars.length];
+        const sx = positiveModulo(start.x * viewport.width - space.drift * 22, viewport.width);
+        const sy = positiveModulo(start.y * viewport.height + space.drift * 3, viewport.height);
+        const ex = positiveModulo(end.x * viewport.width - space.drift * 22, viewport.width);
+        const ey = positiveModulo(end.y * viewport.height + space.drift * 3, viewport.height);
+        this.background.moveTo(sx, sy).lineTo(ex, ey).stroke({
+          color: space.deepStarColor,
+          width: 0.7,
+          alpha: space.constellationAlpha * Math.min(start.alpha, end.alpha)
+        });
+      }
     }
 
     if (speedLines) {
@@ -2444,11 +2567,11 @@ class PixiRenderer implements AstroPixiRenderer {
         y: center.y - Math.sin(surface.lightAngle) * source.radius * 0.2
       };
       this.world.circle(shadowPoint.x, shadowPoint.y, source.radius * 0.86).fill({
-        color: 0x030615,
+        color: surface.terminatorColor,
         alpha: surface.shadowAlpha
       });
       this.world.circle(lightPoint.x, lightPoint.y, source.radius * 0.22).fill({
-        color: sourceVisual.highlightColor,
+        color: surface.specularColor,
         alpha: Math.min(0.34, sourceVisual.highlightAlpha + 0.08)
       });
       this.world.circle(center.x + source.radius * 0.22, center.y + source.radius * 0.18, source.radius * 0.16).fill({
@@ -2470,12 +2593,30 @@ class PixiRenderer implements AstroPixiRenderer {
           color: index % 2 === 0 ? surface.secondaryColor : surface.craterColor,
           alpha: source.visualTheme === "black_metal" ? 0.42 : 0.32
         });
+        if (surface.cityLightAlpha > 0 && index % 3 === 0) {
+          this.world.circle(detail.x + source.radius * 0.024, detail.y - source.radius * 0.01, Math.max(1.1, source.radius * 0.012)).fill({
+            color: surface.cityLightColor,
+            alpha: surface.cityLightAlpha
+          });
+        }
+      }
+      if (surface.bandAlpha > 0) {
+        this.world.ellipse(center.x, center.y + source.radius * 0.1, source.radius * 0.88, source.radius * 0.18).stroke({
+          color: surface.secondaryColor,
+          width: 1.2,
+          alpha: surface.bandAlpha
+        });
       }
       if (surface.cloudAlpha > 0) {
         this.world.ellipse(center.x - source.radius * 0.06, center.y - source.radius * 0.08, source.radius * 0.74, source.radius * 0.18).stroke({
-          color: surface.atmosphereColor,
+          color: surface.cloudColor,
           width: 2,
           alpha: surface.cloudAlpha
+        });
+        this.world.ellipse(center.x + source.radius * 0.12, center.y + source.radius * 0.22, source.radius * 0.48, source.radius * 0.11).stroke({
+          color: surface.cloudColor,
+          width: 1.4,
+          alpha: surface.cloudAlpha * 0.72
         });
       }
       if (surface.ringAlpha > 0) {
@@ -2609,6 +2750,15 @@ class PixiRenderer implements AstroPixiRenderer {
         color: phenomenon.color,
         alpha: visual.fillAlpha + phenomenon.alpha * 0.18
       });
+      this.hazards.circle(center.x, center.y, hazard.radius * 0.52).fill({
+        color: phenomenon.coreColor,
+        alpha: phenomenon.alpha * 0.42
+      });
+      this.hazards.circle(center.x, center.y, hazard.radius * 1.08).stroke({
+        color: phenomenon.particleColor,
+        width: 1,
+        alpha: phenomenon.lensAlpha
+      });
       this.hazards.circle(center.x, center.y, hazard.radius).stroke({
         color: phenomenon.accentColor,
         width: Math.max(visual.strokeWidth, phenomenon.ringWidth),
@@ -2622,7 +2772,7 @@ class PixiRenderer implements AstroPixiRenderer {
           y: center.y + Math.sin(angle) * hazard.radius * 0.36 * wobble
         };
         this.hazards.circle(rock.x, rock.y, 2.2 + (index % 3)).fill({
-          color: index % 2 === 0 ? phenomenon.accentColor : phenomenon.color,
+          color: index % 2 === 0 ? phenomenon.particleColor : phenomenon.accentColor,
           alpha: hazard.type === "asteroid_field" ? 0.8 : phenomenon.alpha
         });
       }
@@ -2675,6 +2825,13 @@ class PixiRenderer implements AstroPixiRenderer {
         color: visual.engineGlowColor,
         alpha: 0.62 + visual.warningAlpha * 0.18
       });
+      if (visual.shieldAlpha > 0) {
+        this.combat.circle(center.x, center.y, visual.radius + 6).stroke({
+          color: visual.armorBandColor,
+          width: visual.silhouette === "guardian" ? 2.2 : 1.2,
+          alpha: visual.shieldAlpha
+        });
+      }
       if (visual.silhouette === "sentinel") {
         const leftPanel = {
           x: center.x + Math.cos(angle + Math.PI / 2) * visual.radius * 0.78,
@@ -2697,16 +2854,77 @@ class PixiRenderer implements AstroPixiRenderer {
           alpha: visual.alpha
         });
         this.combat.circle(center.x, center.y, visual.radius * 0.68).fill({ color: visual.color, alpha: visual.alpha });
-        this.combat.circle(center.x, center.y, visual.radius * 0.68).stroke({ color: visual.beamColor, width: 1.8, alpha: 0.64 });
+        this.combat.circle(center.x, center.y, visual.radius * 0.68).stroke({ color: visual.outlineColor, width: 1.8, alpha: 0.64 });
         this.combat.circle(center.x, center.y, visual.radius * 0.42).stroke({ color: visual.armorBandColor, width: 2, alpha: 0.72 });
-        this.combat.circle(center.x + Math.cos(angle) * 4, center.y + Math.sin(angle) * 4, 5.2).fill({ color: visual.beamColor, alpha: 0.9 });
+        this.combat.circle(center.x + Math.cos(angle) * 4, center.y + Math.sin(angle) * 4, 5.2).fill({ color: visual.canopyColor, alpha: 0.9 });
+      } else if (visual.silhouette === "guardian") {
+        const tail = {
+          x: center.x - Math.cos(angle) * visual.radius * 0.82,
+          y: center.y - Math.sin(angle) * visual.radius * 0.82
+        };
+        const leftPlate = {
+          x: center.x + Math.cos(angle + Math.PI / 2) * visual.radius * 0.92,
+          y: center.y + Math.sin(angle + Math.PI / 2) * visual.radius * 0.92
+        };
+        const rightPlate = {
+          x: center.x + Math.cos(angle - Math.PI / 2) * visual.radius * 0.92,
+          y: center.y + Math.sin(angle - Math.PI / 2) * visual.radius * 0.92
+        };
+        this.combat.moveTo(nose.x, nose.y).lineTo(leftPlate.x, leftPlate.y).lineTo(tail.x, tail.y).lineTo(rightPlate.x, rightPlate.y).closePath().fill({
+          color: visual.color,
+          alpha: visual.alpha
+        });
+        this.combat
+          .moveTo(leftPlate.x, leftPlate.y)
+          .lineTo(nose.x, nose.y)
+          .lineTo(rightPlate.x, rightPlate.y)
+          .stroke({ color: visual.outlineColor, width: 1.7, alpha: 0.7 });
+        this.combat.circle(center.x, center.y, visual.radius * 0.34).fill({
+          color: visual.canopyColor,
+          alpha: 0.84
+        });
+        this.combat.moveTo(leftPlate.x, leftPlate.y).lineTo(rightPlate.x, rightPlate.y).stroke({
+          color: visual.armorBandColor,
+          width: 2.2,
+          alpha: 0.62
+        });
+      } else if (visual.silhouette === "missileBoat") {
+        const tail = {
+          x: center.x - Math.cos(angle) * visual.radius * 0.95,
+          y: center.y - Math.sin(angle) * visual.radius * 0.95
+        };
+        this.combat.moveTo(nose.x, nose.y).lineTo(left.x, left.y).lineTo(tail.x, tail.y).lineTo(right.x, right.y).closePath().fill({
+          color: visual.color,
+          alpha: visual.alpha
+        });
+        this.combat.moveTo(nose.x, nose.y).lineTo(left.x, left.y).lineTo(tail.x, tail.y).lineTo(right.x, right.y).closePath().stroke({
+          color: visual.outlineColor,
+          width: 1.5,
+          alpha: 0.68
+        });
+        for (let pod = 0; pod < visual.podCount; pod += 1) {
+          const side = pod % 2 === 0 ? 1 : -1;
+          const rail = -0.2 - Math.floor(pod / 2) * 0.32;
+          const podCenter = {
+            x: center.x + Math.cos(angle) * visual.radius * rail + Math.cos(angle + side * Math.PI / 2) * visual.radius * 0.58,
+            y: center.y + Math.sin(angle) * visual.radius * rail + Math.sin(angle + side * Math.PI / 2) * visual.radius * 0.58
+          };
+          this.combat.circle(podCenter.x, podCenter.y, visual.radius * 0.12).fill({
+            color: visual.armorBandColor,
+            alpha: 0.86
+          });
+        }
+        this.combat.circle(center.x + Math.cos(angle) * visual.radius * 0.2, center.y + Math.sin(angle) * visual.radius * 0.2, visual.radius * visual.cockpitScale * 0.38).fill({
+          color: visual.canopyColor,
+          alpha: 0.84
+        });
       } else {
         this.combat.moveTo(nose.x, nose.y).lineTo(left.x, left.y).lineTo(right.x, right.y).closePath().fill({
           color: visual.color,
           alpha: visual.alpha
         });
         this.combat.moveTo(nose.x, nose.y).lineTo(left.x, left.y).lineTo(right.x, right.y).closePath().stroke({
-          color: visual.beamColor,
+          color: visual.outlineColor,
           width: 1.6,
           alpha: 0.62
         });
@@ -2716,7 +2934,7 @@ class PixiRenderer implements AstroPixiRenderer {
           alpha: 0.54
         });
         this.combat.circle(center.x + Math.cos(angle) * visual.radius * 0.12, center.y + Math.sin(angle) * visual.radius * 0.12, visual.radius * visual.cockpitScale * 0.42).fill({
-          color: visual.beamColor,
+          color: visual.canopyColor,
           alpha: 0.86
         });
       }

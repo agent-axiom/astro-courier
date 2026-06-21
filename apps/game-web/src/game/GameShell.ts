@@ -26,6 +26,7 @@ import type {
   RunResultSummary,
   RunStatus,
   ScoreBreakdown,
+  ShipUpgradeId,
   Vec2
 } from "@astro-courier/shared";
 import { KeyboardInput, type InputSource } from "./input";
@@ -200,6 +201,10 @@ const perkOptionList: PerkOption[] = [
   }
 ];
 
+function sameShipUpgrades(left: readonly ShipUpgradeId[], right: readonly ShipUpgradeId[]): boolean {
+  return left.length === right.length && left.every((upgradeId, index) => upgradeId === right[index]);
+}
+
 export class GameShell {
   private readonly mount: HTMLElement;
   private readonly onHud: (hud: HudState) => void;
@@ -233,6 +238,7 @@ export class GameShell {
   private enemyDirectorPollSeconds = 0;
   private enemyDirectorRequestInFlight = false;
   private selectedPerkId: PlayerPerkId = "afterburner";
+  private shipUpgradeIds: ShipUpgradeId[] = [];
   private destroyed = false;
 
   constructor(options: GameShellOptions) {
@@ -360,6 +366,31 @@ export class GameShell {
 
   setGhostTrail(trail: readonly Vec2[]): void {
     this.ghostTrail = trail.map((point) => ({ x: point.x, y: point.y }));
+  }
+
+  setShipUpgrades(upgradeIds: readonly ShipUpgradeId[]): void {
+    if (this.destroyed) {
+      return;
+    }
+    const nextUpgradeIds = [...new Set(upgradeIds)];
+    if (sameShipUpgrades(this.shipUpgradeIds, nextUpgradeIds)) {
+      return;
+    }
+
+    this.shipUpgradeIds = nextUpgradeIds;
+    if (this.world.status === "paused") {
+      this.accumulator = 0;
+      this.hudTimer = 0;
+      this.latestTrajectoryRisk = undefined;
+      this.enemyDirectorResult = undefined;
+      this.enemyDirectorPollSeconds = 0;
+      this.enemyDirectorRequestInFlight = false;
+      this.queuedCommands.length = 0;
+      this.inputFrames.length = 0;
+      this.world = this.createFreshWorld();
+      this.resetRunTrail();
+      this.publishHud();
+    }
   }
 
   destroy(): void {
@@ -517,7 +548,8 @@ export class GameShell {
   private createFreshWorld(): SimulationWorld {
     const world = createWorldFromSystem(this.system, this.replaySeed, {
       contractId: this.selectedContractId,
-      perkId: this.selectedPerkId
+      perkId: this.selectedPerkId,
+      shipUpgrades: this.shipUpgradeIds
     });
     if (this.paused) {
       world.status = "paused";

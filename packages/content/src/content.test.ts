@@ -16,6 +16,8 @@ describe("content schemas", () => {
       "asteroid-sprint",
       "asteroid-labyrinth",
       "nebula-longhaul",
+      "rescue-pod-run",
+      "convoy-escort",
       "gravity-slingshot",
       "gravity-lockpick",
       "solar-thread",
@@ -23,6 +25,7 @@ describe("content schemas", () => {
       "interceptor-swarm",
       "black-forge-capture",
       "sentinel-siege",
+      "forge-flagship-raid",
       "antimatter-drift",
       "last-drop-run"
     ]);
@@ -74,6 +77,8 @@ describe("content schemas", () => {
       "standard",
       "standard",
       "longhaul",
+      "rescue",
+      "escort",
       "standard",
       "standard",
       "standard",
@@ -81,6 +86,7 @@ describe("content schemas", () => {
       "standard",
       "standard",
       "standard",
+      "raid",
       "standard",
       "standard"
     ]);
@@ -106,6 +112,23 @@ describe("content schemas", () => {
       refuelStationIds: ["relay-fuel-pad"],
       hazardSeverityMultiplier: 1.25,
       medalTimes: { bronze: 210, silver: 148, gold: 104 }
+    });
+    expect(parsed.contracts.find((contract) => contract.id === "rescue-pod-run")).toMatchObject({
+      title: "Rescue Pod Run",
+      missionType: "rescue",
+      riskLabel: "Rescue",
+      rewardLabel: "Crew rescue bonuses",
+      cargoId: "escape-pod",
+      medalTimes: { bronze: 92, silver: 58, gold: 36 }
+    });
+    expect(parsed.contracts.find((contract) => contract.id === "convoy-escort")).toMatchObject({
+      title: "Convoy Escort",
+      missionType: "escort",
+      riskLabel: "Escort",
+      rewardLabel: "Guardian lane bonuses",
+      difficultyTier: "hard",
+      enemyWave: { drones: 3, fighters: 1, brutes: 0, sentinels: 0, guardians: 1, missileBoats: 0 },
+      medalTimes: { bronze: 98, silver: 62, gold: 39 }
     });
     expect(parsed.contracts.find((contract) => contract.id === "asteroid-sprint")?.briefing ?? "").toContain("asteroid");
     expect(parsed.contracts.find((contract) => contract.id === "asteroid-sprint")?.riskLabel).toBe("Asteroid Field");
@@ -197,6 +220,17 @@ describe("content schemas", () => {
       enemyWave: { drones: 4, fighters: 4, brutes: 2, sentinels: 2 },
       medalTimes: { bronze: 104, silver: 64, gold: 40 }
     });
+    expect(parsed.contracts.find((contract) => contract.id === "forge-flagship-raid")).toMatchObject({
+      title: "Forge Flagship Raid",
+      missionType: "raid",
+      riskLabel: "Boss Raid",
+      rewardLabel: "Flagship takedown",
+      destinationId: "forge-dock",
+      cargoId: "capture-beacon",
+      difficultyTier: "boss",
+      enemyWave: { drones: 2, fighters: 2, brutes: 1, sentinels: 1, guardians: 1, missileBoats: 2 },
+      medalTimes: { bronze: 128, silver: 82, gold: 54 }
+    });
     expect(parsed.contracts.find((contract) => contract.id === "antimatter-drift")).toMatchObject({
       title: "Antimatter Drift",
       riskLabel: "Unstable Cargo",
@@ -247,6 +281,16 @@ describe("content schemas", () => {
       name: "Capture Beacon",
       kind: "magnetic",
       fragility: 0.82
+    });
+    expect(parsed.cargo.find((cargo) => cargo.id === "escape-pod")).toMatchObject({
+      name: "Escape Pod",
+      kind: "live",
+      fragility: 0.72
+    });
+    expect(parsed.cargo.find((cargo) => cargo.id === "convoy-transponder")).toMatchObject({
+      name: "Convoy Transponder",
+      kind: "time-sensitive",
+      fragility: 0.7
     });
     expect(parsed.contracts.find((contract) => contract.id === "return-leg")?.shipStart?.position).toEqual([360, -140]);
     expect(parsed.planets[0]?.landingPads[0]?.allowedApproachSpeed).toBeGreaterThan(0);

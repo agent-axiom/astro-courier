@@ -22,6 +22,7 @@ export type RunStatus = "flying" | "delivered" | "crashed" | "paused";
 export type ObjectivePhase = "pickup" | "delivery" | "complete";
 export type LandingGuidanceStatus = "approach" | "too-fast" | "misaligned" | "ready";
 export type PlayerPerkId = "afterburner" | "shield-crate" | "pulse-shot" | "magnet-clamp";
+export type ShipUpgradeId = "boost-tune" | "reinforced-hull" | "pulse-rail" | "mag-clamp" | "forge-core";
 
 export type LandingRating =
   | "Perfect Landing"
@@ -45,7 +46,7 @@ export type ScoreBreakdown = {
   total: number;
 };
 
-export type EnemyShipArchetype = "drone" | "fighter" | "brute" | "sentinel";
+export type EnemyShipArchetype = "drone" | "fighter" | "brute" | "sentinel" | "guardian" | "missileBoat";
 export type ContractDifficultyTier = "standard" | "hard" | "raid" | "boss";
 
 export type EnemyDirectorPolicy = {
@@ -59,6 +60,7 @@ export type EnemyDirectorPolicy = {
 export type EnemyDirectorDirective = {
   formation: "screen" | "pincer" | "ambush" | "retreat";
   missileDoctrine: "hold" | "single" | "salvo";
+  tempo: "calm" | "push" | "spike";
   pressure: number;
   hint?: string;
 };
@@ -180,6 +182,7 @@ export type SimulationSnapshot = {
     armor: number;
     shield: number;
     maxShield: number;
+    missileAmmo: number;
     difficultyTier: ContractDifficultyTier;
     radius: number;
     policy: "patrol" | "chase" | "evade";

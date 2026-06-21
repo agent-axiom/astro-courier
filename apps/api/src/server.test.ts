@@ -174,11 +174,11 @@ describe("Astro Courier API", () => {
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({
       label: "Daily dispatch",
-      value: "Gravity Lockpick",
+      value: "Convoy Escort",
       systemId: "starter-route",
       date: "2026-06-13",
-      contractId: "gravity-lockpick",
-      seed: "daily-2026-06-13-gravity-lockpick",
+      contractId: "convoy-escort",
+      seed: "daily-2026-06-13-convoy-escort",
       resetsAt: "2026-06-14T00:00:00.000Z"
     });
   });

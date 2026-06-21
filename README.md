@@ -10,7 +10,7 @@ Playable build: https://agent-axiom.github.io/astro-courier/
 
 Astro Courier is a TypeScript web game built around short, replayable delivery runs. The player launches a route, collects cargo, reaches the destination pad, and tries to improve speed, fuel discipline, cargo safety, landing quality, and style rewards.
 
-The game includes contracts, route mastery, medals, best-run tracking, optional Cloud Code progress restore, longhaul routes with fuel stops, richer procedural space art, compact mobile menus, replay-style run feedback, daily dispatch progression, cargo risk, hazard pressure, armored combat interceptors, sentinel-class enemies, ship HP, limited homing missiles, adaptive game feel, keyboard/gamepad controls, and touch-friendly browser play.
+The game includes contracts, rescue/escort/raid missions, route mastery, medals, best-run tracking, optional Cloud Code progress restore, longhaul routes with fuel stops, richer procedural space art, compact mobile menus, replay-style run feedback, daily dispatch progression, cargo risk, hazard pressure, guardian and missile-boat enemies, mechanical ship upgrades, ship HP, limited homing missiles, adaptive game feel, keyboard/gamepad controls, and touch-friendly browser play.
 
 The project is organized as a pnpm monorepo with separate apps and packages for the web game, simulation, renderer, content, shared types, API, and the optional enemy director Worker.
 
@@ -54,7 +54,7 @@ https://agent-axiom.github.io/astro-courier/
 
 ## Enemy Director Worker
 
-The optional OpenAI enemy director runs as a Cloudflare Worker from `apps/enemy-director-worker`. It keeps the OpenAI API key server-side and returns bounded combat policy plus formation/missile directives to the static GitHub Pages build.
+The optional OpenAI enemy director runs as a Cloudflare Worker from `apps/enemy-director-worker`. It keeps the OpenAI API key server-side and returns bounded combat policy plus formation, missile, and tempo directives to the static GitHub Pages build.
 
 Deploy it with Wrangler:
 

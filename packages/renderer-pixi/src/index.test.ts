@@ -57,14 +57,17 @@ describe("procedural art direction helpers", () => {
       nebulaColor: 0x245f9f,
       dustColor: 0x8ee6ff,
       starDensity: 1,
-      parallaxLayers: 3
+      parallaxLayers: 3,
+      deepStarColor: 0xbff7ff,
+      constellationAlpha: 0.18
     });
     expect(layeredSpaceVisual({ background: "black-hole-frontier", status: "flying", tick: 40 })).toMatchObject({
       baseColor: 0x04030b,
       nebulaColor: 0x6d4cff,
       dustColor: 0xffd166,
       starDensity: 0.72,
-      parallaxLayers: 4
+      parallaxLayers: 4,
+      horizonGlowColor: 0x7c5cff
     });
   });
 
@@ -77,7 +80,9 @@ describe("procedural art direction helpers", () => {
       ringAlpha: 0,
       lightAngle: expect.any(Number),
       shadowAlpha: 0.28,
-      continentScale: 0.64
+      continentScale: 0.64,
+      cloudColor: 0xd7fbff,
+      cityLightAlpha: 0.18
     });
     expect(planetSurfaceVisual({ visualTheme: "black_metal", radius: 58, status: "flying", tick: 8 })).toMatchObject({
       surfaceColor: 0x11131a,
@@ -86,7 +91,9 @@ describe("procedural art direction helpers", () => {
       detailCount: 6,
       ringAlpha: 0.22,
       shadowAlpha: 0.42,
-      continentScale: 0.36
+      continentScale: 0.36,
+      specularColor: 0x8c96ad,
+      cityLightAlpha: 0.62
     });
   });
 
@@ -121,7 +128,8 @@ describe("procedural art direction helpers", () => {
       silhouette: "drone",
       armorBandColor: 0x7ce1ff,
       engineGlowColor: 0x8ee6b8,
-      cockpitScale: 0.45
+      cockpitScale: 0.45,
+      canopyColor: 0xbff7ff
     });
     expect(
       enemyShipVisual({
@@ -134,7 +142,8 @@ describe("procedural art direction helpers", () => {
       silhouette: "sentinel",
       armorBandColor: 0xff6f91,
       engineGlowColor: 0xffd166,
-      cockpitScale: 0.62
+      cockpitScale: 0.62,
+      shieldAlpha: 0.28
     });
   });
 
@@ -143,13 +152,15 @@ describe("procedural art direction helpers", () => {
       color: 0x7c5cff,
       accentColor: 0x7ce1ff,
       particleCount: 20,
-      swirl: 0.45
+      swirl: 0.45,
+      coreColor: 0x2a174e
     });
     expect(cosmicPhenomenonVisual({ type: "gravity_ripple", severity: 0.8, tick: 5 })).toMatchObject({
       color: 0x8ee6ff,
       accentColor: 0xffd166,
       particleCount: 12,
-      swirl: 0.8
+      swirl: 0.8,
+      lensAlpha: 0.34
     });
   });
 });
@@ -296,6 +307,22 @@ describe("combat visuals", () => {
       radius: 27,
       wingScale: 1.32,
       beamColor: 0x8ee6ff
+    });
+    expect(enemyShipVisual({ archetype: "guardian", policy: "chase", hp: 62, maxHp: 62 })).toMatchObject({
+      archetype: "guardian",
+      silhouette: "guardian",
+      radius: 20,
+      wingScale: 1.08,
+      armorBandColor: 0x8ee6b8,
+      shieldAlpha: 0.38
+    });
+    expect(enemyShipVisual({ archetype: "missileBoat", policy: "chase", hp: 52, maxHp: 52 })).toMatchObject({
+      archetype: "missileBoat",
+      silhouette: "missileBoat",
+      radius: 19,
+      wingScale: 1,
+      armorBandColor: 0xffb13b,
+      podCount: 4
     });
   });
 

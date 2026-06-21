@@ -37,7 +37,7 @@ type EnemyDirectorRequest = {
   };
   enemies: Array<{
     id: string;
-    archetype?: "drone" | "fighter" | "brute" | "sentinel";
+    archetype?: "drone" | "fighter" | "brute" | "sentinel" | "guardian" | "missileBoat";
     hp: number;
     position: Vec2;
     distance: number;
@@ -76,6 +76,7 @@ type EnemyDirectorPolicy = {
 type EnemyDirectorDirective = {
   formation: "screen" | "pincer" | "ambush" | "retreat";
   missileDoctrine: "hold" | "single" | "salvo";
+  tempo: "calm" | "push" | "spike";
   pressure: number;
   hint?: string;
 };
@@ -96,6 +97,7 @@ const fallbackPolicy: EnemyDirectorPolicy = {
 const fallbackDirective: EnemyDirectorDirective = {
   formation: "screen",
   missileDoctrine: "hold",
+  tempo: "calm",
   pressure: 0.4,
   hint: "screen"
 };
@@ -403,7 +405,9 @@ function isEnemy(value: unknown): value is EnemyDirectorRequest["enemies"][numbe
       candidate.archetype === "drone" ||
       candidate.archetype === "fighter" ||
       candidate.archetype === "brute" ||
-      candidate.archetype === "sentinel") &&
+      candidate.archetype === "sentinel" ||
+      candidate.archetype === "guardian" ||
+      candidate.archetype === "missileBoat") &&
     Number.isFinite(candidate.hp) &&
     Number.isFinite(candidate.distance) &&
     isVec2(candidate.position)
@@ -474,8 +478,8 @@ function buildOpenAIRequest(model: string, directorRequest: EnemyDirectorRequest
         role: "system",
         content:
           quality === "cinematic"
-            ? "You are the Astro Courier enemy director. Return only compact JSON. Coordinate varied enemy archetypes for cinematic pressure, readable flanks, and fair recoveries."
-            : "You are the Astro Courier enemy director. Return only compact JSON. Tune enemies for fun pressure, not unfair hits."
+            ? "You are the Astro Courier enemy director. Return only compact JSON. Coordinate varied enemy archetypes, readable flanks, fair recoveries, and tempo beats: calm, push, or spike."
+            : "You are the Astro Courier enemy director. Return only compact JSON. Tune enemies for fun pressure, not unfair hits. Use tempo calm, push, or spike."
       },
       {
         role: "user",
@@ -513,10 +517,11 @@ function buildOpenAIRequest(model: string, directorRequest: EnemyDirectorRequest
             directive: {
               type: "object",
               additionalProperties: false,
-              required: ["formation", "missileDoctrine", "pressure", "hint"],
+              required: ["formation", "missileDoctrine", "tempo", "pressure", "hint"],
               properties: {
                 formation: { type: "string", enum: ["screen", "pincer", "ambush", "retreat"] },
                 missileDoctrine: { type: "string", enum: ["hold", "single", "salvo"] },
+                tempo: { type: "string", enum: ["calm", "push", "spike"] },
                 pressure: { type: "number", minimum: 0, maximum: 1 },
                 hint: { type: "string", maxLength: 32 }
               }
@@ -567,6 +572,8 @@ function clampDirective(directive: Partial<EnemyDirectorDirective> | undefined):
       directive?.missileDoctrine === "single" || directive?.missileDoctrine === "salvo" || directive?.missileDoctrine === "hold"
         ? directive.missileDoctrine
         : fallbackDirective.missileDoctrine,
+    tempo:
+      directive?.tempo === "push" || directive?.tempo === "spike" || directive?.tempo === "calm" ? directive.tempo : fallbackDirective.tempo,
     pressure: clampNumber(directive?.pressure, 0, 1, fallbackDirective.pressure),
     hint: typeof directive?.hint === "string" && directive.hint.trim() ? directive.hint.trim().slice(0, 32) : fallbackDirective.hint
   };

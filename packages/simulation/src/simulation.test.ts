@@ -308,6 +308,7 @@ describe("deterministic Astro Courier simulation", () => {
       enemyDirectorDirective: {
         formation: "screen",
         missileDoctrine: "single",
+        tempo: "push",
         pressure: 0.6
       }
     });
@@ -321,6 +322,7 @@ describe("deterministic Astro Courier simulation", () => {
       enemyDirectorDirective: {
         formation: "screen",
         missileDoctrine: "single",
+        tempo: "push",
         pressure: 0.6
       }
     });
@@ -441,36 +443,94 @@ describe("deterministic Astro Courier simulation", () => {
     });
   });
 
-  it("starts runs with ship HP and a small interceptor patrol", () => {
+  it("starts non-combat runs with ship HP and no hidden interceptor patrol", () => {
     const world = createWorldFromSystem(starterSystem, "combat-seed");
     const snapshot = combatSnapshot(world);
 
     expect(snapshot.ship.hp).toBe(100);
     expect(snapshot.ship.maxHp).toBe(100);
-    expect(snapshot.enemies).toHaveLength(2);
-    expect(snapshot.enemies.every((enemy) => enemy.hp > 0 && enemy.maxHp >= enemy.hp)).toBe(true);
+    expect(snapshot.enemies).toEqual([]);
     expect(snapshot.playerProjectiles).toEqual([]);
     expect(snapshot.enemyProjectiles).toEqual([]);
   });
 
   it("spawns mixed enemy archetypes with distinct combat stats", () => {
-    const world = createWorldFromSystem(starterSystem, "combat-role-seed");
+    const combatSystem: SystemContent = {
+      ...starterSystem,
+      contracts: [
+        ...starterSystem.contracts,
+        {
+          id: "role-test",
+          title: "Role Test",
+          briefing: "Verify explicit enemy roles.",
+          riskLabel: "Enemy Roles",
+          rewardLabel: "Combat check",
+          pickupId: "north-pad",
+          destinationId: "dock-a",
+          cargoId: "bottled-starlight",
+          enemyWave: { drones: 1, fighters: 1, brutes: 0, sentinels: 0 },
+          medalTimes: { bronze: 82, silver: 50, gold: 30 }
+        }
+      ]
+    };
+    const world = createWorldFromSystem(combatSystem, "combat-role-seed", { contractId: "role-test" });
     const snapshot = combatSnapshot(world);
 
     expect(snapshot.enemies.map((enemy) => enemy.archetype)).toEqual(["fighter", "drone"]);
     expect(snapshot.enemies[0]).toMatchObject({
       archetype: "fighter",
-      hp: 40,
-      maxHp: 40,
+      hp: 36,
+      maxHp: 36,
       radius: 14
     });
     expect(snapshot.enemies[1]).toMatchObject({
       archetype: "drone",
-      hp: 22,
-      maxHp: 22,
+      hp: 20,
+      maxHp: 20,
       radius: 10
     });
     expect(combatWorld(world).enemies[1].maxSpeed).toBeGreaterThan(combatWorld(world).enemies[0].maxSpeed);
+  });
+
+  it("keeps hard contracts below missile pressure until raid tiers", () => {
+    const hardSystem: SystemContent = {
+      ...starterSystem,
+      contracts: [
+        ...starterSystem.contracts,
+        {
+          id: "hard-no-missile-test",
+          title: "Hard No Missile Test",
+          briefing: "Hard should add combat without missile shock.",
+          riskLabel: "Hard",
+          rewardLabel: "Pressure check",
+          pickupId: "north-pad",
+          destinationId: "dock-a",
+          cargoId: "bottled-starlight",
+          difficultyTier: "hard",
+          enemyWave: { drones: 0, fighters: 1, brutes: 1, sentinels: 0 },
+          medalTimes: { bronze: 82, silver: 50, gold: 30 }
+        },
+        {
+          id: "raid-missile-test",
+          title: "Raid Missile Test",
+          briefing: "Raid can introduce missile pressure.",
+          riskLabel: "Raid",
+          rewardLabel: "Missile check",
+          pickupId: "north-pad",
+          destinationId: "dock-a",
+          cargoId: "bottled-starlight",
+          difficultyTier: "raid",
+          enemyWave: { drones: 0, fighters: 1, brutes: 1, sentinels: 0 },
+          medalTimes: { bronze: 82, silver: 50, gold: 30 }
+        }
+      ]
+    };
+
+    const hard = combatWorld(createWorldFromSystem(hardSystem, "hard-no-missiles", { contractId: "hard-no-missile-test" }));
+    const raid = combatWorld(createWorldFromSystem(hardSystem, "raid-has-missiles", { contractId: "raid-missile-test" }));
+
+    expect(hard.enemies.every((enemy) => enemy.missileAmmo === 0)).toBe(true);
+    expect(raid.enemies.some((enemy) => enemy.missileAmmo > 0)).toBe(true);
   });
 
   it("uses contract enemy waves to create larger combat missions", () => {
@@ -499,12 +559,48 @@ describe("deterministic Astro Courier simulation", () => {
     expect(snapshot.enemies.map((enemy) => enemy.archetype)).toEqual(["fighter", "fighter", "drone", "drone", "drone", "brute", "sentinel"]);
     expect(new Set(snapshot.enemies.map((enemy) => enemy.id)).size).toBe(7);
     expect(snapshot.enemies.find((enemy) => enemy.archetype === "brute")).toMatchObject({
-      hp: 78,
+      hp: 70,
       radius: 20
     });
     expect(snapshot.enemies.find((enemy) => enemy.archetype === "sentinel")).toMatchObject({
-      hp: 120,
+      hp: 108,
       radius: 25
+    });
+  });
+
+  it("spawns guardian and missile boat roles with distinct pressure profiles", () => {
+    const roleSystem: SystemContent = {
+      ...starterSystem,
+      contracts: [
+        ...starterSystem.contracts,
+        {
+          id: "combat-v2-role-test",
+          title: "Combat V2 Role Test",
+          briefing: "Verify specialized combat roles.",
+          riskLabel: "Enemy Roles",
+          rewardLabel: "Role check",
+          pickupId: "north-pad",
+          destinationId: "dock-a",
+          cargoId: "bottled-starlight",
+          difficultyTier: "raid",
+          enemyWave: { drones: 0, fighters: 0, brutes: 0, sentinels: 0, guardians: 1, missileBoats: 1 },
+          medalTimes: { bronze: 90, silver: 60, gold: 40 }
+        }
+      ]
+    };
+
+    const snapshot = combatSnapshot(createWorldFromSystem(roleSystem, "combat-v2-role-seed", { contractId: "combat-v2-role-test" }));
+
+    expect(snapshot.enemies.map((enemy) => enemy.archetype)).toEqual(["guardian", "missileBoat"]);
+    expect(snapshot.enemies.find((enemy) => enemy.archetype === "guardian")).toMatchObject({
+      shield: 42,
+      maxShield: 42,
+      armor: 6,
+      radius: 18
+    });
+    expect(snapshot.enemies.find((enemy) => enemy.archetype === "missileBoat")).toMatchObject({
+      missileAmmo: 2,
+      radius: 17
     });
   });
 
@@ -798,6 +894,59 @@ describe("deterministic Astro Courier simulation", () => {
     expect(magnet.cargoOnboard).toBe(true);
   });
 
+  it("turns unlocked ship upgrades into mechanical ship systems", () => {
+    const baseline = createWorldFromSystem(starterSystem, "baseline-upgrade-seed", { perkId: "shield-crate" });
+    const upgraded = createWorldFromSystem(starterSystem, "ship-upgrade-seed", {
+      perkId: "shield-crate",
+      shipUpgrades: ["boost-tune", "reinforced-hull", "pulse-rail", "forge-core"]
+    });
+    for (const world of [baseline, upgraded]) {
+      world.gravitySources = [];
+      world.landingPads = [];
+      world.enemies = [];
+      world.ship.position = { x: 500, y: 500 };
+      world.ship.velocity = { x: 0, y: 0 };
+      world.ship.rotation = 0;
+      world.ship.targetRotation = 0;
+    }
+
+    stepWorld(baseline, 1 / 60, [{ type: "BOOST" }], { combat: false });
+    stepWorld(upgraded, 1 / 60, [{ type: "BOOST" }, { type: "FIRE" }], { combat: false });
+
+    expect(upgraded.ship.maxHp).toBe(140);
+    expect(upgraded.ship.hp).toBe(140);
+    expect(upgraded.ship.missileAmmo).toBe(4);
+    expect(upgraded.ship.velocity.x).toBeGreaterThan(baseline.ship.velocity.x);
+    expect(upgraded.fuelUsed).toBeLessThan(baseline.fuelUsed);
+    expect(upgraded.playerProjectiles[0]).toMatchObject({
+      damage: 42,
+      radius: 6
+    });
+    expect(upgraded.pulseShotAvailable).toBe(false);
+  });
+
+  it("lets mag-clamp ship upgrades widen pickup capture without selecting the perk", () => {
+    const baseline = createWorldFromSystem(starterSystem, "baseline-upgrade-magnet-seed", { perkId: "shield-crate" });
+    const upgraded = createWorldFromSystem(starterSystem, "ship-upgrade-magnet-seed", {
+      perkId: "shield-crate",
+      shipUpgrades: ["mag-clamp"]
+    });
+    for (const world of [baseline, upgraded]) {
+      world.enemies = [];
+      world.ship.position = { x: 74, y: -74 };
+      world.ship.velocity = { x: -4, y: 0 };
+      world.ship.rotation = -Math.PI / 2;
+      world.ship.targetRotation = -Math.PI / 2;
+    }
+
+    stepWorld(baseline, 1 / 60, [], { combat: false });
+    stepWorld(upgraded, 1 / 60, [], { combat: false });
+
+    expect(baseline.cargoOnboard).toBe(false);
+    expect(upgraded.objectivePhase).toBe("delivery");
+    expect(upgraded.cargoOnboard).toBe(true);
+  });
+
   it("awards risk gate style once for a fast clean pass", () => {
     const systemWithHazard: SystemContent = {
       ...starterSystem,
@@ -941,12 +1090,39 @@ describe("deterministic Astro Courier simulation", () => {
       enemyDirectorDirective: {
         formation: "screen",
         missileDoctrine: "single",
+        tempo: "spike",
         pressure: 0.6
       }
     });
 
     expect(combat.enemies[0].missileAmmo).toBe(0);
     expect(combat.enemyProjectiles.some((projectile) => projectile.kind === "missile" && projectile.targetId === "player")).toBe(true);
+  });
+
+  it("lets calm director tempo hold single enemy missiles for fair recovery windows", () => {
+    const world = createWorldFromSystem(starterSystem, "enemy-calm-missile-seed");
+    const combat = combatWorld(world);
+    combat.enemies = [
+      {
+        ...testEnemy("calm-missile-fighter-a", { x: 260, y: 0 }),
+        missileAmmo: 1,
+        missileCooldownSeconds: 0
+      }
+    ];
+    combat.ship.position = { x: 120, y: 0 };
+    combat.ship.velocity = { x: 0, y: 0 };
+
+    stepWorld(world, 1 / 60, [], {
+      enemyDirectorDirective: {
+        formation: "screen",
+        missileDoctrine: "single",
+        tempo: "calm",
+        pressure: 0.9
+      }
+    });
+
+    expect(combat.enemies[0].missileAmmo).toBe(1);
+    expect(combat.enemyProjectiles.some((projectile) => projectile.kind === "missile")).toBe(false);
   });
 
   it("allows regular shots to intercept homing missiles", () => {
