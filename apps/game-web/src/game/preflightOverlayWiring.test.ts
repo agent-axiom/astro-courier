@@ -51,6 +51,7 @@ describe("preflight overlay density wiring", () => {
 
   it("wires optional cloud sync into preflight without blocking local play", () => {
     expect(appSource).toContain('from "./game/cloudSave"');
+    expect(appSource).toContain("const profileApiUrl = import.meta.env.VITE_PROFILE_API_URL as string | undefined;");
     expect(appSource).toContain("createCloudSaveClient(profileApiUrl)");
     expect(appSource).toContain("const cloudSaveStatusLabel = buildCloudSaveStatusLabel(cloudSaveStatus)");
     expect(appSource).toContain("enableCloudSave");

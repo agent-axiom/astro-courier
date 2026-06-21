@@ -339,8 +339,7 @@ export function App() {
     return storage ? getDailyDispatchProgress(storage) : undefined;
   });
   const [dailyProgressReceipt, setDailyProgressReceipt] = useState<DailyDispatchProgressReceipt | undefined>(undefined);
-  const profileApiUrl =
-    (import.meta.env.VITE_PROFILE_API_URL as string | undefined) ?? (import.meta.env.VITE_ENEMY_DIRECTOR_URL as string | undefined);
+  const profileApiUrl = import.meta.env.VITE_PROFILE_API_URL as string | undefined;
   const cloudSaveClient = useMemo(() => createCloudSaveClient(profileApiUrl), [profileApiUrl]);
   const [cloudSession, setCloudSession] = useState<CloudSaveSession | undefined>(undefined);
   const [cloudSaveStatus, setCloudSaveStatus] = useState<CloudSaveStatus>(() => (profileApiUrl ? { mode: "idle" } : { mode: "disabled" }));

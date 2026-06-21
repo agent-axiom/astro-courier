@@ -53,6 +53,7 @@ jobs:
         env:
           DEPLOY_BASE: /astro-courier/
           VITE_ENEMY_DIRECTOR_URL: ${{ vars.VITE_ENEMY_DIRECTOR_URL }}
+          VITE_PROFILE_API_URL: ${{ vars.VITE_PROFILE_API_URL }}
 
       - name: Configure Pages
         uses: actions/configure-pages@v6

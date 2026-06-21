@@ -9,4 +9,4 @@ OPENAI_MODEL = "gpt-5.4-mini"
 [[d1_databases]]
 binding = "PROFILE_DB"
 database_name = "astro-courier-profile"
-database_id = "replace-with-cloudflare-d1-database-id"
+database_id = "a4bbb574-532e-4b69-bc09-d2704facaebf"

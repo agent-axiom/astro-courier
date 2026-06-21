@@ -76,7 +76,7 @@ Optional: set `VITE_ENEMY_DIRECTOR_QUALITY=cinematic` to let the Worker send a w
 
 ## Optional Cloud Save
 
-The same Worker can also issue guest profile sessions and store progress snapshots in Cloudflare D1. Create the database, copy its `database_id` into `apps/enemy-director-worker/wrangler.toml`, run the migration, and set a token secret:
+The same Worker can also issue guest profile sessions and store progress snapshots in Cloudflare D1. This is a lightweight cloud-save profile, not a GitHub/OAuth account login. Create the database, copy its `database_id` into `apps/enemy-director-worker/wrangler.toml`, run the migration, and set a token secret:
 
 ```sh
 corepack pnpm dlx wrangler d1 create astro-courier-profile

@@ -106,9 +106,9 @@ export function buildCloudSaveStatusLabel(status: CloudSaveStatus): CloudSaveSta
     return { label: "Cloud", value: status.displayName, tone: "synced" };
   }
   if (status.mode === "error") {
-    return { label: "Cloud", value: "Offline", tone: "error" };
+    return { label: "Cloud", value: "Cloud off", tone: "error" };
   }
-  return { label: "Cloud", value: "Sign in", tone: "idle" };
+  return { label: "Cloud", value: "Cloud save", tone: "idle" };
 }
 
 function normalizeProfileApiUrl(value: string | undefined): string | undefined {

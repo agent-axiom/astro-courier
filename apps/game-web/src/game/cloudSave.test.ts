@@ -63,6 +63,11 @@ describe("cloud save", () => {
     expect(createCloudSaveClient(undefined)).toBeUndefined();
     expect(buildCloudSaveStatusLabel({ mode: "disabled" })).toEqual({ label: "Cloud", value: "Local only", tone: "idle" });
   });
+
+  it("labels profile sync without implying a full account login", () => {
+    expect(buildCloudSaveStatusLabel({ mode: "idle" })).toEqual({ label: "Cloud", value: "Cloud save", tone: "idle" });
+    expect(buildCloudSaveStatusLabel({ mode: "error" })).toEqual({ label: "Cloud", value: "Cloud off", tone: "error" });
+  });
 });
 
 function jsonResponse(value: unknown): Response {
