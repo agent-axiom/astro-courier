@@ -111,6 +111,10 @@ describe("keyboard input mapping", () => {
     ]);
   });
 
+  it("keeps space free for fire instead of continuous thrust", () => {
+    expect(commandsFromKeyboardState(new Set(["Space"]), Math.PI / 2)).toEqual([]);
+  });
+
   it("queues boost once per key press instead of every frame", () => {
     const target = new FakeKeyboardTarget();
     const input = new KeyboardInput(target as unknown as Window);
@@ -146,6 +150,11 @@ describe("keyboard input mapping", () => {
     expect(input.commands(0)).toEqual([]);
 
     target.dispatch("keyup", "KeyJ");
+    target.dispatch("keydown", "Space");
+
+    expect(input.commands(0)).toEqual([{ type: "FIRE" }]);
+
+    target.dispatch("keyup", "Space");
     target.dispatch("keydown", "Enter");
 
     expect(input.commands(0)).toEqual([{ type: "FIRE" }]);

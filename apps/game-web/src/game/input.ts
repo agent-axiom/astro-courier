@@ -90,7 +90,7 @@ export function commandsFromKeyboardState(pressed: ReadonlySet<string>, currentR
   if (isDown(pressed, "ArrowRight") || isDown(pressed, "KeyD")) {
     commands.push({ type: "AIM", angle: currentRotation + turnStep });
   }
-  if (isDown(pressed, "ArrowUp") || isDown(pressed, "KeyW") || isDown(pressed, "Space")) {
+  if (isDown(pressed, "ArrowUp") || isDown(pressed, "KeyW")) {
     commands.push({ type: "THRUST", amount: 1 });
   }
   if (isDown(pressed, "ArrowDown") || isDown(pressed, "KeyS") || isDown(pressed, "ShiftLeft") || isDown(pressed, "ShiftRight")) {
@@ -218,7 +218,7 @@ export class KeyboardInput {
       if (event.code === "KeyE" && !wasPressed) {
         this.boostQueued = true;
       }
-      if ((event.code === "KeyJ" || event.code === "Enter") && !wasPressed) {
+      if ((event.code === "KeyJ" || event.code === "Enter" || event.code === "Space") && !wasPressed) {
         this.fireQueued = true;
       }
       if (event.code === "KeyK" && !wasPressed) {

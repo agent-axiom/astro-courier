@@ -22,11 +22,12 @@ Some routes are longhaul contracts. Watch for the small `Fuel` chip, dock softly
 
 Keyboard controls:
 
-- `W` / `ArrowUp` / `Space`: thrust
+- `Enter` / `Space`: launch from the preflight screen
+- `W` / `ArrowUp`: thrust
 - `A` / `ArrowLeft` and `D` / `ArrowRight`: steer
 - `S` / `ArrowDown` / `Shift`: brake
 - `E`: boost
-- `J` / `Enter`: fire
+- `Space` / `J` / `Enter`: fire in flight
 - `K`: homing missile
 - `P` / `Esc`: pause
 - `R`: restart from result screen
