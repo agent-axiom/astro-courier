@@ -103,5 +103,5 @@
 - [x] `corepack pnpm -r typecheck`
 - [x] `corepack pnpm -r test`
 - [x] `corepack pnpm -r build`
-- [ ] Push to `main` and verify GitHub Pages deploy.
-- [ ] Deploy Worker if Worker code changes and verify `/health` plus `/enemy-director`.
+- [x] Push to `main` and verify GitHub Pages deploy.
+- [x] Deploy Worker if Worker code changes and verify `/health` plus `/enemy-director`.
