@@ -57,7 +57,9 @@ https://agent-axiom.github.io/astro-courier/
 
 The optional OpenAI enemy director runs as a Cloudflare Worker from `apps/enemy-director-worker`. It keeps the OpenAI API key server-side and returns bounded combat policy plus formation, missile, tempo, mission-modifier, scene, and personality directives to the static GitHub Pages build.
 
-Deploy it with Wrangler:
+Worker code is auto-deployed from `.github/workflows/deploy-worker.yml` when Worker files change on `main`. The GitHub repository must have `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` secrets configured.
+
+Manual deploy with Wrangler:
 
 ```sh
 corepack pnpm dlx wrangler login
