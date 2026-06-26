@@ -76,6 +76,7 @@ describe("enemy director client", () => {
         modifier: "none",
         scene: "none",
         personality: "balanced",
+        runBeat: "none",
         pressure: 0.8,
         hint: "pincer"
       }
@@ -104,6 +105,7 @@ describe("enemy director client", () => {
             modifier: "meteorBurst",
             scene: "pursuit",
             personality: "aggressive",
+            runBeat: "bonusWindow",
             pressure: 0.4
           }
         })
@@ -188,6 +190,10 @@ function testSnapshot(): SimulationSnapshot {
         formation: "screen",
         missileDoctrine: "hold",
         tempo: "calm",
+        modifier: "none",
+        scene: "none",
+        personality: "balanced",
+        runBeat: "none",
         pressure: 0.4
       }
     },

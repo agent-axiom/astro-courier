@@ -72,6 +72,7 @@ export type EnemyDirectorPolicy = {
 export type EnemyDirectorModifier = "none" | "ambush" | "lowFuel" | "heavyEscort" | "meteorBurst" | "quietLane";
 export type EnemyDirectorScene = "none" | "ambush" | "pursuit" | "siege" | "recovery";
 export type EnemyDirectorPersonality = "balanced" | "aggressive" | "cautious" | "swarm" | "sniper";
+export type EnemyDirectorRunBeat = "none" | "bonusWindow" | "reinforcement" | "recovery" | "shortcut";
 
 export type EnemyDirectorDirective = {
   formation: "screen" | "pincer" | "ambush" | "retreat";
@@ -80,6 +81,7 @@ export type EnemyDirectorDirective = {
   modifier?: EnemyDirectorModifier;
   scene?: EnemyDirectorScene;
   personality?: EnemyDirectorPersonality;
+  runBeat?: EnemyDirectorRunBeat;
   pressure: number;
   hint?: string;
 };

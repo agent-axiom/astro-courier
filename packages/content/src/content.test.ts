@@ -19,6 +19,9 @@ describe("content schemas", () => {
       "silent-courier",
       "comet-chase",
       "rescue-pod-run",
+      "smuggler-scan-run",
+      "evacuation-window",
+      "portal-hop",
       "convoy-escort",
       "gravity-slingshot",
       "gravity-lockpick",
@@ -82,6 +85,9 @@ describe("content schemas", () => {
       "stealth",
       "chase",
       "rescue",
+      "stealth",
+      "rescue",
+      "standard",
       "escort",
       "standard",
       "standard",
@@ -135,6 +141,31 @@ describe("content schemas", () => {
       riskGateCount: 4,
       enemyWave: { scouts: 2, fighters: 1 },
       medalTimes: { bronze: 88, silver: 56, gold: 34 }
+    });
+    expect(parsed.contracts.find((contract) => contract.id === "smuggler-scan-run")).toMatchObject({
+      title: "Smuggler Scan Run",
+      missionType: "stealth",
+      missionHook: "smuggler",
+      riskLabel: "Scanner Net",
+      cargoId: "black-box-parcel",
+      enemyWave: { scouts: 1, drones: 1 },
+      medalTimes: { bronze: 86, silver: 54, gold: 34 }
+    });
+    expect(parsed.contracts.find((contract) => contract.id === "evacuation-window")).toMatchObject({
+      title: "Evacuation Window",
+      missionType: "rescue",
+      missionHook: "evac",
+      riskLabel: "Rescue Clock",
+      cargoId: "escape-pod",
+      medalTimes: { bronze: 84, silver: 52, gold: 33 }
+    });
+    expect(parsed.contracts.find((contract) => contract.id === "portal-hop")).toMatchObject({
+      title: "Portal Hop",
+      missionHook: "portal",
+      riskLabel: "Portal Drift",
+      cargoId: "phase-map",
+      riskGateCount: 2,
+      medalTimes: { bronze: 78, silver: 48, gold: 29 }
     });
     expect(parsed.contracts.find((contract) => contract.id === "rescue-pod-run")).toMatchObject({
       title: "Rescue Pod Run",
@@ -314,6 +345,16 @@ describe("content schemas", () => {
       name: "Convoy Transponder",
       kind: "time-sensitive",
       fragility: 0.7
+    });
+    expect(parsed.cargo.find((cargo) => cargo.id === "black-box-parcel")).toMatchObject({
+      name: "Black Box Parcel",
+      kind: "illegal-ish",
+      fragility: 0.78
+    });
+    expect(parsed.cargo.find((cargo) => cargo.id === "phase-map")).toMatchObject({
+      name: "Phase Map",
+      kind: "magnetic",
+      fragility: 0.76
     });
     expect(parsed.contracts.find((contract) => contract.id === "return-leg")?.shipStart?.position).toEqual([360, -140]);
     expect(parsed.planets[0]?.landingPads[0]?.allowedApproachSpeed).toBeGreaterThan(0);

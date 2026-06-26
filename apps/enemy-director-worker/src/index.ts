@@ -21,6 +21,7 @@ type D1DatabaseBinding = {
 type D1PreparedStatementBinding = {
   bind(...values: unknown[]): D1PreparedStatementBinding;
   first<T = unknown>(): Promise<T | null>;
+  all<T = unknown>(): Promise<{ results: T[] }>;
   run(): Promise<{ success?: boolean }>;
 };
 
@@ -76,6 +77,32 @@ type ProfileProgressSnapshot = {
   updatedAt: string;
 };
 
+type LeaderboardMedal = "none" | "bronze" | "silver" | "gold" | "comet";
+
+type LeaderboardEntry = {
+  id: string;
+  contractId: string;
+  playerId: string;
+  displayName: string;
+  score: number;
+  elapsedSeconds: number;
+  medal: LeaderboardMedal;
+  replaySeed: string;
+  createdAt: string;
+};
+
+type LeaderboardEntryRow = {
+  id: string;
+  contract_id: string;
+  player_id: string;
+  display_name: string;
+  score: number;
+  elapsed_seconds: number;
+  medal: LeaderboardMedal;
+  replay_seed: string;
+  created_at: string;
+};
+
 type EnemyDirectorPolicy = {
   aggression: number;
   flank: number;
@@ -87,6 +114,7 @@ type EnemyDirectorPolicy = {
 type EnemyDirectorModifier = "none" | "ambush" | "lowFuel" | "heavyEscort" | "meteorBurst" | "quietLane";
 type EnemyDirectorScene = "none" | "ambush" | "pursuit" | "siege" | "recovery";
 type EnemyDirectorPersonality = "balanced" | "aggressive" | "cautious" | "swarm" | "sniper";
+type EnemyDirectorRunBeat = "none" | "bonusWindow" | "reinforcement" | "recovery" | "shortcut";
 
 type EnemyDirectorDirective = {
   formation: "screen" | "pincer" | "ambush" | "retreat";
@@ -95,6 +123,7 @@ type EnemyDirectorDirective = {
   modifier: EnemyDirectorModifier;
   scene: EnemyDirectorScene;
   personality: EnemyDirectorPersonality;
+  runBeat: EnemyDirectorRunBeat;
   pressure: number;
   hint?: string;
 };
@@ -119,6 +148,7 @@ const fallbackDirective: EnemyDirectorDirective = {
   modifier: "none",
   scene: "none",
   personality: "balanced",
+  runBeat: "none",
   pressure: 0.4,
   hint: "screen"
 };
@@ -151,6 +181,14 @@ export function createEnemyDirectorWorker(deps: EnemyDirectorWorkerDeps = {}): E
 
       if (url.pathname === "/profile/progress") {
         return handleProfileProgress(request, env, cors);
+      }
+
+      if (url.pathname === "/leaderboard/submit") {
+        return handleLeaderboardSubmit(request, env, cors);
+      }
+
+      if (url.pathname === "/leaderboard/top") {
+        return handleLeaderboardTop(request, env, cors, url);
       }
 
       if (url.pathname !== "/enemy-director") {
@@ -311,6 +349,71 @@ async function handleProfileProgress(request: Request, env: EnemyDirectorEnv, co
   return json({ ok: true, saved: true }, { status: 200, headers: cors });
 }
 
+async function handleLeaderboardSubmit(request: Request, env: EnemyDirectorEnv, cors: Headers): Promise<Response> {
+  if (request.method !== "POST") {
+    return json({ error: "method_not_allowed" }, { status: 405, headers: cors });
+  }
+  if (!env.PROFILE_DB) {
+    return json({ error: "leaderboard_unavailable" }, { status: 503, headers: cors });
+  }
+
+  const session = await readProfileSession(request, env);
+  if (!session) {
+    return json({ error: "unauthorized" }, { status: 401, headers: cors });
+  }
+
+  const entry = await readLeaderboardEntry(request, session);
+  if (!entry) {
+    return json({ error: "invalid_leaderboard_entry" }, { status: 400, headers: cors });
+  }
+
+  await env.PROFILE_DB.prepare(
+    "INSERT INTO leaderboard_entries (id, contract_id, player_id, display_name, score, elapsed_seconds, medal, replay_seed, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+  )
+    .bind(
+      entry.id,
+      entry.contractId,
+      entry.playerId,
+      entry.displayName,
+      entry.score,
+      entry.elapsedSeconds,
+      entry.medal,
+      entry.replaySeed,
+      entry.createdAt
+    )
+    .run();
+
+  return json({ ok: true, entry: publicLeaderboardEntry(entry) }, { status: 200, headers: cors });
+}
+
+async function handleLeaderboardTop(request: Request, env: EnemyDirectorEnv, cors: Headers, url: URL): Promise<Response> {
+  if (request.method !== "GET") {
+    return json({ error: "method_not_allowed" }, { status: 405, headers: cors });
+  }
+  if (!env.PROFILE_DB) {
+    return json({ error: "leaderboard_unavailable" }, { status: 503, headers: cors });
+  }
+
+  const contractId = sanitizeLeaderboardId(url.searchParams.get("contractId") ?? "");
+  if (!contractId) {
+    return json({ error: "invalid_contract_id" }, { status: 400, headers: cors });
+  }
+
+  const rows = await env.PROFILE_DB.prepare(
+    "SELECT id, contract_id, player_id, display_name, score, elapsed_seconds, medal, replay_seed, created_at FROM leaderboard_entries WHERE contract_id = ? ORDER BY score DESC, elapsed_seconds ASC LIMIT 10"
+  )
+    .bind(contractId)
+    .all<LeaderboardEntryRow>();
+
+  return json(
+    {
+      contractId,
+      entries: rows.results.map(leaderboardEntryFromRow).map(publicLeaderboardEntry)
+    },
+    { status: 200, headers: cors }
+  );
+}
+
 async function createCloudProfile(db: D1DatabaseBinding, displayName: string): Promise<{ playerId: string; code: string }> {
   const progress = emptyProgressSnapshot();
   for (let attempt = 0; attempt < 5; attempt += 1) {
@@ -366,6 +469,67 @@ async function readProfileProgress(request: Request): Promise<ProfileProgressSna
     updatedAt: body.updatedAt
   };
   return JSON.stringify(progress).length <= 32_000 ? progress : undefined;
+}
+
+async function readLeaderboardEntry(request: Request, session: ProfileSessionPayload): Promise<LeaderboardEntry | undefined> {
+  const body = await readJsonObject(request);
+  const contractId = sanitizeLeaderboardId(typeof body?.contractId === "string" ? body.contractId : "");
+  const replaySeed = sanitizeLeaderboardId(typeof body?.replaySeed === "string" ? body.replaySeed : "");
+  const medal = normalizeLeaderboardMedal(body?.medal);
+  const score = Math.floor(typeof body?.score === "number" && Number.isFinite(body.score) ? body.score : -1);
+  const elapsedSeconds = typeof body?.elapsedSeconds === "number" && Number.isFinite(body.elapsedSeconds) ? body.elapsedSeconds : -1;
+
+  if (!contractId || !replaySeed || !medal || score < 0 || elapsedSeconds <= 0 || elapsedSeconds > 3600) {
+    return undefined;
+  }
+
+  return {
+    id: `run_${crypto.randomUUID().replaceAll("-", "")}`,
+    contractId,
+    playerId: session.sub,
+    displayName: sanitizeDisplayName(session.displayName),
+    score,
+    elapsedSeconds: Math.round(elapsedSeconds * 1000) / 1000,
+    medal,
+    replaySeed,
+    createdAt: new Date().toISOString()
+  };
+}
+
+function leaderboardEntryFromRow(row: LeaderboardEntryRow): LeaderboardEntry {
+  return {
+    id: row.id,
+    contractId: row.contract_id,
+    playerId: row.player_id,
+    displayName: row.display_name,
+    score: row.score,
+    elapsedSeconds: row.elapsed_seconds,
+    medal: row.medal,
+    replaySeed: row.replay_seed,
+    createdAt: row.created_at
+  };
+}
+
+function publicLeaderboardEntry(entry: LeaderboardEntry) {
+  return {
+    id: entry.id,
+    contractId: entry.contractId,
+    displayName: entry.displayName,
+    score: entry.score,
+    elapsedSeconds: entry.elapsedSeconds,
+    medal: entry.medal,
+    replaySeed: entry.replaySeed,
+    createdAt: entry.createdAt
+  };
+}
+
+function normalizeLeaderboardMedal(value: unknown): LeaderboardMedal | undefined {
+  return value === "none" || value === "bronze" || value === "silver" || value === "gold" || value === "comet" ? value : undefined;
+}
+
+function sanitizeLeaderboardId(value: string): string {
+  const normalized = value.trim();
+  return /^[a-zA-Z0-9:_-]{2,80}$/.test(normalized) ? normalized : "";
 }
 
 async function readProfileSession(request: Request, env: EnemyDirectorEnv): Promise<ProfileSessionPayload | undefined> {
@@ -504,8 +668,8 @@ function buildOpenAIRequest(model: string, directorRequest: EnemyDirectorRequest
         role: "system",
         content:
           quality === "cinematic"
-            ? "You are the Astro Courier enemy director. Return only compact JSON. Coordinate varied enemy archetypes, readable flanks, fair recoveries, tempo beats, one bounded mission modifier, one bounded combat scene, and one bounded enemy personality."
-            : "You are the Astro Courier enemy director. Return only compact JSON. Tune enemies for fun pressure, not unfair hits. Use one bounded modifier, scene, and personality."
+            ? "You are the Astro Courier enemy director. Return only compact JSON. Coordinate varied enemy archetypes, readable flanks, fair recoveries, tempo beats, one bounded mission modifier, one bounded combat scene, one bounded enemy personality, and one bounded run beat."
+            : "You are the Astro Courier enemy director. Return only compact JSON. Tune enemies for fun pressure, not unfair hits. Use one bounded modifier, scene, personality, and run beat."
       },
       {
         role: "user",
@@ -543,7 +707,7 @@ function buildOpenAIRequest(model: string, directorRequest: EnemyDirectorRequest
             directive: {
               type: "object",
               additionalProperties: false,
-              required: ["formation", "missileDoctrine", "tempo", "modifier", "scene", "personality", "pressure", "hint"],
+              required: ["formation", "missileDoctrine", "tempo", "modifier", "scene", "personality", "runBeat", "pressure", "hint"],
               properties: {
                 formation: { type: "string", enum: ["screen", "pincer", "ambush", "retreat"] },
                 missileDoctrine: { type: "string", enum: ["hold", "single", "salvo"] },
@@ -551,6 +715,7 @@ function buildOpenAIRequest(model: string, directorRequest: EnemyDirectorRequest
                 modifier: { type: "string", enum: ["none", "ambush", "lowFuel", "heavyEscort", "meteorBurst", "quietLane"] },
                 scene: { type: "string", enum: ["none", "ambush", "pursuit", "siege", "recovery"] },
                 personality: { type: "string", enum: ["balanced", "aggressive", "cautious", "swarm", "sniper"] },
+                runBeat: { type: "string", enum: ["none", "bonusWindow", "reinforcement", "recovery", "shortcut"] },
                 pressure: { type: "number", minimum: 0, maximum: 1 },
                 hint: { type: "string", maxLength: 32 }
               }
@@ -628,6 +793,14 @@ function clampDirective(directive: Partial<EnemyDirectorDirective> | undefined):
       directive?.personality === "balanced"
         ? directive.personality
         : fallbackDirective.personality,
+    runBeat:
+      directive?.runBeat === "bonusWindow" ||
+      directive?.runBeat === "reinforcement" ||
+      directive?.runBeat === "recovery" ||
+      directive?.runBeat === "shortcut" ||
+      directive?.runBeat === "none"
+        ? directive.runBeat
+        : fallbackDirective.runBeat,
     pressure: clampNumber(directive?.pressure, 0, 1, fallbackDirective.pressure),
     hint: typeof directive?.hint === "string" && directive.hint.trim() ? directive.hint.trim().slice(0, 32) : fallbackDirective.hint
   };

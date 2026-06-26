@@ -33,6 +33,34 @@ export type FirstRunExperienceAudit = {
   checks: FirstRunExperienceCheck[];
 };
 
+export type FirstExperienceCue = {
+  label: "First flight" | "Training";
+  value: string;
+  detail: string;
+  tone: "guide" | "training";
+};
+
+export function buildFirstExperienceCue(input: {
+  status: "paused" | "flying" | "delivered" | "crashed";
+  preflightOpen: boolean;
+  savedRouteCount: number;
+  contractId: string;
+}): FirstExperienceCue | undefined {
+  if (!input.preflightOpen || input.status !== "paused" || input.savedRouteCount > 0) {
+    return undefined;
+  }
+
+  if (input.contractId === "training-flight") {
+    return { label: "Training", value: "Try controls", detail: "Safe lane", tone: "training" };
+  }
+
+  if (input.contractId === "first-light-delivery") {
+    return { label: "First flight", value: "Pickup then dock", detail: "Training optional", tone: "guide" };
+  }
+
+  return undefined;
+}
+
 export function buildFirstRunExperienceAudit(input: FirstRunExperienceAuditInput): FirstRunExperienceAudit {
   const checks: FirstRunExperienceCheck[] = [
     {

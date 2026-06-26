@@ -124,7 +124,8 @@ function normalizeDirectorResult(value: unknown): EnemyDirectorResult | undefine
         tempo: candidate.directive.tempo ?? "calm",
         modifier: normalizeModifier(candidate.directive.modifier),
         scene: normalizeScene(candidate.directive.scene),
-        personality: normalizePersonality(candidate.directive.personality)
+        personality: normalizePersonality(candidate.directive.personality),
+        runBeat: normalizeRunBeat(candidate.directive.runBeat)
       }
     };
   }
@@ -143,6 +144,10 @@ function normalizePersonality(value: unknown): EnemyDirectorDirective["personali
   return value === "aggressive" || value === "cautious" || value === "swarm" || value === "sniper" || value === "balanced"
     ? value
     : "balanced";
+}
+
+function normalizeRunBeat(value: unknown): EnemyDirectorDirective["runBeat"] {
+  return value === "bonusWindow" || value === "reinforcement" || value === "recovery" || value === "shortcut" || value === "none" ? value : "none";
 }
 
 function distanceBetween(left: Vec2, right: Vec2): number {

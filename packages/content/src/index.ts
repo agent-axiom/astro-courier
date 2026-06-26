@@ -32,7 +32,17 @@ export const stationSchema = z.object({
 
 export const hazardSchema = z.object({
   id: z.string().min(1),
-  type: z.enum(["asteroid_field", "solar_wind", "customs_drone", "gravity_ripple", "radiation", "nebula"]),
+  type: z.enum([
+    "asteroid_field",
+    "solar_wind",
+    "customs_drone",
+    "gravity_ripple",
+    "radiation",
+    "nebula",
+    "ion_storm",
+    "wormhole",
+    "magnetic_burst"
+  ]),
   position: vec2Schema,
   radius: z.number().positive(),
   severity: z.number().min(0).max(1)
@@ -75,6 +85,7 @@ export const contractSchema = z.object({
   rewardLabel: z.string().min(1),
   difficultyTier: z.enum(["standard", "hard", "raid", "boss"]).optional(),
   missionType: z.enum(["standard", "longhaul", "rescue", "escort", "raid", "stealth", "chase"]).optional(),
+  missionHook: z.enum(["smuggler", "evac", "multiDrop", "rival", "portal"]).optional(),
   shipStart: contractShipStartSchema.optional(),
   pickupId: z.string().min(1),
   destinationId: z.string().min(1),

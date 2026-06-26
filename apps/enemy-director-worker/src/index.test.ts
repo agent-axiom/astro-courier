@@ -62,6 +62,7 @@ describe("enemy director worker", () => {
       expect(body.text.format.schema.properties.directive.required).toContain("modifier");
       expect(body.text.format.schema.properties.directive.required).toContain("scene");
       expect(body.text.format.schema.properties.directive.required).toContain("personality");
+      expect(body.text.format.schema.properties.directive.required).toContain("runBeat");
       expect(body.max_output_tokens).toBe(160);
       expect(JSON.parse(body.input[1].content)).toMatchObject({
         quality: "standard",
@@ -92,6 +93,7 @@ describe("enemy director worker", () => {
               modifier: "ambush",
               scene: "siege",
               personality: "sniper",
+              runBeat: "reinforcement",
               pressure: 3,
               hint: "wide pincer"
             }
@@ -128,6 +130,7 @@ describe("enemy director worker", () => {
         modifier: "ambush",
         scene: "siege",
         personality: "sniper",
+        runBeat: "reinforcement",
         pressure: 1,
         hint: "wide pincer"
       }
@@ -159,6 +162,7 @@ describe("enemy director worker", () => {
               modifier: "heavyEscort",
               scene: "ambush",
               personality: "swarm",
+              runBeat: "bonusWindow",
               pressure: 0.66,
               hint: "ambush lane"
             }
@@ -204,6 +208,7 @@ describe("enemy director worker", () => {
         modifier: "heavyEscort",
         scene: "ambush",
         personality: "swarm",
+        runBeat: "bonusWindow",
         pressure: 0.66,
         hint: "ambush lane"
       }
@@ -240,6 +245,7 @@ describe("enemy director worker", () => {
         modifier: "none",
         scene: "none",
         personality: "balanced",
+        runBeat: "none",
         pressure: 0.4,
         hint: "screen"
       }
@@ -401,6 +407,67 @@ describe("enemy director worker", () => {
     });
   });
 
+  it("submits authenticated leaderboard entries and reads the contract top list", async () => {
+    const db = new MemoryProfileDb();
+    const worker = createEnemyDirectorWorker();
+    const env = testEnv({ PROFILE_DB: db, PROFILE_TOKEN_SECRET: "profile-secret" });
+    const session = (await (
+      await worker.fetch(
+        new Request("https://director.example/profile/session", {
+          method: "POST",
+          body: JSON.stringify({ displayName: "Axiom" })
+        }),
+        env
+      )
+    ).json()) as { token: string };
+
+    const submitResponse = await worker.fetch(
+      new Request("https://director.example/leaderboard/submit", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          contractId: "first-light-delivery",
+          score: 4200,
+          elapsedSeconds: 31.2345,
+          medal: "gold",
+          replaySeed: "daily:2026-06-26"
+        })
+      }),
+      env
+    );
+    const topResponse = await worker.fetch(new Request("https://director.example/leaderboard/top?contractId=first-light-delivery"), env);
+
+    expect(submitResponse.status).toBe(200);
+    expect(await submitResponse.json()).toMatchObject({
+      ok: true,
+      entry: {
+        contractId: "first-light-delivery",
+        displayName: "Axiom",
+        score: 4200,
+        elapsedSeconds: 31.235,
+        medal: "gold",
+        replaySeed: "daily:2026-06-26"
+      }
+    });
+    expect(topResponse.status).toBe(200);
+    expect(await topResponse.json()).toMatchObject({
+      contractId: "first-light-delivery",
+      entries: [
+        {
+          contractId: "first-light-delivery",
+          displayName: "Axiom",
+          score: 4200,
+          elapsedSeconds: 31.235,
+          medal: "gold",
+          replaySeed: "daily:2026-06-26"
+        }
+      ]
+    });
+  });
+
   it("returns a clear cloud-save unavailable response when D1 is not bound", async () => {
     const worker = createEnemyDirectorWorker();
     const response = await worker.fetch(
@@ -435,12 +502,24 @@ class MemoryProfileDb {
       updated_at: string;
     }
   >();
+  private leaderboardRows: Array<{
+    id: string;
+    contract_id: string;
+    player_id: string;
+    display_name: string;
+    score: number;
+    elapsed_seconds: number;
+    medal: string;
+    replay_seed: string;
+    created_at: string;
+  }> = [];
   private query = "";
   private args: unknown[] = [];
 
   prepare(query: string): this {
     const statement = new MemoryProfileDb();
     statement.rows = this.rows;
+    statement.leaderboardRows = this.leaderboardRows;
     statement.query = query;
     return statement as this;
   }
@@ -461,6 +540,19 @@ class MemoryProfileDb {
       return (this.rows.get(playerId) as T | undefined) ?? null;
     }
     return null;
+  }
+
+  async all<T>(): Promise<{ results: T[] }> {
+    if (this.query.includes("FROM leaderboard_entries")) {
+      const contractId = String(this.args[0]);
+      return {
+        results: this.leaderboardRows
+          .filter((row) => row.contract_id === contractId)
+          .sort((left, right) => right.score - left.score || left.elapsed_seconds - right.elapsed_seconds)
+          .slice(0, 10) as T[]
+      };
+    }
+    return { results: [] };
   }
 
   async run(): Promise<{ success: boolean }> {
@@ -493,6 +585,19 @@ class MemoryProfileDb {
           updated_at: updatedAt
         });
       }
+    }
+    if (this.query.includes("INSERT INTO leaderboard_entries")) {
+      this.leaderboardRows.push({
+        id: String(this.args[0]),
+        contract_id: String(this.args[1]),
+        player_id: String(this.args[2]),
+        display_name: String(this.args[3]),
+        score: Number(this.args[4]),
+        elapsed_seconds: Number(this.args[5]),
+        medal: String(this.args[6]),
+        replay_seed: String(this.args[7]),
+        created_at: String(this.args[8])
+      });
     }
     return { success: true };
   }

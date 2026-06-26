@@ -87,6 +87,7 @@ export type ContractContent = {
   pickupId: string;
   destinationId: string;
   missionType?: "standard" | "longhaul" | "rescue" | "escort" | "raid" | "stealth" | "chase";
+  missionHook?: "smuggler" | "evac" | "multiDrop" | "rival" | "portal";
   difficultyTier?: ContractDifficultyTier;
   refuelStationIds?: string[];
   cargoId: string;
@@ -607,6 +608,7 @@ export function defaultEnemyDirectorDirective(): EnemyDirectorDirective {
     modifier: "none",
     scene: "none",
     personality: "balanced",
+    runBeat: "none",
     pressure: 0.4,
     hint: "screen"
   };
@@ -659,6 +661,14 @@ export function clampEnemyDirectorDirective(directive: Partial<EnemyDirectorDire
     directive?.personality === "balanced"
       ? directive.personality
       : fallback.personality;
+  const runBeat =
+    directive?.runBeat === "bonusWindow" ||
+    directive?.runBeat === "reinforcement" ||
+    directive?.runBeat === "recovery" ||
+    directive?.runBeat === "shortcut" ||
+    directive?.runBeat === "none"
+      ? directive.runBeat
+      : fallback.runBeat;
   const hint = typeof directive?.hint === "string" && directive.hint.trim() ? directive.hint.trim().slice(0, 32) : fallback.hint;
   return {
     formation,
@@ -667,6 +677,7 @@ export function clampEnemyDirectorDirective(directive: Partial<EnemyDirectorDire
     modifier,
     scene,
     personality,
+    runBeat,
     pressure: round(clamp(directive?.pressure ?? fallback.pressure, 0, 1), 3),
     hint
   };
@@ -1675,7 +1686,11 @@ function updateEnemies(world: SimulationWorld, fixedDt: number): void {
     1.25
   );
   const effectiveFireBias = clamp(
-    policy.fireBias + tempoFireBiasOffset(directive.tempo) + directive.pressure * 0.08 + personalityFireBiasOffset(directive.personality ?? "balanced"),
+    policy.fireBias +
+      tempoFireBiasOffset(directive.tempo) +
+      directive.pressure * 0.08 +
+      personalityFireBiasOffset(directive.personality ?? "balanced") +
+      runBeatFireBiasOffset(directive.runBeat ?? "none"),
     0,
     1
   );
@@ -1764,6 +1779,14 @@ function personalityFireBiasOffset(personality: NonNullable<EnemyDirectorDirecti
   if (personality === "cautious") return -0.12;
   if (personality === "swarm") return -0.02;
   if (personality === "sniper") return 0.12;
+  return 0;
+}
+
+function runBeatFireBiasOffset(runBeat: NonNullable<EnemyDirectorDirective["runBeat"]>): number {
+  if (runBeat === "reinforcement") return 0.06;
+  if (runBeat === "recovery") return -0.1;
+  if (runBeat === "bonusWindow") return -0.04;
+  if (runBeat === "shortcut") return -0.02;
   return 0;
 }
 

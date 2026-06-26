@@ -10,9 +10,11 @@ Playable build: https://agent-axiom.github.io/astro-courier/
 
 Astro Courier is a TypeScript web game built around short, replayable delivery runs. The player launches a route, collects cargo, reaches the destination pad, and tries to improve speed, fuel discipline, cargo safety, landing quality, and style rewards.
 
-The game includes a compact campaign map, raid boss loops, stealth/chase/rescue/escort/raid missions, route mastery, medals, best-run tracking, optional Cloud Code progress restore, longhaul routes with fuel stops, richer procedural space art, compact mobile menus, optional Ghost Coach hints, daily and weekly challenge routes, cargo risk, hazard pressure, multiple enemy roles, five ship loadouts, ship HP, limited homing missiles, EMP bursts, adaptive AI combat scenes, keyboard/gamepad controls, and touch-friendly browser play.
+The game includes a compact campaign map, raid boss loops, stealth/chase/rescue/escort/raid missions, mission hooks, route phenomena, route mastery, medals, best-run tracking, optional Cloud Code progress restore, longhaul routes with fuel stops, richer procedural space art, compact mobile menus, first-flight cues, optional Ghost Coach hints, daily and weekly challenge routes, cargo risk, hazard pressure, multiple enemy roles, five ship loadouts, ship HP, limited homing missiles, EMP bursts, adaptive AI combat scenes, keyboard/gamepad controls, and touch-friendly browser play.
 
 The project is organized as a pnpm monorepo with separate apps and packages for the web game, simulation, renderer, content, shared types, API, and the optional enemy director Worker.
+
+Future gameplay backlog: [docs/gameplay-100-iteration-roadmap.md](docs/gameplay-100-iteration-roadmap.md).
 
 ## How to play
 
@@ -55,7 +57,7 @@ https://agent-axiom.github.io/astro-courier/
 
 ## Enemy Director Worker
 
-The optional OpenAI enemy director runs as a Cloudflare Worker from `apps/enemy-director-worker`. It keeps the OpenAI API key server-side and returns bounded combat policy plus formation, missile, tempo, mission-modifier, scene, and personality directives to the static GitHub Pages build.
+The optional OpenAI enemy director runs as a Cloudflare Worker from `apps/enemy-director-worker`. It keeps the OpenAI API key server-side and returns bounded combat policy plus formation, missile, tempo, mission-modifier, scene, personality, and run-beat directives to the static GitHub Pages build.
 
 Worker code is auto-deployed from `.github/workflows/deploy-worker.yml` when Worker files change on `main`. The GitHub repository must have `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` secrets configured.
 
@@ -91,6 +93,7 @@ Create the database, copy its `database_id` into `apps/enemy-director-worker/wra
 corepack pnpm dlx wrangler d1 create astro-courier-profile
 corepack pnpm dlx wrangler d1 execute astro-courier-profile --remote --file apps/enemy-director-worker/migrations/0001_player_progress.sql
 corepack pnpm dlx wrangler d1 execute astro-courier-profile --remote --file apps/enemy-director-worker/migrations/0002_cloud_code.sql
+corepack pnpm dlx wrangler d1 execute astro-courier-profile --remote --file apps/enemy-director-worker/migrations/0003_leaderboard_entries.sql
 corepack pnpm dlx wrangler secret put PROFILE_TOKEN_SECRET --config apps/enemy-director-worker/wrangler.toml
 ```
 

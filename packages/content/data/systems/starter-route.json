@@ -477,6 +477,123 @@
       }
     },
     {
+      "id": "smuggler-scan-run",
+      "title": "Smuggler Scan Run",
+      "briefing": "Carry a black-box parcel through a scanner net. Stay cold, avoid customs arcs, and dock before the patrol notices the lane.",
+      "riskLabel": "Scanner Net",
+      "rewardLabel": "Cold-run bonuses",
+      "missionType": "stealth",
+      "missionHook": "smuggler",
+      "shipStart": {
+        "position": [392, -144],
+        "velocity": [10, -10],
+        "rotation": -0.2,
+        "fuel": 88
+      },
+      "pickupId": "dock-a",
+      "destinationId": "north-pad",
+      "cargoId": "black-box-parcel",
+      "hazardSeverityMultiplier": 1.18,
+      "enemyWave": {
+        "scouts": 1,
+        "drones": 1
+      },
+      "hazards": [
+        {
+          "id": "scan-net-a",
+          "type": "customs_drone",
+          "position": [250, -96],
+          "radius": 56,
+          "severity": 0.42
+        },
+        {
+          "id": "scan-net-b",
+          "type": "nebula",
+          "position": [160, -24],
+          "radius": 54,
+          "severity": 0.36
+        }
+      ],
+      "medalTimes": {
+        "bronze": 86,
+        "silver": 54,
+        "gold": 34
+      }
+    },
+    {
+      "id": "evacuation-window",
+      "title": "Evacuation Window",
+      "briefing": "A rescue pod has a shrinking life-support window. Pick it up fast, keep the ride smooth, and return before the signal fades.",
+      "riskLabel": "Rescue Clock",
+      "rewardLabel": "Evacuation bonuses",
+      "missionType": "rescue",
+      "missionHook": "evac",
+      "shipStart": {
+        "position": [118, -188],
+        "velocity": [36, 4],
+        "rotation": 0.1,
+        "fuel": 96
+      },
+      "pickupId": "north-pad",
+      "destinationId": "dock-a",
+      "cargoId": "escape-pod",
+      "hazardSeverityMultiplier": 1.24,
+      "hazards": [
+        {
+          "id": "evac-radiation-a",
+          "type": "radiation",
+          "position": [210, -118],
+          "radius": 46,
+          "severity": 0.44
+        }
+      ],
+      "medalTimes": {
+        "bronze": 84,
+        "silver": 52,
+        "gold": 33
+      }
+    },
+    {
+      "id": "portal-hop",
+      "title": "Portal Hop",
+      "briefing": "Thread two phase gates and deliver the map while the portal shear keeps drifting across the route.",
+      "riskLabel": "Portal Drift",
+      "rewardLabel": "Phase gate bonuses",
+      "missionHook": "portal",
+      "shipStart": {
+        "position": [132, -212],
+        "velocity": [44, 2],
+        "rotation": 0.14,
+        "fuel": 84
+      },
+      "pickupId": "north-pad",
+      "destinationId": "dock-a",
+      "cargoId": "phase-map",
+      "hazardSeverityMultiplier": 1.22,
+      "riskGateCount": 2,
+      "hazards": [
+        {
+          "id": "portal-shear-a",
+          "type": "wormhole",
+          "position": [222, -118],
+          "radius": 48,
+          "severity": 0.46
+        },
+        {
+          "id": "portal-shear-b",
+          "type": "ion_storm",
+          "position": [330, -58],
+          "radius": 52,
+          "severity": 0.38
+        }
+      ],
+      "medalTimes": {
+        "bronze": 78,
+        "silver": 48,
+        "gold": 29
+      }
+    },
+    {
       "id": "convoy-escort",
       "title": "Convoy Escort",
       "briefing": "Carry the convoy transponder through a guarded lane. Guardians block the route; tag them and keep the line moving.",
@@ -881,6 +998,18 @@
       "name": "Convoy Transponder",
       "kind": "time-sensitive",
       "fragility": 0.7
+    },
+    {
+      "id": "black-box-parcel",
+      "name": "Black Box Parcel",
+      "kind": "illegal-ish",
+      "fragility": 0.78
+    },
+    {
+      "id": "phase-map",
+      "name": "Phase Map",
+      "kind": "magnetic",
+      "fragility": 0.76
     }
   ]
 }

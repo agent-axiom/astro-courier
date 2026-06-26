@@ -59,7 +59,10 @@ import {
 import { buildBossLoop } from "./game/bossLoop";
 import { buildCampaignMap } from "./game/campaignMap";
 import { buildCombatFeelCue } from "./game/combatFeel";
+import { buildCombatReadability } from "./game/combatReadability";
 import { buildMissionProfile } from "./game/missionProfile";
+import { buildShipBuild } from "./game/shipBuild";
+import { buildSpacePhenomenon } from "./game/spacePhenomena";
 import { GameShell, type HudState } from "./game/GameShell";
 import { createEnemyDirectorClient } from "./game/enemyDirector";
 import { buildTargetCompassPresentation, formatBearingGuidance } from "./game/bearing";
@@ -101,6 +104,7 @@ import {
   buildTacticalCue
 } from "./game/objective";
 import { buildFlightDirector } from "./game/flightDirector";
+import { buildFirstExperienceCue } from "./game/firstRunExperience";
 import {
   buildPreflightBonusObjectives,
   buildPreflightMasteryTargets,
@@ -795,11 +799,18 @@ export function App() {
     landingStatus: hud.landingStatus
   });
   const coverArtSrc = resolvePublicAssetPath("images/astro-courier-cover.png");
+  const savedRouteCount = Object.values(bestRunsByContract).filter(Boolean).length;
   const preflightOverlayDensity = buildPreflightOverlayDensity({
     status: hud.status,
     preflightOpen: overlays.preflight,
-    savedRouteCount: Object.values(bestRunsByContract).filter(Boolean).length,
+    savedRouteCount: savedRouteCount,
     dailyStreak: dailyProgress?.streak
+  });
+  const firstExperienceCue = buildFirstExperienceCue({
+    status: hud.status,
+    preflightOpen: overlays.preflight,
+    savedRouteCount,
+    contractId: hud.contractId
   });
   const trainingFlightAction = buildTrainingFlightAction({
     status: hud.status,
@@ -1033,6 +1044,7 @@ export function App() {
     targetDistance: hud.targetDistance
   });
   const missionProfile = buildMissionProfile(activeContractOption ? { ...activeContractOption, riskGateCount: hud.riskGateCount } : undefined);
+  const spacePhenomenon = buildSpacePhenomenon(hud.contractHazards);
   const combatFeelCue = buildCombatFeelCue({
     status: hud.status,
     preflightOpen,
@@ -1042,6 +1054,15 @@ export function App() {
     shipMaxHp: hud.shipMaxHp,
     interceptorCount: hud.interceptorCount,
     missileAmmo: hud.missileAmmo
+  });
+  const combatReadability = buildCombatReadability({
+    status: hud.status,
+    preflightOpen,
+    interceptorCount: hud.interceptorCount,
+    incomingMissileCount: hud.incomingMissileCount,
+    empAmmo: hud.empAmmo,
+    missileAmmo: hud.missileAmmo,
+    weaponCooldownSeconds: hud.weaponCooldownSeconds
   });
   const firstRouteBestRun = bestRunsByContract["first-light-delivery"];
   const ghostCoachEligible = firstRouteBestRun === undefined && (hud.contractId === "first-light-delivery" || hud.contractId === "training-flight");
@@ -1319,6 +1340,7 @@ export function App() {
   const shipUpgradeSummary = buildShipUpgradeSummary(shipUpgradeTrack);
   const hangarReadout = buildHangarReadout(shipUpgradeTrack);
   const upgradeChoice = buildUpgradeChoice(shipUpgradeTrack);
+  const shipBuild = buildShipBuild({ activePerk: hud.activePerk, unlockedShipUpgradeIds });
   const routeTargetSelectionAction = buildRouteBoardSelectionAction(routeBoardTarget, hud.contractId);
   const currentDate = new Date();
   const dailyDispatch = buildDailyDispatch({ contracts: hud.contractOptions, now: currentDate });
@@ -2352,6 +2374,13 @@ export function App() {
             <strong>{combatFeelCue.value}</strong>
           </div>
         ) : null}
+        {liveHudDensity.showActionChips && combatReadability ? (
+          <div className={`combat-readability-chip combat-readability-${combatReadability.tone}`} aria-label={`${combatReadability.label}: ${combatReadability.value}`}>
+            {combatReadability.tone === "danger" ? <ShieldAlert size={16} /> : combatReadability.tone === "emp" ? <Activity size={16} /> : <Crosshair size={16} />}
+            <span>{combatReadability.label}</span>
+            <strong>{combatReadability.value}</strong>
+          </div>
+        ) : null}
         {liveHudDensity.showActionChips && ghostCoachCue ? (
           <div className={`ghost-coach-chip ghost-coach-${ghostCoachCue.tone}`} aria-label={`${ghostCoachCue.label}: ${ghostCoachCue.action}. ${ghostCoachCue.detail}`}>
             <Target size={16} />
@@ -2591,6 +2620,17 @@ export function App() {
             </div>
           )}
           {preflightCloudControls}
+          {firstExperienceCue ? (
+            <div
+              className={`first-experience-chip first-experience-${firstExperienceCue.tone}`}
+              aria-label={`${firstExperienceCue.label}: ${firstExperienceCue.value}. ${firstExperienceCue.detail}`}
+            >
+              <Target size={17} />
+              <span>{firstExperienceCue.label}</span>
+              <strong>{firstExperienceCue.value}</strong>
+              <small>{firstExperienceCue.detail}</small>
+            </div>
+          ) : null}
           {hud.perkOptions.length > 0 ? (
             <div className="perk-selector" aria-label="Courier loadout">
               {hud.perkOptions.map((perk) => (
@@ -2670,6 +2710,23 @@ export function App() {
               <small>{upgradeChoice.detail}</small>
             </div>
           ) : null}
+          <div
+            className={`ship-build-chip ship-build-${shipBuild.tone}`}
+            aria-label={`${shipBuild.label}: ${shipBuild.value}. ${shipBuild.detail}`}
+          >
+            {shipBuild.tone === "combat" ? (
+              <Crosshair size={17} />
+            ) : shipBuild.tone === "guard" ? (
+              <ShieldAlert size={17} />
+            ) : shipBuild.tone === "dock" ? (
+              <PackageCheck size={17} />
+            ) : (
+              <Zap size={17} />
+            )}
+            <span>{shipBuild.label}</span>
+            <strong>{shipBuild.value}</strong>
+            <small>{shipBuild.detail}</small>
+          </div>
           <div className="preflight-mini-goals" aria-label="Launch goals">
             {preflightPuzzleGoals.map((goal) => (
               <span
@@ -2732,6 +2789,17 @@ export function App() {
               <span>{missionProfile.label}</span>
               <strong>{missionProfile.value}</strong>
               <small>{missionProfile.detail}</small>
+            </div>
+          ) : null}
+          {spacePhenomenon ? (
+            <div
+              className={`space-phenomenon-chip space-phenomenon-${spacePhenomenon.tone}`}
+              aria-label={`${spacePhenomenon.label}: ${spacePhenomenon.value}. ${spacePhenomenon.detail}`}
+            >
+              <Satellite size={17} />
+              <span>{spacePhenomenon.label}</span>
+              <strong>{spacePhenomenon.value}</strong>
+              <small>{spacePhenomenon.detail}</small>
             </div>
           ) : null}
           {preflightOverlayDensity.showRoutePressure ? (

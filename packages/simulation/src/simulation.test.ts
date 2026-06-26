@@ -1187,7 +1187,8 @@ describe("deterministic Astro Courier simulation", () => {
   it("defaults and clamps AI director scene/personality for backward compatibility", () => {
     expect(defaultEnemyDirectorDirective()).toMatchObject({
       scene: "none",
-      personality: "balanced"
+      personality: "balanced",
+      runBeat: "none"
     });
 
     expect(
@@ -1198,11 +1199,13 @@ describe("deterministic Astro Courier simulation", () => {
         modifier: "ambush",
         pressure: 0.75,
         scene: "siege",
-        personality: "sniper"
+        personality: "sniper",
+        runBeat: "reinforcement"
       })
     ).toMatchObject({
       scene: "siege",
-      personality: "sniper"
+      personality: "sniper",
+      runBeat: "reinforcement"
     });
 
     expect(
@@ -1214,7 +1217,8 @@ describe("deterministic Astro Courier simulation", () => {
       })
     ).toMatchObject({
       scene: "none",
-      personality: "balanced"
+      personality: "balanced",
+      runBeat: "none"
     });
   });
 

@@ -51,6 +51,7 @@ export type HudState = {
   cargoKind: string;
   cargoFragility: number;
   hazardSeverityMultiplier?: number;
+  contractHazards?: ContractContent["hazards"];
   contractOptions: ContractOption[];
   trainingContractOption?: ContractOption;
   elapsedSeconds: number;
@@ -605,6 +606,7 @@ export class GameShell {
       cargoKind: activeContract.cargoKind,
       cargoFragility: activeContract.cargoFragility,
       hazardSeverityMultiplier: activeContract.hazardSeverityMultiplier,
+      contractHazards: this.world.activeContract.hazards,
       contractOptions: this.contractOptions(),
       trainingContractOption: this.trainingContractOption,
       elapsedSeconds: result.elapsedSeconds,
