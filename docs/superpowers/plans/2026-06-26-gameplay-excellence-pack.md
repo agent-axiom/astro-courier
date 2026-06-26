@@ -111,4 +111,4 @@
 - [x] `corepack pnpm -r test`
 - [x] `corepack pnpm -r build`
 - [x] `git diff --check`
-- [ ] Commit and push.
+- [x] Commit and push.
